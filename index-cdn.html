@@ -1,0 +1,2534 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>TasteForm HQ</title>
+<div id="jsErrBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#B03A2A;color:#fff;font:13px/1.5 -apple-system,sans-serif;padding:10px 14px;white-space:pre-wrap;"></div>
+<script>
+(function(){
+  var seen = {};
+  function show(msg){
+    if(seen[msg]) return; seen[msg]=true;
+    var el = document.getElementById('jsErrBanner');
+    if(!el) return;
+    el.style.display = 'block';
+    el.textContent = (el.textContent ? el.textContent + '\n\n' : '') + 'Page error — copy this and send it back: ' + msg;
+  }
+  window.addEventListener('error', function(e){ show((e && e.message) || String(e)); });
+  window.addEventListener('unhandledrejection', function(e){ show('(promise) ' + ((e.reason && (e.reason.message||e.reason)) || e.reason)); });
+})();
+</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Open+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+  :root{
+    --bg:#F2F1E8; --surface:#FBFAF5; --border:#E0DBCC; --text:#15110D; --muted:#6B6153; --tan:#BCAA90;
+    --accent-super:#8B6540; --on-super:#FFFFFF; --accent-close:#15110D; --on-close:#F2F1E8; --accent-dm:#8B6540;
+    --series-1:#2A211A; --series-2:#B8925F;
+    --crit:#B03A2A; --crit-soft:#F3DCD3; --warn:#946010; --warn-soft:#F1E3C4; --good:#3F7040; --good-soft:#DCE8D5;
+    --warn-bg:#F1E3C4; --warn-text:#6B4508; --warn-border:#D9BF8A;
+    --page-bg:var(--bg);
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0B0907; --surface:#17130F; --border:#2E261E; --text:#F2F1E8; --muted:#A89A86; --tan:#BCAA90;
+      --accent-super:#C49A6C; --on-super:#15110D; --accent-close:#F2F1E8; --on-close:#15110D; --accent-dm:#C49A6C;
+      --series-1:#F2F1E8; --series-2:#A67C4E;
+      --crit:#EE7A62; --crit-soft:#3A1D16; --warn:#E0B25A; --warn-soft:#33270F; --good:#8CC08A; --good-soft:#1C2A1A;
+      --warn-bg:#33270F; --warn-text:#EBC57A; --warn-border:#574421;
+      --page-bg:linear-gradient(180deg,#000000 0%,#0F0D0B 35%,#1E1913 75%,#2E2419 100%);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0907; --surface:#17130F; --border:#2E261E; --text:#F2F1E8; --muted:#A89A86; --tan:#BCAA90;
+    --accent-super:#C49A6C; --on-super:#15110D; --accent-close:#F2F1E8; --on-close:#15110D; --accent-dm:#C49A6C;
+    --series-1:#F2F1E8; --series-2:#A67C4E;
+    --crit:#EE7A62; --crit-soft:#3A1D16; --warn:#E0B25A; --warn-soft:#33270F; --good:#8CC08A; --good-soft:#1C2A1A;
+    --warn-bg:#33270F; --warn-text:#EBC57A; --warn-border:#574421;
+    --page-bg:linear-gradient(180deg,#000000 0%,#0F0D0B 35%,#1E1913 75%,#2E2419 100%);
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box;}
+  [hidden]{display:none!important;}
+  body{
+    background:var(--page-bg);background-attachment:fixed;background-color:var(--bg);color:var(--text);
+    font-family:'Open Sans',system-ui,sans-serif;
+    padding-inline:16px;padding-block:20px;min-height:100%;
+  }
+  .wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:18px;}
+
+  /* tabs */
+  .tabbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .brand{font-family:'Open Sans',sans-serif;font-weight:700;font-size:20px;letter-spacing:-.01em;color:var(--text);display:flex;align-items:baseline;gap:10px;}
+  .brand small{font-size:11px;font-weight:700;letter-spacing:.42em;color:var(--muted);}
+  .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px;}
+  .tab{
+    border:none;background:none;color:var(--muted);font-family:'Open Sans',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    padding:7px 16px;border-radius:999px;cursor:pointer;
+  }
+  .tab[aria-selected="true"]{background:var(--text);color:var(--bg);}
+  .tab:focus-visible{outline:2px solid var(--accent-dm);outline-offset:2px;}
+
+  .top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;}
+  .top h1{
+    font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;font-size:clamp(34px,6vw,54px);line-height:1;
+    letter-spacing:.005em;text-wrap:balance;margin:0;
+  }
+  .top .sub{color:var(--muted);font-size:13px;margin-top:4px;}
+  .stats-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .stat-chip{
+    background:var(--surface);border:1px solid var(--border);border-radius:999px;
+    padding:6px 14px;font-size:13px;font-weight:600;display:flex;gap:6px;align-items:center;
+  }
+  .stat-chip .dot{width:8px;height:8px;border-radius:50%;}
+
+  .banner{background:var(--warn-bg);color:var(--warn-text);border:1px solid var(--warn-border);border-radius:12px;padding:10px 14px;font-size:13px;display:none;}
+  .banner.show{display:block;}
+  .cov-banner{background:var(--crit-soft);color:var(--crit);border:1px solid var(--crit);border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.5;}
+  .cov-banner.warn{background:var(--warn-bg);color:var(--warn-text);border-color:var(--warn-border);}
+  .cov-banner b{font-weight:700;}
+  .approx{font-style:italic;}
+  .src-chip{font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid var(--border);color:var(--muted);margin-left:6px;white-space:nowrap;}
+
+  /* ads */
+  .ads-chart{display:grid;grid-template-columns:36px 1fr;gap:6px;}
+  .ads-chart .yaxis{height:170px;}
+  .ads-chart .plot{height:170px;}
+  .delta{font-weight:600;}
+  .delta.up{color:var(--good);}
+  .delta.down{color:var(--crit);}
+  .delta.flat{color:var(--muted);}
+  .ads-empty{display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.55;}
+  .ads-empty ol{margin:0;padding-left:20px;}
+  .ads-empty code{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-size:12px;}
+  .camp-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;}
+  .camp-status.on{background:var(--good-soft);color:var(--good);}
+  .camp-status.off{background:var(--bg);border:1px solid var(--border);color:var(--muted);}
+
+  /* warm leads board */
+  .board{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:720px){.board{grid-template-columns:1fr;}}
+  .column{
+    background:var(--surface);border:1px solid var(--border);border-radius:18px;
+    padding:16px;display:flex;flex-direction:column;gap:10px;min-height:180px;
+  }
+  .column.dragover{outline:2px dashed var(--col-accent);outline-offset:4px;}
+  .col-head{display:flex;justify-content:space-between;align-items:baseline;}
+  .col-head h2{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;font-size:19px;margin:0;display:flex;gap:8px;align-items:center;}
+  .col-head .dot{width:10px;height:10px;border-radius:50%;}
+  .col-head .count{color:var(--muted);font-weight:600;font-size:14px;}
+  .col-rule{font-size:12px;color:var(--muted);margin:0;}
+  .card-list{display:flex;flex-direction:column;gap:8px;min-height:56px;}
+  .card{border:1px solid var(--border);border-radius:12px;padding:10px;display:flex;gap:10px;align-items:center;background:var(--bg);cursor:grab;}
+  .card.dragging{opacity:.45;}
+  .avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--col-on,#fff);font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;font-size:14px;}
+  .card-main{flex:1;min-width:0;}
+  .card-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .bar-row{display:flex;align-items:center;gap:6px;margin-top:5px;}
+  .bar-track{flex:1;height:4px;border-radius:2px;background:var(--border);overflow:hidden;}
+  .bar-fill{height:100%;border-radius:2px;}
+  .bar-label{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0;}
+  .card-scanned{font-size:11px;color:var(--muted);margin-top:2px;}
+  .card-actions{display:flex;gap:4px;flex-shrink:0;}
+  .icon-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;line-height:1;}
+  .icon-btn:hover{border-color:var(--col-accent);}
+  .icon-btn:focus-visible{outline:2px solid var(--col-accent);outline-offset:1px;}
+  .empty-state{text-align:center;padding:22px 8px;color:var(--muted);font-size:13px;}
+  .add-row{display:flex;gap:6px;border-top:1px dashed var(--border);padding-top:10px;margin-top:2px;}
+  .add-row input{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Open Sans',sans-serif;}
+  .add-row input:focus-visible{outline:2px solid var(--col-accent);outline-offset:1px;}
+  .add-row input.name{flex:1;min-width:0;}
+  .add-row input.count{width:56px;flex:0 0 56px;}
+  .add-row button{border:none;background:var(--col-accent);color:var(--on-super);border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;cursor:pointer;flex-shrink:0;}
+  details.disqual{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 16px;}
+  details.disqual summary{cursor:pointer;font-weight:600;font-size:14px;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details.disqual summary::-webkit-details-marker{display:none;}
+  details.disqual summary .muted{color:var(--muted);font-weight:400;font-size:13px;}
+  .disqual-list{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+  .disqual-item{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;padding:7px 10px;border-radius:8px;background:var(--bg);}
+  .disqual-item span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .restore-btn{border:1px solid var(--border);background:none;color:var(--text);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;flex-shrink:0;}
+  footer.hint{font-size:12px;color:var(--muted);text-align:center;padding-top:4px;}
+
+  /* DMs */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  @media (max-width:820px){.kpis{grid-template-columns:repeat(2,1fr);}}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
+  .kpi .label{font-size:10.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
+  .kpi .value{font-family:'Anton',Impact,sans-serif;font-size:40px;font-weight:400;line-height:1.05;letter-spacing:.01em;}
+  .kpi .note{font-size:12px;color:var(--muted);}
+  .kpi.alert .value{color:var(--crit);}
+
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0;}
+  .panel h2{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em;font-size:22px;margin:0;}
+  .panel .rule{font-size:12px;color:var(--muted);margin:-6px 0 0;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:820px){.grid2{grid-template-columns:1fr;}}
+
+  .wait-list{display:flex;flex-direction:column;gap:8px;}
+  .wait-item{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--bg);}
+  .wait-main{flex:1;min-width:0;}
+  .wait-name{font-weight:600;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .wait-name a{color:inherit;text-decoration:none;}
+  .wait-name a:hover{text-decoration:underline;}
+  .wait-preview{font-size:12px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .chip{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;flex-shrink:0;}
+  .chip.crit{background:var(--crit-soft);color:var(--crit);}
+  .chip.warn{background:var(--warn-soft);color:var(--warn);}
+  .chip.good{background:var(--good-soft);color:var(--good);}
+  .chip.stage{background:var(--bg);border:1px solid var(--border);color:var(--muted);font-weight:500;}
+
+  .table-wrap{overflow-x:auto;}
+  table.scores{width:100%;border-collapse:collapse;font-size:13px;}
+  table.scores th{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  table.scores td{padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  table.scores td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+  table.scores th.num{text-align:right;}
+  table.scores tr:last-child td{border-bottom:none;}
+  .op-name{font-weight:600;}
+  .op-sample{font-size:11px;color:var(--muted);max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rate-cell{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
+  .rate-track{width:60px;height:6px;border-radius:3px;background:var(--border);overflow:hidden;}
+  .rate-fill{height:100%;background:var(--accent-dm);border-radius:0 4px 4px 0;}
+
+  .funnel{display:flex;flex-direction:column;gap:6px;}
+  .f-row{display:grid;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:13px;}
+  @media (max-width:520px){.f-row{grid-template-columns:110px 1fr 70px;}}
+  .f-label{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .f-track{height:18px;position:relative;}
+  .f-bar{height:100%;background:var(--accent-dm);border-radius:0 4px 4px 0;min-width:2px;}
+  .f-val{font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;font-size:12px;white-space:nowrap;}
+  .f-row.biggest .f-val{color:var(--crit);font-weight:600;}
+  .f-note{font-size:12px;color:var(--muted);}
+
+  .mini-list{display:flex;flex-wrap:wrap;gap:6px;}
+  .mini{font-size:12px;padding:5px 10px;border-radius:999px;background:var(--bg);border:1px solid var(--border);}
+  .mini b{font-weight:600;}
+
+  /* messages per day chart */
+  .chart-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .sw{width:10px;height:10px;border-radius:2px;display:inline-block;}
+  .sw.line{height:0;border-top:1.5px dashed var(--muted);border-radius:0;width:14px;}
+  .range{display:flex;gap:4px;}
+  .range button{border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;font-size:12px;font-weight:600;padding:4px 10px;cursor:pointer;font-family:'Open Sans',sans-serif;}
+  .range button[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text);}
+  .mchart{display:grid;grid-template-columns:28px 1fr;gap:6px;}
+  .yaxis{position:relative;height:180px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;}
+  .yaxis span{position:absolute;right:0;transform:translateY(50%);}
+  .plot{position:relative;height:180px;border-bottom:1px solid var(--border);}
+  .gridline{position:absolute;left:0;right:0;border-top:1px solid var(--border);opacity:.6;}
+  .target{position:absolute;left:0;right:0;border-top:1.5px dashed var(--muted);}
+  .target em{position:absolute;right:0;top:-17px;font-style:normal;font-size:11px;color:var(--muted);background:var(--surface);padding:0 4px;}
+  .cols{position:absolute;inset:0;display:flex;align-items:flex-end;gap:3px;}
+  .col{flex:1;height:100%;display:flex;flex-direction:column-reverse;gap:2px;cursor:default;position:relative;min-width:0;}
+  .col:hover,.col:focus-visible{background:color-mix(in srgb, var(--text) 5%, transparent);outline:none;border-radius:4px 4px 0 0;}
+  .seg{width:70%;margin:0 auto;}
+  .seg.top{border-radius:4px 4px 0 0;}
+  .xaxis{grid-column:2;display:flex;gap:3px;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;}
+  .xaxis span{flex:1;text-align:center;min-width:0;overflow:hidden;white-space:nowrap;}
+  .tip{position:absolute;z-index:5;pointer-events:none;background:var(--text);color:var(--bg);font-size:12px;padding:8px 10px;border-radius:8px;white-space:nowrap;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.18);}
+  .tip b{font-weight:600;}
+  .tip .sw{margin-right:4px;vertical-align:middle;}
+  details.tv summary{font-size:12px;color:var(--muted);cursor:pointer;}
+  details.tv table{margin-top:8px;}
+
+  /* follow-ups */
+  .tab-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:999px;background:var(--crit);color:#fff;font-size:11px;line-height:18px;text-align:center;}
+  .cadence{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted);}
+  .cadence .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .cadence .row b{color:var(--text);font-weight:600;min-width:128px;}
+  .step{padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-variant-numeric:tabular-nums;}
+  .arrow{color:var(--muted);}
+  .fu-list{display:flex;flex-direction:column;gap:10px;}
+  .fu-item{border:1px solid var(--border);border-radius:14px;background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:8px;}
+  .fu-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;}
+  .fu-name{font-weight:600;font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .fu-name a{color:inherit;text-decoration:none;}
+  .fu-name a:hover{text-decoration:underline;}
+  .fu-last{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .draft{display:flex;gap:8px;align-items:flex-start;background:var(--surface);border:1px dashed var(--border);border-radius:10px;padding:8px 10px;}
+  .draft p{margin:0;flex:1;font-size:13px;line-height:1.45;user-select:all;}
+  .fu-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Open Sans',sans-serif;}
+  .btn.primary{background:var(--text);color:var(--bg);border-color:var(--text);}
+  .btn:focus-visible{outline:2px solid var(--accent-dm);outline-offset:1px;}
+  .btn.small{padding:4px 10px;flex-shrink:0;}
+  .fu-section-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .fu-section-head .count{color:var(--muted);font-weight:600;font-size:14px;}
+
+  /* dashboard */
+  button.kpi{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%;}
+  button.kpi:hover{border-color:var(--muted);}
+  button.kpi:focus-visible{outline:2px solid var(--accent-dm);outline-offset:2px;}
+  .kpi .go{font-size:12px;color:var(--muted);margin-top:auto;padding-top:6px;}
+  .kpi.alert .go{color:var(--crit);}
+  .act{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:inherit;text-decoration:none;}
+  a.act:hover,button.act:hover{border-color:var(--muted);}
+  button.act{font:inherit;text-align:left;cursor:pointer;width:100%;}
+  .act:focus-visible{outline:2px solid var(--accent-dm);outline-offset:1px;}
+  .act .ico{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .act .ico.reply{background:var(--text);color:var(--bg);}
+  .act .ico.fu{background:var(--series-2);color:#15110D;}
+  .act .ico.warm{background:var(--tan);color:#15110D;}
+  .act-main{flex:1;min-width:0;}
+  .act-title{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .act-sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .funnel.warm .f-bar{background:var(--accent-super);}
+  .pace{display:grid;grid-template-columns:28px 1fr;gap:6px;}
+  .pace .plot{height:130px;}
+  .pace .yaxis{height:130px;}
+  .pace .cols{gap:8px;}
+  .pace .seg{width:60%;}
+  .pace-val{position:absolute;left:-6px;right:-6px;top:0;text-align:center;font-size:11px;color:var(--muted);transform:translateY(-100%);padding-bottom:2px;}
+  .pace .xaxis{gap:8px;}
+  .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+  .home-col{display:flex;flex-direction:column;gap:16px;min-width:0;}
+  @media (max-width:820px){.home-grid{grid-template-columns:1fr;}}
+  .tabs{max-width:100%;overflow-x:auto;scrollbar-width:none;}
+  .tab{white-space:nowrap;flex-shrink:0;}
+  @media (max-width:520px){.tabbar{flex-direction:column;align-items:flex-start;}.tabs{width:100%;justify-content:space-between;}.tab{padding:7px 8px;font-size:10.5px;letter-spacing:.02em;}}
+  .st-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .st-row:last-child{border-bottom:none;padding-bottom:0;}
+  .st-row:first-child{padding-top:0;}
+  .st-name{font-weight:600;font-size:14px;}
+  .st-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  /* collapsible panels */
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;}
+  .panel-toggle-label{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em;font-size:18px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .panel-toggle-label:empty{display:none;}
+  .panel-toggle-btn{border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;flex-shrink:0;line-height:1;margin-left:auto;}
+  .panel-toggle-btn:hover{background:var(--bg);color:var(--text);}
+  .panel-toggle-btn:focus-visible{outline:2px solid var(--accent-dm);outline-offset:1px;}
+  .panel-toggle-btn .chev{display:inline-block;transition:transform .15s;}
+  .panel.collapsed .panel-toggle-btn .chev{transform:rotate(-90deg);}
+  .panel.collapsed{padding-bottom:12px;}
+  .panel.collapsed > *:not(.panel-head){display:none!important;}
+
+  /* setter tracker */
+  :root{
+    --trend-1:#2a78d6; --trend-2:#eb6834; --trend-3:#1baf7a; --trend-4:#4a3aa7;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --trend-1:#3987e5; --trend-2:#d95926; --trend-3:#199e70; --trend-4:#9085e9;
+    }
+  }
+  :root[data-theme="dark"]{
+    --trend-1:#3987e5; --trend-2:#d95926; --trend-3:#199e70; --trend-4:#9085e9;
+  }
+  .seg-filter{display:flex;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:4px;width:fit-content;}
+  .seg-filter button{border:none;background:none;color:var(--muted);font-family:'Open Sans',sans-serif;font-weight:600;font-size:12px;padding:6px 14px;border-radius:999px;cursor:pointer;}
+  .seg-filter button[aria-pressed="true"]{background:var(--text);color:var(--bg);}
+  .trend-toggles{display:flex;flex-wrap:wrap;gap:10px;}
+  .trend-toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;user-select:none;}
+  .trend-toggle.off{color:var(--muted);}
+  .trend-toggle input{margin:0;}
+  .trend-toggle .sw{width:10px;height:10px;border-radius:2px;display:inline-block;}
+  .tchart{position:relative;}
+  .tchart svg{width:100%;height:auto;display:block;overflow:visible;}
+  .tchart .tc-tip{position:absolute;z-index:5;pointer-events:none;background:var(--text);color:var(--bg);font-size:12px;padding:8px 10px;border-radius:8px;white-space:nowrap;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.18);}
+  .review-list{display:flex;flex-direction:column;gap:8px;}
+  .review-item{border:1px solid var(--border);border-radius:14px;background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:8px;}
+  .review-item.off-script{border-color:var(--warn-border);}
+  .review-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .review-name{font-weight:600;font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .review-name a{color:inherit;text-decoration:none;}
+  .review-name a:hover{text-decoration:underline;}
+  .chip.setter-tag{background:var(--bg);border:1px solid var(--border);color:var(--muted);cursor:pointer;}
+  .chip.founder-tag{background:var(--accent-dm);border:1px solid var(--accent-dm);color:var(--on-super);cursor:pointer;}
+  .review-when{font-size:12px;color:var(--muted);white-space:nowrap;}
+  .review-detail{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px dashed var(--border);border-radius:10px;padding:10px;font-size:13px;}
+  .review-detail .rlabel{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+  .review-detail .said{color:var(--text);}
+  .review-detail .expected{color:var(--muted);}
+  .review-detail .suggest{color:var(--good);}
+  .setter-outcomes-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+
+  /* auth */
+  #authLoading{min-height:60vh;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;}
+  #authScreen{min-height:80vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .auth-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;gap:14px;}
+  .auth-card h1{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:30px;margin:0;letter-spacing:.01em;}
+  .auth-card .auth-sub{color:var(--muted);font-size:11px;letter-spacing:.3em;text-transform:uppercase;font-weight:700;margin:-8px 0 4px;}
+  .auth-field{display:flex;flex-direction:column;gap:4px;}
+  .auth-field label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  .auth-field input{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:8px;padding:10px 12px;font-size:14px;font-family:'Open Sans',sans-serif;width:100%;}
+  .auth-field input:focus-visible{outline:2px solid var(--accent-dm);outline-offset:1px;}
+  .auth-error{font-size:12px;color:var(--crit);min-height:16px;line-height:1.4;}
+  .auth-switch{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;}
+  .auth-switch button{border:none;background:none;color:var(--accent-dm);font-weight:700;cursor:pointer;font-family:'Open Sans',sans-serif;font-size:12px;padding:0;}
+  #authSubmit{border:none;background:var(--text);color:var(--bg);border-radius:8px;padding:11px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Open Sans',sans-serif;}
+  #authSubmit:disabled{opacity:.6;cursor:default;}
+  #accountBox{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-left:auto;}
+  .acct-email{font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
+  .acct-role{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);white-space:nowrap;}
+  .acct-role.admin{background:var(--good-soft);color:var(--good);border-color:var(--good);}
+  .acct-role.limited{background:var(--bg);color:var(--muted);}
+  @media (max-width:640px){#accountBox{margin-left:0;width:100%;justify-content:space-between;}.acct-email{max-width:140px;}}
+</style>
+
+<div id="authLoading">Loading…</div>
+
+<div id="authScreen" hidden>
+  <div class="auth-card">
+    <div class="auth-sub">TasteForm</div>
+    <h1>HQ</h1>
+    <form id="authForm" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="auth-field">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" autocomplete="email" required>
+      </div>
+      <div class="auth-field">
+        <label for="authPassword">Password</label>
+        <input id="authPassword" type="password" autocomplete="current-password" required minlength="6">
+      </div>
+      <div class="auth-error" id="authError"></div>
+      <button type="submit" id="authSubmit">Sign in</button>
+    </form>
+    <div class="auth-switch"><span id="authModeLabel">Don't have an account?</span><button type="button" id="authToggle">Sign up</button></div>
+  </div>
+</div>
+
+<div class="wrap" id="appRoot" hidden>
+  <div class="tabbar">
+    <div class="brand">TasteForm <small>HQ</small></div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabHome" aria-selected="true" aria-controls="viewHome" data-view="home">Dashboard</button>
+      <button class="tab" role="tab" id="tabLeads" aria-selected="false" aria-controls="viewLeads" data-view="leads">Warm Leads</button>
+      <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms">DMs</button>
+      <button class="tab" role="tab" id="tabFollow" aria-selected="false" aria-controls="viewFollow" data-view="follow">Follow-ups <span class="tab-badge" id="fuBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabMagnets" aria-selected="false" aria-controls="viewMagnets" data-view="magnets">Magnets <span class="tab-badge" id="magBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads">Ads</button>
+    </div>
+    <div id="accountBox"></div>
+  </div>
+
+  <div class="banner" id="offlineBanner"></div>
+  <div class="cov-banner" id="coverageBanner" role="status" hidden></div>
+
+  <!-- DASHBOARD -->
+  <section id="viewHome" role="tabpanel" aria-labelledby="tabHome" style="display:flex;flex-direction:column;gap:18px;">
+    <div class="top">
+      <div>
+        <h1 id="homeGreeting">Dashboard</h1>
+        <div class="sub" id="homeSub">Loading…</div>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <button type="button" class="kpi" id="hkReplyTile" data-go="dms"><div class="label">DM reply rate</div><div class="value" id="hkReply">–</div><div class="note" id="hkReplyNote">&nbsp;</div><div class="go">DMs →</div></button>
+      <button type="button" class="kpi" id="hkFuTile" data-go="follow"><div class="label">Follow-ups due</div><div class="value" id="hkFu">–</div><div class="note" id="hkFuNote">&nbsp;</div><div class="go">Follow-ups →</div></button>
+      <button type="button" class="kpi" id="hkWaitTile" data-go="dms"><div class="label">Waiting on your reply</div><div class="value" id="hkWait">–</div><div class="note" id="hkWaitNote">&nbsp;</div><div class="go">DMs →</div></button>
+      <button type="button" class="kpi" id="hkWarmTile" data-go="leads"><div class="label">Warm leads</div><div class="value" id="hkWarm">–</div><div class="note" id="hkWarmNote">&nbsp;</div><div class="go">Warm Leads →</div></button>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-col">
+        <div class="panel">
+          <h2>Do this next</h2>
+          <p class="rule">Replies first, then follow-ups, then fresh warm leads to open.</p>
+          <div class="wait-list" id="homeActions"></div>
+        </div>
+      </div>
+      <div class="home-col">
+        <div class="panel">
+          <h2>Warm lead tracker</h2>
+          <p class="rule">How many of your warm leads have turned into conversations and calls.</p>
+          <div class="funnel warm" id="homeFunnel"></div>
+          <div class="f-note" id="homeFunnelNote"></div>
+        </div>
+        <div class="panel">
+          <h2>Outreach pace</h2>
+          <p class="rule">New openers sent per day, last 7 days. The dashed line is your 20-a-day target.</p>
+          <div class="pace" id="homePace" style="position:relative">
+            <div class="yaxis" id="paceY"></div>
+            <div class="plot" id="pacePlot"></div>
+            <div class="xaxis" id="paceX"></div>
+          </div>
+          <div class="f-note" id="homePaceNote"></div>
+        </div>
+        <div class="panel">
+          <h2>System status</h2>
+          <p class="rule">The morning scans that feed this page.</p>
+          <div id="homeStatus"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WARM LEADS -->
+  <section id="viewLeads" role="tabpanel" aria-labelledby="tabLeads" hidden style="display:flex;flex-direction:column;gap:18px;">
+    <div class="top">
+      <div>
+        <h1>Warm Leads Board</h1>
+        <div class="sub" id="scanMetaLine">Loading board…</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-chip"><span class="dot" style="background:var(--accent-super)"></span><span id="countSuper">0</span> Super Engaged</div>
+        <div class="stat-chip"><span class="dot" style="background:var(--accent-close)"></span><span id="countClose">0</span> Close Friends</div>
+      </div>
+    </div>
+
+    <div class="board">
+      <div class="column" id="colSuper" style="--col-accent:var(--accent-super)">
+        <div class="col-head">
+          <h2><span class="dot" style="background:var(--accent-super)"></span>Super Engaged</h2>
+          <span class="count" id="colSuperCount">0</span>
+        </div>
+        <p class="col-rule" id="superRule">Liked 3+ of your tracked posts. Drag into Close Friends, or use the arrow.</p>
+        <div class="card-list" id="listSuper"></div>
+        <form class="add-row" id="formSuper">
+          <input class="name" id="inputSuperName" placeholder="@username" autocomplete="off" required>
+          <input class="count" id="inputSuperCount" type="number" min="0" max="20" placeholder="0-20">
+          <button type="submit">Add</button>
+        </form>
+      </div>
+      <div class="column" id="colClose" style="--col-accent:var(--accent-close)">
+        <div class="col-head">
+          <h2><span class="dot" style="background:var(--accent-close)"></span>Close Friends</h2>
+          <span class="count" id="colCloseCount">0</span>
+        </div>
+        <p class="col-rule">Ordered most to least active. This is your story audience.</p>
+        <div class="card-list" id="listClose"></div>
+      </div>
+    </div>
+
+    <details class="disqual" id="disqualDetails">
+      <summary><span>Personal contacts <span class="muted" id="disqualCountLabel">(0)</span></span><span class="muted">tap to expand</span></summary>
+      <div class="disqual-list" id="disqualList"></div>
+    </details>
+
+    <footer class="hint">Refreshed every morning from Instagram. Marking someone personal removes them for good, and future scans skip them.</footer>
+  </section>
+
+  <!-- DMS -->
+  <section id="viewDms" role="tabpanel" aria-labelledby="tabDms" hidden style="display:flex;flex-direction:column;gap:18px;">
+    <div class="top">
+      <div>
+        <h1>DM Pipeline</h1>
+        <div class="sub" id="dmMetaLine">Loading DMs…</div>
+      </div>
+      <button type="button" class="btn primary" id="addLeadToggle">+ Add lead</button>
+    </div>
+
+    <div class="panel" id="addLeadPanel" hidden>
+      <h2>Add a lead</h2>
+      <p class="rule">For a conversation you've started (or been sent) that the scan hasn't picked up yet — it shows up in Leads by stage right away and picks up the normal follow-up cadence. If they're already tracked, don't add them again — find them in the list below instead.</p>
+      <form id="addLeadForm" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="alName" placeholder="Name" required style="flex:1;min-width:140px;border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Open Sans',sans-serif;">
+          <input id="alUsername" placeholder="@instagram handle (optional)" style="flex:1;min-width:140px;border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Open Sans',sans-serif;">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select id="alDirection" style="border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Open Sans',sans-serif;">
+            <option value="outbound">You messaged first</option>
+            <option value="inbound">They messaged you first</option>
+          </select>
+          <select id="alOpener" style="border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Open Sans',sans-serif;"></select>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button type="submit" class="btn primary">Add lead</button>
+          <button type="button" class="btn" id="addLeadCancel">Cancel</button>
+          <span class="f-note" id="addLeadStatus"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="seg-filter" role="group" aria-label="View" id="dmsSubNav">
+      <button type="button" data-sub="pipeline" aria-pressed="true">Pipeline</button>
+      <button type="button" data-sub="setter" aria-pressed="false">Setter Tracker</button>
+    </div>
+
+    <div>
+      <div class="seg-filter" role="group" aria-label="Opener group" id="dmsOpenerFilter">
+        <button type="button" data-ogroup="all" aria-pressed="true">All openers</button>
+        <button type="button" data-ogroup="traditional" aria-pressed="false">Traditional opener</button>
+        <button type="button" data-ogroup="recipe" aria-pressed="false">Recipe opener</button>
+      </div>
+      <div class="f-note" style="margin-top:6px;">Applies to both Pipeline and Setter Tracker below. Messages sent per day and Trends split by group from 5 Oct onwards. Earlier days only have whole-pipeline totals, so they show as "–" when a group is selected.</div>
+    </div>
+
+    <div id="dmsPipelineBlock" style="display:flex;flex-direction:column;gap:18px;">
+    <div class="kpis">
+      <div class="kpi" id="kpiWaiting"><div class="label">Waiting on you</div><div class="value" id="kWaiting">–</div><div class="note" id="kWaitingNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">You replied in 24h</div><div class="value" id="k24">–</div><div class="note" id="k24Note">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Lead reply rate</div><div class="value" id="kReply">–</div><div class="note" id="kReplyNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Calls booked</div><div class="value" id="kBooked">–</div><div class="note" id="kBookedNote">&nbsp;</div></div>
+    </div>
+
+    <div class="panel" id="responseTimesPanel">
+      <h2>Response times</h2>
+      <p class="rule">Reply rate, how fast you reply to them, and how fast they reply to you.</p>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Reply rate</div><div class="value" id="rtReply">–</div><div class="note" id="rtReplyNote">&nbsp;</div></div>
+        <div class="kpi"><div class="label">You reply in</div><div class="value" id="rtYours">–</div><div class="note" id="rtYoursNote">&nbsp;</div></div>
+        <div class="kpi"><div class="label">They reply in</div><div class="value" id="rtTheirs">–</div><div class="note" id="rtTheirsNote">&nbsp;</div></div>
+      </div>
+    </div>
+
+
+    <div class="panel" id="msgPanel">
+      <div class="chart-head">
+        <div>
+          <h2>Messages sent per day</h2>
+          <p class="rule" style="margin-top:4px">New openers and follow-ups you sent. Lachy's target is 20+ new conversations a day.</p>
+        </div>
+        <div class="range" role="group" aria-label="Date range">
+          <button type="button" data-range="14" aria-pressed="true">14 days</button>
+          <button type="button" data-range="30" aria-pressed="false">30 days</button>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--series-1)"></i>New openers</span>
+        <span><i class="sw" style="background:var(--series-2)"></i>Follow-ups</span>
+        <span><i class="sw line"></i>Target 20 openers</span>
+      </div>
+      <div class="mchart" id="mchart" style="position:relative">
+        <div class="yaxis" id="myaxis"></div>
+        <div class="plot" id="mplot"></div>
+        <div class="xaxis" id="mxaxis"></div>
+      </div>
+      <div class="f-note" id="msgNote"></div>
+      <details class="tv"><summary>Show as table</summary><div class="table-wrap"><table class="scores"><thead><tr><th>Day</th><th class="num">Openers</th><th class="num">Follow-ups</th><th class="num">Total sent</th><th class="num">Replies in</th></tr></thead><tbody id="msgTable"></tbody></table></div></details>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h2>Waiting on you</h2>
+        <p class="rule">Leads whose last message is unanswered, oldest first. A message you've liked (not replied to) doesn't count.</p>
+        <div class="wait-list" id="waitList"></div>
+        <details class="disqual" style="margin-top:2px;">
+          <summary><span>Recently replied <span class="muted" id="repliedCount">(0)</span></span><span class="muted">tap to expand</span></summary>
+          <div class="disqual-list" id="repliedList"></div>
+        </details>
+      </div>
+      <div class="panel">
+        <h2>Opener scoreboard</h2>
+        <p class="rule">How each opening message performs.</p>
+        <div class="table-wrap">
+          <table class="scores">
+            <thead><tr><th>Opener</th><th class="num">Sent</th><th class="num">Reply rate</th><th class="num">Median reply</th><th class="num">Real replies</th></tr></thead>
+            <tbody id="openerBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Where leads drop off</h2>
+      <p class="rule">How many leads reached each stage of your script. The biggest drop is flagged.</p>
+      <div class="funnel" id="funnel"></div>
+      <div class="f-note" id="convNote"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Warm leads in your DMs</h2>
+      <p class="rule">Leads you're already talking to who are also warm on Instagram. Promote straight to Close Friends from here.</p>
+      <div class="wait-list" id="warmInDms"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Super Engaged, not in your DMs</h2>
+      <p class="rule">Warm from the likes scan, but no conversation yet. Easy openers.</p>
+      <div class="mini-list" id="notInDms"></div>
+    </div>
+    </div>
+
+    <div id="dmsSetterBlock" hidden style="display:flex;flex-direction:column;gap:18px;">
+      <div class="panel">
+        <h2>Outcomes</h2>
+        <p class="rule">Reply rate, funnel progress and calls booked — scoped to the window below.</p>
+        <div class="chart-head" style="align-items:center;">
+          <div class="seg-filter" role="group" aria-label="Outcomes time range" id="soRangePills">
+            <button type="button" data-sorange="24h" aria-pressed="true">24 Hours</button>
+            <button type="button" data-sorange="7d" aria-pressed="false">7 Days</button>
+            <button type="button" data-sorange="1m" aria-pressed="false">1 Month</button>
+            <button type="button" data-sorange="all" aria-pressed="false">All time</button>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);">From <input type="date" id="soFrom" style="border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:4px 6px;font-size:12px;font-family:'Open Sans',sans-serif;"></label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);">To <input type="date" id="soTo" style="border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:4px 6px;font-size:12px;font-family:'Open Sans',sans-serif;"></label>
+          </div>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Openers sent</div><div class="value" id="soOpeners">–</div><div class="note" id="soOpenersNote">&nbsp;</div></div>
+          <div class="kpi"><div class="label">Reply rate</div><div class="value" id="soReply">–</div><div class="note" id="soReplyNote">&nbsp;</div></div>
+          <div class="kpi"><div class="label">Booked per 100 opens</div><div class="value" id="soBookedRate">–</div><div class="note" id="soBookedRateNote">&nbsp;</div></div>
+          <div class="kpi"><div class="label">Calls booked</div><div class="value" id="soBooked">–</div><div class="note" id="soBookedNote">&nbsp;</div></div>
+        </div>
+        <div class="funnel" id="setterFunnel"></div>
+        <div class="f-note" id="setterFunnelNote">Click any stage to see who's in it.</div>
+      </div>
+
+      <div class="panel">
+        <div class="setter-outcomes-head">
+          <h2>Leads by stage</h2>
+          <span class="f-note" id="leadBrowserCount"></span>
+        </div>
+        <p class="rule">Where every lead sits right now. Click a stage to filter, updates every scan.</p>
+        <div class="seg-filter" role="group" aria-label="Stage" id="leadStagePills" style="flex-wrap:wrap;width:auto;"></div>
+        <div class="table-wrap">
+          <table class="scores">
+            <thead><tr><th>Lead</th><th>Stage</th><th>Opener</th><th>Direction</th><th class="num">Last activity</th><th class="num">N/A</th></tr></thead>
+            <tbody id="leadBrowserBody"></tbody>
+          </table>
+        </div>
+        <details style="margin-top:12px;">
+          <summary style="cursor:pointer;font-size:13px;color:var(--muted);">Marked not applicable <span id="naCount">(0)</span></summary>
+          <div id="naList" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;"></div>
+        </details>
+      </div>
+
+      <div class="panel">
+        <div class="chart-head">
+          <div>
+            <h2>Trends</h2>
+            <p class="rule" style="margin-top:4px">Compare any two periods to see if a change actually moved the numbers.</p>
+          </div>
+          <div class="range" role="group" aria-label="Date range">
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);">From <input type="date" id="trendFrom" style="border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:4px 6px;font-size:12px;font-family:'Open Sans',sans-serif;"></label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);">To <input type="date" id="trendTo" style="border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:4px 6px;font-size:12px;font-family:'Open Sans',sans-serif;"></label>
+          </div>
+        </div>
+        <div class="trend-toggles" id="trendToggles"></div>
+        <div class="tchart" id="trendChartWrap">
+          <svg id="trendSvg" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="f-note" id="trendNote"></div>
+        <details class="tv"><summary>Show as table</summary><div class="table-wrap"><table class="scores"><thead><tr><th>Day</th><th class="num">Outreaches</th><th class="num">Replies</th><th class="num">New conversations</th><th class="num">Calls booked</th></tr></thead><tbody id="trendTable"></tbody></table></div></details>
+      </div>
+
+      <div class="panel">
+        <h2>Script review feed</h2>
+        <p class="rule">Every conversation touched in the last scan window, checked against the DM script. Drifted ones get the full breakdown.</p>
+        <div class="f-note" id="reviewSummary"></div>
+        <div class="review-list" id="reviewList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOLLOW-UPS -->
+  <section id="viewFollow" role="tabpanel" aria-labelledby="tabFollow" hidden style="display:flex;flex-direction:column;gap:18px;">
+    <div class="top">
+      <div>
+        <h1>Follow-ups</h1>
+        <div class="sub" id="fuMetaLine">Loading…</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="cadence">
+        <div class="row"><b>Cold opener, no reply</b><span class="step">48h</span><span class="arrow">→</span><span class="step">1 month</span><span class="arrow">→</span><span class="step">3 months</span><span class="arrow">→</span><span class="step">12 months</span></div>
+        <div class="row"><b>Mid-conversation</b><span class="step">24h</span><span class="arrow">→</span><span class="step">48h</span><span class="arrow">→</span><span class="step">1 week</span><span class="arrow">→</span><span class="step">1 month</span><span class="arrow">→</span><span class="step">3 months</span><span class="arrow">→</span><span class="step">12 months</span></div>
+        <div>Timed from your last message. Any reply from them resets the sequence. Clients, closed-out leads and personal contacts are never followed up.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="fu-section-head"><h2>Overdue</h2><span class="count" id="fuOverdueCount">0</span></div>
+      <div class="fu-list" id="fuOverdue"></div>
+    </div>
+    <div class="panel">
+      <div class="fu-section-head"><h2>Due today</h2><span class="count" id="fuTodayCount">0</span></div>
+      <div class="fu-list" id="fuToday"></div>
+    </div>
+    <div class="panel">
+      <div class="fu-section-head"><h2>Coming up</h2><span class="count" id="fuSoonCount">0</span></div>
+      <p class="rule">Due in the next 7 days.</p>
+      <div class="fu-list" id="fuSoon"></div>
+    </div>
+
+    <details class="disqual">
+      <summary><span>Stopped or finished <span class="muted" id="fuDoneCount">(0)</span></span><span class="muted">tap to expand</span></summary>
+      <div class="disqual-list" id="fuDone"></div>
+    </details>
+  </section>
+
+  <!-- MAGNETS -->
+  <section id="viewMagnets" role="tabpanel" aria-labelledby="tabMagnets" hidden style="display:flex;flex-direction:column;gap:18px;">
+    <div class="top">
+      <div>
+        <h1>Magnets</h1>
+        <div class="sub" id="magMetaLine">Loading…</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="rule">Recipe/PDF/link deliveries aren't outreach, so they're not counted in your opener or reply-rate numbers — they get their own follow-up cadence here so nothing slips through. If a magnet lead moves past a reply into a real sales conversation, it graduates to the main Leads by stage list in DMs → Setter Tracker.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Where magnet leads come from</h2>
+      <p class="rule">Every magnet lead by the post that triggered it, including the recipe-comment (ManyChat) threads that land in your General inbox. Fills in as the scan reads each thread.</p>
+      <div class="table-wrap">
+        <table class="scores">
+          <thead><tr><th>Post</th><th class="num">Leads</th><th class="num">Last 7 days</th><th class="num">Replied</th><th class="num">Into sales convo</th></tr></thead>
+          <tbody id="magByPostBody"></tbody>
+        </table>
+      </div>
+      <div class="f-note" id="magByPostNote"></div>
+    </div>
+
+    <div class="panel">
+      <div class="setter-outcomes-head">
+        <h2>Leads by stage</h2>
+        <span class="f-note" id="magLeadCount"></span>
+      </div>
+      <p class="rule">Everyone who's only gotten a magnet so far. Click a stage to filter.</p>
+      <div class="seg-filter" role="group" aria-label="Stage" id="magStagePills" style="flex-wrap:wrap;width:auto;"></div>
+      <div class="table-wrap">
+        <table class="scores">
+          <thead><tr><th>Lead</th><th>Stage</th><th class="num">Last activity</th><th class="num">N/A</th></tr></thead>
+          <tbody id="magLeadBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="fu-section-head"><h2>Overdue</h2><span class="count" id="magOverdueCount">0</span></div>
+      <div class="fu-list" id="magOverdue"></div>
+    </div>
+    <div class="panel">
+      <div class="fu-section-head"><h2>Due today</h2><span class="count" id="magTodayCount">0</span></div>
+      <div class="fu-list" id="magToday"></div>
+    </div>
+    <div class="panel">
+      <div class="fu-section-head"><h2>Coming up</h2><span class="count" id="magSoonCount">0</span></div>
+      <p class="rule">Due in the next 7 days.</p>
+      <div class="fu-list" id="magSoon"></div>
+    </div>
+
+    <details class="disqual">
+      <summary><span>Stopped or finished <span class="muted" id="magDoneCount">(0)</span></span><span class="muted">tap to expand</span></summary>
+      <div class="disqual-list" id="magDone"></div>
+    </details>
+  </section>
+
+  <!-- ADS -->
+  <section id="viewAds" role="tabpanel" aria-labelledby="tabAds" hidden style="display:flex;flex-direction:column;gap:18px;">
+    <div class="top">
+      <div>
+        <h1>Meta Ads</h1>
+        <div class="sub" id="adsMetaLine">Loading…</div>
+      </div>
+      <div class="range" role="group" aria-label="Ads date range" id="adsRange">
+        <button type="button" data-adsrange="7" aria-pressed="true">7 days</button>
+        <button type="button" data-adsrange="14" aria-pressed="false">14 days</button>
+        <button type="button" data-adsrange="30" aria-pressed="false">30 days</button>
+      </div>
+    </div>
+
+    <div class="panel" id="adsEmpty" hidden>
+      <h2>Connect Meta Ads</h2>
+      <div class="ads-empty">
+        <div>This tab fills from a daily sync once Meta's official connector is on.</div>
+        <ol>
+          <li>In Claude, open <b>Settings → Connectors → Add custom connector</b>.</li>
+          <li>Name it <b>Meta Ads</b> and paste <code>https://mcp.facebook.com/ads</code> as the server URL.</li>
+          <li>Log in with Facebook, pick the TasteForm ad account, and choose <b>read-only</b> access.</li>
+          <li>Tell Claude it's connected. The daily ads sync then switches on and this tab fills by the next morning.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div id="adsBody" style="display:flex;flex-direction:column;gap:18px;">
+      <div class="kpis">
+        <div class="kpi" id="adsKpiSpend"><div class="label">Spend</div><div class="value" id="adsSpend">–</div><div class="note" id="adsSpendNote">&nbsp;</div></div>
+        <div class="kpi" id="adsKpiResults"><div class="label">Results</div><div class="value" id="adsResults">–</div><div class="note" id="adsResultsNote">&nbsp;</div></div>
+        <div class="kpi" id="adsKpiCpr"><div class="label">Cost per result</div><div class="value" id="adsCpr">–</div><div class="note" id="adsCprNote">&nbsp;</div></div>
+        <div class="kpi" id="adsKpiCtr"><div class="label">Link CTR</div><div class="value" id="adsCtr">–</div><div class="note" id="adsCtrNote">&nbsp;</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="chart-head">
+          <div>
+            <h2>Spend per day</h2>
+            <p class="rule" style="margin-top:4px">Daily spend, with results on each bar's tooltip.</p>
+          </div>
+        </div>
+        <div class="ads-chart" id="adsChart" style="position:relative">
+          <div class="yaxis" id="adsY"></div>
+          <div class="plot" id="adsPlot"></div>
+          <div class="xaxis" id="adsX"></div>
+        </div>
+        <details class="tv"><summary>Show as table</summary><div class="table-wrap"><table class="scores"><thead><tr><th>Day</th><th class="num">Spend</th><th class="num">Results</th><th class="num">Cost / result</th><th class="num">Link CTR</th><th class="num">CPM</th></tr></thead><tbody id="adsTable"></tbody></table></div></details>
+      </div>
+
+      <div class="panel">
+        <h2>Campaigns</h2>
+        <p class="rule">Every campaign that spent in the selected window, best cost per result first.</p>
+        <div class="table-wrap">
+          <table class="scores">
+            <thead><tr><th>Campaign</th><th>Status</th><th class="num">Spend</th><th class="num">Results</th><th class="num">Cost / result</th><th class="num">Link CTR</th><th class="num">Frequency</th></tr></thead>
+            <tbody id="adsCampBody"></tbody>
+          </table>
+        </div>
+        <div class="f-note" id="adsCampNote"></div>
+      </div>
+    </div>
+  </section>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+/* ---------- auth (Supabase) ---------- */
+(function(){
+  var SUPA_URL = 'https://hucqdrekawzsrbbkczgj.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1Y3FkcmVrYXd6c3JiYmtjemdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3NzgxNjMsImV4cCI6MjEwNzM1NDE2M30.5NNB-_F6yLb9tP9UvoZvFFS9HftuF7tocc1kdT6w0ug';
+
+  if(!window.supabase || !window.supabase.createClient){
+    var el = document.getElementById('authLoading') || document.body;
+    el.hidden = false;
+    el.textContent = "Couldn't load the Supabase library (check your internet connection and try reloading). If this keeps happening, open the browser console (F12) and tell Jordan's Claude what the red error says.";
+    throw new Error('supabase-js failed to load from CDN');
+  }
+  var supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+  var authLoadingEl = document.getElementById('authLoading');
+  var authScreenEl = document.getElementById('authScreen');
+  var appRootEl = document.getElementById('appRoot');
+  var mode = 'signin';
+
+  function showLoading(){ authLoadingEl.hidden=false; authScreenEl.hidden=true; appRootEl.hidden=true; }
+  function showLogin(){ authLoadingEl.hidden=true; authScreenEl.hidden=false; appRootEl.hidden=true; }
+  function showApp(){ authLoadingEl.hidden=true; authScreenEl.hidden=true; appRootEl.hidden=false; }
+
+  function escA(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  function friendlyError(msg){
+    if(!msg) return 'Something went wrong. Try again.';
+    if(/invite-only/i.test(msg) || /no invite found/i.test(msg)) return "That email hasn't been invited yet — check with Jordan.";
+    if(/invalid login credentials/i.test(msg)) return 'Wrong email or password.';
+    if(/already registered/i.test(msg) || /user already exists/i.test(msg)) return 'That email already has an account — sign in instead.';
+    return msg;
+  }
+
+  var formEl=document.getElementById('authForm'), emailEl=document.getElementById('authEmail'),
+      passEl=document.getElementById('authPassword'), errEl=document.getElementById('authError'),
+      submitBtn=document.getElementById('authSubmit'), toggleBtn=document.getElementById('authToggle'),
+      toggleLabel=document.getElementById('authModeLabel');
+
+  function applyMode(){
+    submitBtn.textContent = mode==='signin' ? 'Sign in' : 'Sign up';
+    toggleLabel.textContent = mode==='signin' ? "Don't have an account?" : 'Already have an account?';
+    toggleBtn.textContent = mode==='signin' ? 'Sign up' : 'Sign in';
+    errEl.textContent='';
+  }
+  applyMode();
+  toggleBtn.addEventListener('click', function(){ mode = mode==='signin'?'signup':'signin'; applyMode(); });
+
+  formEl.addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    errEl.textContent='';
+    var email=emailEl.value.trim(), pass=passEl.value;
+    if(!email||!pass) return;
+    submitBtn.disabled=true; submitBtn.textContent='Please wait…';
+    try{
+      if(mode==='signin'){
+        var r = await supa.auth.signInWithPassword({email:email, password:pass});
+        if(r.error) throw r.error;
+      } else {
+        var r2 = await supa.auth.signUp({email:email, password:pass});
+        if(r2.error) throw r2.error;
+        if(r2.data && r2.data.user && !r2.data.session){
+          errEl.textContent='Check your email to confirm your account, then sign in.';
+        }
+      }
+    }catch(e){
+      errEl.textContent = friendlyError(e && e.message);
+    }
+    submitBtn.disabled=false; applyMode(); if(errEl.textContent) {} // keep any message set above
+  });
+
+  function renderAccountBox(user, profile){
+    var box=document.getElementById('accountBox'); if(!box) return;
+    var role=(profile&&profile.role)||'limited';
+    box.innerHTML = '<span class="acct-email">'+(profile&&profile.display_name?escA(profile.display_name)+' · ':'')+escA(user.email)+'</span>'+
+      '<span class="acct-role '+escA(role)+'">'+escA(role)+'</span>'+
+      '<button type="button" class="btn small" id="signOutBtn">Sign out</button>';
+    document.getElementById('signOutBtn').addEventListener('click', function(){ supa.auth.signOut(); });
+  }
+
+  var booted=false;
+  async function afterSignIn(user){
+    showLoading();
+    var profile=null;
+    try{
+      var pr = await supa.from('profiles').select('*').eq('id', user.id).maybeSingle();
+      profile = pr.data || null;
+    }catch(e){}
+    if(!profile) profile = {id:user.id, email:user.email, role:'limited', display_name:null};
+    renderAccountBox(user, profile);
+    showApp();
+    if(!booted){ booted=true; document.dispatchEvent(new CustomEvent('tf-auth-ready', {detail:{ supabase:supa, user:user, profile:profile }})); }
+  }
+
+  supa.auth.onAuthStateChange(function(event, session){
+    if(session && session.user){ afterSignIn(session.user); }
+    else { booted=false; showLogin(); document.dispatchEvent(new CustomEvent('tf-auth-signed-out')); }
+  });
+
+  showLoading();
+})();
+</script>
+
+<script>
+(function(){
+  var db = null;
+  var TIER_SUPER='super_engaged', TIER_CLOSE='close_friends', TIER_PERSONAL='personal';
+  var state = { super:[], close:[], personal:[], scanMeta:null, dms:[], dmMeta:null, dmLoaded:false, daily:[], reviews:[], adsDaily:[], adsCampaigns:[], adsMeta:null };
+
+  var STAGES = [
+    ['opened','Opener sent'],['replied','Replied'],['goal','Goal'],['situation','Current situation'],
+    ['pain','Pain & timeline'],['pitched','Call pitched'],['link_sent','Link / video sent'],
+    ['booked','Call booked'],['call','Call held']
+  ];
+  var STAGE_INDEX = {}; STAGES.forEach(function(s,i){ STAGE_INDEX[s[0]]=i; });
+  var REPLY_TARGET_PCT = 35;       // Setter Operating SOP target reply rate
+  var REPLY_TARGET_MIN_SAMPLE = 10; // don't flag until there's enough openers to mean anything
+  var OPENERS = {
+    recipe_offer_a:'Recipe offer — A (choice)',
+    recipe_offer_b:'Recipe offer — B (specific tease)',
+    recipe_reactivation:'Recipe re-engagement (past grab)',
+    new_follower:'New follower (legacy opener)',
+    shopping_list:'Shopping list offer',
+    name_popped:'Name popped up',
+    magnet_delivery:'Magnet delivery',
+    inbound:'Inbound (they messaged)',
+    other:'Other'
+  };
+  var OPENER_ORDER = ['recipe_offer_a','recipe_offer_b','recipe_reactivation','new_follower','shopping_list','name_popped','magnet_delivery','inbound','other'];
+  var OPENER_GROUPS = {
+    recipe_offer_a:'recipe', recipe_offer_b:'recipe', recipe_reactivation:'recipe',
+    new_follower:'traditional', shopping_list:'traditional', name_popped:'traditional', inbound:'traditional', other:'traditional',
+    magnet_delivery:'magnet'
+  };
+  function openerGroupOf(d){ return OPENER_GROUPS[d.opener] || 'traditional'; }
+  function matchesOpenerGroup(d){ return dmsOpenerGroup==='all' || openerGroupOf(d)===dmsOpenerGroup; }
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function toId(u){return String(u||'').trim().toLowerCase().replace(/^@/,'').replace(/[^a-z0-9_\-.~:@+]/g,'-')||'unknown';}
+  function relTime(iso){
+    if(!iso) return null; var diff=Date.now()-new Date(iso).getTime(); if(isNaN(diff)) return null;
+    var m=Math.floor(diff/60000); if(m<1) return 'just now'; if(m<60) return m+'m ago';
+    var h=Math.floor(m/60); if(h<24) return h+'h ago'; var d=Math.floor(h/24); if(d<30) return d+'d ago';
+    return Math.floor(d/30)+'mo ago';
+  }
+  function hoursSince(iso){ if(!iso) return null; var t=new Date(iso).getTime(); return isNaN(t)?null:(Date.now()-t)/3600000; }
+  function fmtHours(h){
+    if(h==null||isNaN(h)) return '–';
+    if(h<1) return Math.max(1,Math.round(h*60))+'m';
+    if(h<48) return (h<10?h.toFixed(1):Math.round(h))+'h';
+    return Math.round(h/24)+'d';
+  }
+  function median(arr){ if(!arr.length) return null; var a=arr.slice().sort(function(x,y){return x-y;}); var m=Math.floor(a.length/2); return a.length%2?a[m]:(a[m-1]+a[m])/2; }
+  function mean(arr){ if(!arr.length) return null; return arr.reduce(function(a,b){return a+b;},0)/arr.length; }
+  function pct(n,d){ return d? Math.round((n/d)*100) : null; }
+  function showBanner(msg){ var b=document.getElementById('offlineBanner'); b.textContent=msg; b.classList.add('show'); }
+
+  /* ---------- tabs ---------- */
+  var VIEWS={home:['viewHome','tabHome'], leads:['viewLeads','tabLeads'], dms:['viewDms','tabDms'], follow:['viewFollow','tabFollow'], magnets:['viewMagnets','tabMagnets'], ads:['viewAds','tabAds']};
+  function setView(view){
+    if(!VIEWS[view]) view='home';
+    Object.keys(VIEWS).forEach(function(k){
+      document.getElementById(VIEWS[k][0]).hidden = k!==view;
+      document.getElementById(VIEWS[k][1]).setAttribute('aria-selected', k===view?'true':'false');
+    });
+  }
+  document.querySelectorAll('.tab').forEach(function(t){ t.addEventListener('click', function(){ setView(t.getAttribute('data-view')); }); });
+  (function initView(){
+    var v = (location.hash||'').replace('#','');
+    setView(VIEWS[v]?v:'home');
+  })();
+
+  /* ---------- warm leads ---------- */
+  // how many posts the like counts are actually out of (the scan tallies up to 20 stored posts;
+  // until 20 exist it's fewer, so never label counts as "/20" when they aren't)
+  function likeWindow(){ var m=state.scanMeta||{}; var n=m.windowPosts||m.storedPosts; return (typeof n==='number' && n>0)? n : 20; }
+  function accentFor(tier){ return tier===TIER_CLOSE?'var(--accent-close)':'var(--accent-super)'; }
+  function cardHtml(doc, tier){
+    var lc = typeof doc.likeCount==='number'?doc.likeCount:0;
+    var W = likeWindow();
+    var p = Math.max(0,Math.min(100,(lc/W)*100));
+    var scanned = relTime(doc.lastScanAt||doc.updatedAt||doc.addedAt);
+    var initial = (doc.username||doc.id||'?').replace(/^@/,'').charAt(0).toUpperCase()||'?';
+    var moveLabel = tier===TIER_SUPER?'Move to Close Friends':'Move to Super Engaged';
+    var arrow = tier===TIER_SUPER?'→':'←';
+    var accent = accentFor(tier);
+    return '<div class="card" draggable="true" data-id="'+esc(doc.id)+'" data-tier="'+tier+'">'+
+      '<div class="avatar" style="background:'+accent+';--col-on:'+(tier===TIER_CLOSE?'var(--on-close)':'var(--on-super)')+'">'+esc(initial)+'</div>'+
+      '<div class="card-main"><div class="card-name">@'+esc((doc.username||doc.id).replace(/^@/,''))+'</div>'+
+      '<div class="bar-row"><div class="bar-track"><div class="bar-fill" style="width:'+p+'%;background:'+accent+'"></div></div><div class="bar-label">'+lc+'/'+W+'</div></div>'+
+      (scanned?'<div class="card-scanned">seen '+esc(scanned)+'</div>':'')+'</div>'+
+      '<div class="card-actions">'+
+        '<button class="icon-btn" data-action="move" data-id="'+esc(doc.id)+'" data-target="'+(tier===TIER_SUPER?TIER_CLOSE:TIER_SUPER)+'" title="'+moveLabel+'" aria-label="'+moveLabel+'">'+arrow+'</button>'+
+        '<button class="icon-btn" data-action="personal" data-id="'+esc(doc.id)+'" title="Mark personal (removes from board)" aria-label="Mark personal">✕</button>'+
+      '</div></div>';
+  }
+  function renderColumn(el, docs, tier, empty){
+    el.innerHTML = docs.length ? docs.map(function(d){return cardHtml(d,tier);}).join('') : '<div class="empty-state">'+empty+'</div>';
+  }
+  function renderLeads(){
+    renderColumn(document.getElementById('listSuper'), state.super, TIER_SUPER, 'No one here yet. The morning scan fills this, or add someone below.');
+    renderColumn(document.getElementById('listClose'), state.close, TIER_CLOSE, 'Drag someone over from Super Engaged, or tap the arrow on their card.');
+    ['countSuper','colSuperCount'].forEach(function(id){ document.getElementById(id).textContent=state.super.length; });
+    ['countClose','colCloseCount'].forEach(function(id){ document.getElementById(id).textContent=state.close.length; });
+    var dl=document.getElementById('disqualList');
+    document.getElementById('disqualCountLabel').textContent='('+state.personal.length+')';
+    dl.innerHTML = state.personal.length ? state.personal.map(function(d){
+      return '<div class="disqual-item"><span>@'+esc((d.username||d.id).replace(/^@/,''))+'</span><button class="restore-btn" data-action="restore" data-id="'+esc(d.id)+'">Restore</button></div>';
+    }).join('') : '<div class="empty-state">Nobody marked personal.</div>';
+    var W=likeWindow();
+    var sr=document.getElementById('superRule');
+    if(sr) sr.textContent='Liked 3+ of your last '+W+' posts'+(W<20?' (history is still building toward 20)':'')+'. Drag into Close Friends, or use the arrow.';
+    var ml=document.getElementById('scanMetaLine');
+    if(state.scanMeta && state.scanMeta.lastScanAt){
+      var sm=state.scanMeta;
+      ml.textContent='Last scanned '+(relTime(sm.lastScanAt)||'recently')+
+        (sm.lastScanCount!=null?' · '+sm.lastScanCount+' new post'+(sm.lastScanCount===1?'':'s')+' read':'')+
+        ' · counts out of '+W+' post'+(W===1?'':'s')+
+        (sm.partialPosts?' · '+sm.partialPosts+' big post'+(sm.partialPosts===1?' only':'s only')+' partly readable':'');
+    } else { ml.textContent='Waiting for the first morning scan.'; }
+  }
+
+  async function moveTier(id, target){
+    if(!db) return;
+    try{ await db.collection('contacts').doc(id).update({tier:target, updatedAt:new Date().toISOString()}); }
+    catch(e){ console.error('moveTier failed',e); }
+  }
+  async function addContact(username, raw){
+    if(!db) return;
+    var id=toId(username), lc=Math.max(0,Math.min(20,parseInt(raw,10)||0)), ref=db.collection('contacts').doc(id), now=new Date().toISOString();
+    try{
+      var snap=await ref.get();
+      if(snap.exists){ await ref.update({tier:TIER_SUPER, likeCount:lc, updatedAt:now}); }
+      else { await ref.set({username:username.trim().replace(/^@/,''), likeCount:lc, tier:TIER_SUPER, addedAt:now, updatedAt:now, source:'manual'}); }
+    }catch(e){ console.error('addContact failed',e); }
+  }
+  document.addEventListener('click', function(ev){
+    var b=ev.target.closest('[data-action]'); if(!b) return;
+    var a=b.getAttribute('data-action'), id=b.getAttribute('data-id');
+    if(a==='move') moveTier(id, b.getAttribute('data-target'));
+    else if(a==='personal') moveTier(id, TIER_PERSONAL);
+    else if(a==='restore') moveTier(id, TIER_SUPER);
+  });
+  document.getElementById('formSuper').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var n=document.getElementById('inputSuperName'), c=document.getElementById('inputSuperCount');
+    if(!n.value.trim()) return; addContact(n.value, c.value); n.value=''; c.value=''; n.focus();
+  });
+  document.addEventListener('dragstart', function(ev){
+    var card=ev.target.closest&&ev.target.closest('.card'); if(!card) return;
+    card.classList.add('dragging'); ev.dataTransfer.setData('text/plain', card.getAttribute('data-id')); ev.dataTransfer.effectAllowed='move';
+  });
+  document.addEventListener('dragend', function(ev){ var card=ev.target.closest&&ev.target.closest('.card'); if(card) card.classList.remove('dragging'); });
+  [['colSuper',TIER_SUPER],['colClose',TIER_CLOSE]].forEach(function(p){
+    var el=document.getElementById(p[0]);
+    el.addEventListener('dragover', function(ev){ ev.preventDefault(); el.classList.add('dragover'); });
+    el.addEventListener('dragleave', function(){ el.classList.remove('dragover'); });
+    el.addEventListener('drop', function(ev){ ev.preventDefault(); el.classList.remove('dragover'); var id=ev.dataTransfer.getData('text/plain'); if(id) moveTier(id,p[1]); });
+  });
+
+  /* ---------- DMs ---------- */
+  function stageIdx(d){ var i=STAGE_INDEX[d.stage]; return i==null?0:i; }
+  // unread threads are logged from the inbox preview only, so their time is Instagram's rough label;
+  // from 5 Oct the scan also flags any other time it couldn't read exactly (timesExact:false)
+  function isApproxTime(d){ return !!(d.unread || d.timesExact===false); }
+  function srcChip(d){ return d.source==='manychat_comment' ? '<span class="src-chip" title="Came in through a recipe-comment automation">ManyChat</span>' : (d.tab==='general' ? '<span class="src-chip" title="Thread sits in your General inbox">General</span>' : ''); }
+  function isMagnetOnly(d){ return d.opener==='magnet_delivery' && stageIdx(d)<=STAGE_INDEX.replied; }
+  function directionLabel(d){ return d.direction==='inbound'?'Inbound':(d.direction==='outbound'?'Outbound':'Unknown (unread)'); }
+  function leadLink(d, nameHtml){
+    var name = nameHtml || esc(d.displayName||d.username||d.id);
+    if(d.threadId) return '<a href="https://www.instagram.com/direct/t/'+esc(d.threadId)+'/" target="_blank" rel="noopener">'+name+'</a>';
+    if(d.username && !/^pending-/i.test(d.id||'')) return '<a href="https://www.instagram.com/'+esc(d.username.replace(/^@/,''))+'/" target="_blank" rel="noopener">'+name+'</a>';
+    return name;
+  }
+  function renderDms(){
+    var meta=document.getElementById('dmMetaLine');
+    if(state.dmMeta && state.dmMeta.lastScanAt){
+      meta.textContent='Last scanned '+(relTime(state.dmMeta.lastScanAt)||'recently')+(state.dmMeta.threadsRead!=null?' · '+state.dmMeta.threadsRead+' threads read':'')+(state.dmMeta.unreadSkipped?' · '+state.dmMeta.unreadSkipped+' unread left untouched':'');
+    } else { meta.textContent = state.dmLoaded ? 'Waiting for the first DM scan.' : 'Loading DMs…'; }
+
+    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && !isMagnetOnly(d) && matchesOpenerGroup(d); }); // magnets get their own tab until they graduate into a real conversation
+    var outreachLeads = leads;
+
+    // waiting on you — a message you've liked as an ack (no text reply) doesn't count as waiting
+    var waiting = leads.filter(function(d){ return d.lastSender==='lead' && (!d.status || d.status==='active') && !d.lastLeadMessageLiked; })
+      .sort(function(a,b){ return new Date(a.waitingSince||a.lastMessageAt||0) - new Date(b.waitingSince||b.lastMessageAt||0); });
+    state.waiting = waiting;
+    var oldest = waiting.length ? hoursSince(waiting[0].waitingSince||waiting[0].lastMessageAt) : null;
+    document.getElementById('kWaiting').textContent = leads.length||state.dmLoaded ? waiting.length : '–';
+    document.getElementById('kWaitingNote').textContent = waiting.length ? 'oldest waiting '+fmtHours(oldest) : (leads.length?'inbox clear':' ');
+    document.getElementById('kpiWaiting').classList.toggle('alert', !!(oldest && oldest>24));
+
+    var wl=document.getElementById('waitList');
+    if(!waiting.length){
+      wl.innerHTML='<div class="empty-state">'+(leads.length?'Nobody waiting. Nice.':'Nothing yet. The first DM scan fills this.')+'</div>';
+    } else {
+      wl.innerHTML = waiting.slice(0,12).map(function(d){
+        var h=hoursSince(d.waitingSince||d.lastMessageAt);
+        var cls = h>24?'crit':(h>8?'warn':'good');
+        var approx = isApproxTime(d);
+        var tag = (h>24? '⚠ ':'')+(approx?'≈':'')+fmtHours(h)+' waiting';
+        var stageLabel = (STAGES[stageIdx(d)]||STAGES[0])[1];
+        var name = esc(d.displayName||d.username||d.id);
+        var link = leadLink(d, name);
+        return '<div class="wait-item"><div class="wait-main"><div class="wait-name">'+link+
+          (d.unread?'<span class="chip stage">unread</span>':'')+'<span class="chip stage">'+esc(stageLabel)+'</span></div>'+
+          (d.lastMessagePreview?'<div class="wait-preview">'+esc(d.lastMessagePreview)+'</div>':'')+
+          '</div><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;"><span class="chip '+cls+(approx?' approx':'')+'"'+(approx?' title="Unread, so the time comes from Instagram\'s rough label (e.g. 3h). Exact once the thread is read."':'')+'>'+tag+'</span>'+
+          '<button class="btn small" data-action="markReplied" data-id="'+esc(d.id)+'">Mark replied</button></div></div>';
+      }).join('') + (waiting.length>12?'<div class="f-note">+'+(waiting.length-12)+' more</div>':'');
+    }
+
+    // recently marked replied — reconciled against the real thread on the next scan
+    var recentlyReplied = leads.filter(function(d){ return d.manualReplyAt && hoursSince(d.manualReplyAt)<=48; })
+      .sort(function(a,b){ return new Date(b.manualReplyAt)-new Date(a.manualReplyAt); });
+    var repliedCountEl=document.getElementById('repliedCount');
+    if(repliedCountEl) repliedCountEl.textContent='('+recentlyReplied.length+')';
+    var repliedListEl=document.getElementById('repliedList');
+    if(repliedListEl){
+      repliedListEl.innerHTML = recentlyReplied.length ? recentlyReplied.map(function(d){
+        return '<div class="disqual-item"><span>'+esc(d.displayName||d.username||d.id)+' · marked replied '+esc(relTime(d.manualReplyAt)||'recently')+'</span></div>';
+      }).join('') : '<div class="empty-state">Nothing marked replied in the last 48h.</div>';
+    }
+
+    // your 24h reply rate
+    var gaps=[]; leads.forEach(function(d){ if(Array.isArray(d.jordanReplyHours)) d.jordanReplyHours.forEach(function(x){ if(typeof x==='number'&&!isNaN(x)) gaps.push(x); }); });
+    var within = gaps.filter(function(x){return x<=24;}).length;
+    var p24 = pct(within, gaps.length);
+    document.getElementById('k24').textContent = p24==null?'–':p24+'%';
+    document.getElementById('k24Note').textContent = gaps.length ? within+' of '+gaps.length+' replies · median '+fmtHours(median(gaps)) : ' ';
+
+    // lead reply rate (outbound) — magnet deliveries are never counted as outreach, even once they graduate
+    var outbound = outreachLeads.filter(function(d){ return d.direction==='outbound' && d.opener!=='magnet_delivery'; });
+    var repliedOut = outbound.filter(function(d){ return !!d.firstReplyAt; });
+    var pr = pct(repliedOut.length, outbound.length);
+    document.getElementById('kReply').textContent = pr==null?'–':pr+'%';
+    var kReplyBelowTarget = pr!=null && outbound.length>=REPLY_TARGET_MIN_SAMPLE && pr<REPLY_TARGET_PCT;
+    var kReplyKpiEl = document.getElementById('kReply').closest('.kpi');
+    if(kReplyKpiEl) kReplyKpiEl.classList.toggle('alert', kReplyBelowTarget);
+    document.getElementById('kReplyNote').textContent = outbound.length
+      ? repliedOut.length+' of '+outbound.length+' openers'+(kReplyBelowTarget ? ' · target '+REPLY_TARGET_PCT+'%' : '')
+      : ' ';
+
+    // response times panel — reuses the reply-rate and your-reply-speed numbers above, adds their reply speed
+    var theirTimes = repliedOut.map(function(d){ return d.firstReplyHours; }).filter(function(x){ return typeof x==='number' && !isNaN(x); });
+    document.getElementById('rtReply').textContent = pr==null?'–':pr+'%';
+    document.getElementById('rtReplyNote').textContent = outbound.length ? repliedOut.length+' of '+outbound.length+' openers replied' : ' ';
+    document.getElementById('rtYours').textContent = gaps.length ? fmtHours(median(gaps)) : '–';
+    document.getElementById('rtYoursNote').textContent = gaps.length ? 'avg '+fmtHours(mean(gaps))+' · '+(p24==null?'–':p24+'%')+' within 24h' : ' ';
+    document.getElementById('rtTheirs').textContent = theirTimes.length ? fmtHours(median(theirTimes)) : '–';
+    document.getElementById('rtTheirsNote').textContent = theirTimes.length ? 'avg '+fmtHours(mean(theirTimes))+' · from '+theirTimes.length+' replies' : ' ';
+
+    // booked
+    var booked = outreachLeads.filter(function(d){ return stageIdx(d) >= STAGE_INDEX.booked; });
+    document.getElementById('kBooked').textContent = outreachLeads.length||state.dmLoaded ? booked.length : '–';
+    document.getElementById('kBookedNote').textContent = outreachLeads.length ? 'from '+outreachLeads.length+' lead conversations' : ' ';
+
+    // opener scoreboard
+    var groups={};
+    outreachLeads.forEach(function(d){ var k=OPENERS[d.opener]?d.opener:(d.direction==='inbound'?'inbound':'other'); (groups[k]=groups[k]||[]).push(d); });
+    var rows = OPENER_ORDER.filter(function(k){ return groups[k]&&groups[k].length; }).map(function(k){
+      var g=groups[k], rep=g.filter(function(d){return !!d.firstReplyAt;});
+      var rh=rep.map(function(d){return d.firstReplyHours;}).filter(function(x){return typeof x==='number';});
+      var real=rep.filter(function(d){return d.replyDepth==='engaged';}).length;
+      var r=pct(rep.length,g.length);
+      var sample=(g.find(function(d){return d.openerText;})||{}).openerText||'';
+      return {k:k,n:g.length,rep:rep.length,r:r,med:median(rh),real:real,sample:sample};
+    }).sort(function(a,b){ return (b.n>=3?b.r:-1)-(a.n>=3?a.r:-1) || b.n-a.n; });
+    document.getElementById('openerBody').innerHTML = rows.length ? rows.map(function(o){
+      var isInbound = o.k==='inbound';
+      return '<tr><td><div class="op-name">'+esc(OPENERS[o.k])+'</div>'+(o.sample?'<div class="op-sample" title="'+esc(o.sample)+'">“'+esc(o.sample)+'”</div>':'')+'</td>'+
+        '<td class="num">'+o.n+'</td>'+
+        '<td class="num">'+(isInbound?'<span class="f-note">n/a</span>':'<div class="rate-cell" title="'+o.rep+' of '+o.n+' replied"><span>'+(o.r==null?'–':o.r+'%')+'</span><div class="rate-track"><div class="rate-fill" style="width:'+(o.r||0)+'%"></div></div></div>')+'</td>'+
+        '<td class="num">'+(isInbound?'–':fmtHours(o.med))+'</td>'+
+        '<td class="num">'+(o.rep?o.real+' of '+o.rep:'–')+'</td></tr>';
+    }).join('') : '<tr><td colspan="5"><div class="empty-state">No openers logged yet.</div></td></tr>';
+
+    // funnel
+    var counts = STAGES.map(function(s,i){ return outreachLeads.filter(function(d){ return stageIdx(d)>=i; }).length; });
+    var maxC = counts[0]||1, biggest=-1, biggestDrop=0;
+    for(var i=1;i<counts.length;i++){ if(counts[i-1]>=3){ var drop=(counts[i-1]-counts[i])/counts[i-1]; if(drop>biggestDrop){ biggestDrop=drop; biggest=i; } } }
+    document.getElementById('funnel').innerHTML = outreachLeads.length ? STAGES.map(function(s,i){
+      var c=counts[i], w=Math.max(0.5,(c/maxC)*100);
+      var dropTxt = i>0 && counts[i-1] ? ' · '+pct(counts[i],counts[i-1])+'%' : '';
+      return '<div class="f-row'+(i===biggest?' biggest':'')+'" title="'+esc(s[1])+': '+c+' leads'+(i>0&&counts[i-1]?' ('+pct(counts[i],counts[i-1])+'% of previous stage)':'')+'">'+
+        '<div class="f-label">'+esc(s[1])+'</div><div class="f-track"><div class="f-bar" style="width:'+w+'%"></div></div>'+
+        '<div class="f-val">'+c+dropTxt+(i===biggest?' ▼':'')+'</div></div>';
+    }).join('') : '<div class="empty-state">No lead conversations logged yet.</div>';
+    var bk = booked.filter(function(d){ return d.bookedAt && d.openerSentAt; });
+    var msgs = booked.map(function(d){ return (d.msgsJordan||0)+(d.msgsLead||0); }).filter(function(x){return x>0;});
+    var days = bk.map(function(d){ return (new Date(d.bookedAt)-new Date(d.openerSentAt))/86400000; }).filter(function(x){return x>=0;});
+    var noteParts=[];
+    if(biggest>0) noteParts.push('Biggest drop: '+STAGES[biggest-1][1]+' → '+STAGES[biggest][1]+' ('+Math.round(biggestDrop*100)+'% lost).');
+    if(msgs.length) noteParts.push('Booked leads took a median '+Math.round(median(msgs))+' messages'+(days.length?' and '+(median(days)<1?'under a day':Math.round(median(days))+' days')+' from opener to booking':'')+'.');
+    document.getElementById('convNote').textContent = noteParts.join(' ');
+
+    // warm leads already in your DMs (reverse of the list below -- these are people you're
+    // actively talking to who are also warm on Instagram, with a one-click promote to Close Friends)
+    var warmById = {};
+    state.super.concat(state.close).forEach(function(c){ warmById[uname(c)] = c; });
+    var warmInDmsList = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && warmById[uname(d)]; })
+      .map(function(d){ return {d:d, c:warmById[uname(d)]}; })
+      .sort(function(a,b){ return (b.c.likeCount||0)-(a.c.likeCount||0); });
+    document.getElementById('warmInDms').innerHTML = warmInDmsList.length ? warmInDmsList.map(function(x){
+      var ld=x.d, c=x.c, name=esc(ld.displayName||ld.username||ld.id);
+      var link = leadLink(ld, name);
+      var stageLabel = (STAGES[stageIdx(ld)]||STAGES[0])[1];
+      var isClose = c.tier===TIER_CLOSE;
+      var tierChip = '<span class="chip '+(isClose?'good':'warn')+'">'+(isClose?'Close Friends':'Super Engaged')+'</span>';
+      var promote = isClose ? '' : '<button type="button" class="btn small" data-action="move" data-id="'+esc(c.id)+'" data-target="close_friends">\u2192 Close Friends</button>';
+      return '<div class="wait-item"><div class="wait-main"><div class="wait-name">'+link+tierChip+'<span class="chip stage">'+esc(stageLabel)+'</span></div>'+
+        '<div class="wait-preview">'+(c.likeCount||0)+'/'+likeWindow()+' posts liked</div>'+
+        '</div><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;">'+promote+
+        '<button type="button" class="btn small" data-go="leads">View on Warm Leads \u2192</button></div></div>';
+    }).join('') : '<div class="empty-state">None of your current DM leads are on the Warm Leads board yet.</div>';
+
+    // super engaged not in DMs
+    var dmIds={}; state.dms.forEach(function(d){ dmIds[(d.username||d.id||'').toLowerCase()]=true; });
+    var notIn = state.super.concat(state.close).filter(function(c){ return !dmIds[(c.username||c.id||'').toLowerCase()]; })
+      .sort(function(a,b){ return (b.likeCount||0)-(a.likeCount||0); });
+    document.getElementById('notInDms').innerHTML = notIn.length ? notIn.slice(0,24).map(function(c){
+      return '<a class="mini" href="https://www.instagram.com/'+esc((c.username||c.id).replace(/^@/,''))+'/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><b>@'+esc((c.username||c.id).replace(/^@/,''))+'</b> · '+(c.likeCount||0)+'/'+likeWindow()+'</a>';
+    }).join('') : '<div class="empty-state" style="width:100%">'+(state.super.length||state.close.length?'Everyone warm is already in your DMs.':'Fills once the likes scan has run.')+'</div>';
+  }
+
+
+  /* ---------- add lead (manual) ---------- */
+  var ADD_OPENER_CHOICES = OPENER_ORDER.filter(function(k){ return k!=='magnet_delivery' && k!=='inbound'; });
+  (function initAddLeadForm(){
+    var sel=document.getElementById('alOpener'); if(!sel) return;
+    sel.innerHTML = ADD_OPENER_CHOICES.map(function(k){ return '<option value="'+k+'">'+esc(OPENERS[k])+'</option>'; }).join('');
+  })();
+  function updateAddLeadOpenerVisibility(){
+    var dir=document.getElementById('alDirection'), sel=document.getElementById('alOpener');
+    if(!dir||!sel) return;
+    sel.style.display = dir.value==='inbound' ? 'none' : '';
+  }
+  var alToggle=document.getElementById('addLeadToggle'), alPanel=document.getElementById('addLeadPanel');
+  if(alToggle && alPanel){
+    alToggle.addEventListener('click', function(){
+      alPanel.hidden = !alPanel.hidden;
+      if(!alPanel.hidden){ updateAddLeadOpenerVisibility(); document.getElementById('alName').focus(); }
+    });
+  }
+  var alDirectionEl=document.getElementById('alDirection');
+  if(alDirectionEl) alDirectionEl.addEventListener('change', updateAddLeadOpenerVisibility);
+  var alCancelEl=document.getElementById('addLeadCancel');
+  if(alCancelEl) alCancelEl.addEventListener('click', function(){
+    var f=document.getElementById('addLeadForm'); if(f) f.reset();
+    var s=document.getElementById('addLeadStatus'); if(s) s.textContent='';
+    if(alPanel) alPanel.hidden=true;
+  });
+  var addLeadForm=document.getElementById('addLeadForm');
+  if(addLeadForm){
+    addLeadForm.addEventListener('submit', async function(ev){
+      ev.preventDefault();
+      var statusEl=document.getElementById('addLeadStatus');
+      if(!db){ statusEl.textContent="Can't save right now — not connected to live data."; return; }
+      var name=document.getElementById('alName').value.trim();
+      var handle=document.getElementById('alUsername').value.trim().replace(/^@/,'');
+      var direction=document.getElementById('alDirection').value;
+      var opener=direction==='inbound' ? 'inbound' : document.getElementById('alOpener').value;
+      if(!name){ statusEl.textContent='Add a name first.'; return; }
+      var id = handle ? toId(handle) : 'pending-'+toId(name);
+      var submitBtn=addLeadForm.querySelector('button[type=submit]');
+      submitBtn.disabled=true; statusEl.textContent='Saving…';
+      try{
+        var ref=db.collection('dm_threads').doc(id);
+        var snap=await ref.get();
+        if(snap.exists){
+          statusEl.textContent='Already tracked — find them in Leads by stage instead of adding again.';
+          submitBtn.disabled=false; return;
+        }
+        var now=new Date().toISOString();
+        var doc={
+          displayName:name, category:'lead', status:'active', direction:direction,
+          opener:opener, stage: direction==='outbound'?'opened':'replied',
+          lastSender: direction==='outbound'?'jordan':'lead',
+          lastMessageAt:now, lastMessagePreview:'', unread:false, notApplicable:false,
+          msgsJordan: direction==='outbound'?1:0, msgsLead: direction==='inbound'?1:0,
+          sentBy:'setter', manuallyAdded:true, firstSeenAt:now, updatedAt:now,
+          previewSig: name+'|manual add|'+now
+        };
+        if(handle) doc.username=handle;
+        if(direction==='outbound'){ doc.openerSentAt=now; doc.lastJordanAt=now; }
+        else { doc.waitingSince=now; }
+        await ref.set(doc);
+        statusEl.textContent='Added — now showing in Leads by stage.';
+        addLeadForm.reset();
+        setTimeout(function(){ if(alPanel) alPanel.hidden=true; statusEl.textContent=''; }, 1800);
+      }catch(e){ console.error('addLead failed', e); statusEl.textContent='Something went wrong saving that — try again.'; }
+      submitBtn.disabled=false;
+    });
+  }
+
+  /* ---------- messages per day ---------- */
+  var msgRange = 14;
+  try{ var mr=parseInt(localStorage.getItem('hqMsgRange'),10); if(mr===30||mr===14) msgRange=mr; }catch(e){}
+  function dayKey(d){ var y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), dd=('0'+d.getDate()).slice(-2); return y+'-'+m+'-'+dd; }
+  // a dm_daily record narrowed to the selected opener group. Days logged before the scan
+  // wrote byGroup return null (= "no data for this group"), never a made-up zero.
+  function groupRec(r){
+    if(!r) return null;
+    if(dmsOpenerGroup==='all') return r;
+    if(!r.byGroup) return null;
+    return r.byGroup[dmsOpenerGroup] || {};
+  }
+  function niceMax(v){ if(v<=5) return 5; if(v<=10) return 10; if(v<=20) return 20; if(v<=30) return 30; if(v<=50) return 50; return Math.ceil(v/25)*25; }
+  function renderMsgs(){
+    var byDay={}; (state.daily||[]).forEach(function(d){ byDay[d.date||d.id]=d; });
+    var days=[], today=new Date();
+    for(var i=msgRange-1;i>=0;i--){ var dt=new Date(today.getFullYear(),today.getMonth(),today.getDate()-i); var k=dayKey(dt); var r=groupRec(byDay[k]);
+      days.push({key:k, dt:dt, o:r?(r.openersSent||0):0, f:r?(r.followUpsSent||0):0, rep:r?(r.repliesReceived||0):0, has:!!r}); }
+    var TARGET=20;
+    var maxV=niceMax(Math.max(TARGET, Math.max.apply(null, days.map(function(d){return d.o+d.f;}))));
+    var plot=document.getElementById('mplot'), yax=document.getElementById('myaxis'), xax=document.getElementById('mxaxis');
+    var ticks=[0, maxV/2, maxV];
+    yax.innerHTML=ticks.map(function(t){ return '<span style="bottom:'+(t/maxV*100)+'%">'+Math.round(t)+'</span>'; }).join('');
+    var grid=ticks.slice(1).map(function(t){ return '<div class="gridline" style="bottom:'+(t/maxV*100)+'%"></div>'; }).join('');
+    var target='<div class="target" style="bottom:'+(TARGET/maxV*100)+'%"><em>target 20</em></div>';
+    var cols=days.map(function(d,idx){
+      var total=d.o+d.f, ho=d.o/maxV*100, hf=d.f/maxV*100;
+      var segs='';
+      if(d.o) segs+='<div class="seg'+(d.f?'':' top')+'" style="height:calc('+ho+'% - '+(d.f?1:0)+'px);background:var(--series-1)"></div>';
+      if(d.f) segs+='<div class="seg top" style="height:calc('+hf+'% - '+(d.o?1:0)+'px);background:var(--series-2)"></div>';
+      return '<div class="col" tabindex="0" data-i="'+idx+'" aria-label="'+esc(d.dt.toDateString())+': '+d.o+' openers, '+d.f+' follow-ups, '+d.rep+' replies">'+segs+'</div>';
+    }).join('');
+    plot.innerHTML=grid+target+'<div class="cols">'+cols+'</div>';
+    var step = msgRange>14?5:2;
+    xax.innerHTML=days.map(function(d,i){ var show=(i%step===(days.length-1)%step); return '<span>'+(show?d.dt.getDate()+'/'+(d.dt.getMonth()+1):'')+'</span>'; }).join('');
+    // tooltip
+    var wrap=document.getElementById('mchart'), tip=wrap.querySelector('.tip');
+    if(!tip){ tip=document.createElement('div'); tip.className='tip'; tip.hidden=true; wrap.appendChild(tip); }
+    plot.querySelectorAll('.col').forEach(function(c){
+      function show(){
+        var d=days[+c.getAttribute('data-i')];
+        tip.innerHTML='<b>'+d.dt.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})+'</b><br>'+
+          '<i class="sw" style="background:var(--series-1)"></i>'+d.o+' new openers<br>'+
+          '<i class="sw" style="background:var(--series-2)"></i>'+d.f+' follow-ups<br>'+
+          d.rep+' replies received'+(d.has?'':'<br><span style="opacity:.7">no scan data</span>');
+        tip.hidden=false;
+        var cr=c.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
+        var left=cr.left-wr.left+cr.width/2 - tip.offsetWidth/2;
+        left=Math.max(0, Math.min(left, wr.width-tip.offsetWidth));
+        tip.style.left=left+'px'; tip.style.top=Math.max(0, cr.top-wr.top - 8)+'px';
+      }
+      c.addEventListener('mouseenter',show); c.addEventListener('focus',show);
+      c.addEventListener('mouseleave',function(){tip.hidden=true;}); c.addEventListener('blur',function(){tip.hidden=true;});
+    });
+    // note + table
+    var withData=days.filter(function(d){return d.has;});
+    var sumO=withData.reduce(function(a,d){return a+d.o;},0), hit=withData.filter(function(d){return d.o>=TARGET;}).length;
+    document.getElementById('msgNote').textContent = withData.length
+      ? 'Last '+msgRange+' days: '+sumO+' new openers, '+withData.reduce(function(a,d){return a+d.f;},0)+' follow-ups. Hit the 20-opener target on '+hit+' of '+withData.length+' days tracked.'
+      : (dmsOpenerGroup!=='all' ? 'No per-group daily numbers yet. The scan starts splitting them by opener group from 5 Oct.' : 'Fills in as the DM scan runs.');
+    document.getElementById('msgTable').innerHTML = days.slice().reverse().map(function(d){
+      return '<tr><td>'+d.dt.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})+'</td><td class="num">'+(d.has?d.o:'–')+'</td><td class="num">'+(d.has?d.f:'–')+'</td><td class="num">'+(d.has?d.o+d.f:'–')+'</td><td class="num">'+(d.has?d.rep:'–')+'</td></tr>';
+    }).join('');
+  }
+  document.querySelectorAll('#msgPanel .range button').forEach(function(b){
+    b.addEventListener('click', function(){
+      msgRange=parseInt(b.getAttribute('data-range'),10);
+      document.querySelectorAll('#msgPanel .range button').forEach(function(x){ x.setAttribute('aria-pressed', x===b?'true':'false'); });
+      try{ localStorage.setItem('hqMsgRange', String(msgRange)); }catch(e){}
+      renderMsgs();
+    });
+  });
+  document.querySelectorAll('#msgPanel .range button').forEach(function(x){ x.setAttribute('aria-pressed', parseInt(x.getAttribute('data-range'),10)===msgRange?'true':'false'); });
+
+
+  /* ---------- follow-ups ---------- */
+  var H=1, D=24;
+  var CADENCE = {
+    cold:  [48*H, 30*D, 90*D, 365*D],
+    convo: [24*H, 48*H, 7*D, 30*D, 90*D, 365*D]
+  };
+  var STEP_LABEL = function(h){ return h<48?h+'h':(h===48?'48h':(h===7*D?'1 week':(h===30*D?'1 month':(h===90*D?'3 months':'12 months')))); };
+  var STOP_STATUSES = {closed_out:1, won:1, lost:1, cancelled:1, client:1};
+  function firstName(d){ var n=(d.displayName||d.username||'').trim().split(/\s+/)[0]||''; return n.replace(/[^\w'-]/g,'') || 'mate'; }
+  function fallbackDraft(d, seq, step){
+    var n=firstName(d);
+    if(seq==='cold' && step===0) return 'Hey '+n+', not sure if this one got buried bro, you end up giving it a crack?';
+    if(seq==='convo' && step===0) return 'Hey '+n+', just circling back on this bro';
+    if(seq==='convo' && step===1) return n+'?';
+    return 'Hey '+n+' brother, I just saw your name pop up - how is everything going my man?';
+  }
+  function fuState(d){
+    if(d.category!=='lead') return null;
+    if(d.notApplicable) return null;
+    if(isMagnetOnly(d)) return null;                    // magnet-only leads live in their own tab; once they graduate past "replied" they follow up here
+    if(d.followUpStopped || STOP_STATUSES[d.status]) return {kind:'stopped', d:d};
+    if(d.lastSender!=='jordan') return null;           // they're waiting on you (DMs tab)
+    var seq = d.firstReplyAt ? 'convo' : 'cold';
+    var steps = CADENCE[seq];
+    var step = Math.max(0, d.followUpsSinceReply||0);
+    var base = d.lastJordanAt || d.lastMessageAt;
+    if(!base) return null;
+    if(step>=steps.length) return {kind:'finished', d:d, seq:seq};
+    var due = new Date(new Date(base).getTime() + steps[step]*3600000);
+    return {kind:'active', d:d, seq:seq, step:step, total:steps.length, gap:steps[step], due:due,
+            draft: d.draftFollowUp || fallbackDraft(d, seq, step)};
+  }
+  function dueLabel(due){
+    var ms=due-Date.now(), h=Math.abs(ms)/3600000;
+    var txt = h<1?Math.max(1,Math.round(h*60))+'m':(h<48?Math.round(h)+'h':Math.round(h/24)+'d');
+    return ms<0 ? txt+' overdue' : 'due in '+txt;
+  }
+  function fuItem(f, bucket){
+    var d=f.d, name=esc(d.displayName||d.username||d.id);
+    var link = leadLink(d, name);
+    var chipCls = bucket==='overdue'?'crit':(bucket==='today'?'warn':'stage');
+    var stageLabel = (STAGES[stageIdx(d)]||STAGES[0])[1];
+    return '<div class="fu-item">'+
+      '<div class="fu-top"><div class="fu-name">'+link+
+        '<span class="chip stage">'+(f.seq==='cold'?'Cold':'Mid-conversation')+'</span>'+
+        '<span class="chip stage">'+esc(stageLabel)+'</span></div>'+
+        '<span class="chip '+chipCls+'">'+(bucket==='overdue'?'\u26A0 ':'')+esc(dueLabel(f.due))+'</span></div>'+
+      '<div class="fu-last">Follow-up '+(f.step+1)+' of '+f.total+' ('+STEP_LABEL(f.gap)+' after your last message)'+
+        (d.lastMessagePreview?' \u00b7 You: '+esc(d.lastMessagePreview):'')+'</div>'+
+      '<div class="draft"><p id="draft-'+esc(d.id)+'">'+esc(f.draft)+'</p><button class="btn small" data-fu="copy" data-id="'+esc(d.id)+'">Copy</button></div>'+
+      '<div class="fu-actions">'+
+        '<button class="btn primary" data-fu="sent" data-id="'+esc(d.id)+'" data-step="'+f.step+'">Mark sent</button>'+
+        '<button class="btn" data-fu="stop" data-id="'+esc(d.id)+'">Stop following up</button>'+
+      '</div></div>';
+  }
+  function renderFollow(){
+    var now=new Date(), startToday=new Date(now.getFullYear(),now.getMonth(),now.getDate()), endToday=new Date(startToday.getTime()+86400000), weekOut=new Date(endToday.getTime()+7*86400000);
+    var over=[], today=[], soon=[], done=[];
+    state.dms.forEach(function(d){
+      var f=fuState(d); if(!f) return;
+      if(f.kind!=='active'){ done.push(f); return; }
+      if(f.due<startToday) over.push(f);
+      else if(f.due<endToday) today.push(f);
+      else if(f.due<weekOut) soon.push(f);
+    });
+    function byDue(a,b){ return a.due-b.due; }
+    over.sort(byDue); today.sort(byDue); soon.sort(byDue);
+    function fill(id, list, bucket, empty){
+      document.getElementById(id).innerHTML = list.length ? list.map(function(f){return fuItem(f,bucket);}).join('') : '<div class="empty-state">'+empty+'</div>';
+    }
+    var noData = !state.dms.length;
+    state.fu = {over:over, today:today, soon:soon};
+    fill('fuOverdue', over, 'overdue', noData?'Fills once the DM scan has run.':'Nothing overdue.');
+    fill('fuToday', today, 'today', noData?'Fills once the DM scan has run.':'Nothing due today.');
+    fill('fuSoon', soon, 'soon', noData?'Fills once the DM scan has run.':'Nothing due this week.');
+    document.getElementById('fuOverdueCount').textContent=over.length;
+    document.getElementById('fuTodayCount').textContent=today.length;
+    document.getElementById('fuSoonCount').textContent=soon.length;
+    document.getElementById('fuDoneCount').textContent='('+done.length+')';
+    document.getElementById('fuDone').innerHTML = done.length ? done.map(function(f){
+      var d=f.d; return '<div class="disqual-item"><span>'+esc(d.displayName||d.username||d.id)+' \u00b7 '+(f.kind==='finished'?'sequence finished':(d.followUpStopped?'stopped by you':esc(d.status||'')))+'</span>'+
+        (d.followUpStopped?'<button class="restore-btn" data-fu="restart" data-id="'+esc(d.id)+'">Restart</button>':'')+'</div>';
+    }).join('') : '<div class="empty-state">None yet.</div>';
+    var n=over.length+today.length, badge=document.getElementById('fuBadge');
+    badge.hidden = !n; badge.textContent = n;
+    document.getElementById('fuMetaLine').textContent = noData ? 'Waiting for the first DM scan.' :
+      (n ? n+' to send today'+(over.length?' ('+over.length+' overdue)':'') : 'All caught up.')+' \u00b7 '+soon.length+' more this week';
+  }
+
+  /* ---------- magnets (their own follow-up cadence, not counted as outreach) ---------- */
+  function magnetFuState(d){
+    if(d.category!=='lead' || !isMagnetOnly(d)) return null;   // graduated magnet leads move to the main Follow-ups tab
+    if(d.notApplicable) return null;
+    if(d.followUpStopped || STOP_STATUSES[d.status]) return {kind:'stopped', d:d};
+    if(d.lastSender!=='jordan') return null;
+    var seq = d.firstReplyAt ? 'convo' : 'cold';
+    var steps = CADENCE[seq];
+    var step = Math.max(0, d.followUpsSinceReply||0);
+    var base = d.lastJordanAt || d.lastMessageAt;
+    if(!base) return null;
+    if(step>=steps.length) return {kind:'finished', d:d, seq:seq};
+    var due = new Date(new Date(base).getTime() + steps[step]*3600000);
+    return {kind:'active', d:d, seq:seq, step:step, total:steps.length, gap:steps[step], due:due,
+            draft: d.draftFollowUp || fallbackDraft(d, seq, step)};
+  }
+  function renderMagnets(){
+    var now=new Date(), startToday=new Date(now.getFullYear(),now.getMonth(),now.getDate()), endToday=new Date(startToday.getTime()+86400000), weekOut=new Date(endToday.getTime()+7*86400000);
+    var over=[], today=[], soon=[], done=[];
+    state.dms.forEach(function(d){
+      var f=magnetFuState(d); if(!f) return;
+      if(f.kind!=='active'){ done.push(f); return; }
+      if(f.due<startToday) over.push(f);
+      else if(f.due<endToday) today.push(f);
+      else if(f.due<weekOut) soon.push(f);
+    });
+    function byDue(a,b){ return a.due-b.due; }
+    over.sort(byDue); today.sort(byDue); soon.sort(byDue);
+    function fill(id, list, bucket, empty){
+      document.getElementById(id).innerHTML = list.length ? list.map(function(f){return fuItem(f,bucket);}).join('') : '<div class="empty-state">'+empty+'</div>';
+    }
+    var magnetLeads = state.dms.filter(function(d){ return d.category==='lead' && d.opener==='magnet_delivery'; });
+    var noData = !state.dms.length;
+    fill('magOverdue', over, 'overdue', noData?'Fills once the scan has run.':'Nothing overdue.');
+    fill('magToday', today, 'today', noData?'Fills once the scan has run.':'Nothing due today.');
+    fill('magSoon', soon, 'soon', noData?'Fills once the scan has run.':'Nothing due this week.');
+    document.getElementById('magOverdueCount').textContent=over.length;
+    document.getElementById('magTodayCount').textContent=today.length;
+    document.getElementById('magSoonCount').textContent=soon.length;
+    document.getElementById('magDoneCount').textContent='('+done.length+')';
+    document.getElementById('magDone').innerHTML = done.length ? done.map(function(f){
+      var d=f.d; return '<div class="disqual-item"><span>'+esc(d.displayName||d.username||d.id)+' \u00b7 '+(f.kind==='finished'?'sequence finished':(d.followUpStopped?'stopped by you':esc(d.status||'')))+'</span>'+
+        (d.followUpStopped?'<button class="restore-btn" data-fu="restart" data-id="'+esc(d.id)+'">Restart</button>':'')+'</div>';
+    }).join('') : '<div class="empty-state">None yet.</div>';
+    var n=over.length+today.length, badge=document.getElementById('magBadge');
+    badge.hidden = !n; badge.textContent = n;
+    document.getElementById('magMetaLine').textContent = noData ? 'Waiting for the first scan.' :
+      (magnetLeads.length ? (n ? n+' to send today'+(over.length?' ('+over.length+' overdue)':'') : 'All caught up.')+' \u00b7 '+soon.length+' more this week' : 'No magnet deliveries logged yet.');
+    renderMagnetLeadBrowser();
+    renderMagnetsByPost();
+  }
+  // magnet leads grouped by the post that triggered them (scan writes sourcePost = post shortcode)
+  function renderMagnetsByPost(){
+    var body=document.getElementById('magByPostBody'); if(!body) return;
+    var mags = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && d.opener==='magnet_delivery'; });
+    var byPost={}, unknown=0;
+    mags.forEach(function(d){
+      var p=d.sourcePost; if(!p){ unknown++; return; }
+      var g=byPost[p]||(byPost[p]={post:p, n:0, wk:0, replied:0, sales:0});
+      g.n++;
+      if(inLast(leadStartedAt(d),0,7)) g.wk++;
+      if(d.firstReplyAt || stageIdx(d)>=STAGE_INDEX.replied) g.replied++;
+      if(stageIdx(d)>STAGE_INDEX.replied) g.sales++;
+    });
+    var rows=Object.keys(byPost).map(function(k){ return byPost[k]; }).sort(function(a,b){ return b.n-a.n || b.wk-a.wk; });
+    body.innerHTML = rows.length ? rows.map(function(g){
+      return '<tr><td class="op-name"><a href="https://www.instagram.com/p/'+esc(g.post)+'/" target="_blank" rel="noopener">'+esc(g.post)+'</a></td>'+
+        '<td class="num">'+g.n+'</td><td class="num">'+g.wk+'</td><td class="num">'+g.replied+' <span class="f-note">('+pct(g.replied,g.n)+'%)</span></td><td class="num">'+g.sales+'</td></tr>';
+    }).join('') : '<tr><td colspan="5"><div class="empty-state">No post sources logged yet. The scan starts recording which post each magnet lead came from as it reads their thread.</div></td></tr>';
+    var note=document.getElementById('magByPostNote');
+    if(note) note.textContent = unknown ? unknown+' magnet lead'+(unknown===1?' has':'s have')+' no post recorded yet (logged before 5 Oct, or the thread didn\'t link a post).' : '';
+  }
+  var magStageFilter = 'all';
+  function renderMagnetLeadBrowser(){
+    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && isMagnetOnly(d); });
+    var counts = {};
+    STAGES.forEach(function(s){ counts[s[0]] = 0; });
+    leads.forEach(function(d){ var s=STAGES[stageIdx(d)]; if(s) counts[s[0]] = (counts[s[0]]||0)+1; });
+    var pills = ['<button type="button" data-mstage="all" aria-pressed="'+(magStageFilter==='all'?'true':'false')+'">All ('+leads.length+')</button>'].concat(
+      STAGES.map(function(s){ return '<button type="button" data-mstage="'+s[0]+'" aria-pressed="'+(magStageFilter===s[0]?'true':'false')+'">'+esc(s[1])+' ('+(counts[s[0]]||0)+')</button>'; })
+    );
+    document.getElementById('magStagePills').innerHTML = pills.join('');
+    var matching = magStageFilter==='all' ? leads : leads.filter(function(d){ return (STAGES[stageIdx(d)]||[])[0]===magStageFilter; });
+    matching = matching.slice().sort(function(a,b){ return new Date(b.lastMessageAt||0)-new Date(a.lastMessageAt||0); });
+    document.getElementById('magLeadCount').textContent = matching.length+' lead'+(matching.length===1?'':'s');
+    document.getElementById('magLeadBody').innerHTML = matching.length ? matching.slice(0,300).map(function(d){
+      var name = esc(d.displayName||d.username||d.id);
+      var link = leadLink(d, name);
+      var stageLabel = (STAGES[stageIdx(d)]||STAGES[0])[1];
+      return '<tr><td class="op-name">'+link+srcChip(d)+'</td><td><span class="chip stage">'+esc(stageLabel)+'</span></td>'+
+        '<td class="num">'+(relTime(d.lastMessageAt)||'\u2013')+'</td>'+
+        '<td class="num"><button class="icon-btn" data-action="notApplicable" data-id="'+esc(d.id)+'" title="Mark not applicable (removes from all counts)" aria-label="Mark not applicable">\u2715</button></td></tr>';
+    }).join('') : '<tr><td colspan="4"><div class="empty-state">No magnet leads at this stage.</div></td></tr>';
+  }
+  document.getElementById('magStagePills').addEventListener('click', function(ev){
+    var b=ev.target.closest('button[data-mstage]'); if(!b) return;
+    magStageFilter = b.getAttribute('data-mstage');
+    renderMagnetLeadBrowser();
+  });
+  document.addEventListener('click', async function(ev){
+    var b=ev.target.closest('[data-fu]'); if(!b) return;
+    var a=b.getAttribute('data-fu'), id=b.getAttribute('data-id');
+    if(a==='copy'){
+      var el=document.getElementById('draft-'+id), txt=el?el.textContent:'';
+      try{ await navigator.clipboard.writeText(txt); b.textContent='Copied'; }
+      catch(e){ var r=document.createRange(); r.selectNodeContents(el); var sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r); b.textContent='Selected'; }
+      setTimeout(function(){ b.textContent='Copy'; }, 1500);
+      return;
+    }
+    if(!db) return;
+    var ref=db.collection('dm_threads').doc(id), now=new Date().toISOString();
+    try{
+      if(a==='sent'){ b.disabled=true; await ref.update({followUpsSinceReply:(parseInt(b.getAttribute('data-step'),10)||0)+1, lastJordanAt:now, lastSender:'jordan', manualFollowUpAt:now, updatedAt:now}); }
+      else if(a==='stop'){ await ref.update({followUpStopped:true, updatedAt:now}); }
+      else if(a==='restart'){ await ref.update({followUpStopped:false, updatedAt:now}); }
+    }catch(e){ console.error('follow-up update failed', e); b.disabled=false; }
+  });
+
+  /* ---------- dashboard ---------- */
+  function uname(x){ return String(x.username||x.id||'').replace(/^@/,'').toLowerCase(); }
+  function inLast(iso, fromDays, toDays){ var h=hoursSince(iso); return h!=null && h>=fromDays*24 && h<toDays*24; }
+  function scanStatus(meta, label, sched, notRunMsg, freshHours){
+    if(!meta || !meta.lastScanAt) return {name:label, sub:notRunMsg, chip:'crit', chipTxt:'Not run yet'};
+    var h=hoursSince(meta.lastScanAt), fresh=h<(freshHours||30);
+    return {name:label, sub:'Last ran '+(relTime(meta.lastScanAt)||'recently')+' · runs '+sched, chip:fresh?'good':'warn', chipTxt:fresh?'Up to date':'Missed a run'};
+  }
+  // coverage the DM scan reports about itself. Scans before 5 Oct didn't report it, and they only ever
+  // read the newest ~20 Primary threads (no General tab), so treat "not reported" as partial, not complete.
+  function dmCoverage(){
+    var m=state.dmMeta; if(!m || !m.lastScanAt) return null;
+    var c=m.coverage;
+    if(!c) return {legacy:true, complete:false};
+    return c;
+  }
+  function renderCoverage(){
+    var el=document.getElementById('coverageBanner'); if(!el) return;
+    var m=state.dmMeta, c=dmCoverage(), html='', cls='';
+    if(m && m.lastScanAt){
+      var h=hoursSince(m.lastScanAt);
+      if(c && c.legacy){
+        cls='warn';
+        html='<b>DM numbers are partial.</b> The last DM scan ('+esc(relTime(m.lastScanAt)||'recently')+') only checked the newest ~20 threads in your Primary inbox. Your General inbox (recipe-comment leads) and older threads weren\'t read. This clears on the next run of the upgraded scan.';
+      } else if(c && c.complete===false){
+        var parts=[];
+        var st=c.stalled||{};
+        var stalledTabs=[st.primary?'Primary':null, st.general?'General':null].filter(Boolean);
+        if(stalledTabs.length) parts.push('Instagram stopped loading the '+stalledTabs.join(' and ')+' inbox list'+(c.recoveredBy?' (partly recovered by '+esc(c.recoveredBy)+')':''));
+        var unv=c.unverified||[];
+        if(unv.length) parts.push(unv.length+' lead'+(unv.length===1?'':'s')+' couldn\'t be checked: '+unv.slice(0,6).map(esc).join(', ')+(unv.length>6?' and '+(unv.length-6)+' more':''));
+        var rem=c.resumeRemaining||[];
+        if(rem.length) parts.push(rem.length+' thread'+(rem.length===1?' is':'s are')+' queued for the next run');
+        html='<b>Last DM scan was incomplete</b> ('+esc(relTime(m.lastScanAt)||'recently')+'). '+(parts.length?parts.join('; ')+'. ':'')+'Counts below may be missing activity, so treat them as a floor rather than the total.';
+      } else if(h!=null && h>9){
+        cls='warn';
+        html='<b>The DM scan hasn\'t run for '+fmtHours(h)+'.</b> Everything below is as of '+esc(relTime(m.lastScanAt)||'the last run')+'.';
+      }
+    }
+    el.className='cov-banner'+(cls?' '+cls:'');
+    el.innerHTML=html; el.hidden=!html;
+  }
+  function renderHome(){
+    var now=new Date(), hr=now.getHours();
+    document.getElementById('homeGreeting').textContent = (hr<12?'Morning':(hr<17?'Afternoon':'Evening'))+', Jordan';
+    var dmReady = !!(state.dmMeta && state.dmMeta.lastScanAt) || state.dms.length>0;
+    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable; });
+    var outreachLeadsHome = leads.filter(function(d){ return !isMagnetOnly(d); });
+    var waiting = state.waiting||[], fu = state.fu||{over:[],today:[],soon:[]};
+    var fuDue = fu.over.length+fu.today.length;
+
+    // tile: reply rate (openers sent in the last 30 days, vs the 30 before)
+    var outbound = outreachLeadsHome.filter(function(d){ return d.direction==='outbound' && d.opener!=='magnet_delivery'; });
+    var cur = outbound.filter(function(d){ return inLast(d.openerSentAt,0,30); });
+    var prev = outbound.filter(function(d){ return inLast(d.openerSentAt,30,60); });
+    var basis = cur.length ? cur : outbound, allTime = !cur.length;
+    var rep = basis.filter(function(d){ return !!d.firstReplyAt; }).length;
+    var rr = pct(rep, basis.length);
+    document.getElementById('hkReply').textContent = rr==null?'–':rr+'%';
+    var rn = basis.length ? rep+' of '+basis.length+' openers replied'+(allTime?' (all time)':' · last 30 days') : (dmReady?'No openers logged yet':'Waiting for the DM scan');
+    if(!allTime && prev.length>=5 && cur.length>=5){
+      var pr = pct(prev.filter(function(d){return !!d.firstReplyAt;}).length, prev.length), dlt = rr-pr;
+      rn += ' · '+(dlt>=0?'up ':'down ')+Math.abs(dlt)+' pts';
+    }
+    var hkBelowTarget = rr!=null && basis.length>=REPLY_TARGET_MIN_SAMPLE && rr<REPLY_TARGET_PCT;
+    if(hkBelowTarget) rn += ' · target '+REPLY_TARGET_PCT+'%';
+    document.getElementById('hkReplyNote').textContent = rn;
+    document.getElementById('hkReplyTile').classList.toggle('alert', hkBelowTarget);
+
+    // tile: follow-ups
+    document.getElementById('hkFu').textContent = dmReady ? fuDue : '–';
+    document.getElementById('hkFuNote').textContent = dmReady ? (fu.over.length?fu.over.length+' overdue · ':'')+fu.soon.length+' more this week' : 'Waiting for the DM scan';
+    document.getElementById('hkFuTile').classList.toggle('alert', fu.over.length>0);
+
+    // tile: waiting on you
+    var oldest = waiting.length ? hoursSince(waiting[0].waitingSince||waiting[0].lastMessageAt) : null;
+    document.getElementById('hkWait').textContent = dmReady ? waiting.length : '–';
+    document.getElementById('hkWaitNote').textContent = dmReady ? (waiting.length?'oldest waiting '+fmtHours(oldest):'Inbox clear') : 'Waiting for the DM scan';
+    document.getElementById('hkWaitTile').classList.toggle('alert', !!(oldest && oldest>24));
+
+    // warm lead tracker
+    var warm = state.super.concat(state.close);
+    var byUser = {}; state.dms.forEach(function(d){ byUser[uname(d)] = d; });
+    var messaged = warm.filter(function(c){ return byUser[uname(c)]; });
+    var replied = messaged.filter(function(c){ var d=byUser[uname(c)]; return d.firstReplyAt || d.direction==='inbound' || (d.msgsLead||0)>0; });
+    var booked = messaged.filter(function(c){ return stageIdx(byUser[uname(c)]) >= STAGE_INDEX.booked; });
+    var notMsg = warm.filter(function(c){ return !byUser[uname(c)]; }).sort(function(a,b){ return (b.likeCount||0)-(a.likeCount||0); });
+    var newWeek = warm.filter(function(c){ return inLast(c.firstSeenAt||c.addedAt,0,7); }).length;
+    document.getElementById('hkWarm').textContent = warm.length;
+    document.getElementById('hkWarmNote').textContent = state.close.length+' in Close Friends'+(dmReady?' · '+notMsg.length+' not messaged':'');
+
+    var fstages = [['Warm leads',warm.length],['Messaged',messaged.length],['Replied',replied.length],['Call booked',booked.length]];
+    var fmax = warm.length||1;
+    document.getElementById('homeFunnel').innerHTML = warm.length ? fstages.map(function(s,i){
+      var w=Math.max(0.5,(s[1]/fmax)*100), sub = i>0 && fstages[i-1][1] ? ' · '+pct(s[1],fstages[i-1][1])+'%' : '';
+      return '<div class="f-row" title="'+esc(s[0])+': '+s[1]+'"><div class="f-label">'+esc(s[0])+'</div><div class="f-track"><div class="f-bar" style="width:'+w+'%"></div></div><div class="f-val">'+s[1]+sub+'</div></div>';
+    }).join('') : '<div class="empty-state">Fills once the likes scan has run.</div>';
+    var fn=[];
+    if(newWeek) fn.push(newWeek+' new warm lead'+(newWeek===1?'':'s')+' this week.');
+    if(!dmReady) fn.push('Messaged, Replied and Booked fill in once the DM scan runs.');
+    else if(notMsg.length) fn.push(notMsg.length+' warm lead'+(notMsg.length===1?' has':'s have')+" never been messaged. They're your easiest openers.");
+    document.getElementById('homeFunnelNote').textContent = fn.join(' ');
+
+    // do this next
+    var acts=[];
+    waiting.slice(0,3).forEach(function(d){
+      var h=hoursSince(d.waitingSince||d.lastMessageAt), name=esc(d.displayName||d.username||d.id);
+      var href = d.threadId ? 'https://www.instagram.com/direct/t/'+esc(d.threadId)+'/' : 'https://www.instagram.com/direct/inbox/';
+      acts.push('<a class="act" href="'+href+'" target="_blank" rel="noopener"><span class="ico reply" aria-hidden="true">↩</span><div class="act-main"><div class="act-title">Reply to '+name+'</div><div class="act-sub">'+(d.lastMessagePreview?esc(d.lastMessagePreview):'They messaged you')+'</div></div><span class="chip '+(h>24?'crit':(h>8?'warn':'good'))+(isApproxTime(d)?' approx':'')+'">'+(isApproxTime(d)?'≈':'')+fmtHours(h)+'</span></a>');
+    });
+    fu.over.concat(fu.today).slice(0,3).forEach(function(f){
+      var d=f.d, overdue=f.due<now;
+      acts.push('<button type="button" class="act" data-go="follow"><span class="ico fu" aria-hidden="true">↻</span><div class="act-main"><div class="act-title">Follow up '+esc(d.displayName||d.username||d.id)+'</div><div class="act-sub">'+(f.seq==='cold'?'Cold opener':'Mid-conversation')+' · follow-up '+(f.step+1)+' of '+f.total+'</div></div><span class="chip '+(overdue?'crit':'warn')+'">'+esc(dueLabel(f.due))+'</span></button>');
+    });
+    var room = Math.max(2, 6-acts.length);
+    (dmReady?notMsg:warm).slice(0,room).forEach(function(c){
+      var u=(c.username||c.id).replace(/^@/,'');
+      acts.push('<a class="act" href="https://www.instagram.com/'+esc(u)+'/" target="_blank" rel="noopener"><span class="ico warm" aria-hidden="true">★</span><div class="act-main"><div class="act-title">Open a convo with @'+esc(u)+'</div><div class="act-sub">Liked '+(c.likeCount||0)+' of your last '+likeWindow()+' posts'+(c.tier===TIER_CLOSE?' · Close Friends':'')+'</div></div></a>');
+    });
+    document.getElementById('homeActions').innerHTML = acts.length ? acts.join('') : '<div class="empty-state">Nothing waiting. Go post a story.</div>';
+
+    // sub line
+    var bits=[];
+    if(dmReady){
+      bits.push(waiting.length?waiting.length+' repl'+(waiting.length===1?'y':'ies')+' waiting':'no replies waiting');
+      bits.push(fuDue?fuDue+' follow-up'+(fuDue===1?'':'s')+' due':'no follow-ups due');
+    }
+    bits.push(warm.length+' warm leads');
+    document.getElementById('homeSub').textContent = now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'})+' · '+bits.join(' · ');
+
+    // outreach pace (last 7 complete days)
+    var byDay={}; (state.daily||[]).forEach(function(d){ byDay[d.date||d.id]=d; });
+    var days=[]; for(var i=7;i>=1;i--){ var dt=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i), k=dayKey(dt), r=byDay[k]; days.push({dt:dt, o:r?(r.openersSent||0):0, has:!!r}); }
+    var TARGET=20, maxV=niceMax(Math.max(TARGET, Math.max.apply(null, days.map(function(d){return d.o;}))));
+    document.getElementById('paceY').innerHTML=[0,maxV/2,maxV].map(function(t){ return '<span style="bottom:'+(t/maxV*100)+'%">'+Math.round(t)+'</span>'; }).join('');
+    document.getElementById('pacePlot').innerHTML =
+      [maxV/2,maxV].map(function(t){ return '<div class="gridline" style="bottom:'+(t/maxV*100)+'%"></div>'; }).join('')+
+      '<div class="target" style="bottom:'+(TARGET/maxV*100)+'%"></div>'+
+      '<div class="cols">'+days.map(function(d){
+        var h=d.o/maxV*100, lbl=d.dt.toLocaleDateString('en-AU',{weekday:'long'})+': '+(d.has?d.o+' new openers':'no data');
+        return '<div class="col" role="img" aria-label="'+esc(lbl)+'" title="'+esc(lbl)+'">'+(d.o?'<div class="seg top" style="height:'+h+'%;background:var(--series-1);position:relative"><span class="pace-val">'+d.o+'</span></div>':'')+'</div>';
+      }).join('')+'</div>';
+    document.getElementById('paceX').innerHTML = days.map(function(d){ return '<span>'+d.dt.toLocaleDateString('en-AU',{weekday:'short'})+'</span>'; }).join('');
+    var tracked=days.filter(function(d){return d.has;}), tot=tracked.reduce(function(a,d){return a+d.o;},0), hit=tracked.filter(function(d){return d.o>=TARGET;}).length;
+    var yd=days[6];
+    document.getElementById('homePaceNote').textContent = tracked.length
+      ? 'Yesterday: '+(yd.has?yd.o:'–')+' of 20. Last 7 days: '+tot+' openers, averaging '+Math.round(tot/tracked.length)+' a day. Target hit on '+hit+' of '+tracked.length+' days.'
+      : 'Fills in once the DM scan runs. Each morning adds yesterday.';
+
+    // system status
+    var rows=[
+      scanStatus(state.scanMeta,'Likes scan','daily ~3:15am','Fills Warm Leads each morning.', 30),
+      scanStatus(state.dmMeta,'DM scan','5× a day (6am · 10am · 2pm · 6pm · 10pm)','Runs on the Mac Mini\'s Chrome.', 9)
+    ];
+    if(state.scanMeta && state.scanMeta.uniqueLikers) rows[0].sub += ' · '+state.scanMeta.uniqueLikers+' likers across '+likeWindow()+' stored post'+(likeWindow()===1?'':'s');
+    if(state.dmMeta && state.dmMeta.threadsRead!=null) rows[1].sub += ' · '+state.dmMeta.threadsRead+' threads read';
+    var cov=dmCoverage();
+    if(cov && cov.complete===false && rows[1].chip==='good'){
+      rows[1].chip = cov.legacy ? 'warn' : 'crit';
+      rows[1].chipTxt = cov.legacy ? 'Partial' : 'Incomplete';
+    }
+    if(cov && !cov.legacy){
+      var bits2=[];
+      if(cov.primaryRowsSeen!=null) bits2.push(cov.primaryRowsSeen+' Primary');
+      if(cov.generalRowsSeen!=null) bits2.push(cov.generalRowsSeen+' General');
+      if(bits2.length) rows[1].sub += ' · rows checked: '+bits2.join(', ');
+      var rq=cov.requests;
+      if(rq && rq.count){
+        rows.push({name:'Message requests', sub:rq.count+' unopened'+(rq.items&&rq.items.length?': '+rq.items.slice(0,3).map(function(x){return x.name;}).join(', ')+(rq.items.length>3?'…':''):'')+'. The scan never opens these, so check them yourself.', chip:'warn', chipTxt:rq.count+' waiting'});
+      }
+    }
+    var am=state.adsMeta;
+    rows.push(am && am.lastSyncAt
+      ? {name:'Ads sync', sub:'Last ran '+(relTime(am.lastSyncAt)||'recently')+' · daily ~6:30am'+(am.accountName?' · '+am.accountName:''), chip:(am.ok===false||hoursSince(am.lastSyncAt)>30)?'warn':'good', chipTxt:(am.ok===false?'Problem':(hoursSince(am.lastSyncAt)>30?'Missed a run':'Up to date'))}
+      : {name:'Ads sync', sub:'Switches on once the Meta Ads connector is added. See the Ads tab.', chip:'stage', chipTxt:'Not connected'});
+    document.getElementById('homeStatus').innerHTML = rows.map(function(r){
+      return '<div class="st-row"><div><div class="st-name">'+esc(r.name)+'</div><div class="st-sub">'+esc(r.sub)+'</div></div><span class="chip '+r.chip+'">'+esc(r.chipTxt)+'</span></div>';
+    }).join('');
+  }
+  document.addEventListener('click', function(ev){
+    var g=ev.target.closest('[data-go]'); if(!g) return;
+    setView(g.getAttribute('data-go')); window.scrollTo(0,0);
+  });
+
+  /* ---------- setter tracker ---------- */
+  function sentByOf(d){ return d.sentBy==='founder' ? 'founder' : 'setter'; }
+  var dmsSubView = 'pipeline';
+  try{ var dsv=localStorage.getItem('hqDmsSubView'); if(dsv==='pipeline'||dsv==='setter') dmsSubView=dsv; }catch(e){}
+  function setDmsSubView(v){
+    dmsSubView = v;
+    document.getElementById('dmsPipelineBlock').hidden = v!=='pipeline';
+    document.getElementById('dmsSetterBlock').hidden = v!=='setter';
+    document.querySelectorAll('#dmsSubNav button').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-sub')===v?'true':'false'); });
+    try{ localStorage.setItem('hqDmsSubView', v); }catch(e){}
+  }
+  document.getElementById('dmsSubNav').addEventListener('click', function(ev){
+    var b=ev.target.closest('button[data-sub]'); if(!b) return;
+    setDmsSubView(b.getAttribute('data-sub'));
+  });
+
+  var dmsOpenerGroup = 'all';
+  try{ var dog=localStorage.getItem('hqDmsOpenerGroup'); if(dog==='all'||dog==='traditional'||dog==='recipe') dmsOpenerGroup=dog; }catch(e){}
+  function setDmsOpenerGroup(v){
+    dmsOpenerGroup = v;
+    document.querySelectorAll('#dmsOpenerFilter button').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-ogroup')===v?'true':'false'); });
+    try{ localStorage.setItem('hqDmsOpenerGroup', v); }catch(e){}
+    renderAll();
+  }
+  document.getElementById('dmsOpenerFilter').addEventListener('click', function(ev){
+    var b=ev.target.closest('button[data-ogroup]'); if(!b) return;
+    setDmsOpenerGroup(b.getAttribute('data-ogroup'));
+  });
+
+  var soRange = '24h';
+  try{ var sr0=localStorage.getItem('hqSoRange'); if(sr0==='24h'||sr0==='7d'||sr0==='1m'||sr0==='all'||sr0==='custom') soRange=sr0; }catch(e){}
+  var soFrom = '', soTo = '';
+  try{ var sf0=localStorage.getItem('hqSoFrom'), st0=localStorage.getItem('hqSoTo'); if(sf0) soFrom=sf0; if(st0) soTo=st0; }catch(e){}
+  // IMPORTANT: firstSeenAt is when OUR SCAN first discovered/read this thread in Supabase,
+  // not when the opener was actually sent. For catch-up-scanned threads it's "now" even
+  // though the real activity may be weeks old. Never use it as a recency signal when a
+  // real message timestamp (lastMessageAt) is available - only fall back to it as a last resort.
+  function leadStartedAt(d){ return d.openerSentAt || d.lastMessageAt || d.firstSeenAt; }
+  function computeSoWindow(){
+    var now=new Date();
+    if(soRange==='custom'){
+      var from = soFrom ? new Date(soFrom+'T00:00:00') : null;
+      var to = soTo ? new Date(soTo+'T23:59:59.999') : null;
+      return {from:from, to:to};
+    }
+    if(soRange==='24h') return {from:new Date(now.getTime()-24*3600000), to:null};
+    if(soRange==='7d') return {from:new Date(now.getTime()-7*86400000), to:null};
+    if(soRange==='1m') return {from:new Date(now.getTime()-30*86400000), to:null};
+    return {from:null, to:null};
+  }
+  function inSoWindow(iso){
+    if(!iso) return false;
+    var t=new Date(iso).getTime(); if(isNaN(t)) return false;
+    var w=computeSoWindow();
+    if(w.from && t<w.from.getTime()) return false;
+    if(w.to && t>w.to.getTime()) return false;
+    return true;
+  }
+  function soRangeLabel(){
+    if(soRange==='24h') return 'last 24 hours';
+    if(soRange==='7d') return 'last 7 days';
+    if(soRange==='1m') return 'last 30 days';
+    if(soRange==='custom'){
+      var w=computeSoWindow();
+      var f=w.from?w.from.toLocaleDateString('en-AU',{day:'numeric',month:'short'}):'the start';
+      var t=w.to?w.to.toLocaleDateString('en-AU',{day:'numeric',month:'short'}):'now';
+      return f+' \u2013 '+t;
+    }
+    return 'all time';
+  }
+  function setSoRange(v){
+    soRange = v;
+    document.querySelectorAll('#soRangePills button').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-sorange')===v?'true':'false'); });
+    try{ localStorage.setItem('hqSoRange', v); }catch(e){}
+    renderSetterOutcomes();
+  }
+  var soRangePillsEl=document.getElementById('soRangePills');
+  if(soRangePillsEl) soRangePillsEl.addEventListener('click', function(ev){
+    var b=ev.target.closest('button[data-sorange]'); if(!b) return;
+    setSoRange(b.getAttribute('data-sorange'));
+  });
+  var soFromInput=document.getElementById('soFrom'), soToInput=document.getElementById('soTo');
+  if(soFromInput) soFromInput.value=soFrom;
+  if(soToInput) soToInput.value=soTo;
+  function handleSoDateChange(){
+    soFrom=soFromInput.value; soTo=soToInput.value;
+    try{ localStorage.setItem('hqSoFrom', soFrom); localStorage.setItem('hqSoTo', soTo); }catch(e){}
+    if(soFrom || soTo){
+      soRange='custom';
+      document.querySelectorAll('#soRangePills button').forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+      try{ localStorage.setItem('hqSoRange','custom'); }catch(e){}
+    }
+    renderSetterOutcomes();
+  }
+  if(soFromInput) soFromInput.addEventListener('change', handleSoDateChange);
+  if(soToInput) soToInput.addEventListener('change', handleSoDateChange);
+  document.querySelectorAll('#soRangePills button').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-sorange')===soRange?'true':'false'); });
+
+  function renderSetterOutcomes(){
+    var noData = !state.dmLoaded;
+    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && !isMagnetOnly(d) && matchesOpenerGroup(d); });
+    if(soRange!=='all'){ leads = leads.filter(function(d){ return inSoWindow(leadStartedAt(d)); }); }
+    var outbound = leads.filter(function(d){ return d.direction==='outbound' && d.opener!=='magnet_delivery'; });
+    document.getElementById('soOpeners').textContent = noData ? '–' : outbound.length;
+    document.getElementById('soOpenersNote').textContent = noData ? ' ' : soRangeLabel();
+
+    var replied = outbound.filter(function(d){ return !!d.firstReplyAt; });
+    var rr = pct(replied.length, outbound.length);
+    document.getElementById('soReply').textContent = rr==null?'–':rr+'%';
+    var belowTarget = rr!=null && outbound.length>=REPLY_TARGET_MIN_SAMPLE && rr<REPLY_TARGET_PCT;
+    var replyKpiEl = document.getElementById('soReply').closest('.kpi');
+    if(replyKpiEl) replyKpiEl.classList.toggle('alert', belowTarget);
+    document.getElementById('soReplyNote').textContent = outbound.length
+      ? replied.length+' of '+outbound.length+' openers · target '+REPLY_TARGET_PCT+'%'+(belowTarget ? ' — '+(REPLY_TARGET_PCT-rr)+'pt under' : (outbound.length<REPLY_TARGET_MIN_SAMPLE ? ' · more data needed to compare' : ''))
+      : ' ';
+
+    var booked = leads.filter(function(d){ return stageIdx(d) >= STAGE_INDEX.booked; });
+    var bookedRate = outbound.length ? Math.round((booked.length/outbound.length)*100) : null;
+    document.getElementById('soBookedRate').textContent = bookedRate==null?'–':bookedRate;
+    document.getElementById('soBookedRateNote').textContent = outbound.length ? 'per 100 opens' : ' ';
+    document.getElementById('soBooked').textContent = noData ? '–' : booked.length;
+    document.getElementById('soBookedNote').textContent = leads.length ? 'from '+leads.length+' conversations' : ' ';
+
+    var counts = STAGES.map(function(s,i){ return leads.filter(function(d){ return stageIdx(d)>=i; }).length; });
+    var maxC = counts[0]||1, biggest=-1, biggestDrop=0;
+    for(var i=1;i<counts.length;i++){ if(counts[i-1]>=3){ var drop=(counts[i-1]-counts[i])/counts[i-1]; if(drop>biggestDrop){ biggestDrop=drop; biggest=i; } } }
+    document.getElementById('setterFunnel').innerHTML = leads.length ? STAGES.map(function(s,i){
+      var c=counts[i], w=Math.max(0.5,(c/maxC)*100);
+      var dropTxt = i>0 && counts[i-1] ? ' · '+pct(counts[i],counts[i-1])+'%' : '';
+      return '<button type="button" class="f-row'+(i===biggest?' biggest':'')+'" data-stage="'+s[0]+'" style="all:unset;display:grid;cursor:pointer;width:100%;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:13px;">'+
+        '<div class="f-label">'+esc(s[1])+'</div><div class="f-track"><div class="f-bar" style="width:'+w+'%"></div></div>'+
+        '<div class="f-val">'+c+dropTxt+(i===biggest?' ▼':'')+'</div></button>';
+    }).join('') : '<div class="empty-state">No conversations logged yet.</div>';
+    document.getElementById('setterFunnelNote').textContent = biggest>0 ? 'Biggest drop: '+STAGES[biggest-1][1]+' → '+STAGES[biggest][1]+' ('+Math.round(biggestDrop*100)+'% lost). Click any stage to see who\'s in it.' : 'Click any stage to see who\'s in it.';
+  }
+  document.getElementById('setterFunnel').addEventListener('click', function(ev){
+    var b=ev.target.closest('button[data-stage]'); if(!b) return;
+    leadStageFilter = b.getAttribute('data-stage');
+    renderLeadBrowser();
+    document.getElementById('leadBrowserBody').closest('.panel').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  /* ---------- lead browser ---------- */
+  var leadStageFilter = 'all';
+  function renderLeadBrowser(){
+    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && !isMagnetOnly(d) && matchesOpenerGroup(d); });
+    var counts = {};
+    STAGES.forEach(function(s){ counts[s[0]] = 0; });
+    leads.forEach(function(d){ var s=STAGES[stageIdx(d)]; if(s) counts[s[0]] = (counts[s[0]]||0)+1; });
+    var pills = ['<button type="button" data-stage="all" aria-pressed="'+(leadStageFilter==='all'?'true':'false')+'">All ('+leads.length+')</button>'].concat(
+      STAGES.map(function(s){ return '<button type="button" data-stage="'+s[0]+'" aria-pressed="'+(leadStageFilter===s[0]?'true':'false')+'">'+esc(s[1])+' ('+(counts[s[0]]||0)+')</button>'; })
+    );
+    document.getElementById('leadStagePills').innerHTML = pills.join('');
+    var matching = leadStageFilter==='all' ? leads : leads.filter(function(d){ return (STAGES[stageIdx(d)]||[])[0]===leadStageFilter; });
+    matching = matching.slice().sort(function(a,b){ return new Date(b.lastMessageAt||0)-new Date(a.lastMessageAt||0); });
+    document.getElementById('leadBrowserCount').textContent = matching.length+' lead'+(matching.length===1?'':'s');
+    document.getElementById('leadBrowserBody').innerHTML = matching.length ? matching.slice(0,300).map(function(d){
+      var name = esc(d.displayName||d.username||d.id);
+      var link = leadLink(d, name);
+      var stageLabel = (STAGES[stageIdx(d)]||STAGES[0])[1];
+      return '<tr><td class="op-name">'+link+srcChip(d)+'</td><td><span class="chip stage">'+esc(stageLabel)+'</span></td>'+
+        '<td>'+esc(OPENERS[d.opener]||'–')+'</td><td>'+directionLabel(d)+'</td>'+
+        '<td class="num">'+(relTime(d.lastMessageAt)||'–')+'</td>'+
+        '<td class="num"><button class="icon-btn" data-action="notApplicable" data-id="'+esc(d.id)+'" title="Mark not applicable (removes from all counts)" aria-label="Mark not applicable">✕</button></td></tr>';
+    }).join('') : '<tr><td colspan="6"><div class="empty-state">No leads at this stage.</div></td></tr>';
+
+    var na = state.dms.filter(function(d){ return d.category==='lead' && d.notApplicable; });
+    var naCountEl=document.getElementById('naCount'); if(naCountEl) naCountEl.textContent='('+na.length+')';
+    var naListEl=document.getElementById('naList');
+    if(naListEl){
+      naListEl.innerHTML = na.length ? na.map(function(d){
+        return '<div class="disqual-item"><span>'+esc(d.displayName||d.username||d.id)+'</span><button class="restore-btn" data-action="restoreLead" data-id="'+esc(d.id)+'">Restore</button></div>';
+      }).join('') : '<div class="empty-state">Nobody marked not applicable.</div>';
+    }
+  }
+  document.getElementById('leadStagePills').addEventListener('click', function(ev){
+    var b=ev.target.closest('button[data-stage]'); if(!b) return;
+    leadStageFilter = b.getAttribute('data-stage');
+    renderLeadBrowser();
+  });
+  document.addEventListener('click', async function(ev){
+    var b=ev.target.closest('[data-action="notApplicable"],[data-action="restoreLead"]'); if(!b) return;
+    if(!db) return;
+    var id=b.getAttribute('data-id'); if(!id) return;
+    var mark = b.getAttribute('data-action')==='notApplicable';
+    var now=new Date().toISOString();
+    try{ await db.collection('dm_threads').doc(id).update({notApplicable:mark, notApplicableAt:now, updatedAt:now}); }
+    catch(e){ console.error('notApplicable update failed', e); }
+  });
+  setDmsSubView(dmsSubView);
+
+  var TREND_SERIES = [
+    {key:'openersSent', label:'Outreaches', color:'var(--trend-1)'},
+    {key:'repliesReceived', label:'Replies', color:'var(--trend-2)'},
+    {key:'newConversations', label:'New conversations', color:'var(--trend-3)'},
+    {key:'callsBooked', label:'Calls booked', color:'var(--trend-4)'}
+  ];
+  var today0 = new Date();
+  var trendFrom = dayKey(new Date(today0.getFullYear(),today0.getMonth(),today0.getDate()-13));
+  var trendTo = dayKey(today0);
+  try{
+    var sf=localStorage.getItem('hqTrendFrom'), st=localStorage.getItem('hqTrendTo');
+    if(sf && /^\d{4}-\d{2}-\d{2}$/.test(sf)) trendFrom=sf;
+    if(st && /^\d{4}-\d{2}-\d{2}$/.test(st)) trendTo=st;
+  }catch(e){}
+  var trendVisible = {openersSent:true, repliesReceived:true, newConversations:true, callsBooked:true};
+  try{ var tv0=JSON.parse(localStorage.getItem('hqTrendVisible')||'null'); if(tv0) trendVisible=tv0; }catch(e){}
+
+  function dayMetric(rec, who, key){
+    if(!rec) return 0;
+    if(who==='all') return rec[key]||0;
+    var sub = rec[who];
+    return sub && typeof sub[key]==='number' ? sub[key] : 0;
+  }
+  function renderTrendChart(){
+    var toggles=document.getElementById('trendToggles');
+    toggles.innerHTML = TREND_SERIES.map(function(s){
+      var off = !trendVisible[s.key];
+      return '<label class="trend-toggle'+(off?' off':'')+'"><input type="checkbox" data-series="'+s.key+'" '+(off?'':'checked')+'><i class="sw" style="background:'+s.color+'"></i>'+esc(s.label)+'</label>';
+    }).join('');
+
+    var byDay={}; (state.daily||[]).forEach(function(d){ byDay[d.date||d.id]=d; });
+    var fromParts=trendFrom.split('-').map(Number), toParts=trendTo.split('-').map(Number);
+    var fromDt=new Date(fromParts[0],fromParts[1]-1,fromParts[2]), toDt=new Date(toParts[0],toParts[1]-1,toParts[2]);
+    if(toDt<fromDt){ var tmp=fromDt; fromDt=toDt; toDt=tmp; }
+    var spanDays = Math.min(370, Math.round((toDt-fromDt)/86400000)+1);
+    var days=[];
+    for(var i=0;i<spanDays;i++){
+      var dt=new Date(fromDt.getFullYear(),fromDt.getMonth(),fromDt.getDate()+i), k=dayKey(dt), r=groupRec(byDay[k]);
+      var row={key:k, dt:dt, has:!!r};
+      TREND_SERIES.forEach(function(s){ row[s.key]= r ? (r[s.key]||0) : 0; });
+      days.push(row);
+    }
+    var visSeries = TREND_SERIES.filter(function(s){ return trendVisible[s.key]; });
+    var allVals=[0]; days.forEach(function(d){ visSeries.forEach(function(s){ allVals.push(d[s.key]); }); });
+    var maxV = niceMax(Math.max.apply(null, allVals));
+    var W=600,H=220,padL=8,padR=8,padT=10,padB=24;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    function xPos(i){ return padL + (days.length>1 ? (i/(days.length-1))*plotW : plotW/2); }
+    function yPos(v){ return padT + plotH - (v/maxV)*plotH; }
+
+    var gridN=4, grid='';
+    for(var g=0; g<=gridN; g++){
+      var gy = padT + plotH - (g/gridN)*plotH;
+      grid += '<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="var(--border)" stroke-width="1" opacity="0.6"/>';
+      grid += '<text x="0" y="'+(gy+3)+'" font-size="9" fill="var(--muted)">'+Math.round((g/gridN)*maxV)+'</text>';
+    }
+    // in "all" mode a day with no dm_daily doc genuinely had no activity (0); with a group
+    // selected, days logged before the per-group split have no data, so the line breaks there
+    var groupMode = dmsOpenerGroup!=='all';
+    var lines = visSeries.map(function(s){
+      var runs=[], cur=[];
+      days.forEach(function(d,i){
+        if(groupMode && !d.has){ if(cur.length) runs.push(cur); cur=[]; return; }
+        cur.push(xPos(i)+','+yPos(d[s.key]));
+      });
+      if(cur.length) runs.push(cur);
+      var polys = runs.map(function(pts){ return '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+s.color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'; }).join('');
+      var dots = days.map(function(d,i){ return (groupMode && !d.has) ? '' : '<circle cx="'+xPos(i)+'" cy="'+yPos(d[s.key])+'" r="2.5" fill="'+s.color+'"></circle>'; }).join('');
+      return polys+dots;
+    }).join('');
+    var step = spanDays>60?14:(spanDays>30?7:(spanDays>14?3:2));
+    var xlabels = days.map(function(d,i){
+      if(i%step!==0 && i!==days.length-1) return '';
+      return '<text x="'+xPos(i)+'" y="'+(H-4)+'" font-size="9" fill="var(--muted)" text-anchor="middle">'+d.dt.getDate()+'/'+(d.dt.getMonth()+1)+'</text>';
+    }).join('');
+    document.getElementById('trendSvg').innerHTML = grid+lines+xlabels;
+
+    // period-over-period comparison
+    var half = Math.floor(days.length/2);
+    var noteParts=[];
+    if(days.length>=4){
+      visSeries.forEach(function(s){
+        var recent = days.slice(half).reduce(function(a,d){return a+d[s.key];},0);
+        var prior = days.slice(0,half).reduce(function(a,d){return a+d[s.key];},0);
+        if(prior>0){
+          var delta = Math.round(((recent-prior)/prior)*100);
+          noteParts.push(esc(s.label)+' '+(delta>=0?'up ':'down ')+Math.abs(delta)+'%');
+        }
+      });
+    }
+    document.getElementById('trendNote').textContent = noteParts.length ? 'vs. the previous period of the same length: '+noteParts.join(', ')+'.' : 'Not enough history yet to compare periods.';
+
+    document.getElementById('trendTable').innerHTML = days.slice().reverse().map(function(d){
+      return '<tr><td>'+d.dt.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})+'</td>'+
+        TREND_SERIES.map(function(s){ return '<td class="num">'+(d.has?d[s.key]:'–')+'</td>'; }).join('')+'</tr>';
+    }).join('');
+
+    // crosshair tooltip
+    var wrap=document.getElementById('trendChartWrap'), svg=document.getElementById('trendSvg');
+    var tip=wrap.querySelector('.tc-tip');
+    if(!tip){ tip=document.createElement('div'); tip.className='tc-tip'; tip.hidden=true; wrap.appendChild(tip); }
+    svg.onmousemove = function(ev){
+      var rect=svg.getBoundingClientRect();
+      var relX = (ev.clientX-rect.left)/rect.width;
+      var i = Math.round(relX * (days.length-1));
+      i = Math.max(0, Math.min(days.length-1, i));
+      var d=days[i];
+      if(!d){ tip.hidden=true; return; }
+      tip.innerHTML = '<b>'+d.dt.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})+'</b><br>'+
+        visSeries.map(function(s){ return '<i class="sw" style="background:'+s.color+'"></i>'+esc(s.label)+': '+((groupMode && !d.has)?'no group data':d[s.key]); }).join('<br>');
+      tip.hidden=false;
+      var left = (rect.width*i/(days.length-1||1)) - tip.offsetWidth/2;
+      left = Math.max(0, Math.min(left, rect.width-tip.offsetWidth));
+      tip.style.left=left+'px'; tip.style.top='0px';
+    };
+    svg.onmouseleave = function(){ tip.hidden=true; };
+  }
+  document.getElementById('trendToggles').addEventListener('change', function(ev){
+    var cb=ev.target.closest('input[data-series]'); if(!cb) return;
+    trendVisible[cb.getAttribute('data-series')] = cb.checked;
+    try{ localStorage.setItem('hqTrendVisible', JSON.stringify(trendVisible)); }catch(e){}
+    renderTrendChart();
+  });
+  var trendFromInput=document.getElementById('trendFrom'), trendToInput=document.getElementById('trendTo');
+  trendFromInput.value=trendFrom; trendToInput.value=trendTo;
+  trendFromInput.addEventListener('change', function(){
+    if(!trendFromInput.value) return;
+    trendFrom=trendFromInput.value;
+    try{ localStorage.setItem('hqTrendFrom', trendFrom); }catch(e){}
+    renderTrendChart();
+  });
+  trendToInput.addEventListener('change', function(){
+    if(!trendToInput.value) return;
+    trendTo=trendToInput.value;
+    try{ localStorage.setItem('hqTrendTo', trendTo); }catch(e){}
+    renderTrendChart();
+  });
+
+  // the scan writes verdict "drifted" (older builds of this page looked for "off_script", so drift was
+  // silently shown as a green "Reviewed"); accept both
+  function isDrift(v){ return v==='drifted' || v==='off_script'; }
+  function verdictLabel(v){ return isDrift(v)?'Drifted':(v==='on_script'?'On script':(v==='not_enough_data'?'Too early to judge':'Reviewed')); }
+  function reviewItemHtml(r){
+    var name = esc(r.displayName||r.username||r.id||'Unknown');
+    var link = leadLink(r, name);
+    var who = sentByOf({sentBy:r.sentBy});
+    var stageLabel = r.stage!=null && STAGE_INDEX[r.stage]!=null ? (STAGES[STAGE_INDEX[r.stage]]||STAGES[0])[1] : '';
+    var offScript = isDrift(r.verdict);
+    var expected = r.whatScriptCalledFor || r.scriptExpected;
+    var idFor = r.threadId||r.username||r.id;
+    var toggleTag = who==='founder'
+      ? '<span class="chip founder-tag" data-action="toggleSentBy" data-id="'+esc(idFor)+'" title="Click to mark as Setter">Founder</span>'
+      : '<span class="chip setter-tag" data-action="toggleSentBy" data-id="'+esc(idFor)+'" title="Click to mark as Founder">Setter</span>';
+    var when = r.scanAt ? (relTime(r.scanAt)||'recently') : '';
+    var detail = offScript ? (
+      '<div class="review-detail">'+
+        (r.whatWasSaid?'<div><div class="rlabel">What was said</div><div class="said">'+esc(r.whatWasSaid)+'</div></div>':'')+
+        (expected?'<div><div class="rlabel">Script calls for</div><div class="expected">'+esc(expected)+'</div></div>':'')+
+        (r.suggestedLine?'<div><div class="rlabel">Try instead</div><div class="suggest">'+esc(r.suggestedLine)+'</div></div>':'')+
+      '</div>'
+    ) : '';
+    return '<div class="review-item'+(offScript?' off-script':'')+'">'+
+      '<div class="review-top"><div class="review-name">'+link+toggleTag+(stageLabel?'<span class="chip stage">'+esc(stageLabel)+'</span>':'')+
+        '<span class="chip '+(offScript?'warn':(r.verdict==='on_script'?'good':'stage'))+'">'+verdictLabel(r.verdict)+'</span></div>'+
+        '<span class="review-when">'+esc(when)+'</span></div>'+
+      detail+
+      '</div>';
+  }
+  function renderReviewFeed(){
+    var list = (state.reviews||[]).slice().sort(function(a,b){ return new Date(b.scanAt||0)-new Date(a.scanAt||0); });
+    if(dmsOpenerGroup!=='all'){
+      list = list.filter(function(r){
+        var idFor = r.threadId||r.username||r.id;
+        var thread = state.dms.find(function(d){ return d.id===idFor || d.threadId===idFor || d.username===idFor; });
+        return thread && matchesOpenerGroup(thread);
+      });
+    }
+    document.getElementById('reviewList').innerHTML = list.length ? list.slice(0,200).map(reviewItemHtml).join('') : '<div class="empty-state">Fills once the setter scan has run.</div>';
+    var wk = list.filter(function(r){ return inLast(r.scanAt,0,7); });
+    var wkDrift = wk.filter(function(r){ return isDrift(r.verdict); }).length;
+    var sumEl=document.getElementById('reviewSummary');
+    if(sumEl) sumEl.textContent = wk.length ? 'Last 7 days: '+wk.length+' reviewed · '+wkDrift+' drifted ('+pct(wkDrift,wk.length)+'%) · '+(wk.length-wkDrift)+' on script or too early to judge.' : '';
+  }
+  document.addEventListener('click', async function(ev){
+    var b=ev.target.closest('[data-action="toggleSentBy"]'); if(!b) return;
+    if(!db) return;
+    var id=b.getAttribute('data-id'); if(!id) return;
+    var thread = state.dms.find(function(d){ return d.id===id || d.threadId===id || d.username===id; });
+    if(!thread) return;
+    var next = sentByOf(thread)==='founder' ? 'setter' : 'founder';
+    try{ await db.collection('dm_threads').doc(thread.id).update({sentBy:next, sentByOverride:true, updatedAt:new Date().toISOString()}); }
+    catch(e){ console.error('toggleSentBy failed', e); }
+  });
+  document.addEventListener('click', async function(ev){
+    var b=ev.target.closest('[data-action="markReplied"]'); if(!b) return;
+    if(!db) return;
+    var id=b.getAttribute('data-id'); if(!id) return;
+    b.disabled=true;
+    var now=new Date().toISOString();
+    try{ await db.collection('dm_threads').doc(id).update({lastSender:'jordan', lastJordanAt:now, manualReplyAt:now, updatedAt:now}); }
+    catch(e){ console.error('markReplied failed', e); b.disabled=false; }
+  });
+
+  /* ---------- ads (filled by the daily Meta Ads sync: ads_daily, ads_campaigns, meta/adsSync) ---------- */
+  var adsRange = 7;
+  try{ var ar0=parseInt(localStorage.getItem('hqAdsRange'),10); if(ar0===7||ar0===14||ar0===30) adsRange=ar0; }catch(e){}
+  function money(v, dp){
+    var cur=(state.adsMeta&&state.adsMeta.currency)||'AUD', d=dp==null?0:dp;
+    try{ return new Intl.NumberFormat('en-AU',{style:'currency',currency:cur,minimumFractionDigits:d,maximumFractionDigits:d}).format(v); }
+    catch(e){ return '$'+Number(v).toFixed(d); }
+  }
+  function num(v){ return v==null||isNaN(v)?'–':Number(v).toLocaleString('en-AU'); }
+  // complete days only: the sync writes up to yesterday, so windows end yesterday (i=1)
+  function adsDayList(len, startBack){
+    var now=new Date(), out=[];
+    for(var i=startBack+len-1;i>=startBack;i--) out.push(dayKey(new Date(now.getFullYear(),now.getMonth(),now.getDate()-i)));
+    return out;
+  }
+  function sumAds(recFor, keys){
+    var t={spend:0,results:0,impressions:0,linkClicks:0,days:0};
+    keys.forEach(function(k){ var r=recFor(k); if(!r) return; t.days++; t.spend+=+r.spend||0; t.results+=+r.results||0; t.impressions+=+r.impressions||0; t.linkClicks+=+r.linkClicks||0; });
+    t.cpr = t.results ? t.spend/t.results : null;
+    t.ctr = t.impressions ? (t.linkClicks/t.impressions)*100 : null;
+    return t;
+  }
+  function deltaHtml(cur, prev, goodWhenUp, neutral){
+    if(cur==null || prev==null || !isFinite(prev) || prev===0) return '';
+    var d=Math.round(((cur-prev)/prev)*100);
+    var cls = neutral||d===0 ? 'flat' : ((d>0)===goodWhenUp ? 'up' : 'down');
+    return ' · <span class="delta '+cls+'">'+(d>0?'▲ ':(d<0?'▼ ':''))+Math.abs(d)+'%</span> vs prior '+adsRange+'d';
+  }
+  function renderAds(){
+    var metaEl=document.getElementById('adsMetaLine'); if(!metaEl) return;
+    var am=state.adsMeta, hasData=(state.adsDaily||[]).length>0;
+    document.getElementById('adsEmpty').hidden = !!(am || hasData);
+    document.getElementById('adsBody').hidden = !(am || hasData);
+    document.getElementById('adsRange').hidden = !(am || hasData);
+    if(!am && !hasData){ metaEl.textContent = state.adsLoaded ? 'Not connected yet.' : 'Loading…'; return; }
+    var resultLabel=(am&&am.resultLabel)||'results';
+    metaEl.textContent = (am&&am.lastSyncAt ? 'Synced '+(relTime(am.lastSyncAt)||'recently') : 'Not synced yet')+
+      (am&&am.accountName?' · '+am.accountName:'')+' · a "result" = '+resultLabel+' · complete days only (to yesterday)';
+
+    var byDay={}; (state.adsDaily||[]).forEach(function(d){ byDay[d.date||d.id]=d; });
+    var cur=sumAds(function(k){return byDay[k];}, adsDayList(adsRange,1));
+    var prev=sumAds(function(k){return byDay[k];}, adsDayList(adsRange,1+adsRange));
+    var havePrev = prev.days>0;
+    document.getElementById('adsSpend').textContent = cur.days?money(cur.spend):'–';
+    document.getElementById('adsSpendNote').innerHTML = cur.days ? 'last '+adsRange+' days'+(havePrev?deltaHtml(cur.spend,prev.spend,true,true):'') : '&nbsp;';
+    document.getElementById('adsResults').textContent = cur.days?num(cur.results):'–';
+    document.getElementById('adsResultsNote').innerHTML = cur.days ? esc(resultLabel)+(havePrev?deltaHtml(cur.results,prev.results,true):'') : '&nbsp;';
+    document.getElementById('adsCpr').textContent = cur.cpr==null?'–':money(cur.cpr,2);
+    document.getElementById('adsCprNote').innerHTML = cur.cpr==null ? (cur.days?'no results yet':'&nbsp;') : 'per '+esc(resultLabel.replace(/s$/,''))+(havePrev&&prev.cpr!=null?deltaHtml(cur.cpr,prev.cpr,false):'');
+    document.getElementById('adsCtr').textContent = cur.ctr==null?'–':cur.ctr.toFixed(2)+'%';
+    document.getElementById('adsCtrNote').innerHTML = cur.ctr==null ? '&nbsp;' : num(cur.linkClicks)+' link clicks'+(havePrev&&prev.ctr!=null?deltaHtml(cur.ctr,prev.ctr,true):'');
+
+    // daily spend bars
+    var keys=adsDayList(adsRange,1), days=keys.map(function(k){ var r=byDay[k]; var p=k.split('-').map(Number); return {k:k, dt:new Date(p[0],p[1]-1,p[2]), r:r}; });
+    var maxV=Math.max(1, Math.max.apply(null, days.map(function(d){ return d.r?(+d.r.spend||0):0; })));
+    var nice = maxV<=50?50:(maxV<=100?100:(maxV<=200?200:(maxV<=500?500:Math.ceil(maxV/250)*250)));
+    document.getElementById('adsY').innerHTML=[0,nice/2,nice].map(function(t){ return '<span style="bottom:'+(t/nice*100)+'%">'+money(t)+'</span>'; }).join('');
+    var plot=document.getElementById('adsPlot');
+    plot.innerHTML=[nice/2,nice].map(function(t){ return '<div class="gridline" style="bottom:'+(t/nice*100)+'%"></div>'; }).join('')+
+      '<div class="cols">'+days.map(function(d,i){
+        var s=d.r?(+d.r.spend||0):0, h=s/nice*100;
+        return '<div class="col" tabindex="0" data-i="'+i+'" aria-label="'+esc(d.dt.toDateString())+': '+money(s,2)+' spend, '+(d.r?num(d.r.results):'no data')+' results">'+(s?'<div class="seg top" style="height:'+h+'%;background:var(--series-2)"></div>':'')+'</div>';
+      }).join('')+'</div>';
+    var step = adsRange>14?5:(adsRange>7?2:1);
+    document.getElementById('adsX').innerHTML=days.map(function(d,i){ var show=(i%step===(days.length-1)%step); return '<span>'+(show?d.dt.getDate()+'/'+(d.dt.getMonth()+1):'')+'</span>'; }).join('');
+    var wrap=document.getElementById('adsChart'), tip=wrap.querySelector('.tip');
+    if(!tip){ tip=document.createElement('div'); tip.className='tip'; tip.hidden=true; wrap.appendChild(tip); }
+    plot.querySelectorAll('.col').forEach(function(c){
+      function show(){
+        var d=days[+c.getAttribute('data-i')], r=d.r;
+        tip.innerHTML='<b>'+d.dt.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})+'</b><br>'+
+          (r ? money(+r.spend||0,2)+' spend<br>'+num(r.results)+' '+esc(resultLabel)+(r.results?' · '+money((+r.spend||0)/r.results,2)+' each':'') : 'no data');
+        tip.hidden=false;
+        var cr=c.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
+        var left=cr.left-wr.left+cr.width/2-tip.offsetWidth/2; left=Math.max(0,Math.min(left,wr.width-tip.offsetWidth));
+        tip.style.left=left+'px'; tip.style.top=Math.max(0,cr.top-wr.top-8)+'px';
+      }
+      c.addEventListener('mouseenter',show); c.addEventListener('focus',show);
+      c.addEventListener('mouseleave',function(){tip.hidden=true;}); c.addEventListener('blur',function(){tip.hidden=true;});
+    });
+    document.getElementById('adsTable').innerHTML = days.slice().reverse().map(function(d){
+      var r=d.r; if(!r) return '<tr><td>'+d.dt.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})+'</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="num">–</td></tr>';
+      var sp=+r.spend||0, im=+r.impressions||0, lc=+r.linkClicks||0;
+      return '<tr><td>'+d.dt.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})+'</td><td class="num">'+money(sp,2)+'</td><td class="num">'+num(r.results)+'</td><td class="num">'+(r.results?money(sp/r.results,2):'–')+'</td><td class="num">'+(im?(lc/im*100).toFixed(2)+'%':'–')+'</td><td class="num">'+(im?money(sp/im*1000,2):'–')+'</td></tr>';
+    }).join('');
+
+    // campaigns
+    var camps=(state.adsCampaigns||[]).map(function(c){
+      var t=sumAds(function(k){ return c.daily&&c.daily[k]; }, keys);
+      var fq=c.frequency&&c.frequency[String(adsRange)];
+      return {c:c, t:t, fq:fq};
+    }).filter(function(x){ return x.t.spend>0; })
+      .sort(function(a,b){ var ac=a.t.cpr, bc=b.t.cpr; if(ac!=null&&bc!=null) return ac-bc; if(ac!=null) return -1; if(bc!=null) return 1; return b.t.spend-a.t.spend; });
+    document.getElementById('adsCampBody').innerHTML = camps.length ? camps.map(function(x){
+      var c=x.c, t=x.t, on=String(c.status||'').toUpperCase()==='ACTIVE';
+      return '<tr><td class="op-name">'+esc(c.name||c.id)+(c.objective?'<div class="op-sample">'+esc(c.objective)+'</div>':'')+'</td>'+
+        '<td><span class="camp-status '+(on?'on':'off')+'">'+esc(on?'Active':(c.status?String(c.status).charAt(0)+String(c.status).slice(1).toLowerCase():'–'))+'</span></td>'+
+        '<td class="num">'+money(t.spend,2)+'</td><td class="num">'+num(t.results)+'</td><td class="num">'+(t.cpr==null?'–':money(t.cpr,2))+'</td>'+
+        '<td class="num">'+(t.ctr==null?'–':t.ctr.toFixed(2)+'%')+'</td><td class="num">'+(x.fq==null?'–':Number(x.fq).toFixed(2))+'</td></tr>';
+    }).join('') : '<tr><td colspan="7"><div class="empty-state">No campaign spent in the last '+adsRange+' days.</div></td></tr>';
+    var hiFreq=camps.filter(function(x){ return x.fq!=null && x.fq>=3; });
+    document.getElementById('adsCampNote').textContent = hiFreq.length ? hiFreq.length+' campaign'+(hiFreq.length===1?' is':'s are')+' at a frequency of 3 or more. The same people are seeing the ads a lot, so watch for creative fatigue.' : '';
+  }
+  document.getElementById('adsRange').addEventListener('click', function(ev){
+    var b=ev.target.closest('button[data-adsrange]'); if(!b) return;
+    adsRange=parseInt(b.getAttribute('data-adsrange'),10);
+    document.querySelectorAll('#adsRange button').forEach(function(x){ x.setAttribute('aria-pressed', x===b?'true':'false'); });
+    try{ localStorage.setItem('hqAdsRange', String(adsRange)); }catch(e){}
+    renderAds();
+  });
+  document.querySelectorAll('#adsRange button').forEach(function(x){ x.setAttribute('aria-pressed', parseInt(x.getAttribute('data-adsrange'),10)===adsRange?'true':'false'); });
+
+  function renderAll(){ renderLeads(); renderDms(); renderMsgs(); renderFollow(); renderMagnets(); renderHome(); renderSetterOutcomes(); renderLeadBrowser(); renderTrendChart(); renderReviewFeed(); renderCoverage(); renderAds(); }
+
+  function subscribe(){
+    function sub(q, key){
+      q.onSnapshot(function(s){ state[key]=s.docs.map(function(d){return Object.assign({id:d.id},d.data());}); if(key==='dms') state.dmLoaded=true; renderAll(); },
+        function(e){ console.error(key+' snapshot error', e); });
+    }
+    sub(db.collection('contacts').where('tier','==',TIER_SUPER).orderBy('likeCount','desc'), 'super');
+    sub(db.collection('contacts').where('tier','==',TIER_CLOSE).orderBy('likeCount','desc'), 'close');
+    sub(db.collection('contacts').where('tier','==',TIER_PERSONAL).orderBy('likeCount','desc'), 'personal');
+    sub(db.collection('dm_threads').limit(1000), 'dms');
+    sub(db.collection('dm_daily').orderBy('date','desc').limit(60), 'daily');
+    sub(db.collection('script_reviews').orderBy('scanAt','desc').limit(300), 'reviews');
+    db.doc('meta/scan').onSnapshot(function(s){ state.scanMeta=s.exists?s.data():null; renderAll(); }, function(e){ console.error(e); });
+    db.doc('meta/dmScan').onSnapshot(function(s){ state.dmMeta=s.exists?s.data():null; renderAll(); }, function(e){ console.error(e); });
+    sub(db.collection('ads_daily').orderBy('date','desc').limit(90), 'adsDaily');
+    sub(db.collection('ads_campaigns').limit(200), 'adsCampaigns');
+    db.doc('meta/adsSync').onSnapshot(function(s){ state.adsMeta=s.exists?s.data():null; state.adsLoaded=true; renderAll(); }, function(e){ console.error(e); state.adsLoaded=true; renderAll(); });
+  }
+
+  /* ---------- Supabase-backed db shim ----------
+     Re-implements the small Firestore-style surface the code above calls:
+       db.collection(name).where(f,'==',v).orderBy(f,dir).limit(n).onSnapshot(onNext,onErr)
+       db.collection(name).doc(id).get()/.set(obj)/.update(patch)
+       db.doc('table/id').onSnapshot(onNext,onErr)
+     Every "data" table is {id text PK, data jsonb}; a doc is {id, ...data}.
+     onSnapshot is poll-based (no ALTER PUBLICATION / Realtime config needed on tables we
+     were told not to touch) and every local write immediately re-polls its own table so the
+     UI updates instantly rather than waiting for the next tick. */
+  var POLL_MS = 15000;
+  function makeSupabaseDb(client){
+    var intervals = [];
+    var refreshers = {};
+    function registerRefresher(table, fn){ (refreshers[table]=refreshers[table]||[]).push(fn); }
+    function notifyWrite(table){ (refreshers[table]||[]).forEach(function(fn){ fn(); }); }
+
+    function docRef(table, id){
+      return {
+        get: async function(){
+          var res = await client.from(table).select('*').eq('id', id).maybeSingle();
+          if(res.error) throw res.error;
+          var row = res.data;
+          return { exists: !!row, data: function(){ return row ? Object.assign({}, row.data||{}) : undefined; } };
+        },
+        set: async function(obj){
+          var res = await client.from(table).upsert({ id:id, data:(obj||{}), updated_at:new Date().toISOString() });
+          if(res.error) throw res.error;
+          notifyWrite(table);
+        },
+        update: async function(patch){
+          var cur = await client.from(table).select('data').eq('id', id).maybeSingle();
+          if(cur.error) throw cur.error;
+          var merged = Object.assign({}, (cur.data && cur.data.data) || {}, patch||{});
+          var res = await client.from(table).upsert({ id:id, data:merged, updated_at:new Date().toISOString() });
+          if(res.error) throw res.error;
+          notifyWrite(table);
+        },
+        onSnapshot: function(onNext, onErr){
+          var stopped=false;
+          async function load(){
+            try{
+              var res = await client.from(table).select('*').eq('id', id).maybeSingle();
+              if(res.error){ onErr && onErr(res.error); return; }
+              if(stopped) return;
+              var row = res.data;
+              onNext({ exists: !!row, data: function(){ return row ? Object.assign({}, row.data||{}) : undefined; } });
+            }catch(e){ onErr && onErr(e); }
+          }
+          load();
+          var iv=setInterval(load, POLL_MS); intervals.push(iv);
+          registerRefresher(table, load);
+          return function(){ stopped=true; clearInterval(iv); };
+        }
+      };
+    }
+
+    function collectionRef(table){
+      var filters=[], order=null, limitN=null;
+      var ref = {
+        where: function(f,op,v){ filters.push([f,op,v]); return ref; },
+        orderBy: function(f,dir){ order=[f,dir||'asc']; return ref; },
+        limit: function(n){ limitN=n; return ref; },
+        doc: function(id){ return docRef(table, id); },
+        onSnapshot: function(onNext, onErr){
+          var stopped=false;
+          async function load(){
+            try{
+              var res = await client.from(table).select('*');
+              if(res.error){ onErr && onErr(res.error); return; }
+              if(stopped) return;
+              var docs = (res.data||[]).map(function(r){ return { id:r.id, _data:r.data||{} }; });
+              filters.forEach(function(f){
+                var field=f[0], op=f[1], val=f[2];
+                docs = docs.filter(function(d){
+                  var dv=d._data[field];
+                  if(op==='!=') return dv!==val;
+                  return dv===val; // only '==' is used by this app
+                });
+              });
+              if(order){
+                var field=order[0], dir=order[1];
+                docs.sort(function(a,b){
+                  var av=a._data[field], bv=b._data[field];
+                  if(av==null && bv==null) return 0;
+                  if(av==null) return dir==='desc'?1:-1;
+                  if(bv==null) return dir==='desc'?-1:1;
+                  if(av<bv) return dir==='desc'?1:-1;
+                  if(av>bv) return dir==='desc'?-1:1;
+                  return 0;
+                });
+              }
+              if(limitN!=null) docs = docs.slice(0, limitN);
+              onNext({ docs: docs.map(function(d){ return { id:d.id, data:function(){ return Object.assign({}, d._data); } }; }) });
+            }catch(e){ onErr && onErr(e); }
+          }
+          load();
+          var iv=setInterval(load, POLL_MS); intervals.push(iv);
+          registerRefresher(table, load);
+          return function(){ stopped=true; clearInterval(iv); };
+        }
+      };
+      return ref;
+    }
+
+    return {
+      collection: function(name){ return collectionRef(name); },
+      doc: function(path){ var parts=String(path).split('/'); return docRef(parts[0], parts[1]); },
+      __stopAll: function(){ intervals.forEach(function(iv){ clearInterval(iv); }); intervals=[]; }
+    };
+  }
+
+  async function boot(client){
+    renderAll();
+    try{ db = makeSupabaseDb(client); }catch(e){ db=null; }
+    if(!db){ showBanner("Live sync isn't available in this view, so changes here won't be saved."); return; }
+    subscribe();
+    setInterval(function(){ renderDms(); renderFollow(); renderMagnets(); renderHome(); renderSetterOutcomes(); renderLeadBrowser(); renderReviewFeed(); renderCoverage(); }, 60000); // keep "waiting" ages fresh
+  }
+  renderAll(); // initial empty render so nothing looks broken while auth resolves
+  document.addEventListener('tf-auth-ready', function(ev){ boot(ev.detail.supabase); });
+  document.addEventListener('tf-auth-signed-out', function(){ if(db && db.__stopAll) db.__stopAll(); db=null; });
+
+  /* ---------- collapsible panels (per-viewer convenience, persisted) ---------- */
+  /* A dedicated toggle row is inserted as the first child of every panel, independent of
+     however that panel's own <h2> is nested (some are bare, some sit inside a chart-head or
+     setter-outcomes-head flex row) -- this keeps collapse/expand uniform everywhere. */
+  function initPanelCollapse(){
+    var seen = {};
+    document.querySelectorAll('.panel').forEach(function(panel){
+      var h2 = panel.querySelector('h2');
+      if(!h2) return;
+      var title = h2.textContent.trim();
+      var section = panel.closest('section');
+      var sectionId = section ? section.id : 'root';
+      var key = sectionId+'::'+title;
+      seen[key] = (seen[key]||0)+1;
+      if(seen[key]>1) key += '::'+seen[key];
+      var storeKey = 'hqPanelCollapsed:'+key;
+
+      var head = document.createElement('div');
+      head.className = 'panel-head';
+      var label = document.createElement('span');
+      label.className = 'panel-toggle-label';
+      head.appendChild(label);
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'panel-toggle-btn';
+      var chev = document.createElement('span');
+      chev.className = 'chev'; chev.setAttribute('aria-hidden','true'); chev.textContent='\u25be';
+      btn.appendChild(chev);
+      head.appendChild(btn);
+      panel.insertBefore(head, panel.firstChild);
+
+      function applyState(collapsed){
+        label.textContent = collapsed ? title : '';
+        btn.setAttribute('aria-expanded', collapsed?'false':'true');
+        btn.setAttribute('aria-label', (collapsed?'Expand ':'Collapse ')+title);
+      }
+      var collapsed = false;
+      try{ collapsed = localStorage.getItem(storeKey)==='1'; }catch(e){}
+      if(collapsed) panel.classList.add('collapsed');
+      applyState(collapsed);
+      head.addEventListener('click', function(){
+        var now = panel.classList.toggle('collapsed');
+        applyState(now);
+        try{ localStorage.setItem(storeKey, now?'1':'0'); }catch(e){}
+      });
+    });
+  }
+  initPanelCollapse();
+})();
+</script>
+
+</body></html>
