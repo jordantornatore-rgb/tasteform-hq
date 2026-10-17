@@ -90,7 +90,8 @@
   .src-chip{font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid var(--border);color:var(--muted);margin-left:6px;white-space:nowrap;}
 
   /* ads */
-  .ads-chart{display:grid;grid-template-columns:36px 1fr;gap:6px;}
+  .ads-chart{display:grid;grid-template-columns:36px minmax(0,1fr);gap:6px;}
+  .ads-chart > *{min-width:0;}
   .ads-chart .yaxis{height:170px;}
   .ads-chart .plot{height:170px;}
   .delta{font-weight:600;}
@@ -103,6 +104,12 @@
   .camp-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;}
   .camp-status.on{background:var(--good-soft);color:var(--good);}
   .camp-status.off{background:var(--bg);border:1px solid var(--border);color:var(--muted);}
+
+  /* applications */
+  .apps-outcome{font-family:'Open Sans',sans-serif;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);}
+  #appsSrcNote code{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-size:11.5px;word-break:break-all;}
+  #appsBody a{color:var(--text);}
+  #appsX span{overflow:visible;}
 
   /* warm leads board */
   .board{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
@@ -401,6 +408,7 @@
       <button class="tab" role="tab" id="tabFollow" aria-selected="false" aria-controls="viewFollow" data-view="follow">Follow-ups <span class="tab-badge" id="fuBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabMagnets" aria-selected="false" aria-controls="viewMagnets" data-view="magnets">Magnets <span class="tab-badge" id="magBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads">Ads</button>
+      <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps">Applications <span class="tab-badge" id="appsBadge" hidden></span></button>
     </div>
     <div id="accountBox"></div>
   </div>
@@ -869,6 +877,79 @@
     </div>
   </section>
 
+  <!-- APPLICATIONS (Typeform funnel: tf_responses, tf_daily, meta/typeformSync — synced hourly by the typeform-sync edge function) -->
+  <section id="viewApps" role="tabpanel" aria-labelledby="tabApps" hidden style="display:flex;flex-direction:column;gap:18px;">
+    <div class="top">
+      <div>
+        <h1>Applications</h1>
+        <div class="sub" id="appsMetaLine">Loading…</div>
+      </div>
+      <div class="range" role="group" aria-label="Applications date range" id="appsRange">
+        <button type="button" data-appsrange="7" aria-pressed="false">7 days</button>
+        <button type="button" data-appsrange="30" aria-pressed="true">30 days</button>
+        <button type="button" data-appsrange="90" aria-pressed="false">90 days</button>
+        <button type="button" data-appsrange="all" aria-pressed="false">All time</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="label">Form opens</div><div class="value" id="appsOpens">–</div><div class="note" id="appsOpensNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Applications</div><div class="value" id="appsDone">–</div><div class="note" id="appsDoneNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Open → apply</div><div class="value" id="appsRate">–</div><div class="note" id="appsRateNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Good-fit applications</div><div class="value" id="appsFit">–</div><div class="note" id="appsFitNote">&nbsp;</div></div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-col">
+        <div class="panel">
+          <div class="chart-head">
+            <div>
+              <h2>Opens vs applications</h2>
+              <p class="rule" style="margin-top:4px" id="appsChartRule">Everyone who opened the form, and the part of them who finished it.</p>
+            </div>
+            <div class="legend"><span><i class="sw" style="background:var(--series-1)"></i>Applied</span><span><i class="sw" style="background:var(--series-2)"></i>Opened, didn't apply</span></div>
+          </div>
+          <div class="ads-chart" id="appsChart" style="position:relative">
+            <div class="yaxis" id="appsY"></div>
+            <div class="plot" id="appsPlot"></div>
+            <div class="xaxis" id="appsX"></div>
+          </div>
+          <details class="tv"><summary>Show as table</summary><div class="table-wrap"><table class="scores"><thead><tr><th id="appsTblPeriod">Day</th><th class="num">Opens</th><th class="num">Applications</th><th class="num">Open → apply</th></tr></thead><tbody id="appsTable"></tbody></table></div></details>
+        </div>
+      </div>
+      <div class="home-col">
+        <div class="panel">
+          <h2>Where they fall off</h2>
+          <p class="rule">From opening the form to a booked call, in the selected window.</p>
+          <div class="funnel" id="appsFunnel"></div>
+          <div class="f-note" id="appsFunnelNote"></div>
+        </div>
+        <div class="panel">
+          <h2>Which link they came from</h2>
+          <p class="rule">Read from the link each person used to open the form.</p>
+          <div class="table-wrap">
+            <table class="scores">
+              <thead><tr><th>Source</th><th class="num">Opens</th><th class="num">Applied</th><th class="num">Rate</th></tr></thead>
+              <tbody id="appsSrcBody"></tbody>
+            </table>
+          </div>
+          <div class="f-note" id="appsSrcNote"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Applicants</h2>
+      <p class="rule">Newest first. "Good fit" = in Aus/NZ/UK/US, coaching is a top or important financial priority, and 18+. Set the outcome as you work each one.</p>
+      <div class="table-wrap">
+        <table class="scores">
+          <thead><tr><th>Applied</th><th>Name</th><th>Goal</th><th>Roadblock</th><th>Priority</th><th>Age</th><th>Fit</th><th>Contact</th><th>In DMs</th><th>Outcome</th></tr></thead>
+          <tbody id="appsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
 
 </div>
 
@@ -979,7 +1060,7 @@
 (function(){
   var db = null;
   var TIER_SUPER='super_engaged', TIER_CLOSE='close_friends', TIER_PERSONAL='personal';
-  var state = { super:[], close:[], personal:[], scanMeta:null, dms:[], dmMeta:null, dmLoaded:false, daily:[], reviews:[], adsDaily:[], adsCampaigns:[], adsMeta:null };
+  var state = { super:[], close:[], personal:[], scanMeta:null, dms:[], dmMeta:null, dmLoaded:false, daily:[], reviews:[], adsDaily:[], adsCampaigns:[], adsMeta:null, tfResponses:[], tfDaily:[], tfMeta:null, tfLoaded:false };
 
   var STAGES = [
     ['opened','Opener sent'],['replied','Replied'],['goal','Goal'],['situation','Current situation'],
@@ -1030,7 +1111,7 @@
   function showBanner(msg){ var b=document.getElementById('offlineBanner'); b.textContent=msg; b.classList.add('show'); }
 
   /* ---------- tabs ---------- */
-  var VIEWS={home:['viewHome','tabHome'], leads:['viewLeads','tabLeads'], dms:['viewDms','tabDms'], follow:['viewFollow','tabFollow'], magnets:['viewMagnets','tabMagnets'], ads:['viewAds','tabAds']};
+  var VIEWS={home:['viewHome','tabHome'], leads:['viewLeads','tabLeads'], dms:['viewDms','tabDms'], follow:['viewFollow','tabFollow'], magnets:['viewMagnets','tabMagnets'], ads:['viewAds','tabAds'], apps:['viewApps','tabApps']};
   function setView(view){
     if(!VIEWS[view]) view='home';
     Object.keys(VIEWS).forEach(function(k){
@@ -1824,6 +1905,9 @@
     rows.push(am && am.lastSyncAt
       ? {name:'Ads sync', sub:'Last ran '+(relTime(am.lastSyncAt)||'recently')+' · daily ~6:30am'+(am.accountName?' · '+am.accountName:''), chip:(am.ok===false||hoursSince(am.lastSyncAt)>30)?'warn':'good', chipTxt:(am.ok===false?'Problem':(hoursSince(am.lastSyncAt)>30?'Missed a run':'Up to date'))}
       : {name:'Ads sync', sub:'Switches on once the Meta Ads connector is added. See the Ads tab.', chip:'stage', chipTxt:'Not connected'});
+    var tfm=state.tfMeta;
+    if(tfm) rows.push({name:'Typeform sync', sub:'Last ran '+(relTime(tfm.lastSyncAt)||'never')+' · hourly'+(tfm.ok===false&&tfm.error?' · '+tfm.error:''),
+      chip:(tfm.ok===false||hoursSince(tfm.lastSyncAt)>3)?'warn':'good', chipTxt:(tfm.ok===false?'Problem':(hoursSince(tfm.lastSyncAt)>3?'Missed a run':'Up to date'))});
     document.getElementById('homeStatus').innerHTML = rows.map(function(r){
       return '<div class="st-row"><div><div class="st-name">'+esc(r.name)+'</div><div class="st-sub">'+esc(r.sub)+'</div></div><span class="chip '+r.chip+'">'+esc(r.chipTxt)+'</span></div>';
     }).join('');
@@ -2339,7 +2423,178 @@
   });
   document.querySelectorAll('#adsRange button').forEach(function(x){ x.setAttribute('aria-pressed', parseInt(x.getAttribute('data-adsrange'),10)===adsRange?'true':'false'); });
 
-  function renderAll(){ renderLeads(); renderDms(); renderMsgs(); renderFollow(); renderMagnets(); renderHome(); renderSetterOutcomes(); renderLeadBrowser(); renderTrendChart(); renderReviewFeed(); renderCoverage(); renderAds(); }
+  /* ---------- applications (Typeform funnel: tf_daily, tf_responses, meta/typeformSync; hourly edge-function sync) ---------- */
+  var appsRange = '30';
+  try{ var apr0=localStorage.getItem('hqAppsRange'); if(apr0==='7'||apr0==='30'||apr0==='90'||apr0==='all') appsRange=apr0; }catch(e){}
+  var OUTCOMES=[['','New'],['called','Called'],['no_answer','No answer'],['booked','Call booked'],['won','Signed'],['not_fit','Not a fit']];
+  var SRC_LABEL={link_in_bio:'Link in bio', unknown:'Untagged link', ig:'Instagram (untagged)'};
+  function srcLabel(s){ return SRC_LABEL[s] || String(s||'').replace(/[_-]+/g,' '); }
+  function parseKey(k){ var p=k.split('-').map(Number); return new Date(p[0],p[1]-1,p[2]); }
+  function appsWindow(){
+    var t=new Date(); t=new Date(t.getFullYear(),t.getMonth(),t.getDate());
+    var days=(state.tfDaily||[]).map(function(d){ return d.date||d.id; }).sort();
+    if(appsRange==='all'){
+      var first = days.length ? parseKey(days[0]) : t;
+      return {from:dayKey(first), to:dayKey(t), len:Math.round((t-first)/864e5)+1, prev:null};
+    }
+    var n=parseInt(appsRange,10);
+    return {from:dayKey(new Date(t.getFullYear(),t.getMonth(),t.getDate()-(n-1))), to:dayKey(t), len:n,
+            prev:{from:dayKey(new Date(t.getFullYear(),t.getMonth(),t.getDate()-(2*n-1))), to:dayKey(new Date(t.getFullYear(),t.getMonth(),t.getDate()-n))}};
+  }
+  function sumTf(from, to){
+    var t={visits:0,started:0,completed:0,src:{}};
+    (state.tfDaily||[]).forEach(function(d){
+      var k=d.date||d.id; if(k<from||k>to) return;
+      t.visits+=+d.visits||0; t.started+=+d.started||0; t.completed+=+d.completed||0;
+      var bs=d.bySource||{}; Object.keys(bs).forEach(function(s){ var x=t.src[s]||(t.src[s]={visits:0,completed:0}); x.visits+=+bs[s].visits||0; x.completed+=+bs[s].completed||0; });
+    });
+    return t;
+  }
+  function appsInRange(from, to){
+    return (state.tfResponses||[]).filter(function(r){ if(!r.submittedAt) return false; var k=dayKey(new Date(r.submittedAt)); return k>=from && k<=to; });
+  }
+  function isBooked(r){ return r.outcome==='booked' || r.outcome==='won' || r.dmStage==='booked' || r.dmStage==='call'; }
+  function appsDelta(cur, prev, goodUp){
+    if(appsRange==='all' || prev==null || !prev) return '';
+    var d=Math.round(((cur-prev)/prev)*100), cls=d===0?'flat':((d>0)===goodUp?'up':'down');
+    return ' · <span class="delta '+cls+'">'+(d>0?'▲ ':(d<0?'▼ ':''))+Math.abs(d)+'%</span> vs prior '+appsRange+'d';
+  }
+  function renderApps(){
+    var metaEl=document.getElementById('appsMetaLine'); if(!metaEl) return;
+    var tm=state.tfMeta, lf=null;
+    if(tm && tm.forms) tm.forms.forEach(function(f){ if(f.id===tm.liveFormId) lf=f; });
+    if(!tm){ metaEl.textContent = state.tfLoaded ? 'Not synced yet.' : 'Loading…'; }
+    else if(tm.ok===false){ metaEl.innerHTML = '<span class="delta down">Typeform sync failing</span> · '+esc(tm.error||'unknown error')+' · last good sync '+esc(relTime(tm.lastSyncAt)||'never'); }
+    else metaEl.textContent = 'Synced '+(relTime(tm.lastSyncAt)||'recently')+' · hourly from Typeform'+(lf?' · live form: '+lf.title:'');
+
+    var w=appsWindow(), cur=sumTf(w.from,w.to), prev=w.prev?sumTf(w.prev.from,w.prev.to):null;
+    var apps=appsInRange(w.from,w.to), prevApps=w.prev?appsInRange(w.prev.from,w.prev.to):[];
+    var fit=apps.filter(function(r){ return r.fit===true; }).length, fitKnown=apps.filter(function(r){ return r.fit!=null; }).length;
+    var lbl = appsRange==='all' ? 'all time' : 'last '+appsRange+' days';
+    document.getElementById('appsOpens').textContent = num(cur.visits);
+    document.getElementById('appsOpensNote').innerHTML = lbl+(prev?appsDelta(cur.visits,prev.visits,true):'');
+    document.getElementById('appsDone').textContent = num(cur.completed);
+    document.getElementById('appsDoneNote').innerHTML = lbl+(prev?appsDelta(cur.completed,prev.completed,true):'');
+    var rate = cur.visits ? (cur.completed/cur.visits*100) : null, prate = prev&&prev.visits ? (prev.completed/prev.visits*100) : null;
+    document.getElementById('appsRate').textContent = rate==null?'–':(rate<10?rate.toFixed(1):Math.round(rate))+'%';
+    document.getElementById('appsRateNote').innerHTML = rate==null ? 'no opens in this window' : cur.completed+' of '+num(cur.visits)+' who opened it'+(prate!=null&&appsRange!=='all'?' · was '+(prate<10?prate.toFixed(1):Math.round(prate))+'%':'');
+    document.getElementById('appsFit').textContent = cur.completed ? fit : '–';
+    document.getElementById('appsFitNote').innerHTML = cur.completed ? (fitKnown ? pct(fit,fitKnown)+'% of applications' : 'older form, no fit questions') : 'no applications in this window';
+
+    // chart: daily for 7/30, weekly for 90, monthly for all time
+    var byDay={}; (state.tfDaily||[]).forEach(function(d){ byDay[d.date||d.id]=d; });
+    var gran = appsRange==='90' ? 'week' : (appsRange==='all' ? 'month' : 'day');
+    var buckets=[], start=parseKey(w.from), end=parseKey(w.to);
+    function bkey(d){ if(gran==='day') return dayKey(d); if(gran==='month') return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2); var m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7)); return dayKey(m); }
+    var idx={};
+    for(var d=new Date(start); d<=end; d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1)){
+      var k=bkey(d);
+      if(idx[k]==null){ idx[k]=buckets.length; buckets.push({k:k, dt:gran==='month'?new Date(d.getFullYear(),d.getMonth(),1):(gran==='week'?parseKey(k):new Date(d)), visits:0, completed:0}); }
+      var r=byDay[dayKey(d)]; if(r){ buckets[idx[k]].visits+=+r.visits||0; buckets[idx[k]].completed+=+r.completed||0; }
+    }
+    var maxV=Math.max(1, Math.max.apply(null, buckets.map(function(b){ return b.visits; })));
+    var nice = maxV<=5?5:(maxV<=10?10:(maxV<=20?20:(maxV<=50?50:(maxV<=100?100:Math.ceil(maxV/50)*50))));
+    document.getElementById('appsY').innerHTML=[0,nice/2,nice].map(function(t){ return '<span style="bottom:'+(t/nice*100)+'%">'+t+'</span>'; }).join('');
+    var plot=document.getElementById('appsPlot');
+    plot.innerHTML=[nice/2,nice].map(function(t){ return '<div class="gridline" style="bottom:'+(t/nice*100)+'%"></div>'; }).join('')+
+      '<div class="cols">'+buckets.map(function(b,i){
+        var hc=b.completed/nice*100, ho=(b.visits-b.completed)/nice*100;
+        return '<div class="col" tabindex="0" data-i="'+i+'" aria-label="'+esc(b.k)+': '+b.visits+' opens, '+b.completed+' applications">'+
+          (b.completed?'<div class="seg'+(ho?'':' top')+'" style="height:'+hc+'%;background:var(--series-1)"></div>':'')+
+          (ho?'<div class="seg top" style="height:'+ho+'%;background:var(--series-2)"></div>':'')+'</div>';
+      }).join('')+'</div>';
+    // short labels so they never clip: month names for monthly; for dense daily/weekly charts just the day number, with the month name where a new month starts
+    var dense = buckets.length > 14;
+    function blabel(b){
+      if(gran==='month') return b.dt.toLocaleDateString('en-AU',{month:'short'});
+      if(!dense) return b.dt.getDate()+'/'+(b.dt.getMonth()+1);
+      return b.dt.getDate()<=step ? b.dt.toLocaleDateString('en-AU',{month:'short'}) : String(b.dt.getDate());
+    }
+    function blong(b){ return gran==='month' ? b.dt.toLocaleDateString('en-AU',{month:'long',year:'numeric'}) : (gran==='week' ? 'Week of '+b.dt.toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : b.dt.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})); }
+    var narrow = window.matchMedia && window.matchMedia('(max-width:520px)').matches;
+    var step = Math.max(1, Math.ceil(buckets.length/(narrow?6:10)));
+    document.getElementById('appsX').innerHTML=buckets.map(function(b,i){ return '<span>'+((i%step===(buckets.length-1)%step)?blabel(b):'')+'</span>'; }).join('');
+    document.getElementById('appsChartRule').textContent = 'Everyone who opened the form, and the part of them who finished it — per '+gran+'.';
+    document.getElementById('appsTblPeriod').textContent = gran==='day'?'Day':(gran==='week'?'Week of':'Month');
+    var wrap=document.getElementById('appsChart'), tip=wrap.querySelector('.tip');
+    if(!tip){ tip=document.createElement('div'); tip.className='tip'; tip.hidden=true; wrap.appendChild(tip); }
+    plot.querySelectorAll('.col').forEach(function(c){
+      function show(){
+        var b=buckets[+c.getAttribute('data-i')];
+        tip.innerHTML='<b>'+esc(blong(b))+'</b><br>'+b.visits+' opened · '+b.completed+' applied'+(b.visits?' ('+Math.round(b.completed/b.visits*100)+'%)':'');
+        tip.hidden=false;
+        var cr=c.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
+        var left=cr.left-wr.left+cr.width/2-tip.offsetWidth/2; left=Math.max(0,Math.min(left,wr.width-tip.offsetWidth));
+        tip.style.left=left+'px'; tip.style.top=Math.max(0,cr.top-wr.top-8)+'px';
+      }
+      c.addEventListener('mouseenter',show); c.addEventListener('focus',show);
+      c.addEventListener('mouseleave',function(){tip.hidden=true;}); c.addEventListener('blur',function(){tip.hidden=true;});
+    });
+    document.getElementById('appsTable').innerHTML = buckets.slice().reverse().filter(function(b){ return b.visits; }).map(function(b){
+      return '<tr><td>'+esc(blong(b))+'</td><td class="num">'+b.visits+'</td><td class="num">'+b.completed+'</td><td class="num">'+(b.visits?Math.round(b.completed/b.visits*100)+'%':'–')+'</td></tr>';
+    }).join('') || '<tr><td colspan="4"><div class="empty-state">Nobody opened the form in this window.</div></td></tr>';
+
+    // funnel
+    var inDms=apps.filter(function(r){ return !!r.dmThreadId; }).length, booked=apps.filter(isBooked).length;
+    var stages=[['Opened form',cur.visits],['Answered 1+',cur.started],['Applied',cur.completed],['Good fit',fit],['In DMs',inDms],['Call booked',booked]];
+    var fmax=Math.max(1,stages[0][1]), biggest=-1, bigLoss=0;
+    for(var i=1;i<4;i++){ if(stages[i-1][1]>0){ var loss=1-stages[i][1]/stages[i-1][1]; if(loss>bigLoss){ bigLoss=loss; biggest=i; } } }
+    document.getElementById('appsFunnel').innerHTML = cur.visits ? stages.map(function(s,i){
+      var wd=Math.max(0.5,(s[1]/fmax)*100), sub = i>0 && stages[i-1][1] ? ' · '+pct(s[1],stages[i-1][1])+'%' : '';
+      return '<div class="f-row'+(i===biggest?' biggest':'')+'" title="'+esc(s[0])+': '+s[1]+'"><div class="f-label">'+esc(s[0])+'</div><div class="f-track"><div class="f-bar" style="width:'+wd+'%"></div></div><div class="f-val">'+s[1]+sub+(i===biggest?' ▼':'')+'</div></div>';
+    }).join('') : '<div class="empty-state">Nobody opened the form in this window.</div>';
+    var fn='';
+    if(cur.visits && cur.started===cur.completed && cur.visits>cur.completed)
+      fn = (cur.visits-cur.completed)+' of '+cur.visits+' people opened the form and left without answering the first question. Everyone who answered one question finished it, so the leak is the first screen, not the questions.';
+    else if(biggest>0) fn = 'Biggest drop: '+stages[biggest-1][0]+' → '+stages[biggest][0]+' ('+Math.round(bigLoss*100)+'% lost).';
+    if(cur.completed && !inDms) fn += (fn?' ':'')+'No applicant in this window matched an Instagram DM by name.';
+    document.getElementById('appsFunnelNote').textContent = fn;
+
+    // sources
+    var srcs=Object.keys(cur.src).map(function(s){ return {s:s, v:cur.src[s].visits, c:cur.src[s].completed}; }).sort(function(a,b){ return b.c-a.c || b.v-a.v; });
+    document.getElementById('appsSrcBody').innerHTML = srcs.length ? srcs.map(function(x){
+      return '<tr><td class="op-name">'+esc(srcLabel(x.s))+'</td><td class="num">'+x.v+'</td><td class="num">'+x.c+'</td><td class="num">'+(x.v?Math.round(x.c/x.v*100)+'%':'–')+'</td></tr>';
+    }).join('') : '<tr><td colspan="4"><div class="empty-state">No opens in this window.</div></td></tr>';
+    var fid = (tm&&tm.liveFormId) || 'ReFNu7kD';
+    document.getElementById('appsSrcNote').innerHTML = 'To see which post or story drives applications, give each placement its own link, e.g. <code>form.typeform.com/to/'+esc(fid)+'?utm_content=story-17oct</code>. Each tag gets its own row here on the next hourly sync. No change to the form needed.';
+
+    // applicants
+    var list=(state.tfResponses||[]).filter(function(r){ return r.submittedAt; }).slice().sort(function(a,b){ return String(b.submittedAt).localeCompare(String(a.submittedAt)); });
+    if(appsRange!=='all') list=list.filter(function(r){ var k=dayKey(new Date(r.submittedAt)); return k>=w.from && k<=w.to; });
+    document.getElementById('appsBody').innerHTML = list.length ? list.map(function(r){
+      var name=[r.firstName,r.lastName].filter(Boolean).join(' ')||'–';
+      var when=new Date(r.submittedAt);
+      var contact=(r.phone?'<a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a>':'')+(r.phone&&r.email?'<br>':'')+(r.email?'<a href="mailto:'+esc(r.email)+'">'+esc(r.email)+'</a>':'');
+      var dm = r.dmThreadId ? '<span class="chip good">'+esc(r.dmStage||'yes')+'</span>' : '<span class="chip stage">no match</span>';
+      var fitChip = r.fit===true?'<span class="chip good">Fit</span>':(r.fit===false?'<span class="chip warn">No</span>':'–');
+      var sel='<select class="apps-outcome" data-id="'+esc(r.id)+'" aria-label="Outcome for '+esc(name)+'">'+OUTCOMES.map(function(o){ return '<option value="'+o[0]+'"'+((r.outcome||'')===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select>';
+      return '<tr><td title="'+esc(when.toLocaleString('en-AU'))+'">'+esc(when.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'2-digit'}))+'<div class="op-sample">'+esc(relTime(r.submittedAt)||'')+'</div></td>'+
+        '<td class="op-name">'+esc(name)+(r.formTitle&&r.formId!==fid?'<div class="op-sample">'+esc(r.formTitle)+'</div>':'')+'</td>'+
+        '<td>'+esc(r.goal||'–')+'</td><td>'+esc(r.roadblock||'–')+'</td><td>'+esc(r.priority||'–')+'</td><td>'+esc(r.ageBand||'–')+'</td>'+
+        '<td>'+fitChip+'</td><td style="white-space:nowrap">'+(contact||'–')+'</td><td>'+dm+'</td><td>'+sel+'</td></tr>';
+    }).join('') : '<tr><td colspan="10"><div class="empty-state">No applications in this window.</div></td></tr>';
+
+    // tab badge: applications in the last 7 days nobody has worked yet
+    var t0=new Date(), wk=dayKey(new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()-6));
+    var fresh=(state.tfResponses||[]).filter(function(r){ return r.submittedAt && !r.outcome && dayKey(new Date(r.submittedAt))>=wk; }).length;
+    var bd=document.getElementById('appsBadge'); bd.hidden=!fresh; bd.textContent=fresh;
+  }
+  document.getElementById('appsRange').addEventListener('click', function(ev){
+    var b=ev.target.closest('button[data-appsrange]'); if(!b) return;
+    appsRange=b.getAttribute('data-appsrange');
+    document.querySelectorAll('#appsRange button').forEach(function(x){ x.setAttribute('aria-pressed', x===b?'true':'false'); });
+    try{ localStorage.setItem('hqAppsRange', appsRange); }catch(e){}
+    renderApps();
+  });
+  document.querySelectorAll('#appsRange button').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-appsrange')===appsRange?'true':'false'); });
+  document.getElementById('appsBody').addEventListener('change', async function(ev){
+    var s=ev.target.closest('select.apps-outcome'); if(!s || !db) return;
+    var now=new Date().toISOString();
+    try{ await db.collection('tf_responses').doc(s.getAttribute('data-id')).update({outcome:s.value||null, outcomeAt:now}); }
+    catch(e){ console.error('outcome update failed', e); }
+  });
+
+  function renderAll(){ renderLeads(); renderDms(); renderMsgs(); renderFollow(); renderMagnets(); renderHome(); renderSetterOutcomes(); renderLeadBrowser(); renderTrendChart(); renderReviewFeed(); renderCoverage(); renderAds(); renderApps(); }
 
   function subscribe(){
     function sub(q, key){
@@ -2352,6 +2607,9 @@
     sub(db.collection('dm_threads').limit(1000), 'dms');
     sub(db.collection('dm_daily').orderBy('date','desc').limit(60), 'daily');
     sub(db.collection('script_reviews').orderBy('scanAt','desc').limit(300), 'reviews');
+    sub(db.collection('tf_responses').orderBy('submittedAt','desc').limit(1000), 'tfResponses');
+    sub(db.collection('tf_daily').orderBy('date','desc').limit(1000), 'tfDaily');
+    db.doc('meta/typeformSync').onSnapshot(function(s){ state.tfMeta=s.exists?s.data():null; state.tfLoaded=true; renderAll(); }, function(e){ console.error(e); state.tfLoaded=true; renderAll(); });
     db.doc('meta/scan').onSnapshot(function(s){ state.scanMeta=s.exists?s.data():null; renderAll(); }, function(e){ console.error(e); });
     db.doc('meta/dmScan').onSnapshot(function(s){ state.dmMeta=s.exists?s.data():null; renderAll(); }, function(e){ console.error(e); });
     sub(db.collection('ads_daily').orderBy('date','desc').limit(90), 'adsDaily');
