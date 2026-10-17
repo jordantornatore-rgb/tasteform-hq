@@ -553,11 +553,11 @@
 
     <div>
       <div class="seg-filter" role="group" aria-label="Opener group" id="dmsOpenerFilter">
-        <button type="button" data-ogroup="all" aria-pressed="true">All openers</button>
+        <button type="button" data-ogroup="all" aria-pressed="true">All outbound</button>
         <button type="button" data-ogroup="traditional" aria-pressed="false">Traditional opener</button>
         <button type="button" data-ogroup="recipe" aria-pressed="false">Recipe opener</button>
       </div>
-      <div class="f-note" style="margin-top:6px;">Applies to both Pipeline and Setter Tracker below. Messages sent per day and Trends split by group from 5 Oct onwards. Earlier days only have whole-pipeline totals, so they show as "–" when a group is selected.</div>
+      <div class="f-note" style="margin-top:6px;">This tab is the outbound funnel only. Lead-magnet leads are on the Magnets tab at every stage, and never counted here. Applies to both Pipeline and Setter Tracker below. Messages sent per day and Trends split by group from 5 Oct onwards. Earlier days only have whole-pipeline totals, so they show as "–" when a group is selected.</div>
     </div>
 
     <div id="dmsPipelineBlock" style="display:flex;flex-direction:column;gap:18px;">
@@ -1243,7 +1243,16 @@
   // from 5 Oct the scan also flags any other time it couldn't read exactly (timesExact:false)
   function isApproxTime(d){ return !!(d.unread || d.timesExact===false); }
   function srcChip(d){ return d.source==='manychat_comment' ? '<span class="src-chip" title="Came in through a recipe-comment automation">ManyChat</span>' : (d.tab==='general' ? '<span class="src-chip" title="Thread sits in your General inbox">General</span>' : ''); }
-  function isMagnetOnly(d){ return d.opener==='magnet_delivery' && stageIdx(d)<=STAGE_INDEX.replied; }
+  // Two separate funnels, never mixed (Jordan, 17 Oct):
+  //  - Outbound: Jordan/setter opens (recipe offer, or "into fitness" style). Recipes sent later in these chats are still outbound.
+  //  - Lead magnet: someone gets the magnet (ManyChat comment flow or a magnet link), then a 48-72h "did you try it?" follow-up.
+  // A magnet lead stays in the magnet funnel at every stage — it no longer "graduates" into the outbound pipeline.
+  function isMagnetOnly(d){ return d.opener==='magnet_delivery'; }
+  // Placeholders the scan made from the inbox preview without opening the chat: no thread link, and their
+  // opener/funnel was guessed from the LAST message, so they sit outside both funnels until the scan reads them.
+  function isUnverified(d){ return /^pending-/i.test(d.id||'') && !d.threadId; }
+  function funnelOf(d){ return isUnverified(d) ? 'unread' : (isMagnetOnly(d) ? 'magnet' : 'outbound'); }
+  function funnelChip(d){ var f=funnelOf(d); return f==='magnet' ? '<span class="chip stage">Lead magnet</span>' : (f==='unread' ? '<span class="chip stage" title="Seen in the inbox list only. The scan hasn\'t opened this chat yet, so there\'s no link and no funnel.">Not read yet</span>' : ''); }
   function directionLabel(d){ return d.direction==='inbound'?'Inbound':(d.direction==='outbound'?'Outbound':'Unknown (unread)'); }
   function leadLink(d, nameHtml){
     var name = nameHtml || esc(d.displayName||d.username||d.id);
@@ -1257,11 +1266,16 @@
       meta.textContent='Last scanned '+(relTime(state.dmMeta.lastScanAt)||'recently')+(state.dmMeta.threadsRead!=null?' · '+state.dmMeta.threadsRead+' threads read':'')+(state.dmMeta.unreadSkipped?' · '+state.dmMeta.unreadSkipped+' unread left untouched':'');
     } else { meta.textContent = state.dmLoaded ? 'Waiting for the first DM scan.' : 'Loading DMs…'; }
 
-    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && !isMagnetOnly(d) && matchesOpenerGroup(d); }); // magnets get their own tab until they graduate into a real conversation
+    var allLeads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable; });
+    // outbound funnel only: lead-magnet leads live on the Magnets tab, unread placeholders wait until the scan reads them
+    var leads = allLeads.filter(function(d){ return funnelOf(d)==='outbound' && matchesOpenerGroup(d); });
     var outreachLeads = leads;
+    var unreadN = allLeads.filter(isUnverified).length;
+    if(unreadN) meta.textContent += ' · '+unreadN+' chats not read yet (no link or funnel until the scan opens them)';
 
-    // waiting on you — a message you've liked as an ack (no text reply) doesn't count as waiting
-    var waiting = leads.filter(function(d){ return d.lastSender==='lead' && (!d.status || d.status==='active') && !d.lastLeadMessageLiked; })
+    // waiting on you — every funnel, because anyone waiting needs a reply. A message you've liked as an ack (no text reply) doesn't count.
+    var waitPool = dmsOpenerGroup==='all' ? allLeads : leads;
+    var waiting = waitPool.filter(function(d){ return d.lastSender==='lead' && (!d.status || d.status==='active') && !d.lastLeadMessageLiked; })
       .sort(function(a,b){ return new Date(a.waitingSince||a.lastMessageAt||0) - new Date(b.waitingSince||b.lastMessageAt||0); });
     state.waiting = waiting;
     var oldest = waiting.length ? hoursSince(waiting[0].waitingSince||waiting[0].lastMessageAt) : null;
@@ -1282,7 +1296,7 @@
         var name = esc(d.displayName||d.username||d.id);
         var link = leadLink(d, name);
         return '<div class="wait-item"><div class="wait-main"><div class="wait-name">'+link+
-          (d.unread?'<span class="chip stage">unread</span>':'')+'<span class="chip stage">'+esc(stageLabel)+'</span></div>'+
+          (d.unread?'<span class="chip stage">unread</span>':'')+'<span class="chip stage">'+esc(stageLabel)+'</span>'+funnelChip(d)+'</div>'+
           (d.lastMessagePreview?'<div class="wait-preview">'+esc(d.lastMessagePreview)+'</div>':'')+
           '</div><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;"><span class="chip '+cls+(approx?' approx':'')+'"'+(approx?' title="Unread, so the time comes from Instagram\'s rough label (e.g. 3h). Exact once the thread is read."':'')+'>'+tag+'</span>'+
           '<button class="btn small" data-action="markReplied" data-id="'+esc(d.id)+'">Mark replied</button></div></div>';
@@ -1566,7 +1580,8 @@
   function fuState(d){
     if(d.category!=='lead') return null;
     if(d.notApplicable) return null;
-    if(isMagnetOnly(d)) return null;                    // magnet-only leads live in their own tab; once they graduate past "replied" they follow up here
+    if(isMagnetOnly(d)) return null;                    // lead-magnet funnel follows up on the Magnets tab, at every stage
+    if(isUnverified(d)) return null;                    // not read yet: funnel and exact times unknown until the scan opens it
     if(d.followUpStopped || STOP_STATUSES[d.status]) return {kind:'stopped', d:d};
     if(d.lastSender!=='jordan') return null;           // they're waiting on you (DMs tab)
     var seq = d.firstReplyAt ? 'convo' : 'cold';
@@ -1638,7 +1653,7 @@
 
   /* ---------- magnets (their own follow-up cadence, not counted as outreach) ---------- */
   function magnetFuState(d){
-    if(d.category!=='lead' || !isMagnetOnly(d)) return null;   // graduated magnet leads move to the main Follow-ups tab
+    if(d.category!=='lead' || !isMagnetOnly(d) || isUnverified(d)) return null;   // every lead-magnet lead follows up here, whatever its stage
     if(d.notApplicable) return null;
     if(d.followUpStopped || STOP_STATUSES[d.status]) return {kind:'stopped', d:d};
     if(d.lastSender!=='jordan') return null;
@@ -1667,7 +1682,7 @@
     function fill(id, list, bucket, empty){
       document.getElementById(id).innerHTML = list.length ? list.map(function(f){return fuItem(f,bucket);}).join('') : '<div class="empty-state">'+empty+'</div>';
     }
-    var magnetLeads = state.dms.filter(function(d){ return d.category==='lead' && d.opener==='magnet_delivery'; });
+    var magnetLeads = state.dms.filter(function(d){ return d.category==='lead' && funnelOf(d)==='magnet'; });
     var noData = !state.dms.length;
     fill('magOverdue', over, 'overdue', noData?'Fills once the scan has run.':'Nothing overdue.');
     fill('magToday', today, 'today', noData?'Fills once the scan has run.':'Nothing due today.');
@@ -1690,7 +1705,7 @@
   // magnet leads grouped by the post that triggered them (scan writes sourcePost = post shortcode)
   function renderMagnetsByPost(){
     var body=document.getElementById('magByPostBody'); if(!body) return;
-    var mags = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && d.opener==='magnet_delivery'; });
+    var mags = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && funnelOf(d)==='magnet'; });
     var byPost={}, unknown=0;
     mags.forEach(function(d){
       var p=d.sourcePost; if(!p){ unknown++; return; }
@@ -1710,7 +1725,7 @@
   }
   var magStageFilter = 'all';
   function renderMagnetLeadBrowser(){
-    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && isMagnetOnly(d); });
+    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && funnelOf(d)==='magnet'; });
     var counts = {};
     STAGES.forEach(function(s){ counts[s[0]] = 0; });
     leads.forEach(function(d){ var s=STAGES[stageIdx(d)]; if(s) counts[s[0]] = (counts[s[0]]||0)+1; });
@@ -1801,7 +1816,7 @@
     document.getElementById('homeGreeting').textContent = (hr<12?'Morning':(hr<17?'Afternoon':'Evening'))+', Jordan';
     var dmReady = !!(state.dmMeta && state.dmMeta.lastScanAt) || state.dms.length>0;
     var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable; });
-    var outreachLeadsHome = leads.filter(function(d){ return !isMagnetOnly(d); });
+    var outreachLeadsHome = leads.filter(function(d){ return funnelOf(d)==='outbound'; });
     var waiting = state.waiting||[], fu = state.fu||{over:[],today:[],soon:[]};
     var fuDue = fu.over.length+fu.today.length;
 
@@ -2041,7 +2056,7 @@
 
   function renderSetterOutcomes(){
     var noData = !state.dmLoaded;
-    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && !isMagnetOnly(d) && matchesOpenerGroup(d); });
+    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && funnelOf(d)==='outbound' && matchesOpenerGroup(d); });
     if(soRange!=='all'){ leads = leads.filter(function(d){ return inSoWindow(leadStartedAt(d)); }); }
     var outbound = leads.filter(function(d){ return d.direction==='outbound' && d.opener!=='magnet_delivery'; });
     document.getElementById('soOpeners').textContent = noData ? '–' : outbound.length;
@@ -2086,7 +2101,7 @@
   /* ---------- lead browser ---------- */
   var leadStageFilter = 'all';
   function renderLeadBrowser(){
-    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && !isMagnetOnly(d) && matchesOpenerGroup(d); });
+    var leads = state.dms.filter(function(d){ return d.category==='lead' && !d.notApplicable && funnelOf(d)==='outbound' && matchesOpenerGroup(d); });
     var counts = {};
     STAGES.forEach(function(s){ counts[s[0]] = 0; });
     leads.forEach(function(d){ var s=STAGES[stageIdx(d)]; if(s) counts[s[0]] = (counts[s[0]]||0)+1; });
