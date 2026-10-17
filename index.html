@@ -2536,16 +2536,18 @@
 
     // funnel
     var inDms=apps.filter(function(r){ return !!r.dmThreadId; }).length, booked=apps.filter(isBooked).length;
-    var stages=[['Opened form',cur.visits],['Answered 1+',cur.started],['Applied',cur.completed],['Good fit',fit],['In DMs',inDms],['Call booked',booked]];
+    // No "answered a question" stage: on Jordan's Typeform plan answers from people who quit
+    // are never saved (partial responses need a paid plan), so mid-form drop-off can't be measured.
+    var stages=[['Opened form',cur.visits],['Applied',cur.completed],['Good fit',fit],['In DMs',inDms],['Call booked',booked]];
     var fmax=Math.max(1,stages[0][1]), biggest=-1, bigLoss=0;
-    for(var i=1;i<4;i++){ if(stages[i-1][1]>0){ var loss=1-stages[i][1]/stages[i-1][1]; if(loss>bigLoss){ bigLoss=loss; biggest=i; } } }
+    for(var i=1;i<3;i++){ if(stages[i-1][1]>0){ var loss=1-stages[i][1]/stages[i-1][1]; if(loss>bigLoss){ bigLoss=loss; biggest=i; } } }
     document.getElementById('appsFunnel').innerHTML = cur.visits ? stages.map(function(s,i){
       var wd=Math.max(0.5,(s[1]/fmax)*100), sub = i>0 && stages[i-1][1] ? ' · '+pct(s[1],stages[i-1][1])+'%' : '';
       return '<div class="f-row'+(i===biggest?' biggest':'')+'" title="'+esc(s[0])+': '+s[1]+'"><div class="f-label">'+esc(s[0])+'</div><div class="f-track"><div class="f-bar" style="width:'+wd+'%"></div></div><div class="f-val">'+s[1]+sub+(i===biggest?' ▼':'')+'</div></div>';
     }).join('') : '<div class="empty-state">Nobody opened the form in this window.</div>';
     var fn='';
     if(cur.visits && cur.started===cur.completed && cur.visits>cur.completed)
-      fn = (cur.visits-cur.completed)+' of '+cur.visits+' people opened the form and left without answering the first question. Everyone who answered one question finished it, so the leak is the first screen, not the questions.';
+      fn = (cur.visits-cur.completed)+' of '+cur.visits+' people opened the form and didn\'t submit. Typeform only saves answers from people who finish on your plan, so it can\'t show which question they quit on.';
     else if(biggest>0) fn = 'Biggest drop: '+stages[biggest-1][0]+' → '+stages[biggest][0]+' ('+Math.round(bigLoss*100)+'% lost).';
     if(cur.completed && !inDms) fn += (fn?' ':'')+'No applicant in this window matched an Instagram DM by name.';
     document.getElementById('appsFunnelNote').textContent = fn;
