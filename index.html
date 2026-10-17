@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="TasteForm HQ"><meta name="theme-color" content="#15110D"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>TasteForm HQ</title>
 <div id="jsErrBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#B03A2A;color:#fff;font:13px/1.5 -apple-system,sans-serif;padding:10px 14px;white-space:pre-wrap;"></div>
 <script>
@@ -364,6 +364,7 @@
   .auth-field input{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:8px;padding:10px 12px;font-size:14px;font-family:'Open Sans',sans-serif;width:100%;}
   .auth-field input:focus-visible{outline:2px solid var(--accent-dm);outline-offset:1px;}
   .auth-error{font-size:12px;color:var(--crit);min-height:16px;line-height:1.4;}
+  .auth-warn{margin-top:14px;font-size:12px;line-height:1.5;color:var(--warn-text,var(--muted));background:var(--warn-bg,transparent);border:1px solid var(--warn-border,var(--border));border-radius:10px;padding:10px 12px;}
   .auth-switch{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;}
   .auth-switch button{border:none;background:none;color:var(--accent-dm);font-weight:700;cursor:pointer;font-family:'Open Sans',sans-serif;font-size:12px;padding:0;}
   #authSubmit{border:none;background:var(--text);color:var(--bg);border-radius:8px;padding:11px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Open Sans',sans-serif;}
@@ -394,6 +395,7 @@
       <div class="auth-error" id="authError"></div>
       <button type="submit" id="authSubmit">Sign in</button>
     </form>
+    <div class="auth-warn" id="authStorageWarn" hidden></div>
     <div class="auth-switch"><span id="authModeLabel">Don't have an account?</span><button type="button" id="authToggle">Sign up</button></div>
   </div>
 </div>
@@ -966,7 +968,28 @@
     el.textContent = "Couldn't load the Supabase library (check your internet connection and try reloading). If this keeps happening, open the browser console (F12) and tell Jordan's Claude what the red error says.";
     throw new Error('supabase-js failed to load from CDN');
   }
-  var supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  // Remember this computer: the session (incl. a long-lived refresh token) is saved in localStorage
+  // and renewed automatically, so a browser that keeps site data never asks for the password again.
+  var supa = window.supabase.createClient(SUPA_URL, SUPA_KEY, { auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
+
+  // If this browser won't let the page store anything (Private window, Safari "Block all cookies",
+  // or a link opened inside another app's built-in browser), it can never remember the login.
+  // Detect that and say so on the login screen instead of silently asking every time.
+  var storageOk = (function(){ try{ var k='__tf_probe'; localStorage.setItem(k,'1'); var ok=localStorage.getItem(k)==='1'; localStorage.removeItem(k); return ok; }catch(e){ return false; } })();
+  function showStorageWarning(){
+    var w=document.getElementById('authStorageWarn'); if(!w) return;
+    var ua=navigator.userAgent||'', inApp=/Instagram|FBAN|FBAV|Slack|Line\//i.test(ua);
+    if(!storageOk){
+      w.innerHTML = "<b>This window can't remember you.</b> The browser is blocking site storage, so you'll be asked to sign in every time. "+
+        (inApp ? "You're in another app's built-in browser. Open the link in Safari or Chrome instead." :
+         "If this is a Private window, open the link in a normal window. In Safari, also check Settings → Privacy and turn off <b>Block all cookies</b>.");
+      w.hidden=false;
+    } else w.hidden=true;
+  }
+  async function keepStorage(){
+    // ask the browser not to clear this site's data under storage pressure / tracking-prevention sweeps
+    try{ if(navigator.storage && navigator.storage.persist && !(await navigator.storage.persisted())) await navigator.storage.persist(); }catch(e){}
+  }
 
   var authLoadingEl = document.getElementById('authLoading');
   var authScreenEl = document.getElementById('authScreen');
@@ -974,7 +997,7 @@
   var mode = 'signin';
 
   function showLoading(){ authLoadingEl.hidden=false; authScreenEl.hidden=true; appRootEl.hidden=true; }
-  function showLogin(){ authLoadingEl.hidden=true; authScreenEl.hidden=false; appRootEl.hidden=true; }
+  function showLogin(){ authLoadingEl.hidden=true; authScreenEl.hidden=false; appRootEl.hidden=true; showStorageWarning(); }
   function showApp(){ authLoadingEl.hidden=true; authScreenEl.hidden=true; appRootEl.hidden=false; }
 
   function escA(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -1036,6 +1059,7 @@
   var booted=false;
   async function afterSignIn(user){
     showLoading();
+    keepStorage();
     var profile=null;
     try{
       var pr = await supa.from('profiles').select('*').eq('id', user.id).maybeSingle();
