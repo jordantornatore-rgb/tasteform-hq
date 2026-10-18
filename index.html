@@ -155,6 +155,43 @@
   .disqual-item span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .restore-btn{border:1px solid var(--border);background:none;color:var(--text);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;flex-shrink:0;}
   footer.hint{font-size:12px;color:var(--muted);text-align:center;padding-top:4px;}
+  /* routine (admin only) */
+  #viewRoutine .r-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  #viewRoutine .r-nav .btn,.r-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:6px 14px;font:600 12px 'Open Sans',sans-serif;cursor:pointer;}
+  #viewRoutine .r-btn[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text);}
+  #viewRoutine .r-date{font-weight:700;font-size:14px;min-width:150px;text-align:center;}
+  .r-list{display:flex;flex-direction:column;gap:6px;}
+  .r-row{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--bg);}
+  .r-row.now{border-color:var(--accent-dm);box-shadow:0 0 0 2px var(--accent-dm) inset;background:var(--surface);}
+  .r-row.done{opacity:.55;}
+  .r-row.done .r-label{text-decoration:line-through;}
+  .r-row.missed{border-color:var(--crit);background:var(--crit-soft);}
+  .r-tick{width:26px;height:26px;border-radius:8px;border:2px solid var(--muted);background:none;color:var(--bg);cursor:pointer;flex-shrink:0;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;}
+  .r-tick[aria-checked="true"]{background:var(--good);border-color:var(--good);}
+  .r-time{font-size:12px;color:var(--muted);width:118px;flex-shrink:0;font-variant-numeric:tabular-nums;}
+  .r-label{flex:1;min-width:0;font-weight:600;font-size:14px;}
+  .r-cat{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+  .r-now{font-size:10.5px;font-weight:800;letter-spacing:.14em;color:var(--accent-dm);}
+  .r-hrs{width:64px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);padding:4px 6px;font:12px 'Open Sans',sans-serif;}
+  @media (max-width:640px){.r-row{flex-wrap:wrap;gap:8px;}.r-time{width:auto;order:3;}.r-label{flex-basis:calc(100% - 50px);}}
+  .r-counters{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
+  .r-counter{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:6px;}
+  .r-counter .cl{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .r-counter .cv{display:flex;align-items:center;gap:10px;}
+  .r-counter .cv b{font-family:'Anton',Impact,sans-serif;font-weight:400;font-size:28px;min-width:38px;text-align:center;}
+  .r-counter .cv button{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:16px;cursor:pointer;}
+  .r-counter .cn{font-size:11px;color:var(--muted);}
+  .r-bars{display:flex;flex-direction:column;gap:8px;}
+  .r-bar{display:grid;grid-template-columns:130px 1fr 96px;gap:10px;align-items:center;font-size:13px;}
+  .r-bar .track{height:12px;border-radius:999px;background:var(--bg);border:1px solid var(--border);overflow:hidden;}
+  .r-bar .fill{height:100%;background:var(--accent-super);}
+  .r-bar .val{font-variant-numeric:tabular-nums;text-align:right;color:var(--muted);font-size:12px;}
+  @media (max-width:520px){.r-bar{grid-template-columns:96px 1fr 80px;}}
+  #viewRoutine tr.r-click{cursor:pointer;}
+  #viewRoutine tr.r-click:hover td{background:var(--bg);}
+  #viewRoutine tr.r-sel td{font-weight:700;}
+  #rtMsg{font-size:12px;color:var(--crit);}
+
 
   /* DMs */
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
@@ -411,6 +448,7 @@
       <button class="tab" role="tab" id="tabMagnets" aria-selected="false" aria-controls="viewMagnets" data-view="magnets">Magnets <span class="tab-badge" id="magBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads">Ads</button>
       <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps">Applications <span class="tab-badge" id="appsBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden>Routine</button>
     </div>
     <div id="accountBox"></div>
   </div>
@@ -952,6 +990,58 @@
     </div>
   </section>
 
+  <!-- ROUTINE (admin only) -->
+  <section id="viewRoutine" role="tabpanel" aria-labelledby="tabRoutine" hidden style="display:flex;flex-direction:column;gap:18px;">
+    <div id="routineRoot" style="display:flex;flex-direction:column;gap:18px;">
+      <div class="top">
+        <div>
+          <h1>Routine</h1>
+          <div class="sub" id="rtSub">Loading…</div>
+        </div>
+        <div class="r-nav" id="rtNav"></div>
+      </div>
+      <div id="rtMsg" role="status"></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="label">Today done</div><div class="value" id="rtKpiToday">–</div><div class="note" id="rtKpiTodayNote">&nbsp;</div></div>
+        <div class="kpi"><div class="label">Routine stuck to (week)</div><div class="value" id="rtKpiWeek">–</div><div class="note" id="rtKpiWeekNote">&nbsp;</div></div>
+        <div class="kpi"><div class="label">Work hours (week)</div><div class="value" id="rtKpiHours">–</div><div class="note" id="rtKpiHoursNote">&nbsp;</div></div>
+        <div class="kpi"><div class="label">Reels posted (week)</div><div class="value" id="rtKpiReels">–</div><div class="note" id="rtKpiReelsNote">&nbsp;</div></div>
+      </div>
+
+      <div class="panel">
+        <h2>Today's blocks</h2>
+        <p class="rule" id="rtTodayRule">Tick each block when it's done. The highlighted block is the one you should be in right now.</p>
+        <div class="r-nav" id="rtCallsToggle"></div>
+        <div class="r-list" id="rtToday"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Daily numbers</h2>
+        <p class="rule">Tap + each time you do one. Reel bank counts across all days.</p>
+        <div class="r-counters" id="rtCounters"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <h2>Hours this week</h2>
+          <p class="rule">Logged = blocks you ticked. Planned = the full week if every work block happens. Walks, gym, lunch and switch-off aren't counted as work. Calls count only the hours you type on the calls block (planned: about 5h a week).</p>
+          <div class="r-bars" id="rtWeekHours"></div>
+        </div>
+        <div class="panel">
+          <h2>Day by day</h2>
+          <p class="rule">Tap a day to open it.</p>
+          <div class="table-wrap"><table class="scores"><thead><tr><th>Day</th><th class="num">Done</th><th class="num">Stuck to</th><th class="num">Work hrs</th></tr></thead><tbody id="rtWeekDays"></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Last 4 weeks</h2>
+        <p class="rule">Are you actually following the routine, week on week.</p>
+        <div class="table-wrap"><table class="scores"><thead><tr><th>Week starting</th><th class="num">Routine stuck to</th><th class="num">Work hrs logged</th><th class="num">Content</th><th class="num">Sales</th><th class="num">Calls</th><th class="num">Reels posted</th></tr></thead><tbody id="rtHistory"></tbody></table></div>
+      </div>
+    </div>
+  </section>
 
 </div>
 
@@ -1135,7 +1225,7 @@
   function showBanner(msg){ var b=document.getElementById('offlineBanner'); b.textContent=msg; b.classList.add('show'); }
 
   /* ---------- tabs ---------- */
-  var VIEWS={home:['viewHome','tabHome'], leads:['viewLeads','tabLeads'], dms:['viewDms','tabDms'], follow:['viewFollow','tabFollow'], magnets:['viewMagnets','tabMagnets'], ads:['viewAds','tabAds'], apps:['viewApps','tabApps']};
+  var VIEWS={home:['viewHome','tabHome'], leads:['viewLeads','tabLeads'], dms:['viewDms','tabDms'], follow:['viewFollow','tabFollow'], magnets:['viewMagnets','tabMagnets'], ads:['viewAds','tabAds'], apps:['viewApps','tabApps'], routine:['viewRoutine','tabRoutine']};
   function setView(view){
     if(!VIEWS[view]) view='home';
     Object.keys(VIEWS).forEach(function(k){
@@ -2827,6 +2917,361 @@
     });
   }
   initPanelCollapse();
+})();
+</script>
+
+<script>
+/* ---------- Routine tab (admin only) ---------- */
+(function(){
+  'use strict';
+  var TZ='Australia/Sydney';
+  var CAT_ORDER=['content','sales','calls','clients','systems','admin','flex'];
+  var CATS={content:'Content',sales:'Sales & stories',calls:'Calls',clients:'Clients',systems:'Systems / building',admin:'Admin',flex:'Flex',life:'Life'};
+  var DAYN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var COUNTERS=[
+    {k:'reelsPosted',label:'Reels posted',target:2,note:'Target 2 a day'},
+    {k:'reelsFilmed',label:'Reels filmed',target:null,note:''},
+    {k:'bankAdded',label:'Added to reel bank',target:null,note:'',bank:true},
+    {k:'react',label:'Reactivation contacts',target:5,note:'Target 5 on weekdays',weekday:true},
+    {k:'dms',label:'Personal DMs',target:null,note:''}
+  ];
+  var BANK_GOAL=20;
+  var CALL_PLAN={1:120,2:120,3:60}; // planned call minutes per weekday (about 5h a week); real hours are typed on the calls block
+
+  var client=null, timer=null, poller=null;
+  var state={admin:false, days:{}, calls:null, view:null, pending:{}};
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function pad(n){ return (n<10?'0':'')+n; }
+  function hm(h,m){ return h*60+(m||0); }
+  function fmtT(min){ var h=Math.floor(min/60), m=min%60, ap=h>=12?'pm':'am', h12=h%12||12; return h12+':'+pad(m)+ap; }
+  function fmtH(min){ var h=min/60; return (Math.round(h*10)/10).toString(); }
+
+  function nowSyd(){
+    if(window.__routineNow) return window.__routineNow;
+    var p={};
+    new Intl.DateTimeFormat('en-GB',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'})
+      .formatToParts(new Date()).forEach(function(x){ p[x.type]=x.value; });
+    return {date:p.year+'-'+p.month+'-'+p.day, min:parseInt(p.hour,10)*60+parseInt(p.minute,10)};
+  }
+  function dowOf(d){ return new Date(d+'T00:00:00Z').getUTCDay(); }
+  function addDays(d,n){ var t=new Date(d+'T00:00:00Z'); t.setUTCDate(t.getUTCDate()+n); return t.getUTCFullYear()+'-'+pad(t.getUTCMonth()+1)+'-'+pad(t.getUTCDate()); }
+  function weekStart(d){ var w=dowOf(d); return addDays(d, w===0?-6:1-w); }
+  function dateLabel(d){ var t=new Date(d+'T00:00:00Z'); return DAYN[dowOf(d)]+' '+t.getUTCDate()+' '+MON[t.getUTCMonth()]; }
+  function shortDate(d){ var t=new Date(d+'T00:00:00Z'); return t.getUTCDate()+' '+MON[t.getUTCMonth()]; }
+
+  /* ---------- the schedule ---------- */
+  function blk(id,s,e,label,cat){ return {id:id,s:s,e:e,label:label,cat:cat}; }
+  function buildBlocks(dow, calls){
+    var L=[];
+    if(dow>=1 && dow<=4){
+      var hi = dow===4 ? 1 : 2;
+      L.push(blk('wake',hm(6,20),hm(6,30),'Wake up','life'));
+      L.push(blk('research',hm(6,30),hm(6,45),'Research + ideas list','content'));
+      L.push(blk('script',hm(6,45),hm(7,30),'Script '+hi+' high-effort reel'+(hi>1?'s':''),'content'));
+      L.push(blk('walk',hm(7,30),hm(8,5),'Walk + coffee','life'));
+      L.push(blk('shower',hm(8,5),hm(8,20),'Shower + get ready','life'));
+      L.push(blk('film1',hm(8,20),hm(9,10),'Film high-effort reel #1','content'));
+      if(dow===4) L.push(blk('bank1',hm(9,10),hm(10,0),'Film 2–3 bank reels','content'));
+      else L.push(blk('film2',hm(9,10),hm(10,0),'Film high-effort reel #2, send to editor','content'));
+      L.push(blk('checkin',hm(10,0),hm(10,10),'Client / team check-in','clients'));
+      L.push(blk('stories',hm(10,10),hm(10,55),'Stories (45 min cap)','sales'));
+      L.push(blk('react',hm(10,55),hm(11,25),'Reactivation: past applicants, past clients, quiet leads','sales'));
+      L.push(blk('bank2',hm(11,25),hm(12,0),'Bank reels (film / edit)','content'));
+      L.push(blk('lunch',hm(12,0),hm(12,30),'Lunch + float','life'));
+      L.push(blk('low',hm(12,30),hm(13,10),dow===4?'Film 1 low-effort reel':'Film 2 low-effort reels','content'));
+      L.push(blk('review',hm(13,10),hm(13,30),'Review edits + schedule posts','content'));
+      if(dow===4){
+        L.push(blk('admin',hm(13,30),hm(14,15),'Admin + payments (45 min)','admin'));
+        L.push(blk('buffer',hm(14,15),hm(14,30),'Buffer','life'));
+      } else {
+        L.push(blk('admin',hm(13,30),hm(14,30),'Admin + payments','admin'));
+      }
+      L.push(blk('gym',hm(14,30),hm(16,0),'Gym','life'));
+      L.push(blk('dms',hm(16,0),hm(16,30),'Personal DMs + engagement','sales'));
+      L.push(blk('flex',hm(16,30),hm(17,30),'Flex: VA management, sales content, edit review','flex'));
+      if(dow===1||dow===2){
+        if(calls) L.push(blk('eve-calls',hm(17,30),hm(21,0),'Calls: sales, check-ins, setter, 30HC','calls'));
+        else L.push(blk('eve-money',hm(17,30),hm(20,0),'Money-making: reactivation, outreach, sales content','sales'));
+        L.push(blk('off',calls?hm(21,0):hm(20,0),calls?hm(21,30):hm(20,30),'Dinner + switch off','life'));
+      } else if(dow===3){
+        if(calls) L.push(blk('eve-calls',hm(17,30),hm(19,0),'Calls (finish by 7:00)','calls'));
+        else L.push(blk('eve-flex',hm(17,30),hm(19,0),'Flex block (done by 7:00)','flex'));
+        L.push(blk('off',hm(19,0),hm(19,30),'Off: out of action','life'));
+      } else {
+        if(calls) L.push(blk('eve-calls',hm(17,30),hm(20,0),'Calls','calls'));
+        else L.push(blk('eve-flex',hm(17,30),hm(20,0),'Flex: sales, systems catch-up, edit review','flex'));
+        L.push(blk('off',hm(20,0),hm(20,30),'Dinner + switch off','life'));
+      }
+    } else if(dow===5){
+      L.push(blk('wake',hm(6,20),hm(6,30),'Wake up','life'));
+      L.push(blk('research',hm(6,30),hm(7,30),'Research + catch-up scripting for anything behind','content'));
+      L.push(blk('walk',hm(7,30),hm(8,20),'Walk + coffee, shower','life'));
+      L.push(blk('film',hm(8,20),hm(10,0),'Film any reel that slipped, send to editor','content'));
+      L.push(blk('checkin',hm(10,0),hm(10,30),'Client check-ins','clients'));
+      L.push(blk('delivery',hm(10,30),hm(12,0),'Client delivery, feedback, recaps','clients'));
+      L.push(blk('lunch',hm(12,0),hm(12,30),'Lunch','life'));
+      L.push(blk('weekly',hm(12,30),hm(13,30),'Weekly review: numbers, what slipped, what to change','admin'));
+      L.push(blk('admin',hm(13,30),hm(14,30),'Admin + payments','admin'));
+      L.push(blk('gym',hm(14,30),hm(16,0),'Gym','life'));
+      L.push(blk('react',hm(16,0),hm(17,0),'Reactivation + optional calls','sales'));
+    } else if(dow===6){
+      L.push(blk('walk',hm(7,0),hm(7,30),'Walk + coffee','life'));
+      L.push(blk('pick',hm(7,30),hm(7,50),'Pick the one project, define "done"','systems'));
+      L.push(blk('build1',hm(7,50),hm(9,30),'Build','systems'));
+      L.push(blk('break',hm(9,30),hm(9,50),'Break','life'));
+      L.push(blk('build2',hm(9,50),hm(11,30),'Build','systems'));
+      L.push(blk('test',hm(11,30),hm(12,0),'Test, document, note what\'s next','systems'));
+    } else {
+      L.push(blk('research',hm(8,0),hm(8,30),'Deep research: what\'s working in your niche','content'));
+      L.push(blk('plan',hm(8,30),hm(8,50),'Plan the week: topic, script day, film day, post day per reel','content'));
+      L.push(blk('script',hm(8,50),hm(10,0),'Script the 7 low-effort reels','content'));
+      L.push(blk('priorities',hm(10,0),hm(10,30),'Set 3 priorities for each day','admin'));
+    }
+    return L;
+  }
+
+  /* ---------- data ---------- */
+  function dayRec(date){
+    if(!state.days[date]) state.days[date]={ticks:{},counters:{},callsMode:null,callHrs:null};
+    var r=state.days[date]; r.ticks=r.ticks||{}; r.counters=r.counters||{};
+    return r;
+  }
+  function callsOn(date){
+    var r=dayRec(date);
+    if(r.callsMode!=null) return !!r.callsMode;
+    var c=state.calls && state.calls.dates && state.calls.dates[date];
+    if(c && typeof c.count==='number') return c.count>0;
+    var d=dowOf(date); return d===1||d===2||d===3;
+  }
+  function callsSource(date){
+    var r=dayRec(date); if(r.callsMode!=null) return 'set by you';
+    var c=state.calls && state.calls.dates && state.calls.dates[date];
+    if(c && typeof c.count==='number') return 'from Google Calendar ('+c.count+' booked)';
+    return 'default for this day';
+  }
+  function blocksOf(date){ return buildBlocks(dowOf(date), callsOn(date)); }
+
+  function dayStats(date, now){
+    var rec=dayRec(date), bl=blocksOf(date);
+    var s={total:bl.length,counted:0,ticked:0,plan:{},logged:{},planMin:0,loggedMin:0};
+    bl.forEach(function(b){
+      var past = date<now.date || (date===now.date && b.e<=now.min);
+      var tk=!!rec.ticks[b.id];
+      if(past||tk) s.counted++;
+      if(tk) s.ticked++;
+      if(b.cat!=='life'){
+        var pm=b.e-b.s;
+        if(b.cat==='calls') pm=CALL_PLAN[dowOf(date)]||0;
+        s.plan[b.cat]=(s.plan[b.cat]||0)+pm; s.planMin+=pm;
+        if(tk){
+          var lm=(b.cat==='calls') ? ((rec.callHrs!=null && rec.callHrs!=='') ? Math.round(Number(rec.callHrs)*60) : 0) : pm;
+          s.logged[b.cat]=(s.logged[b.cat]||0)+lm; s.loggedMin+=lm;
+        }
+      }
+    });
+    s.pct = s.counted ? Math.round(100*s.ticked/s.counted) : null;
+    return s;
+  }
+  function weekStats(ws, now){
+    var w={days:[],counted:0,ticked:0,plan:{},logged:{},planMin:0,loggedMin:0,reelsPosted:0};
+    for(var i=0;i<7;i++){
+      var d=addDays(ws,i), s=dayStats(d,now);
+      w.days.push({date:d,stats:s});
+      w.counted+=s.counted; w.ticked+=s.ticked; w.planMin+=s.planMin; w.loggedMin+=s.loggedMin;
+      Object.keys(s.plan).forEach(function(c){ w.plan[c]=(w.plan[c]||0)+s.plan[c]; });
+      Object.keys(s.logged).forEach(function(c){ w.logged[c]=(w.logged[c]||0)+s.logged[c]; });
+      w.reelsPosted += Number(dayRec(d).counters.reelsPosted||0);
+    }
+    w.pct = w.counted ? Math.round(100*w.ticked/w.counted) : null;
+    return w;
+  }
+  function bankTotal(){
+    var t=0; Object.keys(state.days).forEach(function(d){ t+=Number((state.days[d].counters||{}).bankAdded||0); });
+    return t;
+  }
+
+  /* ---------- saving / loading ---------- */
+  function setMsg(t){ var m=$('rtMsg'); if(m) m.textContent=t||''; }
+  function save(date){
+    var rec=dayRec(date); rec.updatedAt=new Date().toISOString();
+    state.pending[date]=Date.now();
+    if(!client) return;
+    client.from('meta').upsert({id:'routine:'+date, data:rec, updated_at:rec.updatedAt}).then(function(r){
+      if(r && r.error){ setMsg("Couldn't save that tick: "+r.error.message); } else setMsg('');
+    });
+  }
+  function load(){
+    if(!client) return;
+    client.from('meta').select('*').like('id','routine:%').then(function(res){
+      if(res.error){ setMsg("Couldn't load your routine: "+res.error.message); return; }
+      (res.data||[]).forEach(function(row){
+        var date=String(row.id).slice('routine:'.length);
+        if(state.pending[date] && Date.now()-state.pending[date]<10000) return;
+        state.days[date]=row.data||{ticks:{},counters:{}};
+      });
+      render();
+    });
+    client.from('meta').select('*').eq('id','routineCalls').maybeSingle().then(function(res){
+      if(res && res.data){ state.calls=res.data.data||null; render(); }
+    });
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    if(!state.admin || !$('rtToday')) return;
+    var now=nowSyd(), date=state.view||now.date, isToday=date===now.date;
+    var ws=weekStart(date), w=weekStats(ws,now), ds=dayStats(date,now), rec=dayRec(date), bl=blocksOf(date);
+
+    $('rtSub').textContent=dateLabel(date)+(isToday?' · today':'');
+    $('rtNav').innerHTML=
+      '<button class="r-btn" data-r="nav" data-d="-1" aria-label="Previous day">←</button>'+
+      '<span class="r-date">'+esc(dateLabel(date))+'</span>'+
+      '<button class="r-btn" data-r="nav" data-d="1" aria-label="Next day">→</button>'+
+      (isToday?'':'<button class="r-btn" data-r="nav" data-d="today">Today</button>');
+
+    // KPIs
+    $('rtKpiToday').textContent = ds.total? (ds.ticked+'/'+ds.total) : '–';
+    $('rtKpiTodayNote').textContent = ds.pct==null ? 'nothing due yet' : ds.pct+'% of blocks due so far';
+    $('rtKpiWeek').textContent = w.pct==null ? '–' : w.pct+'%';
+    $('rtKpiWeekNote').textContent = w.counted ? (w.ticked+' of '+w.counted+' blocks due') : 'week hasn\'t started';
+    $('rtKpiHours').textContent = fmtH(w.loggedMin);
+    $('rtKpiHoursNote').textContent = 'of '+fmtH(w.planMin)+' planned';
+    $('rtKpiReels').textContent = w.reelsPosted;
+    $('rtKpiReelsNote').textContent = 'of 14 this week';
+
+    // calls toggle
+    var dow=dowOf(date), ct=$('rtCallsToggle');
+    if(dow>=1 && dow<=4){
+      var on=callsOn(date);
+      ct.innerHTML='<span class="r-cat">Evening</span>'+
+        '<button class="r-btn" data-r="calls" data-v="1" aria-pressed="'+(on?'true':'false')+'">Calls booked</button>'+
+        '<button class="r-btn" data-r="calls" data-v="0" aria-pressed="'+(on?'false':'true')+'">No calls</button>'+
+        '<span class="r-cat" style="text-transform:none;letter-spacing:0;font-weight:500">'+esc(callsSource(date))+'</span>';
+    } else ct.innerHTML='';
+
+    // today's blocks
+    var html='';
+    bl.forEach(function(b){
+      var tk=!!rec.ticks[b.id];
+      var isNow = isToday && b.s<=now.min && now.min<b.e;
+      var past = date<now.date || (isToday && b.e<=now.min);
+      var cls='r-row'+(tk?' done':'')+(isNow&&!tk?' now':'')+(past&&!tk?' missed':'');
+      html+='<div class="'+cls+'">'+
+        '<button class="r-tick" role="checkbox" aria-checked="'+(tk?'true':'false')+'" aria-label="'+esc(b.label)+'" data-r="tick" data-b="'+esc(b.id)+'">'+(tk?'✓':'')+'</button>'+
+        '<div class="r-time">'+fmtT(b.s)+' – '+fmtT(b.e)+'</div>'+
+        '<div class="r-label">'+esc(b.label)+'</div>'+
+        (isNow?'<span class="r-now">NOW</span>':'')+
+        (b.cat==='calls'?'<input class="r-hrs" type="number" min="0" max="8" step="0.25" placeholder="hrs" title="Hours actually on calls" data-r-hrs value="'+(rec.callHrs==null?'':esc(rec.callHrs))+'">':'')+
+        '<span class="r-cat">'+esc(CATS[b.cat])+'</span>'+
+      '</div>';
+    });
+    $('rtToday').innerHTML=html;
+
+    // counters
+    var ch='';
+    COUNTERS.forEach(function(c){
+      var v=Number(rec.counters[c.k]||0);
+      var note=c.note;
+      if(c.bank) note=bankTotal()+' of '+BANK_GOAL+' banked so far';
+      else if(c.target!=null && (!c.weekday || (dow>=1&&dow<=5))) note=v+' / '+c.target+(v>=c.target?' ✓':'');
+      ch+='<div class="r-counter"><div class="cl">'+esc(c.label)+'</div><div class="cv">'+
+        '<button data-r="cnt" data-k="'+c.k+'" data-v="-1" aria-label="Minus one '+esc(c.label)+'">−</button><b>'+v+'</b>'+
+        '<button data-r="cnt" data-k="'+c.k+'" data-v="1" aria-label="Plus one '+esc(c.label)+'">+</button></div>'+
+        '<div class="cn">'+esc(note)+'</div></div>';
+    });
+    $('rtCounters').innerHTML=ch;
+
+    // hours by category
+    var bars='';
+    CAT_ORDER.forEach(function(c){
+      var p=w.plan[c]||0, l=w.logged[c]||0; if(!p && !l) return;
+      var pc=p? Math.min(100,Math.round(100*l/p)) : 100;
+      bars+='<div class="r-bar"><div>'+esc(CATS[c])+'</div><div class="track"><div class="fill" style="width:'+pc+'%"></div></div><div class="val">'+fmtH(l)+' / '+fmtH(p)+' h</div></div>';
+    });
+    $('rtWeekHours').innerHTML=bars||'<div class="empty-state">No work blocks yet.</div>';
+
+    // day by day
+    var rows='';
+    w.days.forEach(function(d){
+      var s=d.stats;
+      rows+='<tr class="r-click'+(d.date===date?' r-sel':'')+'" data-r="goto" data-d="'+d.date+'"><td>'+esc(DAYN[dowOf(d.date)].slice(0,3))+' '+esc(shortDate(d.date))+(d.date===now.date?' · today':'')+'</td>'+
+        '<td class="num">'+s.ticked+'/'+s.total+'</td><td class="num">'+(s.pct==null?'–':s.pct+'%')+'</td><td class="num">'+fmtH(s.loggedMin)+' / '+fmtH(s.planMin)+'</td></tr>';
+    });
+    $('rtWeekDays').innerHTML=rows;
+
+    // last 4 weeks
+    var hist='', cur=weekStart(now.date);
+    for(var i=0;i<4;i++){
+      var wsI=addDays(cur,-7*i), wk=weekStats(wsI,now);
+      hist+='<tr><td>'+esc(shortDate(wsI))+(i===0?' · this week':'')+'</td><td class="num">'+(wk.pct==null?'–':wk.pct+'%')+'</td>'+
+        '<td class="num">'+fmtH(wk.loggedMin)+'</td><td class="num">'+fmtH(wk.logged.content||0)+'</td>'+
+        '<td class="num">'+fmtH(wk.logged.sales||0)+'</td><td class="num">'+fmtH(wk.logged.calls||0)+'</td><td class="num">'+wk.reelsPosted+'</td></tr>';
+    }
+    $('rtHistory').innerHTML=hist;
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click', function(e){
+    if(!state.admin) return;
+    var el=e.target.closest && e.target.closest('#viewRoutine [data-r]'); if(!el) return;
+    var a=el.getAttribute('data-r'), now=nowSyd(), date=state.view||now.date, rec=dayRec(date);
+    if(a==='tick'){
+      var id=el.getAttribute('data-b');
+      if(rec.ticks[id]) delete rec.ticks[id]; else rec.ticks[id]=new Date().toISOString();
+      save(date);
+    } else if(a==='nav'){
+      var d=el.getAttribute('data-d');
+      state.view = d==='today' ? null : addDays(date, parseInt(d,10));
+      if(state.view===now.date) state.view=null;
+    } else if(a==='goto'){
+      var g=el.getAttribute('data-d'); state.view = g===now.date ? null : g;
+    } else if(a==='calls'){
+      rec.callsMode = el.getAttribute('data-v')==='1';
+      save(date);
+    } else if(a==='cnt'){
+      var k=el.getAttribute('data-k'), dv=parseInt(el.getAttribute('data-v'),10);
+      rec.counters[k]=Math.max(0,Number(rec.counters[k]||0)+dv);
+      save(date);
+    }
+    render();
+  });
+  document.addEventListener('change', function(e){
+    if(!state.admin) return;
+    var el=e.target.closest && e.target.closest('#viewRoutine [data-r-hrs]'); if(!el) return;
+    var now=nowSyd(), date=state.view||now.date, rec=dayRec(date);
+    var v=el.value===''?null:Math.max(0,Math.min(8,Number(el.value)));
+    rec.callHrs=(v==null||isNaN(v))?null:v;
+    save(date); render();
+  });
+
+  /* ---------- boot ---------- */
+  function start(){
+    load(); render();
+    timer=setInterval(render,30000);
+    poller=setInterval(load,30000);
+  }
+  document.addEventListener('tf-auth-ready', function(ev){
+    var role=ev.detail && ev.detail.profile && ev.detail.profile.role;
+    client=ev.detail && ev.detail.supabase;
+    var tab=$('tabRoutine');
+    if(role==='admin'){
+      state.admin=true;
+      if(tab) tab.hidden=false;
+      start();
+    } else {
+      state.admin=false;
+      var root=$('routineRoot'); if(root) root.innerHTML='<div class="panel"><h2>Routine</h2><p class="rule">This tab is admin only.</p></div>';
+    }
+  });
+  document.addEventListener('tf-auth-signed-out', function(){
+    state.admin=false; state.days={}; state.calls=null; state.view=null; client=null;
+    if(timer) clearInterval(timer); if(poller) clearInterval(poller);
+    var tab=$('tabRoutine'); if(tab) tab.hidden=true;
+  });
+  window.__routine={buildBlocks:buildBlocks, weekStats:weekStats, dayStats:dayStats, state:state, render:render};
 })();
 </script>
 
