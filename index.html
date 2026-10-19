@@ -1025,7 +1025,7 @@
       <div class="grid2">
         <div class="panel">
           <h2>Hours this week</h2>
-          <p class="rule">Logged = blocks you ticked. Planned = the full week if every work block happens. Walks, gym, lunch and switch-off aren't counted as work. Calls count only the hours you type on the calls block (planned: about 5h a week).</p>
+          <p class="rule">Logged = blocks you ticked. Planned = the full week if every work block happens. Walks, gym, lunch and switch-off aren't counted as work. Calls booked in Google Calendar count at their real length once ticked (planned: about 5h a week).</p>
           <div class="r-bars" id="rtWeekHours"></div>
         </div>
         <div class="panel">
@@ -2964,7 +2964,18 @@
 
   /* ---------- the schedule ---------- */
   function blk(id,s,e,label,cat){ return {id:id,s:s,e:e,label:label,cat:cat}; }
-  function buildBlocks(dow, calls){
+  function eveWithSlots(L,slots,fillLabel,fillCat,def){
+    var cur=hm(17,30);
+    slots.forEach(function(sl){
+      var s=Math.max(sl[0],cur), e=sl[1];
+      if(e<=s) return;
+      if(s-cur>=30) L.push(blk('gap'+cur,cur,s,fillLabel,fillCat));
+      var b=blk('call'+s,s,e,'Call',"calls"); b.real=true; L.push(b);
+      cur=e;
+    });
+    return cur;
+  }
+  function buildBlocks(dow, calls, slots){
     var L=[];
     if(dow>=1 && dow<=4){
       var hi = dow===4 ? 1 : 2;
@@ -2993,17 +3004,23 @@
       L.push(blk('dms',hm(16,0),hm(16,30),'Personal DMs + engagement','sales'));
       L.push(blk('flex',hm(16,30),hm(17,30),'Flex: VA management, sales content, edit review','flex'));
       if(dow===1||dow===2){
-        if(calls) L.push(blk('eve-calls',hm(17,30),hm(21,0),'Calls: sales, check-ins, setter, 30HC','calls'));
-        else L.push(blk('eve-money',hm(17,30),hm(20,0),'Money-making: reactivation, outreach, sales content','sales'));
-        L.push(blk('off',calls?hm(21,0):hm(20,0),calls?hm(21,30):hm(20,30),'Dinner + switch off','life'));
+        var offS;
+        if(calls && slots && slots.length){ offS=eveWithSlots(L,slots,'Money-making: reactivation, outreach, sales content','sales'); }
+        else if(calls){ L.push(blk('eve-calls',hm(17,30),hm(21,0),'Calls: sales, check-ins, setter, 30HC','calls')); offS=hm(21,0); }
+        else { L.push(blk('eve-money',hm(17,30),hm(20,0),'Money-making: reactivation, outreach, sales content','sales')); offS=hm(20,0); }
+        L.push(blk('off',offS,offS+30,'Dinner + switch off','life'));
       } else if(dow===3){
-        if(calls) L.push(blk('eve-calls',hm(17,30),hm(19,0),'Calls (finish by 7:00)','calls'));
+        var offW=hm(19,0);
+        if(calls && slots && slots.length){ offW=Math.max(offW,eveWithSlots(L,slots,'Flex','flex')); }
+        else if(calls) L.push(blk('eve-calls',hm(17,30),hm(19,0),'Calls (finish by 7:00)','calls'));
         else L.push(blk('eve-flex',hm(17,30),hm(19,0),'Flex block (done by 7:00)','flex'));
-        L.push(blk('off',hm(19,0),hm(19,30),'Off: out of action','life'));
+        L.push(blk('off',offW,offW+30,'Off: out of action','life'));
       } else {
-        if(calls) L.push(blk('eve-calls',hm(17,30),hm(20,0),'Calls','calls'));
+        var offT=hm(20,0);
+        if(calls && slots && slots.length){ offT=Math.max(offT,eveWithSlots(L,slots,'Flex: sales, systems catch-up, edit review','flex')); }
+        else if(calls) L.push(blk('eve-calls',hm(17,30),hm(20,0),'Calls','calls'));
         else L.push(blk('eve-flex',hm(17,30),hm(20,0),'Flex: sales, systems catch-up, edit review','flex'));
-        L.push(blk('off',hm(20,0),hm(20,30),'Dinner + switch off','life'));
+        L.push(blk('off',offT,offT+30,'Dinner + switch off','life'));
       }
     } else if(dow===5){
       L.push(blk('wake',hm(6,20),hm(6,30),'Wake up','life'));
@@ -3049,10 +3066,16 @@
   function callsSource(date){
     var r=dayRec(date); if(r.callsMode!=null) return 'set by you';
     var c=state.calls && state.calls.dates && state.calls.dates[date];
-    if(c && typeof c.count==='number') return 'from Google Calendar ('+c.count+' booked)';
+    if(c && typeof c.count==='number') return 'from Google Calendar ('+c.count+' booked'+(c.slots&&c.slots.length?', real times shown':'')+')';
     return 'default for this day';
   }
-  function blocksOf(date){ return buildBlocks(dowOf(date), callsOn(date)); }
+  function callSlots(date){
+    var r=dayRec(date); if(r.callsMode===false) return null;
+    var c=state.calls && state.calls.dates && state.calls.dates[date];
+    if(!c || !c.slots || !c.slots.length) return null;
+    return c.slots.filter(function(x){ return x && x.length===2 && x[1]>x[0] && x[1]<=1440; }).sort(function(a,b){return a[0]-b[0];});
+  }
+  function blocksOf(date){ return buildBlocks(dowOf(date), callsOn(date), callSlots(date)); }
 
   function dayStats(date, now){
     var rec=dayRec(date), bl=blocksOf(date);
@@ -3064,10 +3087,10 @@
       if(tk) s.ticked++;
       if(b.cat!=='life'){
         var pm=b.e-b.s;
-        if(b.cat==='calls') pm=CALL_PLAN[dowOf(date)]||0;
+        if(b.cat==='calls' && !b.real) pm=CALL_PLAN[dowOf(date)]||0;
         s.plan[b.cat]=(s.plan[b.cat]||0)+pm; s.planMin+=pm;
         if(tk){
-          var lm=(b.cat==='calls') ? ((rec.callHrs!=null && rec.callHrs!=='') ? Math.round(Number(rec.callHrs)*60) : 0) : pm;
+          var lm=(b.cat==='calls' && !b.real) ? ((rec.callHrs!=null && rec.callHrs!=='') ? Math.round(Number(rec.callHrs)*60) : 0) : pm;
           s.logged[b.cat]=(s.logged[b.cat]||0)+lm; s.loggedMin+=lm;
         }
       }
@@ -3164,7 +3187,7 @@
         '<div class="r-time">'+fmtT(b.s)+' – '+fmtT(b.e)+'</div>'+
         '<div class="r-label">'+esc(b.label)+'</div>'+
         (isNow?'<span class="r-now">NOW</span>':'')+
-        (b.cat==='calls'?'<input class="r-hrs" type="number" min="0" max="8" step="0.25" placeholder="hrs" title="Hours actually on calls" data-r-hrs value="'+(rec.callHrs==null?'':esc(rec.callHrs))+'">':'')+
+        (b.cat==='calls'&&!b.real?'<input class="r-hrs" type="number" min="0" max="8" step="0.25" placeholder="hrs" title="Hours actually on calls" data-r-hrs value="'+(rec.callHrs==null?'':esc(rec.callHrs))+'">':'')+
         '<span class="r-cat">'+esc(CATS[b.cat])+'</span>'+
       '</div>';
     });
