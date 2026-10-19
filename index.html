@@ -2970,7 +2970,7 @@
       var s=Math.max(sl[0],cur), e=sl[1];
       if(e<=s) return;
       if(s-cur>=30) L.push(blk('gap'+cur,cur,s,fillLabel,fillCat));
-      var b=blk('call'+s,s,e,'Call',"calls"); b.real=true; L.push(b);
+      var b=blk('call'+s,s,e,sl[2]?'Call: '+sl[2]:'Call','calls'); b.real=true; L.push(b);
       cur=e;
     });
     return cur;
@@ -3072,8 +3072,16 @@
   function callSlots(date){
     var r=dayRec(date); if(r.callsMode===false) return null;
     var c=state.calls && state.calls.dates && state.calls.dates[date];
-    if(!c || !c.slots || !c.slots.length) return null;
-    return c.slots.filter(function(x){ return x && x.length===2 && x[1]>x[0] && x[1]<=1440; }).sort(function(a,b){return a[0]-b[0];});
+    var src=(c && c.calls && c.calls.length) ? c.calls.map(function(x){ return [x.s,x.e,x.l||'']; }) : (c && c.slots ? c.slots.map(function(x){ return [x[0],x[1],'']; }) : []);
+    src=src.filter(function(x){ return x && x[1]>x[0] && x[1]<=1440; }).sort(function(a,b){return a[0]-b[0];});
+    if(!src.length) return null;
+    var out=[];
+    src.forEach(function(x){
+      var p=out[out.length-1];
+      if(p && x[0]<p[1]){ p[1]=Math.max(p[1],x[1]); if(x[2]) p[2]=(p[2]?p[2]+' + ':'')+x[2]; }
+      else out.push([x[0],x[1],x[2]]);
+    });
+    return out;
   }
   function blocksOf(date){ return buildBlocks(dowOf(date), callsOn(date), callSlots(date)); }
 
