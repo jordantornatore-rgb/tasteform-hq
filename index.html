@@ -448,6 +448,7 @@
       <button class="tab" role="tab" id="tabMagnets" aria-selected="false" aria-controls="viewMagnets" data-view="magnets">Magnets <span class="tab-badge" id="magBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads">Ads</button>
       <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps">Applications <span class="tab-badge" id="appsBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabContent" aria-selected="false" aria-controls="viewContent" data-view="content">Content</button>
       <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden>Routine</button>
     </div>
     <div id="accountBox"></div>
@@ -990,6 +991,47 @@
     </div>
   </section>
 
+  <!-- CONTENT (Instagram Insights, read via Claude in Chrome: ig_posts, ig_stories, meta/igScan) -->
+  <section id="viewContent" role="tabpanel" aria-labelledby="tabContent" hidden style="display:flex;flex-direction:column;gap:18px;">
+    <div class="top">
+      <div>
+        <h1>Content</h1>
+        <div class="sub" id="contentMetaLine">Loading…</div>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="label">Stories tracked (30d)</div><div class="value" id="ctKpiStories">–</div><div class="note" id="ctKpiStoriesNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Link clicks</div><div class="value" id="ctKpiClicks">–</div><div class="note" id="ctKpiClicksNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Applications matched to a story</div><div class="value" id="ctKpiMatched">–</div><div class="note" id="ctKpiMatchedNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Posts &amp; reels tracked (30d)</div><div class="value" id="ctKpiPosts">–</div><div class="note" id="ctKpiPostsNote">&nbsp;</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>Stories — link clicks &amp; matched applications</h2>
+      <p class="rule">Exact attribution, not a guess: a story only shows a matched-application count when its link sticker's label is the <em>same text</em> (as a tag) as the <code>utm_content</code> on the Typeform link it pointed to. Stories with no link sticker, or a label that doesn't match any Typeform tag seen yet, show "–" rather than a made-up number.</p>
+      <div class="table-wrap">
+        <table class="scores">
+          <thead><tr><th>Story</th><th>Posted</th><th class="num">Views</th><th class="num">Link clicks</th><th>Sticker label</th><th class="num">Matched applications</th></tr></thead>
+          <tbody id="ctStoriesBody"></tbody>
+        </table>
+      </div>
+      <div class="f-note" id="ctStoriesNote"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Posts &amp; reels — raw performance</h2>
+      <p class="rule">These don't carry a trackable link of their own (only the generic link-in-bio), so there's no exact way to tie a specific post to a specific application — this is reach and engagement only, ranked by views.</p>
+      <div class="table-wrap">
+        <table class="scores">
+          <thead><tr><th>Post</th><th>Type</th><th>Posted</th><th class="num">Views</th><th class="num">Likes</th><th class="num">Comments</th><th class="num">Saves</th><th class="num">Shares</th><th class="num">Profile activity</th></tr></thead>
+          <tbody id="ctPostsBody"></tbody>
+        </table>
+      </div>
+      <div class="f-note" id="ctPostsNote"></div>
+    </div>
+  </section>
+
   <!-- ROUTINE (admin only) -->
   <section id="viewRoutine" role="tabpanel" aria-labelledby="tabRoutine" hidden style="display:flex;flex-direction:column;gap:18px;">
     <div id="routineRoot" style="display:flex;flex-direction:column;gap:18px;">
@@ -1225,7 +1267,7 @@
   function showBanner(msg){ var b=document.getElementById('offlineBanner'); b.textContent=msg; b.classList.add('show'); }
 
   /* ---------- tabs ---------- */
-  var VIEWS={home:['viewHome','tabHome'], leads:['viewLeads','tabLeads'], dms:['viewDms','tabDms'], follow:['viewFollow','tabFollow'], magnets:['viewMagnets','tabMagnets'], ads:['viewAds','tabAds'], apps:['viewApps','tabApps'], routine:['viewRoutine','tabRoutine']};
+  var VIEWS={home:['viewHome','tabHome'], leads:['viewLeads','tabLeads'], dms:['viewDms','tabDms'], follow:['viewFollow','tabFollow'], magnets:['viewMagnets','tabMagnets'], ads:['viewAds','tabAds'], apps:['viewApps','tabApps'], content:['viewContent','tabContent'], routine:['viewRoutine','tabRoutine']};
   function setView(view){
     if(!VIEWS[view]) view='home';
     Object.keys(VIEWS).forEach(function(k){
@@ -2725,7 +2767,68 @@
     catch(e){ console.error('outcome update failed', e); }
   });
 
-  function renderAll(){ renderLeads(); renderDms(); renderMsgs(); renderFollow(); renderMagnets(); renderHome(); renderSetterOutcomes(); renderLeadBrowser(); renderTrendChart(); renderReviewFeed(); renderCoverage(); renderAds(); renderApps(); }
+  function renderAll(){ renderLeads(); renderDms(); renderMsgs(); renderFollow(); renderMagnets(); renderHome(); renderSetterOutcomes(); renderLeadBrowser(); renderTrendChart(); renderReviewFeed(); renderCoverage(); renderAds(); renderApps(); renderContent(); }
+
+  /* ---------- content (Instagram Insights via Claude in Chrome: ig_posts, ig_stories, meta/igScan) ---------- */
+  function igNorm(s){ return String(s==null?'':s).toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,''); }
+  function renderContent(){
+    var posts = state.igPosts || [], stories = state.igStories || [], meta = state.igMeta;
+    var responses = state.tfResponses || [];
+    var noData = !state.igLoaded;
+
+    // how many applications carry each utm_content tag (normalized), across all applications we've synced
+    var tagCounts = {};
+    responses.forEach(function(r){
+      var tag = r.utm && r.utm.utm_content ? igNorm(r.utm.utm_content) : (r.source ? igNorm(r.source) : '');
+      if(!tag) return;
+      tagCounts[tag] = (tagCounts[tag]||0) + 1;
+    });
+
+    var ml = document.getElementById('contentMetaLine');
+    if(noData) ml.textContent = 'Loading…';
+    else if(!meta || !meta.lastScanAt) ml.textContent = 'No Instagram scan has run yet.';
+    else ml.textContent = 'Last scanned '+(relTime(meta.lastScanAt)||'recently')+(meta.backfillComplete===false?' · full 30-day backfill still in progress':'')+'.';
+
+    var totalClicks = stories.reduce(function(a,s){ return a + (s.linkClicks||0); }, 0);
+    var storiesWithLink = stories.filter(function(s){ return s.linkStickerLabelNorm; });
+    var matchedApps = 0; var matchedTagsSeen = {};
+    storiesWithLink.forEach(function(s){ var n=tagCounts[s.linkStickerLabelNorm]||0; if(n && !matchedTagsSeen[s.linkStickerLabelNorm]){ matchedApps += n; matchedTagsSeen[s.linkStickerLabelNorm]=true; } });
+
+    document.getElementById('ctKpiStories').textContent = noData ? '–' : stories.length;
+    document.getElementById('ctKpiStoriesNote').textContent = noData ? ' ' : (storiesWithLink.length+' with a link sticker');
+    document.getElementById('ctKpiClicks').textContent = noData ? '–' : totalClicks;
+    document.getElementById('ctKpiClicksNote').textContent = ' ';
+    document.getElementById('ctKpiMatched').textContent = noData ? '–' : matchedApps;
+    document.getElementById('ctKpiMatchedNote').textContent = noData ? ' ' : (matchedApps ? 'exact match by tag, not a guess' : 'none yet — needs matching tags');
+    document.getElementById('ctKpiPosts').textContent = noData ? '–' : posts.length;
+    document.getElementById('ctKpiPostsNote').textContent = ' ';
+
+    var storiesSorted = stories.slice().sort(function(a,b){ return (b.views||0)-(a.views||0); });
+    document.getElementById('ctStoriesBody').innerHTML = storiesSorted.length ? storiesSorted.map(function(s){
+      var matched = s.linkStickerLabelNorm ? (tagCounts[s.linkStickerLabelNorm]||0) : null;
+      return '<tr><td>'+esc(s.caption||'(untitled story)')+'</td>'+
+        '<td>'+esc(s.postedAtLabel||'–')+'</td>'+
+        '<td class="num">'+(s.views==null?'–':s.views)+'</td>'+
+        '<td class="num">'+(s.linkClicks==null?'–':s.linkClicks)+'</td>'+
+        '<td>'+(s.linkStickerLabel?esc(s.linkStickerLabel):'<span class="op-sample">no link sticker</span>')+'</td>'+
+        '<td class="num">'+(matched==null?'–':matched)+'</td></tr>';
+    }).join('') : '<tr><td colspan="6"><div class="empty-state">'+(noData?'Loading…':'No stories scanned yet — the Instagram content scan hasn\'t run.')+'</div></td></tr>';
+    document.getElementById('ctStoriesNote').textContent = noData ? '' : (stories.length ? '' : 'Run the Instagram content scan (claude/ig-content-scan-v1-prompt.md) to fill this in.');
+
+    var postsSorted = posts.slice().sort(function(a,b){ return (b.views||0)-(a.views||0); });
+    document.getElementById('ctPostsBody').innerHTML = postsSorted.length ? postsSorted.map(function(p){
+      return '<tr><td>'+esc(p.title||'(untitled)')+'</td>'+
+        '<td>'+esc(p.mediaType||'–')+'</td>'+
+        '<td>'+esc(p.postedAtLabel||'–')+'</td>'+
+        '<td class="num">'+(p.views==null?'–':p.views)+'</td>'+
+        '<td class="num">'+(p.likes==null?'–':p.likes)+'</td>'+
+        '<td class="num">'+(p.comments==null?'–':p.comments)+'</td>'+
+        '<td class="num">'+(p.saves==null?'–':p.saves)+'</td>'+
+        '<td class="num">'+(p.shares==null?'–':p.shares)+'</td>'+
+        '<td class="num">'+(p.profileActivity==null?'–':p.profileActivity)+'</td></tr>';
+    }).join('') : '<tr><td colspan="9"><div class="empty-state">'+(noData?'Loading…':'No posts scanned yet — the Instagram content scan hasn\'t run.')+'</div></td></tr>';
+    document.getElementById('ctPostsNote').textContent = '';
+  }
 
   function subscribe(){
     function sub(q, key){
@@ -2746,6 +2849,9 @@
     sub(db.collection('ads_daily').orderBy('date','desc').limit(90), 'adsDaily');
     sub(db.collection('ads_campaigns').limit(200), 'adsCampaigns');
     db.doc('meta/adsSync').onSnapshot(function(s){ state.adsMeta=s.exists?s.data():null; state.adsLoaded=true; renderAll(); }, function(e){ console.error(e); state.adsLoaded=true; renderAll(); });
+    sub(db.collection('ig_posts').orderBy('views','desc').limit(300), 'igPosts');
+    sub(db.collection('ig_stories').orderBy('views','desc').limit(300), 'igStories');
+    db.doc('meta/igScan').onSnapshot(function(s){ state.igMeta=s.exists?s.data():null; state.igLoaded=true; renderAll(); }, function(e){ console.error(e); state.igLoaded=true; renderAll(); });
   }
 
   /* ---------- Supabase-backed db shim ----------
