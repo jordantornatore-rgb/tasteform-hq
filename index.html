@@ -1001,15 +1001,27 @@
     </div>
 
     <div class="kpis">
-      <div class="kpi"><div class="label">Stories tracked (30d)</div><div class="value" id="ctKpiStories">–</div><div class="note" id="ctKpiStoriesNote">&nbsp;</div></div>
-      <div class="kpi"><div class="label">Link clicks</div><div class="value" id="ctKpiClicks">–</div><div class="note" id="ctKpiClicksNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Form opens (30d)</div><div class="value" id="ctKpiOpens">–</div><div class="note" id="ctKpiOpensNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Applications (30d)</div><div class="value" id="ctKpiApps">–</div><div class="note" id="ctKpiAppsNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Days with content posted (30d)</div><div class="value" id="ctKpiDays">–</div><div class="note" id="ctKpiDaysNote">&nbsp;</div></div>
       <div class="kpi"><div class="label">Applications matched to a story</div><div class="value" id="ctKpiMatched">–</div><div class="note" id="ctKpiMatchedNote">&nbsp;</div></div>
-      <div class="kpi"><div class="label">Posts &amp; reels tracked (30d)</div><div class="value" id="ctKpiPosts">–</div><div class="note" id="ctKpiPostsNote">&nbsp;</div></div>
     </div>
 
     <div class="panel">
-      <h2>Stories — link clicks &amp; matched applications</h2>
-      <p class="rule">Exact attribution, not a guess: a story only shows a matched-application count when its link sticker's label is the <em>same text</em> (as a tag) as the <code>utm_content</code> on the Typeform link it pointed to. Stories with no link sticker, or a label that doesn't match any Typeform tag seen yet, show "–" rather than a made-up number.</p>
+      <h2>Content vs. applications — day by day</h2>
+      <p class="rule">What you posted that day next to what the Typeform funnel did that day, so a spike in opens/starts/applications lines up with the story, CTA or post that likely caused it. This is a correlation you read by eye (same-day, and worth checking the day or two after a post too) — it's not a claim that a specific item caused a specific application. For an exact, non-guessed link between one story and the applications it drove, see the matched-by-tag table below.</p>
+      <div class="table-wrap">
+        <table class="scores">
+          <thead><tr><th>Date</th><th>Content posted</th><th class="num">Opens</th><th class="num">Started</th><th class="num">Applications</th></tr></thead>
+          <tbody id="ctDayBody"></tbody>
+        </table>
+      </div>
+      <div class="f-note" id="ctDayNote"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Stories matched to applications by tag (exact)</h2>
+      <p class="rule">A story only shows a matched-application count when its link sticker's visible label is the <em>same tag</em> as the <code>utm_content</code> on the Typeform link it pointed to — never a guess. Stories with no link sticker, or a label that doesn't match any Typeform tag seen yet, show "–".</p>
       <div class="table-wrap">
         <table class="scores">
           <thead><tr><th>Story</th><th>Posted</th><th class="num">Views</th><th class="num">Link clicks</th><th>Sticker label</th><th class="num">Matched applications</th></tr></thead>
@@ -1017,18 +1029,6 @@
         </table>
       </div>
       <div class="f-note" id="ctStoriesNote"></div>
-    </div>
-
-    <div class="panel">
-      <h2>Posts &amp; reels — raw performance</h2>
-      <p class="rule">These don't carry a trackable link of their own (only the generic link-in-bio), so there's no exact way to tie a specific post to a specific application — this is reach and engagement only, ranked by views.</p>
-      <div class="table-wrap">
-        <table class="scores">
-          <thead><tr><th>Post</th><th>Type</th><th>Posted</th><th class="num">Views</th><th class="num">Likes</th><th class="num">Comments</th><th class="num">Saves</th><th class="num">Shares</th><th class="num">Profile activity</th></tr></thead>
-          <tbody id="ctPostsBody"></tbody>
-        </table>
-      </div>
-      <div class="f-note" id="ctPostsNote"></div>
     </div>
   </section>
 
@@ -2769,17 +2769,41 @@
 
   function renderAll(){ renderLeads(); renderDms(); renderMsgs(); renderFollow(); renderMagnets(); renderHome(); renderSetterOutcomes(); renderLeadBrowser(); renderTrendChart(); renderReviewFeed(); renderCoverage(); renderAds(); renderApps(); renderContent(); }
 
-  /* ---------- content (Instagram Insights via Claude in Chrome: ig_posts, ig_stories, meta/igScan) ---------- */
+  /* ---------- content (Instagram Insights via Claude in Chrome: ig_posts, ig_stories, meta/igScan)
+     Goal (Jordan's own words): align the Applications page's day-by-day opens/starts/applications
+     with what was actually posted that day, so a funnel spike can be read against the story/CTA/post
+     that likely drove it. Exact per-item attribution only exists for stories whose link-sticker label
+     matches a Typeform utm_content tag — everything else is a by-eye, same-day correlation, labeled as such. ---------- */
   function igNorm(s){ return String(s==null?'':s).toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,''); }
+  var IG_MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  function igParseLabel(label, now){
+    if(!label) return null;
+    var s=String(label).trim().toLowerCase();
+    var m=s.match(/^(\d{1,2})\s*([a-z]{3})/); // "13 oct"
+    if(m && IG_MONTHS[m[2]]!=null){
+      var day=+m[1], mon=IG_MONTHS[m[2]], y=now.getFullYear();
+      var d=new Date(y,mon,day);
+      if(d>now) d=new Date(y-1,mon,day); // label with no year: don't land in the future
+      return dayKey(d);
+    }
+    m=s.match(/^(\d+)\s*([hdw])$/); // "2d", "5h", "1w" (relative labels Instagram sometimes shows for very recent items)
+    if(m){
+      var n=+m[1], unit=m[2];
+      var ms = unit==='h' ? n*3600e3 : unit==='d' ? n*864e5 : n*7*864e5;
+      return dayKey(new Date(now.getTime()-ms));
+    }
+    return null;
+  }
   function renderContent(){
     var posts = state.igPosts || [], stories = state.igStories || [], meta = state.igMeta;
     var responses = state.tfResponses || [];
     var noData = !state.igLoaded;
+    var now = new Date(); now=new Date(now.getFullYear(),now.getMonth(),now.getDate());
 
     // how many applications carry each utm_content tag (normalized), across all applications we've synced
     var tagCounts = {};
     responses.forEach(function(r){
-      var tag = r.utm && r.utm.utm_content ? igNorm(r.utm.utm_content) : (r.source ? igNorm(r.source) : '');
+      var tag = r.utm && r.utm.utm_content ? igNorm(r.utm.utm_content) : '';
       if(!tag) return;
       tagCounts[tag] = (tagCounts[tag]||0) + 1;
     });
@@ -2789,19 +2813,55 @@
     else if(!meta || !meta.lastScanAt) ml.textContent = 'No Instagram scan has run yet.';
     else ml.textContent = 'Last scanned '+(relTime(meta.lastScanAt)||'recently')+(meta.backfillComplete===false?' · full 30-day backfill still in progress':'')+'.';
 
-    var totalClicks = stories.reduce(function(a,s){ return a + (s.linkClicks||0); }, 0);
+    // 30-day window, same width as the Applications tab's default
+    var from = dayKey(new Date(now.getFullYear(),now.getMonth(),now.getDate()-29)), to = dayKey(now);
+    var tfByDay={}; (state.tfDaily||[]).forEach(function(d){ tfByDay[d.date||d.id]=d; });
+    var winOpens=0, winApps=0;
+    (state.tfDaily||[]).forEach(function(d){ var k=d.date||d.id; if(k>=from&&k<=to){ winOpens+=+d.visits||0; winApps+=+d.completed||0; } });
+
+    // bucket content by the day it was posted (resolved from the approximate label — see igParseLabel)
+    var byDay={};
+    function addItem(item, kind){
+      var k = igParseLabel(item.postedAtLabel, now);
+      if(!k) return;
+      (byDay[k]=byDay[k]||[]).push({kind:kind, title:item.title||item.caption||'(untitled)', mediaType:item.mediaType||kind, views:item.views});
+    }
+    posts.forEach(function(p){ addItem(p,'post'); });
+    stories.forEach(function(s){ addItem(s,'story'); });
+    var daysWithContent = Object.keys(byDay).filter(function(k){ return k>=from && k<=to; });
+
+    document.getElementById('ctKpiOpens').textContent = noData ? '–' : num(winOpens);
+    document.getElementById('ctKpiOpensNote').textContent = 'last 30 days';
+    document.getElementById('ctKpiApps').textContent = noData ? '–' : winApps;
+    document.getElementById('ctKpiAppsNote').textContent = 'last 30 days';
+    document.getElementById('ctKpiDays').textContent = noData ? '–' : daysWithContent.length;
+    document.getElementById('ctKpiDaysNote').textContent = ' ';
+
     var storiesWithLink = stories.filter(function(s){ return s.linkStickerLabelNorm; });
     var matchedApps = 0; var matchedTagsSeen = {};
     storiesWithLink.forEach(function(s){ var n=tagCounts[s.linkStickerLabelNorm]||0; if(n && !matchedTagsSeen[s.linkStickerLabelNorm]){ matchedApps += n; matchedTagsSeen[s.linkStickerLabelNorm]=true; } });
-
-    document.getElementById('ctKpiStories').textContent = noData ? '–' : stories.length;
-    document.getElementById('ctKpiStoriesNote').textContent = noData ? ' ' : (storiesWithLink.length+' with a link sticker');
-    document.getElementById('ctKpiClicks').textContent = noData ? '–' : totalClicks;
-    document.getElementById('ctKpiClicksNote').textContent = ' ';
     document.getElementById('ctKpiMatched').textContent = noData ? '–' : matchedApps;
-    document.getElementById('ctKpiMatchedNote').textContent = noData ? ' ' : (matchedApps ? 'exact match by tag, not a guess' : 'none yet — needs matching tags');
-    document.getElementById('ctKpiPosts').textContent = noData ? '–' : posts.length;
-    document.getElementById('ctKpiPostsNote').textContent = ' ';
+    document.getElementById('ctKpiMatchedNote').textContent = noData ? ' ' : (matchedApps ? 'exact match by tag, not a guess' : (storiesWithLink.length ? 'no matching tag seen on Typeform yet' : 'no tagged stories yet'));
+
+    // day-by-day table, newest first
+    var rows=[];
+    for(var k=to; k>=from; ){
+      rows.push(k);
+      var pd=parseKey(k); pd=new Date(pd.getFullYear(),pd.getMonth(),pd.getDate()-1); k=dayKey(pd);
+    }
+    document.getElementById('ctDayBody').innerHTML = rows.length ? rows.map(function(k){
+      var d=tfByDay[k], items=byDay[k]||[];
+      var contentCell = items.length ? items.map(function(it){
+        return '<div><span class="chip stage">'+esc(it.mediaType)+'</span> '+esc(it.title)+(it.views!=null?' <span class="op-sample">'+num(it.views)+' views</span>':'')+'</div>';
+      }).join('') : '<span class="op-sample">–</span>';
+      return '<tr><td>'+esc(parseKey(k).toLocaleDateString('en-AU',{day:'numeric',month:'short'}))+'</td>'+
+        '<td>'+contentCell+'</td>'+
+        '<td class="num">'+(d?num(d.visits||0):'–')+'</td>'+
+        '<td class="num">'+(d?num(d.started||0):'–')+'</td>'+
+        '<td class="num">'+(d?num(d.completed||0):'–')+'</td></tr>';
+    }).join('') : '<tr><td colspan="5"><div class="empty-state">'+(noData?'Loading…':'No data yet.')+'</div></td></tr>';
+    var unresolvedCount = posts.concat(stories).filter(function(i){ return !igParseLabel(i.postedAtLabel, now); }).length;
+    document.getElementById('ctDayNote').textContent = noData ? '' : (unresolvedCount ? unresolvedCount+' scanned item(s) have no confirmed post date yet, so they can\'t be placed on this table — they\'ll appear once the scan captures an exact date.' : '');
 
     var storiesSorted = stories.slice().sort(function(a,b){ return (b.views||0)-(a.views||0); });
     document.getElementById('ctStoriesBody').innerHTML = storiesSorted.length ? storiesSorted.map(function(s){
@@ -2814,20 +2874,6 @@
         '<td class="num">'+(matched==null?'–':matched)+'</td></tr>';
     }).join('') : '<tr><td colspan="6"><div class="empty-state">'+(noData?'Loading…':'No stories scanned yet — the Instagram content scan hasn\'t run.')+'</div></td></tr>';
     document.getElementById('ctStoriesNote').textContent = noData ? '' : (stories.length ? '' : 'Run the Instagram content scan (claude/ig-content-scan-v1-prompt.md) to fill this in.');
-
-    var postsSorted = posts.slice().sort(function(a,b){ return (b.views||0)-(a.views||0); });
-    document.getElementById('ctPostsBody').innerHTML = postsSorted.length ? postsSorted.map(function(p){
-      return '<tr><td>'+esc(p.title||'(untitled)')+'</td>'+
-        '<td>'+esc(p.mediaType||'–')+'</td>'+
-        '<td>'+esc(p.postedAtLabel||'–')+'</td>'+
-        '<td class="num">'+(p.views==null?'–':p.views)+'</td>'+
-        '<td class="num">'+(p.likes==null?'–':p.likes)+'</td>'+
-        '<td class="num">'+(p.comments==null?'–':p.comments)+'</td>'+
-        '<td class="num">'+(p.saves==null?'–':p.saves)+'</td>'+
-        '<td class="num">'+(p.shares==null?'–':p.shares)+'</td>'+
-        '<td class="num">'+(p.profileActivity==null?'–':p.profileActivity)+'</td></tr>';
-    }).join('') : '<tr><td colspan="9"><div class="empty-state">'+(noData?'Loading…':'No posts scanned yet — the Instagram content scan hasn\'t run.')+'</div></td></tr>';
-    document.getElementById('ctPostsNote').textContent = '';
   }
 
   function subscribe(){
