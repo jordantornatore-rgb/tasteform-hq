@@ -36,14 +36,14 @@ Every number on the page, where it comes from, how often it must be refreshed to
 
 No two Chrome jobs overlap: 3:15 likes → 4:32 content → 6:07 DM → 6:40 brief → 6:47 report.
 
-## 3. Why the Mac-mini tasks still show "off" here
+## 3. Where the scans run (updated 22 Oct, afternoon)
 
-The three `TasteForm HQ — …` tasks live **only in the Claude app on the Mac mini** (this computer). Its Scheduled list showed all three disabled with zero runs this morning, and the one test run I started paused on its first tool approval. A task created from a remote session starts in "default" permission mode; only the app on this computer can set it to **Auto** (I tried from here — the app blocks it, correctly). So:
+There are **two separate task lists** and that caused confusion:
 
-1. At the Mac mini: Claude app → **Scheduled** → each of the three tasks → permission mode **Auto** → **Run now**.
-2. Tell me "done": I check the first runs wrote their health rows, then switch the cloud DM/likes routines off.
+- **claude.ai → Scheduled tasks** (the cloud routines, bound to the Mac mini). These are the ones Jordan opened today: DM scan and likes scan are **on, Auto, running** (likes ran 3:15 and 8:40; DM ran 6:07). They still carry the older v4 prompts and Opus, because the API refuses to edit a device-bound routine's instructions or model; the edit box on claude.ai can.
+- **Claude app on the Mac mini → Scheduled** (local tasks `hq-dm-scan`, `hq-likes-scan`, `hq-content-scan`, v5 prompts, Sonnet). Off: a task created remotely starts in "default" permission mode and pauses on its first tool call; only the app on that machine can set Auto.
 
-Until then the cloud routines keep DM and likes fresh; content stays at this morning's backfill.
+Simplest path, from the phone: in each cloud routine's edit box, replace the Instructions with the matching file in `scans/` (v5 prompt), switch the model to Sonnet, save. For content, create a third routine from `scans/content-scan.md` at 4:32 daily. The local tasks then stay off and nothing runs twice.
 
 ## 4. Findings that are about the business, not the data
 
