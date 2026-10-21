@@ -121,7 +121,44 @@ tab's text for `NaN`, `undefined`, `null` and `Infinity`.
 - The hourly `cron.job` embeds a bearer token in its SQL command (set up before this audit). It is
   not printed anywhere by HQ. Listed for Jordan under "Needs Jordan" to confirm it is the anon key.
 
-## I. SQL spot-checks (formulas vs rows, run 21 Oct)
+## I. SQL spot-checks (formulas vs rows)
 
-Filled in section J of this file as each check is run (query, expected, HQ value).
+Run on the live database at 15:40 Sydney, 21 Oct, right after the 15:08 DM scan. The same rules are
+implemented in `hq-core.js`; the Playwright suite asserts the page shows the same numbers for a
+fixture export (plain-JS recomputation, no hq-core), so SQL → core → DOM agree by construction.
+
+| # | Check (plain-English rule) | SQL result | HQ (fixture of the same rows, `tests/ui.test.js`) |
+| --- | --- | --- | --- |
+| S1 | Waiting on you: lead, not N/A, last sender = lead, status active/empty, not liked-only | 23 | `#kWaiting` = independent count (asserted) |
+| S2 | Outbound openers, all time: verified thread, direction outbound, opener ≠ magnet_delivery | 111 | `#kReplyNote` "x of 111 openers" |
+| S3 | …of which replied (firstReplyAt set) | 18 | reply rate 16% |
+| S4 | Magnet leads (opener = magnet_delivery, verified) | 49 | `#magMetaLine` "… magnet leads" (asserted) |
+| S5 | Unread placeholders (`pending-*`, no threadId) — outside both funnels | 330 | coverage banner "330 chats still only seen from the inbox preview" |
+| S6 | Applications, last 30 Sydney days (`tf_daily.completed`) | 3 | `#appsDone` (asserted) |
+| S7 | Form opens, last 30 Sydney days (`tf_daily.visits`) | 27 | `#appsOpens` (asserted) |
+| S8 | Warm leads = super_engaged + close_friends | 71 | `#countSuper` + `#countClose` (asserted) |
+| S9 | Applications with no outcome, last 14 days | 1 | Applications badge (asserted) |
+| S10 | Drift verdicts (`drifted` or legacy `off_script`) in the last 7 days | 2 | Script review feed summary |
+| S11 | `dm_threads` rows | 544 | — |
+
+RLS check (run inside a rolled-back transaction with a temporary `stripe_summary` row): limited user
+sees 0 rows of `stripe_summary` and `stripe_subscriptions` (and 544 of `dm_threads`, as before);
+admin sees 1; anon sees 0. Verified 21 Oct.
+
+## J. Scheduled tasks — what changed (Phase D results)
+
+| Task | Action | Result |
+| --- | --- | --- |
+| DM scan (`trig_01Vt9c4z…`) | Re-enabled via the routines API (it was suspended `device_absent`, not broken). Kept the v4 prompt. Model stays Opus: device-bound routines refuse an unsigned model patch; changing it needs Jordan in the routine's settings. | Fired immediately at 15:08 Sydney: "Primary and General both reached rows older than the window (no stall)", wrote `meta/dmScan` 15:28. Next 18:07. |
+| Likes scan (`trig_01KeUsHa…`) | Re-enabled. Same model note. | Fired at 15:16 Sydney, wrote `meta/scan`. Next 3:15. |
+| Morning Slack report (`trig_011jUZRx…`) | Prompt rewritten: it now reads `meta/todayBrief.slack` (written hourly by `hq-brief` from `hq-core.js`) and sends it verbatim, rebuilds once if stale, and records `meta/morningReport {sentAt, ok, error}` so System health shows it. Model → Sonnet. | First run 22 Oct 6:47. |
+| Content scan | Built as a Claude Desktop scheduled task on the Mac mini (`hq-content-scan`, 4:30 daily, Claude in Chrome, read-only, incremental, stall detection, always writes `meta/igScan` with `lastAttemptAt/Ok/Note`, push on failure). The cloud routines API refuses to create a new device-bound routine without a signed session request, so it lives beside the other Mac tasks instead. | Runs while the Claude app is open on the Mac mini (same condition as the other scans). First run 22 Oct 4:32; the 30-day backfill happens over the first runs (15 posts per run). **Needs Jordan once:** open the task in the Claude app's Scheduled list and press "Run now" to pre-approve its Chrome + Supabase tools, otherwise the first unattended run can pause on a permission prompt. |
+| Typeform sync | Unchanged (healthy). | — |
+| Google Calendar → Routine | Unchanged (healthy). | — |
+| Stripe sync | New: edge function `stripe-sync` + `cron.job` 2 (`35 * * * *`). | Ran once: `{"ok":true,"connected":false}` (no key in Vault yet). |
+| Today brief | New: edge function `hq-brief` + `cron.job` 3 (`40 * * * *`). Fetches `hq-core.js` from the live site so there is one copy of the maths. | Works once `main` is deployed (the function fetches `https://jordantornatore-rgb.github.io/tasteform-hq/hq-core.js`). |
+| Ads sync | Not built: Meta connector not connected; the Ads tab and Funnel → Paid show "paused, no data". | Needs Jordan. |
+| GHL pull | Not built: `meta/ghlSync {connected:false}`, `ghl_secret()` ready for a Vault token `ghl_readonly_token`. | Needs Jordan. |
+
+Collision check after changes (Sydney): 3:15 likes → 4:30 content → 6:07 DM → 6:12 calendar → 6:23 Typeform → 6:35 Stripe → 6:40 brief → 6:47 report. No two Mac-mini (Chrome) tasks overlap; the cloud jobs are independent.
 
