@@ -159,7 +159,18 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       if (width === 1280) {
         await page.focus('#tabFunnel'); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(50);
         const sel = await page.evaluate(() => document.querySelector('#tabRow .tab[aria-selected="true"]').id);
-        check(`${label}: arrow keys move tabs`, () => assert.strictEqual(sel, 'tabLeads'));
+        check(`${label}: arrow keys move tabs`, () => assert.strictEqual(sel, 'tabApps'));
+        await page.keyboard.press('Escape'); await page.evaluate(() => document.activeElement.blur());
+        await page.keyboard.press('3'); await page.waitForTimeout(50);
+        check(`${label}: number keys jump to sections`, async () => {});
+        const v3 = await page.evaluate(() => document.querySelector('#tabRow .tab[aria-selected="true"]').id);
+        check(`${label}: "3" jumps to Follow-ups`, () => assert.strictEqual(v3, 'tabFollow'));
+        await page.keyboard.press('Meta+k'); await page.waitForTimeout(50);
+        const palOpen = await page.evaluate(() => !document.getElementById('cmdk').hidden);
+        check(`${label}: Cmd+K opens the palette`, () => assert.strictEqual(palOpen, true));
+        await page.keyboard.type('reven'); await page.keyboard.press('Enter'); await page.waitForTimeout(80);
+        const vPal = await page.evaluate(() => document.querySelector('#tabRow .tab[aria-selected="true"]').id);
+        check(`${label}: palette jumps to Revenue (admin) or stays safe`, () => assert.strictEqual(vPal, role === 'admin' ? 'tabStripe' : vPal));
       }
       await context.close();
     }

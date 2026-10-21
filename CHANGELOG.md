@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.0 — 21 Oct 2026 (command-centre layout)
+
+- Replaced the row of 10 tabs with a left **sidebar** grouped Command / Pipeline / Growth / Business (icons, badges, number shortcuts 1–9/0, collapsible to an icon rail, remembered per viewer). Phones keep the bottom bar.
+- Sticky **status bar**: section title, Sydney date/time, DM-scan freshness chip, theme toggle.
+- Sidebar footer: scan health dots (DM / likes / content / Typeform / report), live-sync indicator, account.
+- **Command palette** (⌘K, Ctrl+K or `/`): jump to any section, switch theme, open the Instagram inbox or the Typeform form, sign out.
+- Dark is now the default (black→espresso gradient with a faint grid); light stays one tap away.
+- Supabase: `hq_merge(table, rows)` — one merge-only write path for the scans so unattended runs never hit a "destructive statement" approval prompt (the cause of the 3-minute timeouts in the old runs).
+- Scans: v5 prompts for the DM scan, likes scan and content scan live as Claude Desktop scheduled tasks on the Mac mini (`hq-dm-scan`, `hq-likes-scan`, `hq-content-scan`), disabled until Jordan approves their tools once; the cloud routines keep running meanwhile.
+
 ## 2.0.0 — 21 Oct 2026 (revamp branch)
 
 ### Added

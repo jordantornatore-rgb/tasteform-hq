@@ -375,7 +375,7 @@ button.f-row:focus-visible{outline:2px solid var(--accent);border-radius:4px;}
 .yd .label{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
 .yd .value{font-family:'Anton',Impact,sans-serif;font-size:28px;line-height:1.05;}
 .yd .value small{font-family:'Open Sans',sans-serif;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;}
-.yd .label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.yd .label{line-height:1.25;}
 .yd .note{font-size:var(--t-xs);color:var(--muted);}
 .yd.hit .value{color:var(--good);}
 .yd.miss .value{color:var(--crit);}
@@ -490,6 +490,78 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
 .auth-switch button{border:none;background:none;color:var(--accent);font-weight:700;cursor:pointer;font-size:var(--t-s);padding:8px;}
 #authSubmit{border:none;background:var(--text);color:var(--bg);border-radius:var(--r-s);padding:12px 14px;min-height:var(--tap);font-weight:700;font-size:var(--t-m);cursor:pointer;}
 #authSubmit:disabled{opacity:.6;cursor:default;}
+/* ===== command-centre shell: sidebar + status bar + palette ===== */
+body{padding:0;}
+.app{display:grid;grid-template-columns:252px minmax(0,1fr);min-height:100vh;}
+.app.collapsed{grid-template-columns:76px minmax(0,1fr);}
+.sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:var(--s2);background:color-mix(in srgb,var(--surface) 92%,transparent);border-right:1px solid var(--border);padding:var(--s4) var(--s3) calc(var(--s3) + env(safe-area-inset-bottom,0));overflow:hidden;}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:2px 6px 10px;}
+.sb-logo{width:34px;height:34px;border-radius:9px;background:var(--text);color:var(--bg);font-family:'Anton',Impact,sans-serif;font-size:15px;letter-spacing:.04em;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sb-name{font-weight:800;font-size:16px;letter-spacing:-.01em;white-space:nowrap;}
+.sb-name small{font-size:10px;font-weight:700;letter-spacing:.35em;color:var(--muted);margin-left:4px;}
+.sb-collapse{margin-left:auto;border:1px solid var(--border);background:none;color:var(--muted);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:16px;line-height:1;}
+.sb-collapse:hover{color:var(--text);border-color:var(--border-strong);}
+.sb-nav{display:flex;flex-direction:column;gap:2px;flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;}
+.sb-nav::-webkit-scrollbar{display:none;}
+.sb-group{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:12px 10px 4px;white-space:nowrap;}
+.sb-nav .tab{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;min-height:38px;border-radius:var(--r-s);text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;color:var(--muted);text-align:left;position:relative;}
+.sb-nav .tab svg{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.sb-nav .tab > span:not(.tab-badge){flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-nav .tab kbd{font:600 10px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:1px 5px;opacity:.7;}
+.sb-nav .tab:hover{background:var(--surface-2);color:var(--text);}
+.sb-nav .tab[aria-selected="true"]{background:var(--surface-2);color:var(--text);box-shadow:inset 2px 0 0 var(--accent);}
+.sb-nav .tab[aria-selected="true"] .tab-badge{background:var(--crit);color:#fff;}
+.sb-foot{display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--border);}
+.sb-search{display:flex;align-items:center;gap:8px;width:100%;border:1px solid var(--border);background:var(--bg);color:var(--muted);border-radius:var(--r-s);padding:8px 10px;min-height:36px;cursor:pointer;font-size:12px;font-weight:600;}
+.sb-search svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;}
+.sb-search span{flex:1;text-align:left;white-space:nowrap;}
+.sb-search kbd{font:600 10px ui-monospace,Menlo,monospace;border:1px solid var(--border);border-radius:4px;padding:1px 5px;}
+.sb-search:hover{color:var(--text);border-color:var(--border-strong);}
+.sb-health{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:2px 2px;}
+.sb-health .hd{width:9px;height:9px;border-radius:50%;background:var(--border);}
+.sb-health .hd.green{background:var(--good);} .sb-health .hd.amber{background:var(--warn);} .sb-health .hd.red{background:var(--crit);box-shadow:0 0 0 3px var(--crit-soft);} .sb-health .hd.grey{background:var(--border-strong);}
+.sb-health .hl{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;margin-left:auto;}
+.sb-sync{display:flex;align-items:center;gap:6px;font:600 10.5px ui-monospace,Menlo,monospace;color:var(--muted);padding:0 2px;white-space:nowrap;}
+.sb-sync .dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 25%,transparent);}
+.sb-sync.off .dot{background:var(--crit);box-shadow:none;} .sb-sync.wait .dot{background:var(--warn);box-shadow:none;}
+.sidebar #accountBox{margin:0;flex-wrap:wrap;gap:6px;}
+.sidebar .acct-email{max-width:100%;font-size:11px;}
+.app.collapsed .sb-name,.app.collapsed .sb-group,.app.collapsed .sb-nav .tab > span:not(.tab-badge),.app.collapsed .sb-nav .tab kbd,.app.collapsed .sb-search span,.app.collapsed .sb-search kbd,.app.collapsed .sb-sync span,.app.collapsed .sb-health .hl,.app.collapsed #accountBox .acct-email,.app.collapsed #accountBox .acct-role{display:none;}
+.app.collapsed .sb-nav .tab{justify-content:center;padding:9px 0;} .app.collapsed .sb-nav .tab .tab-badge{position:absolute;top:4px;right:6px;}
+.app.collapsed .sb-collapse{transform:rotate(180deg);} .app.collapsed .sb-brand{justify-content:center;flex-direction:column;gap:6px;}
+.app.collapsed .sb-search{justify-content:center;} .app.collapsed .sb-health{justify-content:center;}
+.main{min-width:0;display:flex;flex-direction:column;}
+.statusbar{position:sticky;top:0;z-index:45;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px var(--s5);background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);min-height:52px;}
+.sb-title{display:flex;align-items:baseline;gap:12px;min-width:0;}
+.sb-title > span:first-child{font-family:'Anton',Impact,sans-serif;font-size:18px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
+.sb-date{font-size:11px;color:var(--muted);white-space:nowrap;}
+.sb-right{display:flex;align-items:center;gap:8px;}
+.content{padding:var(--s4) var(--s5) var(--s6);max-width:1280px;width:100%;display:flex;flex-direction:column;gap:var(--s4);}
+.content > section > .top h1{font-size:clamp(28px,4vw,40px);}
+.hero,.goal-strip{background-image:radial-gradient(120% 160% at 0% 0%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 58%);}
+.hero .value,.kpi .value,.goal-cell .value,.yd .value{font-variant-numeric:tabular-nums;}
+.panel{background-image:linear-gradient(180deg,color-mix(in srgb,var(--text) 2.5%,transparent),transparent 40%);}
+:root[data-theme="dark"] body,:root:not([data-theme="light"]) body{background-image:linear-gradient(180deg,#000000 0%,#0F0D0B 35%,#1E1913 75%,#271F16 100%),repeating-linear-gradient(0deg,rgba(242,241,232,.025) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(242,241,232,.025) 0 1px,transparent 1px 56px);background-blend-mode:normal,screen,screen;}
+:root[data-theme="light"] body{background-image:none;background-color:var(--bg);}
+/* palette */
+.palette{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;padding:12vh 16px 0;}
+.palette-card{width:min(600px,100%);background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-l);box-shadow:0 24px 70px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column;}
+.palette-input{border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font:600 16px 'Open Sans',sans-serif;padding:16px 18px;outline:none;}
+.palette-list{max-height:50vh;overflow-y:auto;padding:6px;}
+.pal-item{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;min-height:40px;border:none;background:none;color:var(--text);border-radius:var(--r-s);cursor:pointer;text-align:left;font-size:13px;font-weight:600;}
+.pal-item .pal-sub{color:var(--muted);font-weight:500;font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pal-item kbd{font:600 10px ui-monospace,Menlo,monospace;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:1px 5px;}
+.pal-item.active,.pal-item:hover{background:var(--surface-2);}
+.pal-item .pal-group{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);min-width:64px;}
+.palette-hint{font-size:10.5px;color:var(--muted);padding:8px 14px;border-top:1px solid var(--border);}
+@media (max-width:760px){
+  .app,.app.collapsed{display:block;}
+  .sidebar{display:none;}
+  .statusbar{padding:8px var(--s4);min-height:46px;}
+  .content{padding:var(--s3) var(--s4) var(--s5);}
+  .sb-right .chip{max-width:48vw;overflow:hidden;text-overflow:ellipsis;}
+}
+
 /* phone: every tappable thing is at least 44 px; inline name links get a padded hit area without moving the layout */
 @media (max-width:760px){
   .btn,.btn.small,.icon-btn.sm,.r-btn,.seg-filter button,.range button,.outcome-btns .btn,.r-counter .cv button{min-height:var(--tap);}
@@ -515,7 +587,7 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
   window.addEventListener('error', function(e){ show((e && e.message) || String(e)); });
   window.addEventListener('unhandledrejection', function(e){ show('(promise) ' + ((e.reason && (e.reason.message||e.reason)) || e.reason)); });
   // theme: follow the system unless the viewer picked one
-  try{ var t=localStorage.getItem('hqTheme'); if(t==='light'||t==='dark') document.documentElement.setAttribute('data-theme', t); }catch(e){}
+  var t=null; try{ t=localStorage.getItem('hqTheme'); }catch(e){} document.documentElement.setAttribute('data-theme', t==='light'?'light':'dark');
 })();
 </script>
 
@@ -536,25 +608,40 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
   </div>
 </div>
 
-<div class="wrap" id="appRoot" hidden>
-  <header class="topbar">
-    <div class="brand">TasteForm <small>HQ</small></div>
-    <div class="tabs" role="tablist" aria-label="Sections" id="tabRow">
-      <button class="tab" role="tab" id="tabToday" aria-selected="true" aria-controls="viewToday" data-view="today">Today</button>
-      <button class="tab" role="tab" id="tabFunnel" aria-selected="false" aria-controls="viewFunnel" data-view="funnel">Funnel</button>
-      <button class="tab" role="tab" id="tabLeads" aria-selected="false" aria-controls="viewLeads" data-view="leads">Warm Leads</button>
-      <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms">DMs <span class="tab-badge" id="dmsBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabFollow" aria-selected="false" aria-controls="viewFollow" data-view="follow">Follow-ups <span class="tab-badge" id="fuBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabMagnets" aria-selected="false" aria-controls="viewMagnets" data-view="magnets">Magnets <span class="tab-badge" id="magBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps">Applications <span class="tab-badge" id="appsBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads">Ads</button>
-      <button class="tab" role="tab" id="tabStripe" aria-selected="false" aria-controls="viewStripe" data-view="stripe" hidden>Revenue</button>
-      <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden>Routine</button>
+<div class="app" id="appRoot" hidden>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand"><span class="sb-logo" aria-hidden="true">TF</span><span class="sb-name">TasteForm <small>HQ</small></span><button type="button" class="sb-collapse" id="sbCollapse" title="Collapse sidebar" aria-label="Collapse sidebar">‹</button></div>
+    <nav class="sb-nav" id="tabRow" role="tablist" aria-label="Sections">
+      <div class="sb-group">Command</div>
+      <button class="tab" role="tab" id="tabToday" aria-selected="true" aria-controls="viewToday" data-view="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Today</span><kbd>1</kbd></button>
+      <div class="sb-group">Pipeline</div>
+      <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>DMs</span><span class="tab-badge" id="dmsBadge" hidden></span><kbd>2</kbd></button>
+      <button class="tab" role="tab" id="tabFollow" aria-selected="false" aria-controls="viewFollow" data-view="follow"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/></svg><span>Follow-ups</span><span class="tab-badge" id="fuBadge" hidden></span><kbd>3</kbd></button>
+      <button class="tab" role="tab" id="tabMagnets" aria-selected="false" aria-controls="viewMagnets" data-view="magnets"><svg viewBox="0 0 24 24"><path d="M6 3v8a6 6 0 0 0 12 0V3"/><path d="M6 3h4v8H6zM14 3h4v8h-4z"/></svg><span>Magnets</span><span class="tab-badge" id="magBadge" hidden></span><kbd>4</kbd></button>
+      <button class="tab" role="tab" id="tabLeads" aria-selected="false" aria-controls="viewLeads" data-view="leads"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Warm Leads</span><kbd>5</kbd></button>
+      <div class="sb-group">Growth</div>
+      <button class="tab" role="tab" id="tabFunnel" aria-selected="false" aria-controls="viewFunnel" data-view="funnel"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Funnel</span><kbd>6</kbd></button>
+      <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg><span>Applications</span><span class="tab-badge" id="appsBadge" hidden></span><kbd>7</kbd></button>
+      <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads"><svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M17 8a4 4 0 0 1 0 8"/></svg><span>Ads</span><kbd>8</kbd></button>
+      <div class="sb-group" id="sbGroupBusiness" hidden>Business</div>
+      <button class="tab" role="tab" id="tabStripe" aria-selected="false" aria-controls="viewStripe" data-view="stripe" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Revenue</span><kbd>9</kbd></button>
+      <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Routine</span><kbd>0</kbd></button>
+    </nav>
+    <div class="sb-foot">
+      <button type="button" class="sb-search" id="cmdkOpen" aria-label="Jump to a section (Cmd+K)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span>Jump to…</span><kbd>⌘K</kbd></button>
+      <div class="sb-health" id="sbHealth" title="Scan health"></div>
+      <div class="sb-sync" id="sbSync"><i class="dot"></i><span>connecting…</span></div>
+      <div id="accountBox"></div>
     </div>
-    <div id="accountBox"></div>
-  </header>
+  </aside>
 
-  <div class="banner" id="offlineBanner" role="status"></div>
+  <div class="main" id="mainCol">
+  <header class="statusbar">
+    <div class="sb-title"><span id="statusTitle">Today</span><span class="sb-date mono" id="statusDate"></span></div>
+    <div class="sb-right"><span class="chip grey" id="statusCoverage" hidden></span><button type="button" class="icon-btn sm" id="themeBtnTop" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button></div>
+  </header>
+  <div class="content">
+<div class="banner" id="offlineBanner" role="status"></div>
   <div class="cov-banner" id="coverageBanner" role="status" hidden></div>
 
   <!-- ===== TODAY ===== -->
@@ -998,6 +1085,9 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
     </div>
   </section>
 
+  </div><!-- /content -->
+  </div><!-- /main -->
+
   <!-- phone bottom bar -->
   <nav class="bottombar" id="bottomBar" aria-label="Sections">
     <button class="bb" data-view="today" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Today</button>
@@ -1018,6 +1108,13 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
       <button class="sheet-btn" id="sheetTheme">Theme: system</button>
       <button class="sheet-btn" id="sheetSignOut">Sign out</button>
       <button class="btn" id="sheetClose" style="margin-top:4px">Close</button>
+    </div>
+  </div>
+  <div class="palette" id="cmdk" hidden role="dialog" aria-label="Jump to">
+    <div class="palette-card">
+      <input class="palette-input" id="cmdkInput" type="text" placeholder="Jump to a section or action…" autocomplete="off" aria-label="Search sections">
+      <div class="palette-list" id="cmdkList" role="listbox"></div>
+      <div class="palette-hint mono">↑↓ move · ↵ open · esc close · 1–9 jump</div>
     </div>
   </div>
 </div>
@@ -1212,7 +1309,7 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
     var tabs=Array.prototype.filter.call(tabRow.querySelectorAll('.tab'), function(t){ return !t.hidden; });
     var i=tabs.indexOf(document.activeElement); if(i<0) return;
     var j=null;
-    if(ev.key==='ArrowRight') j=(i+1)%tabs.length; else if(ev.key==='ArrowLeft') j=(i-1+tabs.length)%tabs.length; else if(ev.key==='Home') j=0; else if(ev.key==='End') j=tabs.length-1;
+    if(ev.key==='ArrowRight'||ev.key==='ArrowDown') j=(i+1)%tabs.length; else if(ev.key==='ArrowLeft'||ev.key==='ArrowUp') j=(i-1+tabs.length)%tabs.length; else if(ev.key==='Home') j=0; else if(ev.key==='End') j=tabs.length-1;
     if(j==null) return; ev.preventDefault(); tabs[j].focus(); setView(tabs[j].getAttribute('data-view'));
   });
   function openSheet(){ var s=$('moreSheet'); if(s){ s.hidden=false; var f=s.querySelector('.sheet-btn'); if(f) f.focus(); } }
@@ -1221,19 +1318,80 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
   var sheetCloseEl=$('sheetClose'); if(sheetCloseEl) sheetCloseEl.addEventListener('click', closeSheet);
   var moreSheetEl=$('moreSheet'); if(moreSheetEl){ moreSheetEl.addEventListener('click', function(ev){ if(ev.target===moreSheetEl) closeSheet(); }); document.addEventListener('keydown', function(ev){ if(ev.key==='Escape') closeSheet(); }); }
   var sheetSignOut=$('sheetSignOut'); if(sheetSignOut) sheetSignOut.addEventListener('click', function(){ var b=$('signOutBtn'); if(b) b.click(); });
-  // theme
-  function themeLabel(){ var t=read('hqTheme'); return 'Theme: '+(t==='dark'?'dark':(t==='light'?'light':'system')); }
+  // theme: dark is the default; the viewer can switch to light
+  function themeLabel(){ return 'Theme: '+(document.documentElement.getAttribute('data-theme')==='light'?'light':'dark'); }
   window.__hqToggleTheme = function(){
-    var cur=read('hqTheme'), next = cur==='dark' ? 'light' : (cur==='light' ? '' : 'dark');
-    if(next) { store('hqTheme', next); document.documentElement.setAttribute('data-theme', next); } else { try{ localStorage.removeItem('hqTheme'); }catch(e){} document.documentElement.removeAttribute('data-theme'); }
+    var next = document.documentElement.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+    store('hqTheme', next); document.documentElement.setAttribute('data-theme', next);
     setText('sheetTheme', themeLabel());
   };
   var sheetThemeEl=$('sheetTheme'); if(sheetThemeEl){ sheetThemeEl.textContent=themeLabel(); sheetThemeEl.addEventListener('click', window.__hqToggleTheme); }
+  var themeTop=$('themeBtnTop'); if(themeTop) themeTop.addEventListener('click', window.__hqToggleTheme);
   (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'today'; })();
+
+  /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
+  var VIEW_LABEL={today:'Today', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', stripe:'Revenue', routine:'Routine'};
+  var VIEW_KEYS={'1':'today','2':'dms','3':'follow','4':'magnets','5':'leads','6':'funnel','7':'apps','8':'ads','9':'stripe','0':'routine'};
+  var appEl=$('appRoot');
+  function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
+  if(read('hqSidebar')==='1') setCollapsed(true);
+  var sbc=$('sbCollapse'); if(sbc) sbc.addEventListener('click', function(){ setCollapsed(!appEl.classList.contains('collapsed')); });
+  document.addEventListener('hq-view', function(ev){ setText('statusTitle', VIEW_LABEL[ev.detail.view]||'TasteForm HQ'); });
+  var lastSnapshotAt=null, syncErrors=0;
+  function renderStatusBar(){
+    var p=HQ.sydNow();
+    setText('statusDate', HQ.DAYN[p.dow].slice(0,3)+' '+p.d+' '+HQ.MON[p.m-1]+' · '+HQ.pad(p.h)+':'+HQ.pad(p.min)+' Sydney');
+    var m=state.dmMeta, c=HQ.dmCoverage(m), chip=$('statusCoverage');
+    if(chip){
+      if(!m || !m.lastScanAt){ chip.hidden=!state.dmLoaded; chip.className='chip grey'; chip.innerHTML='<i class="dot"></i>DM scan: never ran'; }
+      else { var h=hoursSince(m.lastScanAt), bad = c && (c.complete===false || c.skipped), cls = bad ? 'red' : (h>9 ? 'amber' : 'green'); chip.hidden=false; chip.className='chip '+cls; chip.innerHTML='<i class="dot"></i>DM scan '+esc(relTime(m.lastScanAt)||'')+(bad?' · '+(c.skipped?'skipped':'incomplete'):''); }
+    }
+    var rows=HQ.healthRows(metaBundle(), Date.now()), want=['DM scan','Likes scan (warm leads)','Content scan (posts & stories)','Typeform sync (applications)','Morning Slack report'];
+    setHtml('sbHealth', want.map(function(n){ var r=rows.find(function(x){ return x.name===n; }); return r?'<i class="hd '+r.chip+'" title="'+esc(r.name+': '+r.chipText+'. '+r.why)+'"></i>':''; }).join('')+'<span class="hl">'+(rows.filter(function(r){ return r.chip==='red'; }).length?rows.filter(function(r){ return r.chip==='red'; }).length+' red':'scans')+'</span>');
+    var sy=$('sbSync'); if(sy){ var age=lastSnapshotAt?Math.round((Date.now()-lastSnapshotAt)/1000):null; sy.className='sb-sync'+(syncErrors?' off':(age==null?' wait':'')); sy.querySelector('span').textContent = syncErrors ? 'sync error · retrying' : (age==null ? 'connecting…' : 'live · '+(age<60?age+'s':Math.round(age/60)+'m')+' ago'); }
+  }
+  document.addEventListener('keydown', function(ev){
+    var t=ev.target, typing = t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);
+    if((ev.metaKey||ev.ctrlKey) && ev.key.toLowerCase()==='k'){ ev.preventDefault(); openPalette(); return; }
+    if(typing) return;
+    if(ev.key==='/' ){ ev.preventDefault(); openPalette(); return; }
+    if(!ev.metaKey && !ev.ctrlKey && !ev.altKey && VIEW_KEYS[ev.key]){ var v=VIEW_KEYS[ev.key]; if(!ADMIN_VIEWS[v] || isAdmin){ setView(v); window.scrollTo(0,0); } }
+  });
+  function paletteItems(){
+    var items=Object.keys(VIEW_LABEL).filter(function(v){ return !ADMIN_VIEWS[v] || isAdmin; }).map(function(v){ var k=Object.keys(VIEW_KEYS).find(function(x){ return VIEW_KEYS[x]===v; }); return {group:'Go to', label:VIEW_LABEL[v], sub:'', kbd:k, run:function(){ setView(v); window.scrollTo(0,0); }}; });
+    items.push({group:'Action', label:'Switch light / dark', sub:themeLabel(), kbd:'', run:window.__hqToggleTheme});
+    items.push({group:'Action', label:(appEl.classList.contains('collapsed')?'Expand':'Collapse')+' sidebar', sub:'', kbd:'', run:function(){ setCollapsed(!appEl.classList.contains('collapsed')); }});
+    items.push({group:'Open', label:'Instagram inbox', sub:'instagram.com/direct/inbox', kbd:'', run:function(){ window.open('https://www.instagram.com/direct/inbox/','_blank','noopener'); }});
+    items.push({group:'Open', label:'Typeform form', sub:'form.typeform.com', kbd:'', run:function(){ window.open('https://form.typeform.com/to/'+((state.tfMeta&&state.tfMeta.liveFormId)||'ReFNu7kD'),'_blank','noopener'); }});
+    items.push({group:'Action', label:'Sign out', sub:'', kbd:'', run:function(){ var b=$('signOutBtn'); if(b) b.click(); }});
+    return items;
+  }
+  var palActive=0, palFiltered=[];
+  function renderPalette(){
+    var q=($('cmdkInput').value||'').trim().toLowerCase();
+    palFiltered=paletteItems().filter(function(i){ return !q || (i.label+' '+i.sub+' '+i.group).toLowerCase().indexOf(q)>=0; });
+    if(palActive>=palFiltered.length) palActive=0;
+    setHtml('cmdkList', palFiltered.length ? palFiltered.map(function(i,idx){ return '<button type="button" class="pal-item'+(idx===palActive?' active':'')+'" data-pal="'+idx+'" role="option" aria-selected="'+(idx===palActive?'true':'false')+'"><span class="pal-group">'+esc(i.group)+'</span><span>'+esc(i.label)+'</span><span class="pal-sub">'+esc(i.sub)+'</span>'+(i.kbd?'<kbd>'+esc(i.kbd)+'</kbd>':'')+'</button>'; }).join('') : '<div class="empty-state">Nothing matches.</div>');
+  }
+  function openPalette(){ var p=$('cmdk'); if(!p) return; p.hidden=false; palActive=0; $('cmdkInput').value=''; renderPalette(); $('cmdkInput').focus(); }
+  function closePalette(){ var p=$('cmdk'); if(p) p.hidden=true; }
+  var cmdkOpenBtn=$('cmdkOpen'); if(cmdkOpenBtn) cmdkOpenBtn.addEventListener('click', openPalette);
+  var cmdkEl=$('cmdk');
+  if(cmdkEl){
+    cmdkEl.addEventListener('click', function(ev){ if(ev.target===cmdkEl){ closePalette(); return; } var b=ev.target.closest('[data-pal]'); if(b){ var it=palFiltered[+b.getAttribute('data-pal')]; closePalette(); if(it) it.run(); } });
+    $('cmdkInput').addEventListener('input', function(){ palActive=0; renderPalette(); });
+    $('cmdkInput').addEventListener('keydown', function(ev){
+      if(ev.key==='ArrowDown'){ ev.preventDefault(); palActive=Math.min(palFiltered.length-1, palActive+1); renderPalette(); }
+      else if(ev.key==='ArrowUp'){ ev.preventDefault(); palActive=Math.max(0, palActive-1); renderPalette(); }
+      else if(ev.key==='Enter'){ ev.preventDefault(); var it=palFiltered[palActive]; closePalette(); if(it) it.run(); }
+      else if(ev.key==='Escape'){ closePalette(); }
+    });
+  }
 
   /* ---------- global strips: coverage banner + badges ---------- */
   function renderGlobal(){
     renderCoverage();
+    try{ renderStatusBar(); }catch(e){ console.error('status bar', e); }
     var fu = HQ.followUps(state.dms, Date.now(), false), mfu = HQ.followUps(state.dms, Date.now(), true);
     var waiting = HQ.waiting(state.dms), unworked = HQ.appsUnworked(state.tfResponses, Date.now(), 14);
     function badge(id, n){ var el=$(id); if(!el) return; el.hidden=!n; el.textContent=n; }
@@ -2017,8 +2175,8 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
   /* ---------- data layer ---------- */
   function subscribe(){
     function sub(q, key, stateKey, onLoad){
-      q.onSnapshot(function(s){ state[stateKey]=s.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); }); state.loaded[stateKey]=true; if(onLoad) onLoad(); markDirty(key); },
-        function(e){ console.error(stateKey+' snapshot error', e); showBanner('Live sync hit an error loading '+stateKey+'. Numbers may be stale until it recovers.'); });
+      q.onSnapshot(function(s){ state[stateKey]=s.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); }); state.loaded[stateKey]=true; lastSnapshotAt=Date.now(); syncErrors=0; if(onLoad) onLoad(); markDirty(key); },
+        function(e){ console.error(stateKey+' snapshot error', e); syncErrors++; markDirty('meta'); showBanner('Live sync hit an error loading '+stateKey+'. Numbers may be stale until it recovers.'); });
     }
     function doc(path, key, assign){ db.doc(path).onSnapshot(function(s){ assign(s.exists?s.data():null); markDirty(key); }, function(e){ console.error(path+' error', e); assign(null); markDirty(key); }); }
     sub(db.collection('contacts'), 'contacts', 'contacts', function(){
@@ -2106,7 +2264,7 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
   function boot(client, user, profile){
     isAdmin = !!(profile && profile.role==='admin');
     currentUser = user ? { email:user.email, firstName: (profile && profile.display_name) ? String(profile.display_name).split(/\s+/)[0] : (user.email && /^jordan/i.test(user.email) ? 'Jordan' : null) } : null;
-    $('tabStripe').hidden = !isAdmin; var ss=$('sheetStripe'); if(ss) ss.hidden=!isAdmin;
+    $('tabStripe').hidden = !isAdmin; var ss=$('sheetStripe'); if(ss) ss.hidden=!isAdmin; var gb=$('sbGroupBusiness'); if(gb) gb.hidden=!isAdmin;
     try{ db = makeSupabaseDb(client); }catch(e){ db=null; }
     if(!db){ showBanner("Live sync isn't available in this view, so changes here won't be saved."); setView(currentView, false); return; }
     subscribe();
