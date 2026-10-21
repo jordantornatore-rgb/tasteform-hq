@@ -685,6 +685,12 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
         <div class="card-list" id="listClose"></div>
       </div>
     </div>
+    <div class="panel">
+      <h2>Warm lead tracker</h2>
+      <p class="rule">How many of your warm leads have turned into conversations and calls. "Replied" includes people who messaged you first.</p>
+      <div class="funnel" id="warmFunnel"></div>
+      <div class="f-note" id="warmFunnelNote"></div>
+    </div>
     <details class="disqual" id="disqualDetails">
       <summary><span>Personal contacts <span class="muted" id="disqualCountLabel">(0)</span></span><span class="muted">tap to expand</span></summary>
       <div class="disqual-list" id="disqualList"></div>
@@ -1472,6 +1478,15 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
     var sm=state.scanMeta;
     if(sm && sm.lastScanAt) setText('scanMetaLine', 'Last scanned '+(relTime(sm.lastScanAt)||'recently')+(sm.lastScanCount!=null?' · '+sm.lastScanCount+' new post'+(sm.lastScanCount===1?'':'s')+' read':'')+' · counts out of '+W+' post'+(W===1?'':'s')+(sm.partialPosts?' · '+sm.partialPosts+' big post'+(sm.partialPosts===1?' only':'s only')+' partly readable':''));
     else setText('scanMetaLine', state.loaded.contacts ? 'Waiting for the first likes scan.' : 'Loading board…');
+    // warm lead tracker (was on the old Dashboard)
+    var warm=state.super.concat(state.close), byUser={}; state.dms.forEach(function(d){ byUser[HQ.uname(d)]=d; });
+    var messaged=warm.filter(function(c){ return byUser[HQ.uname(c)]; });
+    var repliedW=messaged.filter(function(c){ var d=byUser[HQ.uname(c)]; return d.firstReplyAt || d.direction==='inbound' || (d.msgsLead||0)>0; });
+    var bookedW=messaged.filter(function(c){ return stageIdx(byUser[HQ.uname(c)])>=STAGE_INDEX.booked; });
+    var dmReady=state.dmLoaded, notMsg=warm.length-messaged.length;
+    setHtml('warmFunnel', warm.length ? funnelHtml([{label:'Warm leads', value:warm.length},{label:'Messaged', value:dmReady?messaged.length:null, reason:'waiting for the DM scan'},{label:'Replied or messaged first', value:dmReady?repliedW.length:null, reason:'waiting for the DM scan'},{label:'Call booked', value:dmReady?bookedW.length:null, reason:'waiting for the DM scan'}], {showWhy:true}) : '<div class="empty-state">Fills once the likes scan has run.</div>');
+    var newWeek=warm.filter(function(c){ var h=hoursSince(c.firstSeenAt||c.addedAt); return h!=null && h>=0 && h<7*24; }).length;
+    setText('warmFunnelNote', [newWeek?newWeek+' new warm lead'+(newWeek===1?'':'s')+' this week.':'', dmReady&&notMsg?notMsg+' warm lead'+(notMsg===1?' has':'s have')+' never been messaged. They’re your easiest openers.':''].filter(Boolean).join(' '));
     setText('leadsFooter', 'Refreshed by the likes scan (daily, 3:15am). Marking someone personal removes them for good, and future scans skip them.'+(state.inactive.length?' '+state.inactive.length+' contact'+(state.inactive.length===1?'':'s')+' the scan marked inactive are hidden.':''));
   };
   async function moveTier(id, target){ if(!db) return; try{ await db.collection('contacts').doc(id).update({tier:target, updatedAt:new Date().toISOString()}); }catch(e){ console.error('moveTier failed',e); } }
