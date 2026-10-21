@@ -19,31 +19,24 @@ Every number on the page, where it comes from, how often it must be refreshed to
 | Ads tab, Funnel → Paid | `ads_daily`, `ads_campaigns` | none | Daily once connected | Empty. | **Not connected** (page says so). | — |
 | Answered / booked / showed / signed | `tf_responses.outcome` (hand-marked) | you, on the Applications tab | As you work the list | 3 outcomes marked. | Honest. | GHL pull would automate it (needs a read-only token). |
 
-## 2. Scheduled jobs — the full picture after today
+## 2. Scheduled jobs — the full picture (updated 22 Oct, 10:00 Sydney)
 
-| Job | Runs where | Cadence (Sydney) | Status this morning | Model |
+| Job | Runs where | Cadence (Sydney) | Status | Model |
 | --- | --- | --- | --- | --- |
-| DM scan (cloud routine, v4 prompt) | claude.ai → Chrome on the Mac mini | 6:07, 10:07, 14:07, 18:07, 22:07 | ✅ ran 6:07 (coverage: both inboxes to window end) | Opus (API refuses a change; routine settings on claude.ai) |
-| Likes scan (cloud routine, v4) | same | 3:15 | ✅ ran 3:18 | Opus |
-| Content scan `hq-content-scan` (Mac task, v5) | Claude app on the Mac mini | 4:32 daily | ⛔ **switched off** — its test run paused on a tool approval (default permission mode on this Mac) | Sonnet once running |
-| DM scan `hq-dm-scan` (Mac task, v5) | same | 6:07, 10:07, 14:07, 18:07, **22:07 backlog run** | ⛔ switched off (same reason) | Sonnet |
-| Likes scan `hq-likes-scan` (Mac task, v5) | same | 3:15 | ⛔ switched off (same reason) | Sonnet |
-| Typeform sync | Supabase cron → edge fn | hourly :23 | ✅ 24/24 | — |
+| DM scan (cloud routine, **v5 prompt**) | claude.ai → Chrome on the Mac mini | 6:07, 10:07, 14:07, 18:07, **22:07 backlog run** | ✅ v5 test run 9:20–9:27: both inboxes + requests walked, health row written | Sonnet |
+| Likes scan (cloud routine, **v5**) | same | 3:15 | ✅ v5 test run 9:32–9:42: 6 posts read (12 stored), 5 new Super Engaged | Sonnet |
+| Content scan (cloud routine, **v5, new**) | same | 4:32 daily | ✅ created 22 Oct; first run 9:45 | Sonnet |
+| Typeform sync | Supabase cron → edge fn | hourly :23 | ✅ | — |
 | Stripe sync | Supabase cron → edge fn | hourly :35 | ✅ (not connected) | — |
-| Today brief | Supabase cron → edge fn | hourly :40 | ✅ 18/18 | — |
+| Today brief | Supabase cron → edge fn | hourly :40 | ✅ | — |
 | Google Calendar → calls | cloud routine | 6:12, 9:12, 12:12, 15:12, 18:12 | ✅ | Sonnet |
-| Morning Slack report | cloud routine | 6:47 | ✅ sent 6:48, verbatim from the brief | Sonnet |
+| Morning Slack report | cloud routine | 6:47 | ✅ | Sonnet |
 
-No two Chrome jobs overlap: 3:15 likes → 4:32 content → 6:07 DM → 6:40 brief → 6:47 report.
+No two Chrome jobs overlap: 3:15 likes → 4:32 content → 6:07 DM → 6:40 brief → 6:47 report. The three Mac-mini app tasks (`hq-dm-scan`, `hq-likes-scan`, `hq-content-scan`) hold the same prompts and stay **off** so nothing runs twice.
 
-## 3. Where the scans run (updated 22 Oct, afternoon)
+## 3. Where the scans run
 
-There are **two separate task lists** and that caused confusion:
-
-- **claude.ai → Scheduled tasks** (the cloud routines, bound to the Mac mini). These are the ones Jordan opened today: DM scan and likes scan are **on, Auto, running** (likes ran 3:15 and 8:40; DM ran 6:07). They still carry the older v4 prompts and Opus, because the API refuses to edit a device-bound routine's instructions or model; the edit box on claude.ai can.
-- **Claude app on the Mac mini → Scheduled** (local tasks `hq-dm-scan`, `hq-likes-scan`, `hq-content-scan`, v5 prompts, Sonnet). Off: a task created remotely starts in "default" permission mode and pauses on its first tool call; only the app on that machine can set Auto.
-
-Simplest path, from the phone: in each cloud routine's edit box, replace the Instructions with the matching file in `scans/` (v5 prompt), switch the model to Sonnet, save. For content, create a third routine from `scans/content-scan.md` at 4:32 daily. The local tasks then stay off and nothing runs twice.
+There are two task lists. The live ones are the **claude.ai routines** (Scheduled tasks on claude.ai, bound to the Mac mini): Jordan pasted the v5 prompts from `scans/` into them on 22 Oct and set Sonnet; the API confirmed all three prompts match the files byte for byte, permission Auto, device-bound. The **Claude app's own Scheduled list on the Mac mini** holds backup copies, disabled. Edit a scan by changing the file in `scans/` and pasting it into the routine; the README there has the mapping.
 
 ## 4. Findings that are about the business, not the data
 

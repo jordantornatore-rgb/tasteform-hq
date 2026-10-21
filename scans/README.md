@@ -6,7 +6,7 @@ These are the instructions the three Instagram scans run on. Each file is the wh
 | --- | --- | --- |
 | `dm-scan.md` | TasteForm HQ — DM scan (5× daily, Mac Mini) | 6:07, 10:07, 14:07, 18:07, 22:07 (22:07 = 50-min backlog run) |
 | `likes-scan.md` | Warm Leads Board — daily Instagram scan (Mac Mini) | 3:15 |
-| `content-scan.md` | *(new — create it)* TasteForm HQ — content scan (Mac Mini) | 4:32 daily |
+| `content-scan.md` | Content Scan | 4:32 daily |
 
 The same prompts are installed as Claude-app scheduled tasks on the Mac mini (`hq-dm-scan`, `hq-likes-scan`, `hq-content-scan`), currently off. Either place works; never run both for the same scan.
 

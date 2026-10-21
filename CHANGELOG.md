@@ -8,7 +8,7 @@
 - **Command palette** (⌘K, Ctrl+K or `/`): jump to any section, switch theme, open the Instagram inbox or the Typeform form, sign out.
 - Dark is now the default (black→espresso gradient with a faint grid); light stays one tap away.
 - Supabase: `hq_merge(table, rows)` — one merge-only write path for the scans so unattended runs never hit a "destructive statement" approval prompt (the cause of the 3-minute timeouts in the old runs).
-- Scans: v5 prompts for the DM scan, likes scan and content scan live as Claude Desktop scheduled tasks on the Mac mini (`hq-dm-scan`, `hq-likes-scan`, `hq-content-scan`), disabled until Jordan approves their tools once; the cloud routines keep running meanwhile.
+- Scans: v5 prompts for the DM scan, likes scan and the new content scan (`scans/*.md`) run as claude.ai routines bound to the Mac mini, on Sonnet; the Claude-app tasks on the Mac mini hold backup copies, disabled.
 
 ## 2.0.0 — 21 Oct 2026 (revamp branch)
 
