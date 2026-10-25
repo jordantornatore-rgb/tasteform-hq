@@ -19,24 +19,23 @@ Every number on the page, where it comes from, how often it must be refreshed to
 | Ads tab, Funnel → Paid | `ads_daily`, `ads_campaigns` | none | Daily once connected | Empty. | **Not connected** (page says so). | — |
 | Answered / booked / showed / signed | `tf_responses.outcome` (hand-marked) | you, on the Applications tab | As you work the list | 3 outcomes marked. | Honest. | GHL pull would automate it (needs a read-only token). |
 
-## 2. Scheduled jobs — the full picture (updated 22 Oct, 10:00 Sydney)
+## 2. Scheduled jobs — what the four days of v5 showed (26 Oct)
 
-| Job | Runs where | Cadence (Sydney) | Status | Model |
-| --- | --- | --- | --- | --- |
-| DM scan (cloud routine, **v5 prompt**) | claude.ai → Chrome on the Mac mini | 6:07, 10:07, 14:07, 18:07, **22:07 backlog run** | ✅ v5 test run 9:20–9:27: both inboxes + requests walked, health row written | Sonnet |
-| Likes scan (cloud routine, **v5**) | same | 3:15 | ✅ v5 test run 9:32–9:42: 6 posts read (12 stored), 5 new Super Engaged | Sonnet |
-| Content scan (cloud routine, **v5, new**) | same | 4:32 daily | ✅ runs 9:45 and 11:37 (posts current; first story stored); v5.2 prompt walks all stories | Sonnet |
-| Typeform sync | Supabase cron → edge fn | hourly :23 | ✅ | — |
-| Stripe sync | Supabase cron → edge fn | hourly :35 | ✅ (not connected) | — |
-| Today brief | Supabase cron → edge fn | hourly :40 | ✅ | — |
-| Google Calendar → calls | cloud routine | 6:12, 9:12, 12:12, 15:12, 18:12 | ✅ | Sonnet |
-| Morning Slack report | cloud routine | 6:47 | ✅ | Sonnet |
+Every routine fired on time and ended "success", but each run lasted 1–4 minutes, including the 22:07 backlog runs that were meant to take 50. The model treated the deep work ("as time allows") as optional and stopped as soon as the inbox walk was done. Net effect after four days: 321 placeholders still unresolved, 718 leads not re-verified in 24 h, 4 script reviews in 7 days, the morning brief saying "DM INCOMPLETE · 412 chats not read yet" every day, and push notifications admitting "backlog re-verify was not done". The data that *was* written was correct; the problem was coverage, not accuracy.
 
-No two Chrome jobs overlap: 3:15 likes → 4:32 content → 6:07 DM → 6:40 brief → 6:47 report. The three Mac-mini app tasks (`hq-dm-scan`, `hq-likes-scan`, `hq-content-scan`) hold the same prompts and stay **off** so nothing runs twice.
+| Job | Schedule (Sydney) | v6 fix | Status |
+| --- | --- | --- | --- |
+| DM scan (5× daily) | 6:07, 10:07, 14:07, 18:07, 22:07 · 25 min | Queue-driven re-verify by thread URL, 5 placeholders per run, finish gate, self-reported `stoppedEarly` | prompt in `scans/dm-scan.md`, waiting to be pasted |
+| DM backlog (new) | 22:40 · 50 min | Four SQL queues, 10-row batches, opened by URL, reviews + dm_daily at the end | `scans/dm-backlog.md`, routine to be created |
+| Likes scan | 3:15 · 30 min | Big posts read in pages with progress saved every 100 names; tiers every night | `scans/likes-scan.md`, to be pasted |
+| Content scan | 4:32 · 25 min | Same discipline block; hq_merge only; explicit queue | `scans/content-scan.md`, to be pasted |
+| Typeform sync / Stripe sync / Today brief | hourly :23 / :35 / :40 | — | ✅ |
+| Google Calendar → calls | 6:12, 9:12, 12:12, 15:12, 18:12 | — | ✅ |
+| Morning Slack report | 6:47 | — | ✅ |
 
 ## 3. Where the scans run
 
-There are two task lists. The live ones are the **claude.ai routines** (Scheduled tasks on claude.ai, bound to the Mac mini): Jordan pasted the v5 prompts from `scans/` into them on 22 Oct and set Sonnet; the API confirmed all three prompts match the files byte for byte, permission Auto, device-bound. The **Claude app's own Scheduled list on the Mac mini** holds backup copies, disabled. Edit a scan by changing the file in `scans/` and pasting it into the routine; the README there has the mapping.
+All Instagram scans are claude.ai routines bound to the Mac mini (Auto, Sonnet). The API can toggle them and read their logs but cannot change a bound routine's prompt or create a bound one, so prompt changes are pasted once from `scans/` (raw links in `scans/README.md`). The three backup tasks in the Claude app on the Mac mini were deleted on 26 Oct; a routine I created through the API that day came back unbound and is left disabled (named "DM scan v6 (day runs…)", safe to delete).
 
 ## 4. Findings that are about the business, not the data
 

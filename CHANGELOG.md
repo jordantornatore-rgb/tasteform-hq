@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.0 — 26 Oct 2026 (scans that cannot quietly stop early)
+
+- Scan prompts v6 (`scans/`): run-discipline block (START/DEADLINE, SQL queues, batch loop, finish gate), self-reported `stoppedEarly` / `minutesUsed` / `queueRemaining` / `stepsDone`; DM backlog split into its own nightly routine (22:40, 50 min) with URL-based re-verification; likes scan resumes big posts in pages; content scan merge-only.
+- `hq-core.js` 2.2.0: health panel shows "Stopped early" (red) from the scans' own report and a new "DM backlog (nightly deep pass)" row.
+- Mac-mini Claude-app backup tasks removed (they only ever showed as failed).
+
 ## 2.1.0 — 21 Oct 2026 (command-centre layout)
 
 - Replaced the row of 10 tabs with a left **sidebar** grouped Command / Pipeline / Growth / Business (icons, badges, number shortcuts 1–9/0, collapsible to an icon rail, remembered per viewer). Phones keep the bottom bar.

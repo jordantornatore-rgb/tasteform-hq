@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '2.0.0';
+  HQ.VERSION = '2.2.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -416,12 +416,14 @@
       if (opts.notConnected) { r.chip = 'grey'; r.chipText = 'Not connected'; r.why = opts.notConnected; return r; }
       if (when == null) return r;
       if (opts.failed) { r.chip = 'red'; r.chipText = 'Failed'; r.why = opts.failed; return r; }
+      if (opts.stoppedEarly) { r.chip = 'red'; r.chipText = 'Stopped early'; r.why = opts.stoppedEarly; return r; }
       if (opts.incomplete) { r.chip = 'red'; r.chipText = 'Incomplete'; r.why = opts.incomplete; return r; }
       if (h != null && h > (opts.staleHours || 30)) { r.chip = 'amber'; r.chipText = 'Stale'; r.why = 'Last ran ' + HQ.relTime(when, now) + '; expected ' + (opts.schedule || 'sooner') + '.'; return r; }
       if (opts.partial) { r.chip = 'amber'; r.chipText = 'Partial'; r.why = opts.partial; return r; }
       r.chip = 'green'; r.chipText = 'OK'; r.why = 'Last ran ' + (HQ.relTime(when, now) || 'recently') + '.'; return r;
     }
     var rows = [];
+    function early(m) { if (!m || m.stoppedEarly !== true) return null; return 'Last run stopped with ' + (HQ.isNum(m.queueRemaining) ? m.queueRemaining + ' rows' : 'work') + ' still queued after ' + (HQ.isNum(m.minutesUsed) ? m.minutesUsed + ' of ' + (m.budgetMin || '?') + ' min' : 'a short run') + '.'; }
     var dm = meta.dmScan || null, cov = dm && dm.coverage;
     var dmIncomplete = null, dmPartial = null;
     if (dm && dm.lastScanAt) {
@@ -435,11 +437,13 @@
         dmIncomplete = 'Last run did not cover everything: ' + (why.join('; ') || 'see coverage') + '. Treat DM counts as a floor.';
       }
     }
-    rows.push(row('DM scan', dm && dm.lastScanAt, { schedule: (dm && dm.schedule) || '5× a day (6:07, 10:07, 14:07, 18:07, 22:07)', staleHours: 9, incomplete: dmIncomplete, partial: dmPartial, failed: dm && dm.lastAttemptOk === false ? (dm.lastAttemptNote || 'Last attempt failed.') : null, items: dm && HQ.isNum(dm.threadsRead) ? dm.threadsRead + ' threads read' : null, notRun: 'Runs in Chrome on the Mac mini. Nothing written yet.' }));
+    rows.push(row('DM scan', dm && dm.lastScanAt, { schedule: (dm && dm.schedule) || '6:07, 10:07, 14:07, 18:07, 22:07', staleHours: 9, stoppedEarly: early(dm), incomplete: dmIncomplete, partial: dmPartial, failed: dm && dm.lastAttemptOk === false ? (dm.lastAttemptNote || 'Last attempt failed.') : null, items: dm && HQ.isNum(dm.threadsRead) ? dm.threadsRead + ' threads read' : null, notRun: 'Runs in Chrome on the Mac mini. Nothing written yet.' }));
+    var bl = meta.dmBacklog || null;
+    rows.push(row('DM backlog (nightly deep pass)', bl && bl.lastScanAt, { schedule: (bl && bl.schedule) || 'nightly 22:40', staleHours: 30, stoppedEarly: early(bl), failed: bl && bl.lastAttemptOk === false ? (bl.lastAttemptNote || 'Last attempt failed.') : null, partial: bl && HQ.isNum(bl.staleRemaining) && bl.staleRemaining > 0 ? bl.staleRemaining + ' leads still older than 24 h; ' + (HQ.isNum(bl.pendingRemaining) ? bl.pendingRemaining + ' placeholders left' : '') : null, items: bl && bl.processed ? Object.keys(bl.processed).reduce(function (a, k) { return a + (HQ.isNum(bl.processed[k]) ? bl.processed[k] : 0); }, 0) + ' rows re-verified' : null, notRun: 'Runs in Chrome on the Mac mini at 22:40. Nothing written yet.' }));
     var sc = meta.scan || null;
-    rows.push(row('Likes scan (warm leads)', sc && sc.lastScanAt, { schedule: (sc && sc.schedule) || 'daily 3:15am', staleHours: 30, failed: sc && sc.lastAttemptOk === false ? (sc.lastAttemptNote || 'Last attempt failed.') : null, partial: sc && sc.partialPosts ? sc.partialPosts + ' big post(s) only partly readable' : null, items: sc && HQ.isNum(sc.windowPosts) ? sc.windowPosts + ' posts, ' + (HQ.isNum(sc.uniqueLikers) ? sc.uniqueLikers + ' likers' : '') : null, notRun: 'Runs in Chrome on the Mac mini. Nothing written yet.' }));
+    rows.push(row('Likes scan (warm leads)', sc && sc.lastScanAt, { schedule: (sc && sc.schedule) || 'daily 3:15am', staleHours: 30, stoppedEarly: early(sc), failed: sc && sc.lastAttemptOk === false ? (sc.lastAttemptNote || 'Last attempt failed.') : null, partial: sc && sc.partialPosts ? sc.partialPosts + ' big post(s) only partly readable' : null, items: sc && HQ.isNum(sc.windowPosts) ? sc.windowPosts + ' posts, ' + (HQ.isNum(sc.uniqueLikers) ? sc.uniqueLikers + ' likers' : '') : null, notRun: 'Runs in Chrome on the Mac mini. Nothing written yet.' }));
     var ig = meta.igScan || null;
-    rows.push(row('Content scan (posts & stories)', ig && ig.lastScanAt, { schedule: (ig && ig.schedule) || 'daily 4:30am', staleHours: 30, failed: ig && ig.lastAttemptOk === false ? (ig.lastAttemptNote || 'Last attempt failed.') : null, partial: ig && ig.backfillComplete === false ? '30-day backfill not finished yet, so older posts are missing.' : null, items: ig ? ((HQ.isNum(ig.postsStored) ? ig.postsStored + ' posts' : '') + (HQ.isNum(ig.storiesStored) ? ', ' + ig.storiesStored + ' stories' : '')) : null, notRun: 'Not scheduled yet.' }));
+    rows.push(row('Content scan (posts & stories)', ig && ig.lastScanAt, { schedule: (ig && ig.schedule) || 'daily 4:30am', staleHours: 30, stoppedEarly: early(ig), failed: ig && ig.lastAttemptOk === false ? (ig.lastAttemptNote || 'Last attempt failed.') : null, partial: ig && ig.backfillComplete === false ? '30-day backfill not finished yet, so older posts are missing.' : null, items: ig ? ((HQ.isNum(ig.postsStored) ? ig.postsStored + ' posts' : '') + (HQ.isNum(ig.storiesStored) ? ', ' + ig.storiesStored + ' stories' : '')) : null, notRun: 'Not scheduled yet.' }));
     var tf = meta.typeformSync || null;
     rows.push(row('Typeform sync (applications)', tf && tf.lastSyncAt, { schedule: 'hourly', staleHours: 3, failed: tf && tf.ok === false ? (tf.error || 'Sync failing.') : null, items: tf && HQ.isNum(tf.responsesStored) ? tf.responsesStored + ' applications' : null }));
     var rc = meta.routineCalls || null;
