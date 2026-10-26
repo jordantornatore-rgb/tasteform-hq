@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '2.2.0';
+  HQ.VERSION = '2.2.1';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -165,7 +165,10 @@
   /* ---------- lead classification (the 5 Oct rules, unchanged) ---------- */
   HQ.stageIdx = function (d) { var i = HQ.STAGE_INDEX[d && d.stage]; return i == null ? 0 : i; };
   HQ.stageLabel = function (d) { return (HQ.STAGES[HQ.stageIdx(d)] || HQ.STAGES[0])[1]; };
-  HQ.isLead = function (d) { return !!d && d.category === 'lead' && !d.notApplicable; };
+  // A placeholder that was resolved to a real row (resolvedTo) is a duplicate of that row; one the scan could not find
+  // in the inbox on 3 separate nights (unresolvable) is dead. Neither is a lead any more.
+  HQ.isRetiredPlaceholder = function (d) { return !!d && /^pending-/i.test(d.id || '') && !!(d.resolvedTo || d.unresolvable); };
+  HQ.isLead = function (d) { return !!d && d.category === 'lead' && !d.notApplicable && !HQ.isRetiredPlaceholder(d); };
   HQ.isMagnetOnly = function (d) { return !!d && d.opener === 'magnet_delivery'; };
   // "pending-" placeholders made from the inbox preview: no thread link, opener guessed → outside both funnels
   HQ.isUnverified = function (d) { return !!d && /^pending-/i.test(d.id || '') && !d.threadId; };
