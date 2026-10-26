@@ -33,6 +33,17 @@ Every routine fired on time and ended "success", but each run lasted 1–4 minut
 | Google Calendar → calls | 6:12, 9:12, 12:12, 15:12, 18:12 | — | ✅ |
 | Morning Slack report | 6:47 | — | ✅ |
 
+## 2b. v6 live proof (26 Oct, 9:30–12:00 Sydney)
+
+| Run | Minutes used / budget | Did | Self-verdict |
+| --- | --- | --- | --- |
+| DM scan (manual, 9:30) | 14.4 / 25 | 16 threads read, **53 waiting leads re-verified by URL**, 11 script reviews, dm_daily | `stoppedEarly: true` — queue down to 2 unread rows; placeholder step failed (search never opens a chat) |
+| DM scan (scheduled 10:07) | 3.7 / 25 | 8 threads, 3 re-verified, 3 reviews; queue genuinely empty | ok — v6.1 now spends idle minutes on stale leads |
+| DM backlog (manual, 10:33) | 40.5 / 48 | **200 leads re-verified** (37 manual-mark reconciliations, 163 stale), 19 reviews, dm_daily | `stoppedEarly: true` — only the placeholder queue was left, same search problem |
+| Likes scan (manual, 11:25) | 14.8 / 30 | 8 posts read, window of 20 complete posts filled, **19 new Super Engaged**, 3,286 likers | ok; 3 reels sit at Instagram's visible-liker cap (~1,000 names), recorded as partial for good |
+
+Four days of v5 re-verified about 10 leads a day; one morning of v6 re-verified 256 and wrote 33 script reviews. The failures the scans reported on themselves were all the same bug (resolving placeholders via Instagram search), fixed in v6.1 by matching placeholders against the inbox list instead.
+
 ## 3. Where the scans run
 
 All Instagram scans are claude.ai routines bound to the Mac mini (Auto, Sonnet). The API can toggle them and read their logs but cannot change a bound routine's prompt or create a bound one, so prompt changes are pasted once from `scans/` (raw links in `scans/README.md`). The three backup tasks in the Claude app on the Mac mini were deleted on 26 Oct; a routine I created through the API that day came back unbound and is left disabled (named "DM scan v6 (day runs…)", safe to delete).

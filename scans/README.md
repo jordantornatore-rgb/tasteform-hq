@@ -1,4 +1,4 @@
-# Scan prompts (v6)
+# Scan prompts (v6.1)
 
 Four routines on claude.ai (Scheduled tasks), each bound to the Mac mini, permission **Auto**, model **Sonnet**. The Instructions box of each routine holds the matching file below, pasted verbatim (copy from the *raw* link so nothing is reformatted).
 
@@ -10,6 +10,9 @@ Four routines on claude.ai (Scheduled tasks), each bound to the Mac mini, permis
 | Content Scan *(existing)* | 4:32 daily | 25 min | [content-scan.md](https://raw.githubusercontent.com/jordantornatore-rgb/tasteform-hq/main/scans/content-scan.md) |
 
 No two Chrome jobs overlap: 3:15 likes → 4:32 content → 6:07 DM → 6:40 brief → 6:47 report … 22:07 DM (ends by 22:32) → 22:40 backlog (ends by 23:28).
+
+## v6.1 (26 Oct, afternoon)
+Placeholders are resolved from the inbox list, never the search box (search results do not open chats); day runs use idle minutes on the stale-lead queue; a thread that turned unread between the UNREAD snapshot and the URL open is recorded as waiting rather than skipped. Only `dm-scan.md` and `dm-backlog.md` changed; paste both again.
 
 ## What v6 changes (26 Oct 2026)
 Every run before v6 ended "success" after 1–4 minutes and skipped the deep work, so the backlog never moved (321 placeholders, 718 leads unverified for 24 h+, 4 script reviews a week) and the morning brief kept saying "DM INCOMPLETE". v6 fixes the cause, not the symptom:
