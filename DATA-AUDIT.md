@@ -41,6 +41,7 @@ Every routine fired on time and ended "success", but each run lasted 1–4 minut
 | DM scan (scheduled 10:07) | 3.7 / 25 | 8 threads, 3 re-verified, 3 reviews; queue genuinely empty | ok — v6.1 now spends idle minutes on stale leads |
 | DM backlog (manual, 10:33) | 40.5 / 48 | **200 leads re-verified** (37 manual-mark reconciliations, 163 stale), 19 reviews, dm_daily | `stoppedEarly: true` — only the placeholder queue was left, same search problem |
 | Likes scan (manual, 11:25) | 14.8 / 30 | 8 posts read, window of 20 complete posts filled, **19 new Super Engaged**, 3,286 likers | ok; 3 reels sit at Instagram's visible-liker cap (~1,000 names), recorded as partial for good |
+| Content scan (manual, 11:57) | 4.2 / 25 | 4 reels from the last 7 days re-read, 1 new story, 21 posts / 11 stories stored | ok; queue genuinely empty |
 
 Four days of v5 re-verified about 10 leads a day; one morning of v6 re-verified 256 and wrote 33 script reviews. The failures the scans reported on themselves were all the same bug (resolving placeholders via Instagram search), fixed in v6.1 by matching placeholders against the inbox list instead.
 
