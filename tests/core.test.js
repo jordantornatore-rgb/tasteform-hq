@@ -94,7 +94,7 @@ test('waiting excludes liked-only, non-active and personal chats', () => {
   const w = HQ.waiting(dms, NOW);
   w.forEach(x => { assert.strictEqual(x.d.category, 'lead'); assert.ok(!x.d.lastLeadMessageLiked); assert.ok(!x.d.status || x.d.status === 'active'); assert.strictEqual(x.d.lastSender, 'lead'); });
   for (let i = 1; i < w.length; i++) assert.ok((HQ.parseTs(w[i - 1].since) || NOW) <= (HQ.parseTs(w[i].since) || NOW));
-  const exp = dms.filter(d => d.category === 'lead' && !d.notApplicable && d.lastSender === 'lead' && (!d.status || d.status === 'active') && !d.lastLeadMessageLiked).length;
+  const exp = dms.filter(d => d.category === 'lead' && !d.notApplicable && !(/^pending-/.test(d.id) && (d.resolvedTo || d.unresolvable)) && d.lastSender === 'lead' && (!d.status || d.status === 'active') && !d.lastLeadMessageLiked).length;
   assert.strictEqual(w.length, exp);
 });
 test('follow-ups: outbound and magnet cadences are disjoint and bucketed by Sydney day', () => {
