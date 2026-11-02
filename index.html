@@ -562,6 +562,79 @@ body{padding:0;}
   .sb-right .chip{max-width:48vw;overflow:hidden;text-overflow:ellipsis;}
 }
 
+/* ===== Content Engine (Idea Bank + weekly plan + posting queue) ===== */
+:root{--ce-tof:#2F5A86;--ce-tof-soft:#DCE6F0;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ce-tof:#8FB4DC;--ce-tof-soft:#1A2634;}}
+:root[data-theme="dark"]{--ce-tof:#8FB4DC;--ce-tof-soft:#1A2634;}
+.chip.ce-tof{background:var(--ce-tof-soft);color:var(--ce-tof);}
+.chip.ce-mof{background:var(--warn-soft);color:var(--warn);}
+.chip.ce-bof{background:var(--good-soft);color:var(--good);}
+.chip.ce-fmt{font-weight:700;letter-spacing:.04em;}
+.ce-board{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;}
+.ce-day{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.ce-dayhead{font-size:var(--t-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:2px 2px;display:flex;justify-content:space-between;gap:6px;}
+.ce-day.today .ce-dayhead{color:var(--accent);}
+.ce-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:5px;vertical-align:middle;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent);}
+.ce-card{border:1px solid var(--border);background:var(--bg);border-radius:var(--r-m);padding:10px;display:flex;flex-direction:column;gap:6px;text-align:left;cursor:pointer;width:100%;min-height:var(--tap);color:inherit;}
+.ce-card:hover{border-color:var(--accent);}
+.ce-card:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+.ce-card.posted{opacity:.72;}
+.ce-card.skipped{opacity:.5;}
+.ce-card.skipped .ce-title{text-decoration:line-through;}
+.ce-chips{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+.ce-title{font-weight:700;font-size:var(--t-s);line-height:1.35;overflow-wrap:anywhere;}
+.ce-meta{font-size:var(--t-xs);color:var(--muted);overflow-wrap:anywhere;}
+.ce-empty{font-size:var(--t-xs);color:var(--muted);border:1px dashed var(--border);border-radius:var(--r-m);padding:10px;text-align:center;}
+.ce-prog{display:flex;flex-direction:column;gap:6px;}
+.ce-prog .row{display:grid;grid-template-columns:76px 1fr 64px;gap:10px;align-items:center;font-size:var(--t-s);}
+.ce-prog .bar{height:8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);overflow:hidden;}
+.ce-prog .bar i{display:block;height:100%;background:var(--accent);}
+.ce-prog .row.posted .bar i{background:var(--good);}
+.ce-prog .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
+.ce-film-group{display:flex;flex-direction:column;gap:6px;}
+.ce-film-group h3{margin-top:6px;}
+.ce-ideas{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--s3);}
+.ce-idea{border:1px solid var(--border);background:var(--bg);border-radius:var(--r-m);padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0;}
+.ce-idea.skipped{opacity:.55;}
+.ce-creator{font-size:var(--t-m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.ce-stat{font-size:var(--t-s);font-weight:600;font-variant-numeric:tabular-nums;}
+.ce-k{display:block;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+.ce-txt{font-size:var(--t-s);line-height:1.5;overflow-wrap:anywhere;white-space:pre-wrap;}
+.ce-hooks{margin:0;padding-left:18px;font-size:var(--t-s);display:flex;flex-direction:column;gap:4px;}
+.ce-foot{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:auto;}
+.ce-foot a{font-size:var(--t-s);font-weight:600;margin-right:auto;}
+.ce-filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.ce-filters .input{min-width:0;max-width:100%;}
+.ce-scanrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.ce-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.ce-metric{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-s);padding:6px 8px;min-width:0;}
+.ce-metric .label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.ce-metric .v{font-weight:700;font-variant-numeric:tabular-nums;font-size:var(--t-l);overflow-wrap:anywhere;}
+.ce-sheet{position:fixed;inset:0;z-index:65;background:rgba(15,13,11,.55);display:flex;align-items:flex-end;justify-content:center;}
+.ce-sheet-card{background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-l) var(--r-l) 0 0;width:100%;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:var(--s4) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom,0));display:flex;flex-direction:column;gap:var(--s3);}
+@media (min-width:761px){.ce-sheet{align-items:center;padding:24px;}.ce-sheet-card{max-width:720px;border-radius:var(--r-l);max-height:88vh;}}
+.ce-sheet-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+.ce-sheet-head > div{min-width:0;flex:1;}
+.ce-sheet h2{font-size:var(--t-xl);overflow-wrap:anywhere;}
+.ce-block{border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:6px;}
+.ce-block-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+.ce-line{display:flex;gap:8px;align-items:flex-start;justify-content:space-between;font-size:var(--t-s);line-height:1.5;}
+.ce-line .t{flex:1;min-width:0;overflow-wrap:anywhere;white-space:pre-wrap;}
+.ce-copy{flex-shrink:0;}
+.ce-steps{display:flex;gap:4px;flex-wrap:wrap;}
+.ce-step{border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;padding:6px 10px;min-height:34px;font-size:var(--t-xs);font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.ce-step.done{background:var(--good-soft);color:var(--good);border-color:var(--good);}
+.ce-step.cur{background:var(--text);color:var(--bg);border-color:var(--text);}
+.ce-step:disabled{cursor:default;opacity:.8;}
+.ce-step:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+@media (max-width:760px){
+  .ce-board{grid-template-columns:1fr;}
+  .ce-ideas{grid-template-columns:1fr;}
+  .ce-step,.ce-filters .input,.ce-filters .btn{min-height:var(--tap);}
+  .ce-foot a,.ce-a{display:inline-flex;align-items:center;min-height:var(--tap);}
+  .ce-prog .row{grid-template-columns:68px 1fr 56px;}
+}
+
 /* phone: every tappable thing is at least 44 px; inline name links get a padded hit area without moving the layout */
 @media (max-width:760px){
   .btn,.btn.small,.icon-btn.sm,.r-btn,.seg-filter button,.range button,.outcome-btns .btn,.r-counter .cv button{min-height:var(--tap);}
@@ -623,6 +696,7 @@ body{padding:0;}
       <button class="tab" role="tab" id="tabFunnel" aria-selected="false" aria-controls="viewFunnel" data-view="funnel"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Funnel</span><kbd>6</kbd></button>
       <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg><span>Applications</span><span class="tab-badge" id="appsBadge" hidden></span><kbd>7</kbd></button>
       <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads"><svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M17 8a4 4 0 0 1 0 8"/></svg><span>Ads</span><kbd>8</kbd></button>
+      <button class="tab" role="tab" id="tabContent" aria-selected="false" aria-controls="viewContent" data-view="content"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5l2 4M14 5l2 4M10 12l4 2.5-4 2.5z"/></svg><span>Content Engine</span></button>
       <div class="sb-group" id="sbGroupBusiness" hidden>Business</div>
       <button class="tab" role="tab" id="tabStripe" aria-selected="false" aria-controls="viewStripe" data-view="stripe" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Revenue</span><kbd>9</kbd></button>
       <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Routine</span><kbd>0</kbd></button>
@@ -1045,6 +1119,20 @@ body{padding:0;}
     </div>
   </section>
 
+  <!-- ===== CONTENT ENGINE (Idea Bank + weekly plan + posting queue; writes admin-only) ===== -->
+  <section id="viewContent" role="tabpanel" aria-labelledby="tabContent" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="top">
+      <div><h1>Content Engine</h1><div class="sub" id="ceSub">Loading…</div></div>
+      <div class="seg-filter" role="group" aria-label="Content Engine view" id="ceViewSeg">
+        <button type="button" data-ceview="week" aria-pressed="true">This week</button>
+        <button type="button" data-ceview="ideas" aria-pressed="false">Idea Bank</button>
+        <button type="button" data-ceview="perf" aria-pressed="false">Performance</button>
+        <button type="button" data-ceview="scan" aria-pressed="false">Scanner</button>
+      </div>
+    </div>
+    <div id="ceRoot" style="display:flex;flex-direction:column;gap:var(--s4);"><div class="panel"><div class="empty-state">Loading…</div></div></div>
+  </section>
+
   <!-- ===== REVENUE (Stripe, admin only; rows are also admin-only in the database) ===== -->
   <section id="viewStripe" role="tabpanel" aria-labelledby="tabStripe" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div class="top"><div><h1>Revenue</h1><div class="sub" id="stripeMetaLine">Loading…</div></div></div>
@@ -1100,6 +1188,7 @@ body{padding:0;}
   <div class="sheet" id="moreSheet" hidden role="dialog" aria-label="More sections">
     <div class="sheet-card">
       <h2>More</h2>
+      <button class="sheet-btn" data-view="content">Content Engine</button>
       <button class="sheet-btn" data-view="leads">Warm Leads</button>
       <button class="sheet-btn" data-view="magnets">Magnets <span class="tab-badge" id="magBadgeBb" hidden></span></button>
       <button class="sheet-btn" data-view="ads">Ads</button>
@@ -1110,6 +1199,7 @@ body{padding:0;}
       <button class="btn" id="sheetClose" style="margin-top:4px">Close</button>
     </div>
   </div>
+  <div class="ce-sheet" id="ceSheet" hidden role="dialog" aria-modal="true" aria-label="Slot script"></div>
   <div class="palette" id="cmdk" hidden role="dialog" aria-label="Jump to">
     <div class="palette-card">
       <input class="palette-input" id="cmdkInput" type="text" placeholder="Jump to a section or action…" autocomplete="off" aria-label="Search sections">
@@ -1251,6 +1341,7 @@ body{padding:0;}
     tfResponses:[], tfDaily:[], tfMeta:null, tfLoaded:false,
     igPosts:[], igStories:[], igMeta:null, igLoaded:false,
     contentPlan:null, goal:null, ghlMeta:null, routineCalls:null, morningReport:null,
+    contentIdeas:[], contentQueue:[], contentCreators:[], contentScan:null, contentReview:null, contentBatch:null, contentMetaLoaded:{},
     stripe:{summary:null, subs:[], daily:[], meta:null, loaded:false},
     loaded:{}
   };
@@ -1264,7 +1355,7 @@ body{padding:0;}
     today:['dms','daily','contacts','tfResponses','tfDaily','igPosts','igStories','meta','stripe'],
     funnel:['tfResponses','tfDaily','igPosts','igStories','meta','dms','daily','ads'],
     leads:['contacts','meta','dms'], dms:['dms','daily','reviews','contacts','meta'], follow:['dms','meta'], magnets:['dms','meta'],
-    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], stripe:['stripe','meta'], routine:[]
+    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], stripe:['stripe','meta'], routine:[]
   };
   var dirty = {global:true}, raf = null, currentView = 'today';
   window.__hqRenders = 0; // counted by the perf test
@@ -1282,14 +1373,14 @@ body{padding:0;}
   Object.keys(VIEW_DEPS).forEach(function(v){ dirty[v]=true; });
 
   /* ---------- views ---------- */
-  var VIEWS={today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', stripe:'viewStripe', routine:'viewRoutine'};
+  var VIEWS={today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', stripe:'viewStripe', routine:'viewRoutine'};
   var ADMIN_VIEWS={stripe:1, routine:1};
   function setView(view, push){
     if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='today';
     currentView = view;
     Object.keys(VIEWS).forEach(function(k){ var el=$(VIEWS[k]); if(el) el.hidden = k!==view; });
     document.querySelectorAll('[data-view]').forEach(function(b){ b.setAttribute('aria-selected', b.getAttribute('data-view')===view?'true':'false'); });
-    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['leads','magnets','ads','stripe','routine'].indexOf(view)>=0?'true':'false');
+    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['leads','magnets','ads','content','stripe','routine'].indexOf(view)>=0?'true':'false');
     document.querySelectorAll('#tabRow .tab').forEach(function(t){ t.setAttribute('tabindex', t.getAttribute('data-view')===view?'0':'-1'); });
     if(push!==false){ try{ history.replaceState(null,'','#'+view); }catch(e){} }
     closeSheet();
@@ -1330,7 +1421,7 @@ body{padding:0;}
   (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'today'; })();
 
   /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
-  var VIEW_LABEL={today:'Today', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', stripe:'Revenue', routine:'Routine'};
+  var VIEW_LABEL={today:'Today', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', stripe:'Revenue', routine:'Routine'};
   var VIEW_KEYS={'1':'today','2':'dms','3':'follow','4':'magnets','5':'leads','6':'funnel','7':'apps','8':'ads','9':'stripe','0':'routine'};
   var appEl=$('appRoot');
   function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
@@ -2172,6 +2263,326 @@ body{padding:0;}
     root.innerHTML=html;
   };
 
+
+  /* ---------- CONTENT ENGINE: Idea Bank + weekly plan + posting queue ----------
+     Tables: content_ideas (Scanner briefs, id = Instagram shortcode), content_queue (Sunday batch slots,
+     id = <weekStart>-<day>-<hi|lo|car>), content_creators (watchlist); meta rows contentScan / contentReview.
+     Every write is a merge into data (db.doc().update) and only runs for admins; everyone signed in can read. */
+  var CE_STATUS=['to_film','filmed','edited','approved','scheduled','posted'];
+  var CE_STATUS_LABEL={to_film:'To film', filmed:'Filmed', edited:'Edited', approved:'Approved', scheduled:'Scheduled', posted:'Posted', skipped:'Skipped'};
+  var CE_SLOT_ORDER={high:0, low:1, carousel:2}, CE_SLOT_LABEL={high:'High-effort reel', low:'Low-effort reel', carousel:'Carousel'};
+  var CE_LOCATIONS=['desk','car','mirror','kitchen','gym','outside'];
+  var CE_WEEK_SLOTS=18;
+  var CE_TEST_MONTH={start:'2026-11-03', end:'2026-12-03'};
+  var CE_SCHEDULE='Scanner Mon/Wed/Fri 4:47am · Review + batch Sun 4:13pm';
+  var CE_METRICS=[['n','Posts'],['posts','Posts'],['count','Posts'],['medianViews','Median views'],['avgViews','Avg views'],['views','Views'],['likes','Likes'],['comments','Comments'],['saves','Saves'],['shares','Shares'],['follows','Follows'],['dms','DMs'],['keywordComments','Keyword comments'],['applications','Applications'],['score','Score'],['value','Value']];
+  var ceView=(function(){ var v=read('hqCeView'); return ['week','ideas','perf','scan'].indexOf(v)>=0 ? v : 'week'; })();
+  var ceWeekOffset=0, ceShowFilming=false, ceOpenId=null, ceCopyTexts={}, ceBusy={};
+  var ceFilters={status:'', funnel:'', format:'', type:'', office:false};
+
+  function ceIdx(s){ return CE_STATUS.indexOf(String(s||'')); }
+  function ceStatusLabel(s){ return CE_STATUS_LABEL[s] || (s ? String(s) : 'no status'); }
+  function ceFunnel(v){ var s=String(v==null?'':v).trim().toUpperCase(); if(s==='TOP'||s==='TOF') return 'TOF'; if(s==='MID'||s==='MOF') return 'MOF'; if(s==='BOTTOM'||s==='BOF'||s==='PROOF') return 'BOF'; return null; }
+  function ceFunnelChip(v){ var f=ceFunnel(v); return f ? '<span class="chip ce-'+f.toLowerCase()+'">'+f+'</span>' : '<span class="chip grey">no funnel</span>'; }
+  function ceFormatChip(v){ var s=String(v==null?'':v).trim(); return s ? '<span class="chip stage ce-fmt">'+esc(s.length<=4?s.toUpperCase():s)+'</span>' : '<span class="chip grey">no format</span>'; }
+  function ceStatusChip(s){ var i=ceIdx(s), cls = s==='posted'?'good':(s==='skipped'?'grey':(i>=1?'warn':'stage')); return '<span class="chip '+cls+'">'+esc(ceStatusLabel(s||'to_film'))+'</span>'; }
+  function ceText(v){ var s = v==null ? '' : (Array.isArray(v) ? v.map(function(x){ return x==null?'':String(x); }).join('\n') : (typeof v==='object' ? JSON.stringify(v) : String(v))); return s.trim(); }
+  function ceCap(s){ s=ceText(s); return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
+  function ceLink(shortcode, url){ if(url && /^https?:\/\//i.test(String(url))) return String(url); if(shortcode) return 'https://www.instagram.com/p/'+encodeURIComponent(String(shortcode))+'/'; return null; }
+  function ceNowIso(){ return new Date().toISOString(); }
+  function ceLoadState(key){ if(state.loaded[key]) return 'ok'; return syncErrors ? 'error' : 'loading'; }
+  function ceStateBox(st, what){ if(st==='loading') return '<div class="empty-state">Loading '+esc(what)+'…</div>'; return '<div class="empty-state">Couldn\'t load '+esc(what)+' from the database. It retries every 15 seconds; the sync line in the sidebar says when it recovers.</div>'; }
+  function ceSetView(v){ ceView=v; store('hqCeView', v); ceShowFilming=false; renderNow('content'); }
+  function ceCopyBtn(key, text, label){ var t=ceText(text); if(!t) return ''; ceCopyTexts[key]=t; return '<button type="button" class="btn small ce-copy" data-ce-copy="'+esc(key)+'">'+esc(label||'Copy')+'</button>'; }
+  function ceSlotKey(q){ return q.slot ? String(q.slot).toLowerCase() : null; }
+  function ceSlotOrder(q){ var k=ceSlotKey(q); return CE_SLOT_ORDER[k]==null ? 3 : CE_SLOT_ORDER[k]; }
+  function ceArr(v, labelKey){
+    if(Array.isArray(v)) return v.map(function(x){ return (x&&typeof x==='object') ? x : {label:x}; });
+    if(v&&typeof v==='object') return Object.keys(v).map(function(k){ var x=v[k], o=(x&&typeof x==='object')?Object.assign({},x):{value:x}; if(labelKey&&o[labelKey]==null) o[labelKey]=k; if(o.label==null) o.label=k; return o; });
+    return [];
+  }
+  function ceDateFromDay(ws, day){ var names={mon:0,tue:1,wed:2,thu:3,fri:4,sat:5,sun:6}, k=String(day||'').slice(0,3).toLowerCase(); return names[k]==null ? null : HQ.addDays(ws, names[k]); }
+  function ceWeekSlots(ws){
+    var we=HQ.addDays(ws,6);
+    return (state.contentQueue||[]).filter(function(q){ if(HQ.isDayKey(q.date)) return q.date>=ws && q.date<=we; return q.weekStart===ws; })
+      .map(function(q){ return Object.assign({}, q, {_date: HQ.isDayKey(q.date) ? q.date : ceDateFromDay(ws, q.day)}); });
+  }
+  function ceFindSlot(id){ return (state.contentQueue||[]).find(function(q){ return q.id===id; }) || null; }
+
+  RENDER.content = function(){
+    var root=$('ceRoot'); if(!root) return;
+    document.querySelectorAll('#ceViewSeg button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-ceview')===ceView?'true':'false'); });
+    ceCopyTexts={};
+    root.innerHTML = ceView==='ideas' ? ceRenderIdeas() : (ceView==='perf' ? ceRenderPerf() : (ceView==='scan' ? ceRenderScan() : ceRenderWeek()));
+    ceRenderSheet();
+  };
+
+  /* --- This week: Mon–Sun board of content_queue --- */
+  function ceRenderWeek(){
+    var st=ceLoadState('contentQueue');
+    var today=HQ.sydNow().key, ws=HQ.addDays(HQ.weekStart(today), ceWeekOffset*7), we=HQ.addDays(ws,6);
+    var label=HQ.fmtDay(ws,'short')+' – '+HQ.fmtDay(we,'short');
+    var nav='<div class="range" role="group" aria-label="Week"><button type="button" data-cewk="-1">← Prev</button><button type="button" data-cewk="0" aria-pressed="'+(ceWeekOffset===0?'true':'false')+'">This week</button><button type="button" data-cewk="1">Next →</button></div>';
+    var head='<div class="chart-head"><div><h2>'+(ceWeekOffset===0?'This week':'Week')+' · '+esc(label)+'</h2><p class="rule" style="margin-top:4px">Mon–Sun, Sydney. The Sunday batch plans 18 slots: a high-effort and a low-effort reel every day, plus carousels. Tap a card for the full script.</p></div>'+nav+'</div>';
+    if(st!=='ok'){ setText('ceSub', st==='loading'?'Loading…':'Sync error'); return '<div class="panel">'+head+ceStateBox(st,'the weekly plan')+'</div>'; }
+    var slots=ceWeekSlots(ws).sort(function(a,b){ return String(a._date||'').localeCompare(String(b._date||'')) || ceSlotOrder(a)-ceSlotOrder(b) || String(a.id).localeCompare(String(b.id)); });
+    var live=slots.filter(function(q){ return q.status!=='skipped'; });
+    var filmed=live.filter(function(q){ return ceIdx(q.status)>=1; }).length, approved=live.filter(function(q){ return ceIdx(q.status)>=3; }).length, posted=live.filter(function(q){ return q.status==='posted'; }).length;
+    var toFilm=slots.filter(function(q){ return !q.status || q.status==='to_film'; });
+    if(!slots.length){
+      setText('ceSub', 'No plan for the week of '+label);
+      var others={}; (state.contentQueue||[]).forEach(function(q){ var w=HQ.isDayKey(q.weekStart)?q.weekStart:(HQ.isDayKey(q.date)?HQ.weekStart(q.date):null); if(w && w!==ws) others[w]=(others[w]||0)+1; });
+      var ok=Object.keys(others).sort();
+      return '<div class="panel">'+head+'<div class="empty-state">No slots planned for the week of '+esc(label)+'. The Sunday batch writes the plan at 4:13pm on Sunday.'+(ok.length?'<br>Plans exist for the week'+(ok.length===1?'':'s')+' of '+ok.map(function(w){ return esc(HQ.fmtDay(w,'short'))+' ('+others[w]+' slots)'; }).join(', ')+'. Use Prev / Next to open them.':'')+'</div></div>';
+    }
+    setText('ceSub', slots.length+' slots · '+filmed+' filmed · '+posted+' posted · week of '+label);
+    function prog(lbl, n, cls){ return '<div class="row '+cls+'"><span>'+lbl+'</span><div class="bar" role="progressbar" aria-label="'+lbl+'" aria-valuemin="0" aria-valuemax="'+CE_WEEK_SLOTS+'" aria-valuenow="'+n+'"><i style="width:'+Math.min(100, n/CE_WEEK_SLOTS*100)+'%"></i></div><span class="n">'+n+' / '+CE_WEEK_SLOTS+'</span></div>'; }
+    var html='<div class="panel">'+head+'<div class="ce-prog">'+prog('Filmed',filmed,'filmed')+prog('Approved',approved,'approved')+prog('Posted',posted,'posted')+'</div>';
+    if(slots.length!==CE_WEEK_SLOTS || slots.length!==live.length) html+='<div class="f-note">'+slots.length+' slot'+(slots.length===1?'':'s')+' in this week\'s plan'+(slots.length-live.length?', '+(slots.length-live.length)+' skipped':'')+'. The bars count out of the 18 the plan aims for.</div>';
+    html+='<div><button type="button" class="btn'+(ceShowFilming?' primary':'')+'" data-ce="filming" aria-pressed="'+(ceShowFilming?'true':'false')+'">Filming list · '+toFilm.length+' to film</button></div></div>';
+    if(ceShowFilming) html+=ceRenderFilming(toFilm);
+    var days=HQ.dayRange(ws,we);
+    html+='<div class="ce-board">'+days.map(function(d){
+      var mine=slots.filter(function(q){ return q._date===d; });
+      return '<div class="ce-day'+(d===today?' today':'')+'"><div class="ce-dayhead"><span>'+esc(HQ.DAYN[HQ.dowOf(d)].slice(0,3))+(d===today?'<i class="ce-dot" aria-hidden="true"></i><span class="sr-only">today</span>':'')+'</span><span>'+esc(HQ.fmtDay(d,'short'))+'</span></div>'+(mine.length?mine.map(ceCard).join(''):'<div class="ce-empty">No slot</div>')+'</div>';
+    }).join('')+'</div>';
+    var undated=slots.filter(function(q){ return !q._date; });
+    if(undated.length) html+='<div class="panel"><h2>Slots without a day</h2><p class="rule">These rows belong to this week but have no usable date or day, so they can\'t sit on the board.</p><div class="ce-day">'+undated.map(ceCard).join('')+'</div></div>';
+    return html;
+  }
+  function ceCard(q){
+    var loc=ceText(q.location), eff=ceCap(q.effort);
+    return '<button type="button" class="ce-card'+(q.status==='posted'?' posted':'')+(q.status==='skipped'?' skipped':'')+'" data-ce-open="'+esc(q.id)+'" aria-label="Open script: '+esc(ceText(q.title)||q.id)+'">'+
+      '<div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+'</div>'+
+      '<div class="ce-title">'+esc(ceText(q.title)||'Untitled slot')+'</div>'+
+      '<div class="ce-meta">'+esc(eff?eff+' effort':'effort –')+' · '+esc(loc||'location –')+'</div>'+
+      '<div class="ce-chips">'+ceStatusChip(q.status)+'</div></button>';
+  }
+  function ceRenderFilming(toFilm){
+    var groups={}; toFilm.forEach(function(q){ var l=String(q.location||'').trim().toLowerCase(), k=CE_LOCATIONS.indexOf(l)>=0 ? l : (l ? 'other' : 'none'); (groups[k]=groups[k]||[]).push(q); });
+    var order=CE_LOCATIONS.concat(['other','none']);
+    var html='<div class="panel"><h2>Filming list</h2><p class="rule">Everything still to film this week, grouped by where you film it. Tap a line for the hooks and beats.</p>';
+    if(!toFilm.length) return html+'<div class="empty-state">Nothing left to film this week.</div></div>';
+    html+=order.filter(function(k){ return groups[k]; }).map(function(k){
+      var title = k==='other' ? 'Other locations' : (k==='none' ? 'No location set' : ceCap(k));
+      return '<div class="ce-film-group"><h3>'+esc(title)+' <small class="muted">· '+groups[k].length+'</small></h3>'+groups[k].map(function(q){
+        var hook=Array.isArray(q.hooks)&&q.hooks.length?ceText(q.hooks[0]):'';
+        return '<button type="button" class="act" data-ce-open="'+esc(q.id)+'"><div class="act-main"><div class="act-title">'+esc(ceText(q.title)||'Untitled slot')+'</div><div class="act-why">'+esc(q._date?HQ.fmtDay(q._date,'wd'):'no day')+' · '+esc(CE_SLOT_LABEL[ceSlotKey(q)]||'slot –')+' · '+esc(ceText(q.format)||'format –')+(k==='other'?' · '+esc(ceText(q.location)):'')+(hook?'<br>'+esc(hook):'')+'</div></div><span class="arrow">›</span></button>';
+      }).join('')+'</div>';
+    }).join('');
+    return html+'</div>';
+  }
+
+  /* --- Script sheet: hooks, beats, ending, caption, LinkedIn, slides + status stepper --- */
+  function ceRenderSheet(){
+    var el=$('ceSheet'); if(!el) return;
+    var q=ceOpenId ? ceFindSlot(ceOpenId) : null;
+    if(!q){ ceOpenId=null; el.hidden=true; el.innerHTML=''; return; }
+    var card=el.querySelector('.ce-sheet-card'), sc=card?card.scrollTop:0, wasOpen=!el.hidden;
+    var date=HQ.isDayKey(q.date)?q.date:null, idx=ceIdx(q.status||'to_film');
+    function block(title, body, copyKey, copyText){ return '<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">'+esc(title)+'</span>'+(copyText?ceCopyBtn(copyKey, copyText, 'Copy all'):'')+'</div>'+body+'</div>'; }
+    function lines(arr, prefix){ if(!Array.isArray(arr)||!arr.length) return '<div class="ce-txt muted">– not in this slot\'s brief</div>'; return arr.map(function(h,i){ var t=ceText(h); return '<div class="ce-line"><div class="t"><span class="muted">'+(i+1)+'.</span> '+esc(t||'–')+'</div>'+ceCopyBtn(prefix+i, t)+'</div>'; }).join(''); }
+    function single(v, key){ var t=ceText(v); if(!t) return '<div class="ce-txt muted">– not in this slot\'s brief</div>'; return '<div class="ce-line"><div class="t">'+esc(t)+'</div>'+ceCopyBtn(key, t)+'</div>'; }
+    var meta=[date?HQ.fmtDay(date,'wd'):(q.day?String(q.day):'no day'), CE_SLOT_LABEL[ceSlotKey(q)]||'slot –', ceCap(q.effort)?ceCap(q.effort)+' effort':'effort –', ceText(q.location)||'location –'];
+    if(q.angle) meta.push(ceText(q.angle)+' angle'); if(q.hookStyle) meta.push(ceText(q.hookStyle)+' hook');
+    var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status)+'</div><h2 style="margin-top:6px">'+esc(ceText(q.title)||'Untitled slot')+'</h2><div class="ce-meta" style="margin-top:4px">'+esc(meta.join(' · '))+'</div></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
+    html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Status</span>'+(isAdmin?'':'<span class="f-note">View only: your role can\'t change the status.</span>')+'</div><div class="ce-steps">'+CE_STATUS.map(function(s,i){ var cls=i===idx?' cur':(i<idx?' done':''); return '<button type="button" class="ce-step'+cls+'" data-ce-status="'+s+'"'+(isAdmin?'':' disabled')+' aria-pressed="'+(i===idx?'true':'false')+'">'+(i<idx?'✓ ':'')+esc(CE_STATUS_LABEL[s])+'</button>'; }).join('')+'</div>'+
+      '<div class="ce-chips">'+(q.statusAt?'<span class="f-note">Set '+esc(relTime(q.statusAt)||'')+'.</span>':'')+(isAdmin?(q.status==='skipped'?'<button type="button" class="btn small" data-ce-status="to_film">Un-skip</button>':'<button type="button" class="btn small" data-ce-status="skipped">Skip this slot</button>'):'')+'</div></div>';
+    html+=block('Hooks'+(Array.isArray(q.hooks)?' ('+q.hooks.length+')':''), lines(q.hooks,'hook'), 'hooks', Array.isArray(q.hooks)?q.hooks.map(ceText).join('\n'):'');
+    html+=block('Beats', lines(q.body,'beat'), 'beats', Array.isArray(q.body)?q.body.map(ceText).join('\n'):'');
+    html+=block('Ending', single(q.ending,'ending'));
+    html+=block('Caption', single(q.caption,'caption'));
+    html+=block('LinkedIn version', single(q.linkedin,'linkedin'));
+    if(ceSlotKey(q)==='carousel' || (Array.isArray(q.slides)&&q.slides.length)) html+=block('Slides'+(Array.isArray(q.slides)?' ('+q.slides.length+')':''), lines(q.slides,'slide'), 'slides', Array.isArray(q.slides)?q.slides.map(ceText).join('\n\n'):'');
+    if(q.status==='posted' || q.postedShortcode || q.metrics){
+      var m=q.metrics||{}, link=ceLink(q.postedShortcode, null);
+      html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Results</span>'+(link?'<a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">Open post ↗</a>':'')+'</div><div class="ce-metrics">'+[['views','Views'],['likes','Likes'],['comments','Comments'],['saves','Saves'],['shares','Shares'],['follows','Follows']].map(function(k){ return '<div class="ce-metric"><div class="label">'+k[1]+'</div><div class="v">'+num(m[k[0]])+'</div></div>'; }).join('')+'</div>'+(q.metrics?'':'<div class="f-note">– = the Sunday review hasn\'t pulled this post\'s numbers yet.</div>')+'</div>';
+    }
+    if(q.sourceIdea){
+      var idea=(state.contentIdeas||[]).find(function(i){ return i.id===q.sourceIdea || i.shortcode===q.sourceIdea; }), il=ceLink(q.sourceIdea, idea&&idea.url);
+      html+='<div class="ce-block"><span class="ce-k">Source idea</span><div class="ce-txt">'+(idea&&idea.creator?'@'+esc(String(idea.creator).replace(/^@/,''))+' · ':'')+(il?'<a class="ce-a" href="'+esc(il)+'" target="_blank" rel="noopener">'+esc(String(q.sourceIdea))+' ↗</a>':esc(String(q.sourceIdea)))+'</div></div>';
+    }
+    el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>';
+    el.hidden=false;
+    var c2=el.querySelector('.ce-sheet-card'); if(c2&&sc) c2.scrollTop=sc;
+    if(!wasOpen){ var cb=$('ceSheetClose'); if(cb) cb.focus(); }
+  }
+
+  /* --- Idea Bank: content_ideas, newest first --- */
+  function ceRenderIdeas(){
+    var st=ceLoadState('contentIdeas');
+    if(st!=='ok'){ setText('ceSub', st==='loading'?'Loading…':'Sync error'); return '<div class="panel"><h2>Idea Bank</h2>'+ceStateBox(st,'the Idea Bank')+'</div>'; }
+    var all=(state.contentIdeas||[]).slice().sort(function(a,b){ return (HQ.parseTs(b.foundAt)||0)-(HQ.parseTs(a.foundAt)||0) || String(b.id).localeCompare(String(a.id)); });
+    if(!all.length){ setText('ceSub','Idea Bank · empty'); return '<div class="panel"><h2>Idea Bank</h2><div class="empty-state">Scanner runs Mon/Wed/Fri. First briefs land after the next run.</div></div>'; }
+    var formats=[]; all.forEach(function(i){ var f=ceText(i.format); if(f && formats.indexOf(f)<0) formats.push(f); }); formats.sort();
+    var f=ceFilters;
+    var shown=all.filter(function(i){
+      if(f.status && (i.status||'new')!==f.status) return false;
+      if(f.funnel && ceFunnel(i.funnel)!==f.funnel) return false;
+      if(f.format && ceText(i.format)!==f.format) return false;
+      if(f.type && String(i.type||'').toLowerCase()!==f.type) return false;
+      if(f.office && !i.officemaxxing) return false;
+      return true;
+    });
+    var pinned=all.filter(function(i){ return i.pinned && i.status!=='skipped'; }).length;
+    setText('ceSub', all.length+' idea'+(all.length===1?'':'s')+' · '+pinned+' pinned for next week');
+    function sel(name, opts, cur, label){ return '<select class="input" data-cef="'+name+'" aria-label="'+esc(label)+'">'+opts.map(function(o){ return '<option value="'+esc(o[0])+'"'+(o[0]===cur?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('')+'</select>'; }
+    var html='<div class="panel"><h2>Idea Bank</h2><p class="rule">Briefs the Scanner saved from the watchlist, newest first. Skip what you won\'t make; "Use next week" pins it so the Sunday batch takes it first.</p>'+
+      '<div class="ce-filters">'+sel('status',[['','All statuses'],['new','New'],['planned','Planned'],['filmed','Filmed'],['skipped','Skipped']],f.status,'Status')+sel('funnel',[['','All funnels'],['TOF','TOF'],['MOF','MOF'],['BOF','BOF']],f.funnel,'Funnel')+sel('format',[['','All formats']].concat(formats.map(function(x){ return [x,x]; })),f.format,'Format')+sel('type',[['','Reels + carousels'],['reel','Reels'],['carousel','Carousels']],f.type,'Type')+'<button type="button" class="btn" data-cef-office aria-pressed="'+(f.office?'true':'false')+'">Officemaxxing</button><span class="f-note">'+shown.length+' of '+all.length+'</span></div>';
+    html+= shown.length ? '<div class="ce-ideas">'+shown.map(ceIdeaCard).join('')+'</div>' : '<div class="empty-state">No ideas match these filters.</div>';
+    return html+'</div>';
+  }
+  function ceIdeaStat(i){
+    if(HQ.isNum(i.multiple)) return num(i.multiple, i.multiple<10?1:0)+'× the creator\'s median'+(HQ.isNum(i.views)?' · '+num(i.views)+' views':'');
+    if(HQ.isNum(i.views)) return num(i.views)+' views'+(HQ.isNum(i.creatorMedian)?' · creator median '+num(i.creatorMedian):'');
+    if(HQ.isNum(i.likes)||HQ.isNum(i.shares)) return num(i.likes)+' likes · '+num(i.shares)+' shares';
+    return '– no view or like counts saved for this post';
+  }
+  function ceIdeaCard(i){
+    var link=ceLink(i.shortcode||i.id, i.url), status=i.status||'new', hooks=Array.isArray(i.hooks)?i.hooks.slice(0,3):[];
+    var chips=ceFormatChip(i.format)+ceFunnelChip(i.funnel)+(i.type?'<span class="chip grey">'+esc(String(i.type))+'</span>':'')+(i.officemaxxing?'<span class="chip warn">Officemaxxing</span>':'')+(i.pinned&&status!=='skipped'?'<span class="chip good">Pinned for next week</span>':'')+(status!=='new'?'<span class="chip '+(status==='skipped'?'grey':'stage')+'">'+esc(ceStatusLabel(status))+'</span>':'');
+    var actions='';
+    if(isAdmin){
+      if(status==='skipped') actions='<button type="button" class="btn small" data-ce-idea="restore" data-id="'+esc(i.id)+'">Restore</button>';
+      else actions=(i.pinned?'<button type="button" class="btn small" data-ce-idea="unpin" data-id="'+esc(i.id)+'">Unpin</button>':'<button type="button" class="btn small primary" data-ce-idea="pin" data-id="'+esc(i.id)+'">Use next week</button>')+'<button type="button" class="btn small" data-ce-idea="skip" data-id="'+esc(i.id)+'">Skip</button>';
+    }
+    return '<div class="ce-idea'+(status==='skipped'?' skipped':'')+'">'+
+      '<div class="ce-chips" style="justify-content:space-between"><b class="ce-creator">@'+esc(String(i.creator||'unknown creator').replace(/^@/,''))+'</b><span class="ce-meta">'+esc(i.foundAt?'found '+(relTime(i.foundAt)||''):'')+'</span></div>'+
+      '<div class="ce-chips">'+chips+'</div>'+
+      '<div class="ce-stat">'+esc(ceIdeaStat(i))+'</div>'+
+      '<div><span class="ce-k">Why it worked</span><div class="ce-txt">'+esc(ceText(i.whyItWorked)||'– not in this brief')+'</div></div>'+
+      '<div><span class="ce-k">Jordan\'s version</span><div class="ce-txt">'+esc(ceText(i.jordanVersion)||'– not in this brief')+'</div></div>'+
+      '<div><span class="ce-k">Hooks</span>'+(hooks.length?'<ol class="ce-hooks">'+hooks.map(function(h){ return '<li>'+esc(ceText(h))+'</li>'; }).join('')+'</ol>':'<div class="ce-txt muted">– no hooks in this brief</div>')+'</div>'+
+      '<div class="ce-foot">'+(link?'<a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">Open original ↗</a>':'<span class="f-note">no link saved</span>')+actions+'</div></div>';
+  }
+
+  /* --- Performance: meta/contentReview + test-month countdown + core-format approval --- */
+  function ceStatTable(rows, labelKey, labelName, emptyMsg){
+    if(!rows.length) return '<div class="empty-state">'+esc(emptyMsg)+'</div>';
+    var seen={}, cols=CE_METRICS.filter(function(c){ if(seen[c[1]]) return false; var has=rows.some(function(r){ return HQ.isNum(r[c[0]]); }); if(has) seen[c[1]]=true; return has; });
+    return '<div class="table-wrap"><table class="scores"><thead><tr><th>'+esc(labelName)+'</th>'+cols.map(function(c){ return '<th class="num">'+esc(c[1])+'</th>'; }).join('')+(cols.length?'':'<th>Numbers</th>')+'</tr></thead><tbody>'+rows.map(function(r){
+      var lbl=ceText(r[labelKey]!=null?r[labelKey]:(r.label!=null?r.label:(r.title||r.id)))||'–';
+      return '<tr><td class="op-name">'+esc(lbl)+(r.funnel?' '+ceFunnelChip(r.funnel):'')+(r.note||r.why?'<div class="op-sample">'+esc(ceText(r.note||r.why))+'</div>':'')+'</td>'+cols.map(function(c){ var v=r[c[0]]; return '<td class="num">'+num(v, HQ.isNum(v)&&!Number.isInteger(v)?1:0)+'</td>'; }).join('')+(cols.length?'':'<td class="muted">– none recorded</td>')+'</tr>';
+    }).join('')+'</tbody></table></div>';
+  }
+  function ceReviewList(items, emptyMsg){
+    if(!items.length) return '<div class="empty-state">'+esc(emptyMsg)+'</div>';
+    return '<div class="act-list">'+items.map(function(it,i){
+      var title=ceText(it.title||it.label||it.slotId||it.id)||'–', link=ceLink(it.shortcode||it.postedShortcode, it.url);
+      var nums=[['views','views'],['likes','likes'],['comments','comments'],['saves','saves'],['shares','shares'],['follows','follows'],['dms','DMs'],['applications','applications']].filter(function(k){ return HQ.isNum(it[k[0]]); }).map(function(k){ return num(it[k[0]])+' '+k[1]; }).join(' · ');
+      var inner='<span class="n">'+(i+1)+'</span><div class="act-main"><div class="act-title">'+esc(title)+'</div><div class="act-why"><span class="ce-chips" style="display:inline-flex;vertical-align:middle">'+(it.format?ceFormatChip(it.format):'')+(it.funnel?ceFunnelChip(it.funnel):'')+(it.hookStyle?'<span class="chip grey">'+esc(ceText(it.hookStyle))+' hook</span>':'')+'</span>'+(nums?' '+esc(nums):' – no numbers recorded')+(it.why||it.note?'<br>'+esc(ceText(it.why||it.note)):'')+'</div></div>';
+      return link ? '<a class="act" href="'+esc(link)+'" target="_blank" rel="noopener">'+inner+'<span class="arrow">↗</span></a>' : '<div class="act" style="cursor:default">'+inner+'</div>';
+    }).join('')+'</div>';
+  }
+  function ceRenderPerf(){
+    var loaded=!!(state.contentMetaLoaded.review && state.contentMetaLoaded.scan), r=state.contentReview, scan=state.contentScan||{};
+    var tm=(scan.testMonth&&HQ.isDayKey(scan.testMonth.start)&&HQ.isDayKey(scan.testMonth.end))?scan.testMonth:CE_TEST_MONTH;
+    var today=HQ.sydNow().key, span=HQ.fmtDay(tm.start,'short')+' – '+HQ.fmtDay(tm.end,'short')+' '+tm.end.slice(0,4);
+    var cdVal, cdSmall, cdNote;
+    if(today<tm.start){ var inN=HQ.daysBetween(today, tm.start); cdVal='Starts in '+inN; cdSmall=inN===1?'day':'days'; cdNote='Test month '+span+'. Every format gets a run; the review picks the core 5 at the end.'; }
+    else if(today>tm.end){ cdVal='Finished'; cdSmall=HQ.fmtDay(tm.end,'short'); cdNote='Test month '+span+' is over. The core formats below are what to run with.'; }
+    else { var dayN=HQ.daysBetween(tm.start, today)+1, left=HQ.daysBetween(today, tm.end); cdVal='Day '+dayN; cdSmall='· '+left+' day'+(left===1?'':'s')+' left'; cdNote='Test month '+span+', Sydney days. Every format gets a run; the review picks the core 5 at the end.'; }
+    var html='<div class="hero"><div class="label">Test month</div><div class="value">'+esc(cdVal)+' <small>'+esc(cdSmall)+'</small></div><div class="note">'+esc(cdNote)+'</div></div>';
+    if(!loaded){ setText('ceSub','Loading…'); return html+'<div class="panel"><h2>Last week</h2>'+ceStateBox('loading','the review')+'</div>'; }
+    if(!r){ setText('ceSub','Performance · no review yet'); return html+'<div class="panel"><h2>Last week</h2><div class="empty-state">No review yet. The Sunday review writes meta/contentReview at 4:13pm after the first week with posted slots.</div></div>'; }
+    var wk = HQ.isDayKey(r.weekStart) ? 'Week of '+HQ.fmtDay(r.weekStart,'short')+' – '+HQ.fmtDay(HQ.addDays(r.weekStart,6),'short') : 'Last week';
+    setText('ceSub', wk+(r.generatedAt||r.reviewedAt?' · reviewed '+(relTime(r.generatedAt||r.reviewedAt)||''):''));
+    var top=ceArr(r.top3||r.top||(r.lastWeek&&(r.lastWeek.top3||r.lastWeek.top))), bottom=ceArr(r.bottom3||r.bottom||(r.lastWeek&&(r.lastWeek.bottom3||r.lastWeek.bottom)));
+    html+='<div class="grid2"><div class="panel"><h2>Top 3</h2><p class="rule">'+esc(wk)+'. Judged by each stage\'s own metric.</p>'+ceReviewList(top.slice(0,3),'The review has no top list yet.')+'</div><div class="panel"><h2>Bottom 3</h2><p class="rule">'+esc(wk)+'. Lowest by the same metric.</p>'+ceReviewList(bottom.slice(0,3),'The review has no bottom list yet.')+'</div></div>';
+    html+='<div class="panel"><h2>Format leaderboard</h2><p class="rule">Every format posted so far in the test month.</p>'+ceStatTable(ceArr(r.formats||r.formatLeaderboard||r.byFormat,'format'),'format','Format','No per-format numbers in the review yet.')+'</div>';
+    html+='<div class="grid2"><div class="panel"><h2>By hook style</h2><p class="rule">Call-out, contrarian, story, proof.</p>'+ceStatTable(ceArr(r.byHookStyle||r.hookStyles||r.hookStyle,'hookStyle'),'hookStyle','Hook style','No hook-style numbers yet.')+'</div><div class="panel"><h2>By angle</h2><p class="rule">Corporate pain, how we fix it, client proof, Jordan\'s story.</p>'+ceStatTable(ceArr(r.byAngle||r.angles||r.angle,'angle'),'angle','Angle','No angle numbers yet.')+'</div></div>';
+    var rec=ceArr(r.coreFormatRecommendation,'format');
+    if(rec.length){
+      var recFormats=rec.map(function(x){ return ceText(x.format!=null?x.format:(x.id!=null?x.id:x.label)); }).filter(Boolean);
+      var approved=Array.isArray(scan.coreFormats)?scan.coreFormats.map(String):null, same=!!(approved&&approved.length===recFormats.length&&approved.every(function(f,i){ return f===recFormats[i]; }));
+      html+='<div class="panel"><div class="chart-head"><div><h2>Core formats to keep</h2><p class="rule" style="margin-top:4px">The review\'s pick of the '+recFormats.length+' formats to run with after the test month.'+(approved&&approved.length?' Approved'+(scan.coreFormatsApprovedAt?' '+esc(relTime(scan.coreFormatsApprovedAt)||''):'')+': '+esc(approved.join(', '))+'.':' Not approved yet.')+'</p></div>'+(same?'<span class="chip good">Approved</span>':(isAdmin?'<button type="button" class="btn primary" data-ce="approve-core"'+(ceBusy.core?' disabled':'')+'>'+(ceBusy.core?'Saving…':'Approve these '+recFormats.length)+'</button>':''))+'</div>'+ceStatTable(rec,'format','Format','')+(r.coreFormatReason?'<div class="f-note">'+esc(ceText(r.coreFormatReason))+'</div>':'')+'</div>';
+    }
+    return html;
+  }
+
+  /* --- Scanner: watchlist + last run --- */
+  function ceRenderScan(){
+    var st=ceLoadState('contentCreators'), scan=state.contentScan, scanLoaded=!!state.contentMetaLoaded.scan;
+    setText('ceSub', CE_SCHEDULE+' · Sydney');
+    var html='<div class="panel"><h2>Last scan</h2><p class="rule">'+esc(CE_SCHEDULE)+' · Sydney time. The Scanner reads the watchlist and saves briefs into the Idea Bank.</p>';
+    if(!scanLoaded) html+=ceStateBox('loading','the scan record');
+    else if(!scan) html+='<div class="empty-state">The Scanner has not run yet (no meta/contentScan record).</div>';
+    else {
+      var ranAt=scan.lastRunAt||scan.ranAt||scan.lastScanAt||scan.finishedAt||scan.lastAttemptAt||null;
+      var okChip = scan.ok===true ? '<span class="chip good">OK</span>' : (scan.ok===false ? '<span class="chip crit">Failed</span>' : '<span class="chip grey">'+esc(scan.status?ceCap(scan.status):'not run yet')+'</span>');
+      html+='<div class="ce-scanrow">'+okChip+'<span class="ce-txt">'+(ranAt?'Ran '+esc(relTime(ranAt)||'')+' · '+esc(HQ.fmtDay(HQ.sydDay(ranAt),'wd'))+' '+esc(HQ.fmtTime(ranAt)):'Not run yet'+(scan.seededAt?' · watchlist seeded '+esc(HQ.fmtDay(HQ.sydDay(scan.seededAt),'wd')):''))+'</span></div>';
+      html+='<div class="ce-metrics"><div class="ce-metric"><div class="label">Briefs saved</div><div class="v">'+num(scan.briefsSaved)+'</div></div><div class="ce-metric"><div class="label">Accounts added</div><div class="v">'+num(scan.accountsAdded)+'</div></div><div class="ce-metric"><div class="label">Core formats</div><div class="v">'+(Array.isArray(scan.coreFormats)&&scan.coreFormats.length?esc(scan.coreFormats.join(', ')):'–')+'</div></div></div>';
+      if(!HQ.isNum(scan.briefsSaved)||!HQ.isNum(scan.accountsAdded)||!(Array.isArray(scan.coreFormats)&&scan.coreFormats.length)) html+='<div class="f-note">– = '+(ranAt?'not written by the last run':'no run has written this yet')+(Array.isArray(scan.coreFormats)&&scan.coreFormats.length?'':'; core formats are approved on the Performance view')+'.</div>';
+      if(scan.note) html+='<div class="ce-txt">'+esc(ceText(scan.note))+'</div>';
+    }
+    html+='</div><div class="panel"><h2>Watchlist</h2><p class="rule">The accounts the Scanner reads. Median reel views is the bar a post must clear to become a brief.</p>';
+    if(st!=='ok') html+=ceStateBox(st,'the watchlist');
+    else {
+      var rows=(state.contentCreators||[]).slice().sort(function(a,b){ var am=HQ.isNum(a.medianReelViews)?a.medianReelViews:-1, bm=HQ.isNum(b.medianReelViews)?b.medianReelViews:-1; return bm-am || String(a.handle||a.id).localeCompare(String(b.handle||b.id)); });
+      if(!rows.length) html+='<div class="empty-state">No accounts on the watchlist yet. The Scanner adds them, or seed content_creators by hand.</div>';
+      else html+='<div class="table-wrap"><table class="scores"><thead><tr><th>Handle</th><th class="num">Followers</th><th class="num">Median reel views</th><th>Added by</th><th>Last scanned</th></tr></thead><tbody>'+rows.map(function(c){
+        var h=String(c.handle||c.id).replace(/^@/,'');
+        return '<tr><td class="op-name"><a href="https://www.instagram.com/'+esc(encodeURIComponent(h))+'/" target="_blank" rel="noopener">@'+esc(h)+'</a>'+(c.role&&String(c.role)!=='watchlist'?' <span class="chip grey">'+esc(String(c.role))+'</span>':'')+(c.addedReason?'<div class="op-sample" title="'+esc(ceText(c.addedReason))+'">'+esc(ceText(c.addedReason))+'</div>':'')+'</td><td class="num">'+num(c.followers)+'</td><td class="num">'+num(c.medianReelViews)+'</td><td>'+esc(ceText(c.addedBy)||'–')+'</td><td>'+(c.lastScannedAt?esc(relTime(c.lastScannedAt)||'–'):'–')+'</td></tr>';
+      }).join('')+'</tbody></table></div><div class="f-note">'+rows.length+' account'+(rows.length===1?'':'s')+'. – = not recorded by the Scanner yet.</div>';
+    }
+    return html+'</div>';
+  }
+
+  /* --- writes (admin only; every one merges into data) --- */
+  async function ceSetStatus(id, status){
+    if(!isAdmin || !db || !id) return;
+    var q=ceFindSlot(id); if(!q || q.status===status) return;
+    var prev={status:q.status, statusAt:q.statusAt}, now=ceNowIso();
+    q.status=status; q.statusAt=now; renderNow('content'); ceRenderSheet();
+    try{ await db.collection('content_queue').doc(id).update({status:status, statusAt:now}); }
+    catch(e){ console.error('content_queue status write failed', e); q.status=prev.status; q.statusAt=prev.statusAt; renderNow('content'); ceRenderSheet(); showBanner('Couldn\'t save the status for "'+(ceText(q.title)||id)+'". Check you are signed in as admin and try again.'); }
+  }
+  async function ceIdeaAction(id, action){
+    if(!isAdmin || !db || !id) return;
+    var i=(state.contentIdeas||[]).find(function(x){ return x.id===id; }); if(!i) return;
+    var now=ceNowIso(), patch;
+    if(action==='skip') patch={status:'skipped', statusAt:now};
+    else if(action==='pin') patch={status:'new', pinned:true, pinnedAt:now};
+    else if(action==='unpin') patch={pinned:false};
+    else if(action==='restore') patch={status:'new', statusAt:now};
+    else return;
+    var prev={}; Object.keys(patch).forEach(function(k){ prev[k]=i[k]; }); Object.assign(i, patch); renderNow('content');
+    try{ await db.collection('content_ideas').doc(id).update(patch); }
+    catch(e){ console.error('content_ideas write failed', e); Object.assign(i, prev); renderNow('content'); showBanner('Couldn\'t save that change to the Idea Bank. Check you are signed in as admin and try again.'); }
+  }
+  async function ceApproveCore(){
+    if(!isAdmin || !db || ceBusy.core) return;
+    var r=state.contentReview, rec=ceArr(r&&r.coreFormatRecommendation,'format'), formats=rec.map(function(x){ return ceText(x.format!=null?x.format:(x.id!=null?x.id:x.label)); }).filter(Boolean);
+    if(!formats.length) return;
+    var now=ceNowIso(); ceBusy.core=true; renderNow('content');
+    try{ await db.doc('meta/contentScan').update({coreFormats:formats, coreFormatsApprovedAt:now}); if(!state.contentScan) state.contentScan={}; state.contentScan.coreFormats=formats; state.contentScan.coreFormatsApprovedAt=now; }
+    catch(e){ console.error('coreFormats write failed', e); showBanner('Couldn\'t save the core formats. Try again.'); }
+    ceBusy.core=false; renderNow('content');
+  }
+  function ceCopyFallback(text){ try{ var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); var ok=document.execCommand('copy'); document.body.removeChild(ta); return ok; }catch(e){ return false; } }
+  function ceCopy(btn, text){
+    if(!text) return;
+    function done(ok){ var old=btn.textContent; btn.textContent= ok?'Copied':'Copy failed'; btn.disabled=true; setTimeout(function(){ btn.textContent=old; btn.disabled=false; }, 1400); }
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(ceCopyFallback(text)); });
+    else done(ceCopyFallback(text));
+  }
+  (function ceEvents(){
+    var seg=$('ceViewSeg'); if(seg) seg.addEventListener('click', function(ev){ var b=ev.target.closest('button[data-ceview]'); if(b) ceSetView(b.getAttribute('data-ceview')); });
+    var view=$('viewContent'), sheet=$('ceSheet');
+    function onClick(ev){
+      var t=ev.target;
+      var wk=t.closest('[data-cewk]'); if(wk){ var d=parseInt(wk.getAttribute('data-cewk'),10); ceWeekOffset = d===0 ? 0 : ceWeekOffset+d; renderNow('content'); return; }
+      var op=t.closest('[data-ce-open]'); if(op){ ceOpenId=op.getAttribute('data-ce-open'); ceRenderSheet(); return; }
+      var cp=t.closest('[data-ce-copy]'); if(cp){ ceCopy(cp, ceCopyTexts[cp.getAttribute('data-ce-copy')]); return; }
+      var stb=t.closest('[data-ce-status]'); if(stb){ if(!stb.disabled) ceSetStatus(ceOpenId, stb.getAttribute('data-ce-status')); return; }
+      var ia=t.closest('[data-ce-idea]'); if(ia){ ceIdeaAction(ia.getAttribute('data-id'), ia.getAttribute('data-ce-idea')); return; }
+      var off=t.closest('[data-cef-office]'); if(off){ ceFilters.office=!ceFilters.office; renderNow('content'); return; }
+      var a=t.closest('[data-ce]'); if(a){ var k=a.getAttribute('data-ce'); if(k==='filming'){ ceShowFilming=!ceShowFilming; renderNow('content'); } else if(k==='close'){ ceOpenId=null; ceRenderSheet(); } else if(k==='approve-core'){ ceApproveCore(); } }
+    }
+    if(view){ view.addEventListener('click', onClick); view.addEventListener('change', function(ev){ var s=ev.target.closest('select[data-cef]'); if(!s) return; ceFilters[s.getAttribute('data-cef')]=s.value; renderNow('content'); }); }
+    if(sheet){ sheet.addEventListener('click', function(ev){ if(ev.target===sheet){ ceOpenId=null; ceRenderSheet(); return; } onClick(ev); }); document.addEventListener('keydown', function(ev){ if(ev.key==='Escape' && ceOpenId){ ceOpenId=null; ceRenderSheet(); } }); }
+  })();
+
   /* ---------- data layer ---------- */
   function subscribe(){
     function sub(q, key, stateKey, onLoad){
@@ -2199,6 +2610,12 @@ body{padding:0;}
     doc('meta/adsSync', 'meta', function(d){ state.adsMeta=d; state.adsLoaded=true; });
     doc('meta/igScan', 'meta', function(d){ state.igMeta=d; state.igLoaded=true; });
     doc('meta/contentPlan', 'meta', function(d){ state.contentPlan=d; });
+    sub(db.collection('content_ideas').orderBy('foundAt','desc').limit(500), 'content', 'contentIdeas');
+    sub(db.collection('content_queue').limit(1000), 'content', 'contentQueue');
+    sub(db.collection('content_creators').limit(300), 'content', 'contentCreators');
+    doc('meta/contentScan', 'content', function(d){ state.contentScan=d; state.contentMetaLoaded.scan=true; });
+    doc('meta/contentReview', 'content', function(d){ state.contentReview=d; state.contentMetaLoaded.review=true; });
+    doc('meta/contentBatch', 'content', function(d){ state.contentBatch=d; state.contentMetaLoaded.batch=true; });
     doc('meta/goal', 'meta', function(d){ state.goal=d; });
     doc('meta/ghlSync', 'meta', function(d){ state.ghlMeta=d; });
     doc('meta/routineCalls', 'meta', function(d){ state.routineCalls=d; });

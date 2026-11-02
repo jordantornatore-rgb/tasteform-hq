@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.0 — 3 Nov 2026 (Content Engine tab)
+
+- New **Content Engine** tab (Growth group; phone → More) with four views: **This week** (Mon–Sun board of `content_queue`, progress out of 18, filming list by location, script sheet with copy buttons and a status stepper that merges only `status` + `statusAt`), **Idea Bank** (`content_ideas` newest first, filters, Skip / Use next week), **Performance** (`meta/contentReview`: top/bottom 3, format leaderboard, hook style, angle, test-month countdown, "Approve these 5" → `meta/contentScan.coreFormats`) and **Scanner** (watchlist + last run). Admin-only writes, Sydney dates, `–` with a reason for anything missing. See `CONTENT_ENGINE.md`.
+- `tests/ui.test.js` covers the new tab and the three content tables.
+
 ## 2.2.0 — 26 Oct 2026 (scans that cannot quietly stop early)
 
 - Scan prompts v6 (`scans/`): run-discipline block (START/DEADLINE, SQL queues, batch loop, finish gate), self-reported `stoppedEarly` / `minutesUsed` / `queueRemaining` / `stepsDone`; DM backlog split into its own nightly routine (22:40, 50 min) with URL-based re-verification; likes scan resumes big posts in pages; content scan merge-only.

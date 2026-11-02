@@ -22,7 +22,7 @@ if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 const NOW_ISO = process.env.HQ_NOW || '2026-10-21T04:00:00Z'; // 3pm Sydney, 21 Oct 2026
 
 function loadFixture(t) { const p = path.join(FIX, t + '.json'); return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : []; }
-const TABLES = ['dm_threads', 'dm_daily', 'contacts', 'script_reviews', 'tf_responses', 'tf_daily', 'ig_posts', 'ig_stories', 'posts', 'meta', 'ads_daily', 'ads_campaigns', 'stripe_summary', 'stripe_subscriptions', 'stripe_daily'];
+const TABLES = ['dm_threads', 'dm_daily', 'contacts', 'script_reviews', 'tf_responses', 'tf_daily', 'ig_posts', 'ig_stories', 'posts', 'meta', 'ads_daily', 'ads_campaigns', 'stripe_summary', 'stripe_subscriptions', 'stripe_daily', 'content_ideas', 'content_queue', 'content_creators'];
 const fixtures = {}; TABLES.forEach(t => { fixtures[t] = loadFixture(t); });
 const docs = t => fixtures[t].map(r => Object.assign({ id: r.id }, r.data));
 
@@ -70,7 +70,7 @@ function serve() {
 }
 
 const mockSrc = fs.readFileSync(path.join(__dirname, 'mock-supabase.js'), 'utf8');
-const TABS = ['today', 'funnel', 'leads', 'dms', 'follow', 'magnets', 'apps', 'ads', 'stripe', 'routine'];
+const TABS = ['today', 'funnel', 'leads', 'dms', 'follow', 'magnets', 'apps', 'ads', 'content', 'stripe', 'routine'];
 let passed = 0, failed = 0; const failures = [];
 function check(name, fn) { try { fn(); passed++; } catch (e) { failed++; failures.push(name + ': ' + (e && e.message)); console.log('  FAIL ' + name + ' — ' + (e && e.message)); } }
 
