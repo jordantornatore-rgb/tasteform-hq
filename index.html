@@ -635,6 +635,101 @@ body{padding:0;}
   .ce-prog .row{grid-template-columns:68px 1fr 56px;}
 }
 
+/* ===== Content Engine: Library, calendar, approvals, editor ===== */
+:root{--ce-purple:#6B4FA3;--ce-purple-soft:#E6DFF3;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ce-purple:#B9A4E6;--ce-purple-soft:#2A2340;}}
+:root[data-theme="dark"]{--ce-purple:#B9A4E6;--ce-purple-soft:#2A2340;}
+.chip.ce-purple{background:var(--ce-purple-soft);color:var(--ce-purple);}
+.ce-strip{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+.ce-strip .arrow{color:var(--muted);font-size:12px;}
+.ce-stage{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:6px 10px;min-height:34px;font-size:var(--t-xs);font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.ce-stage b{font-family:'Anton',Impact,sans-serif;font-size:16px;font-weight:400;letter-spacing:.02em;}
+.ce-stage[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text);}
+.ce-stage.red{color:var(--crit);border-color:var(--crit);}
+.ce-stage.red[aria-pressed="true"]{background:var(--crit);color:#fff;}
+.ce-stage.zero{opacity:.55;}
+.ce-auto{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.ce-toggle{border:1px solid var(--border);border-radius:999px;min-height:var(--tap);padding:8px 16px 8px 10px;display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:var(--t-s);cursor:pointer;background:var(--surface);color:var(--text);}
+.ce-toggle .knob{width:34px;height:20px;border-radius:999px;background:var(--border-strong);position:relative;flex-shrink:0;}
+.ce-toggle .knob::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s;}
+.ce-toggle.on{background:var(--good-soft);color:var(--good);border-color:var(--good);}
+.ce-toggle.on .knob{background:var(--good);} .ce-toggle.on .knob::after{left:16px;}
+.ce-toggle.off{background:var(--warn-soft);color:var(--warn);border-color:var(--warn);}
+.ce-toggle.off .knob{background:var(--warn);}
+.ce-toggle:disabled{cursor:default;opacity:.8;}
+.ce-thumb{width:64px;height:114px;object-fit:cover;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);flex-shrink:0;display:block;}
+.ce-thumb.ph{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:10px;text-align:center;padding:4px;}
+.ce-video{width:100%;max-height:420px;aspect-ratio:9/16;max-width:260px;background:#000;border-radius:var(--r-m);display:block;}
+.ce-row{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:var(--r-m);background:var(--bg);padding:10px;min-width:0;}
+.ce-row .main{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
+.ce-row .when{font-family:'Anton',Impact,sans-serif;font-size:18px;letter-spacing:.02em;}
+.ce-row .when small{font-family:'Open Sans',sans-serif;font-size:var(--t-xs);color:var(--muted);font-weight:600;letter-spacing:0;margin-left:6px;}
+.ce-row .ttl{font-weight:700;font-size:var(--t-s);line-height:1.35;overflow-wrap:anywhere;}
+.ce-open{background:none;border:none;color:inherit;text-align:left;padding:0;cursor:pointer;font:inherit;min-height:var(--tap);display:flex;flex-direction:column;justify-content:center;gap:3px;width:100%;}
+.ce-open:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
+.ce-daygroup h3{margin:10px 0 6px;}
+.ce-list{display:flex;flex-direction:column;gap:8px;}
+.ce-wait{border:1px solid var(--warn);background:var(--bg);border-radius:var(--r-m);padding:12px;display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:12px;}
+.ce-wait .side{min-width:0;display:flex;flex-direction:column;gap:8px;}
+.ce-big{display:flex;gap:8px;flex-wrap:wrap;}
+.ce-big .btn{min-height:var(--tap);font-size:var(--t-m);padding:10px 18px;flex:1;}
+.ce-fbbox{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);padding-top:8px;}
+.ce-fbbox .input{width:100%;}
+.ce-fbbox textarea.input{min-height:64px;resize:vertical;}
+.ce-fbrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.ce-thread{display:flex;flex-direction:column;gap:6px;}
+.ce-fb{border-left:3px solid var(--ce-purple);padding:4px 10px;font-size:var(--t-s);background:var(--surface-2);border-radius:0 8px 8px 0;}
+.ce-fb .reply{border-left:3px solid var(--good);margin-top:4px;padding:4px 10px;background:var(--bg);border-radius:0 8px 8px 0;}
+.ce-fb .meta{font-size:var(--t-xs);color:var(--muted);}
+.ce-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;}
+.ce-cal-day{display:flex;flex-direction:column;gap:6px;min-width:0;border-radius:var(--r-m);padding:4px;border:1px dashed transparent;min-height:60px;}
+.ce-cal-day.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);}
+.ce-cal-card{border:1px solid var(--border);border-radius:var(--r-m);background:var(--bg);padding:8px;display:flex;flex-direction:column;gap:5px;min-width:0;position:relative;touch-action:pan-y;}
+.ce-cal-card.drag{cursor:grab;}
+.ce-cal-card.moving{opacity:.55;}
+.ce-cal-card .t{font-family:'Anton',Impact,sans-serif;font-size:22px;line-height:1;letter-spacing:.02em;}
+.ce-cal-card .lock{font-size:var(--t-xs);color:var(--muted);font-weight:600;}
+.ce-cal-card .row{display:flex;gap:6px;align-items:flex-start;}
+.ce-cal-card .ce-thumb{width:44px;height:78px;}
+.ce-cal-card .ttl{font-size:var(--t-xs);font-weight:700;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;}
+.ce-cal-card select.input{width:100%;font-size:var(--t-xs);padding:4px 6px;min-height:32px;}
+.ce-cal-card .ce-open{min-height:0;}
+.ce-ghost{position:fixed;z-index:80;pointer-events:none;opacity:.85;transform:rotate(-2deg);box-shadow:0 12px 30px rgba(0,0,0,.35);width:160px;}
+.ce-spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:cespin .8s linear infinite;vertical-align:middle;}
+@keyframes cespin{to{transform:rotate(360deg);}}
+.ce-notime{border-top:1px solid var(--border);padding-top:8px;}
+.ce-notime .ce-cal{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
+.ce-timeline{display:flex;flex-direction:column;gap:4px;font-size:var(--t-s);}
+.ce-timeline div{display:flex;justify-content:space-between;gap:10px;}
+.ce-timeline .muted{font-variant-numeric:tabular-nums;}
+.ce-editor{display:flex;flex-direction:column;gap:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-m);padding:10px;}
+.ce-editor .input{width:100%;}
+.ce-editor textarea.input{min-height:90px;resize:vertical;line-height:1.5;}
+.ce-editor .li{display:flex;gap:4px;align-items:center;}
+.ce-editor .li .input{flex:1;}
+.ce-editor .li .icon-btn{min-width:36px;min-height:36px;}
+.ce-editor .count{font-size:var(--t-xs);color:var(--muted);text-align:right;}
+.ce-editor .count.over{color:var(--crit);font-weight:700;}
+.ce-editor .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;}
+.ce-editor label{font-size:var(--t-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column;gap:3px;}
+.ce-editor .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.ce-editor input[type=range]{width:100%;}
+.ce-note{font-size:var(--t-s);color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px;}
+.ce-libfilters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.ce-libfilters .input{min-width:0;max-width:100%;}
+.ce-rules summary{cursor:pointer;font-weight:600;font-size:var(--t-s);min-height:var(--tap);display:flex;align-items:center;}
+.ce-rules ul{margin:4px 0 0;padding-left:18px;font-size:var(--t-s);}
+.ce-metrics2{font-size:var(--t-s);color:var(--text-2);font-variant-numeric:tabular-nums;}
+@media (max-width:760px){
+  .ce-cal{grid-template-columns:1fr;}
+  .ce-cal-day{border:1px solid var(--border);}
+  .ce-cal-day .dh{font-size:var(--t-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:2px 4px;}
+  .ce-wait{grid-template-columns:1fr;}
+  .ce-video{max-width:100%;}
+  .ce-stage,.ce-cal-card select.input,.ce-cal-card .ce-open,.ce-libfilters .input,.ce-editor .input,.ce-editor .icon-btn,.ce-fbbox .input,.ce-fbbox .btn{min-height:var(--tap);}
+}
+@media (min-width:761px){ .ce-cal-day .dh{font-size:var(--t-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:2px 4px;display:flex;justify-content:space-between;} }
+
 /* phone: every tappable thing is at least 44 px; inline name links get a padded hit area without moving the layout */
 @media (max-width:760px){
   .btn,.btn.small,.icon-btn.sm,.r-btn,.seg-filter button,.range button,.outcome-btns .btn,.r-counter .cv button{min-height:var(--tap);}
@@ -1124,7 +1219,8 @@ body{padding:0;}
     <div class="top">
       <div><h1>Content Engine</h1><div class="sub" id="ceSub">Loading…</div></div>
       <div class="seg-filter" role="group" aria-label="Content Engine view" id="ceViewSeg">
-        <button type="button" data-ceview="week" aria-pressed="true">This week</button>
+        <button type="button" data-ceview="library" aria-pressed="true">Library</button>
+        <button type="button" data-ceview="week" aria-pressed="false">This week</button>
         <button type="button" data-ceview="ideas" aria-pressed="false">Idea Bank</button>
         <button type="button" data-ceview="perf" aria-pressed="false">Performance</button>
         <button type="button" data-ceview="scan" aria-pressed="false">Scanner</button>
@@ -1326,7 +1422,7 @@ body{padding:0;}
   var esc = HQ.esc, num = HQ.num, pct = HQ.pct, relTime = HQ.relTime, hoursSince = HQ.hoursSince, fmtHours = HQ.fmtHours;
   var STAGES = HQ.STAGES, STAGE_INDEX = HQ.STAGE_INDEX, OPENERS = HQ.OPENERS, OPENER_ORDER = HQ.OPENER_ORDER;
   var TIER_SUPER = HQ.TIER.SUPER, TIER_CLOSE = HQ.TIER.CLOSE, TIER_PERSONAL = HQ.TIER.PERSONAL, TIER_INACTIVE = HQ.TIER.INACTIVE;
-  var db = null, isAdmin = false, currentUser = null;
+  var db = null, isAdmin = false, currentUser = null, supaClient = null;
   function $(id){ return document.getElementById(id); }
   function setHtml(id, html){ var el=$(id); if(el) el.innerHTML = html; }
   function setText(id, txt){ var el=$(id); if(el) el.textContent = txt; }
@@ -1342,6 +1438,7 @@ body{padding:0;}
     igPosts:[], igStories:[], igMeta:null, igLoaded:false,
     contentPlan:null, goal:null, ghlMeta:null, routineCalls:null, morningReport:null,
     contentIdeas:[], contentQueue:[], contentCreators:[], contentScan:null, contentReview:null, contentBatch:null, contentMetaLoaded:{},
+    contentSounds:[], contentAutopost:null, contentPosting:null,
     stripe:{summary:null, subs:[], daily:[], meta:null, loaded:false},
     loaded:{}
   };
@@ -2268,15 +2365,20 @@ body{padding:0;}
      Tables: content_ideas (Scanner briefs, id = Instagram shortcode), content_queue (Sunday batch slots,
      id = <weekStart>-<day>-<hi|lo|car>), content_creators (watchlist); meta rows contentScan / contentReview.
      Every write is a merge into data (db.doc().update) and only runs for admins; everyone signed in can read. */
-  var CE_STATUS=['to_film','filmed','edited','approved','scheduled','posted'];
-  var CE_STATUS_LABEL={to_film:'To film', filmed:'Filmed', edited:'Edited', approved:'Approved', scheduled:'Scheduled', posted:'Posted', skipped:'Skipped'};
+  var CE_STATUS=['to_film','filmed','editing','edited','awaiting_approval','approved','scheduled','posted'];
+  var CE_SIDE=['changes_requested','needs_jordan','error','skipped','cancelled'];
+  var CE_STATUS_LABEL={to_film:'To film', filmed:'Filmed', editing:'Editing', edited:'Edited', awaiting_approval:'Needs your OK', approved:'Approved', scheduled:'Scheduled', posted:'Posted', skipped:'Skipped', changes_requested:'Changes requested', needs_jordan:'Needs Jordan', error:'Error', cancelled:'Pulled'};
+  var CE_PLATFORM_SHORT={INSTAGRAM:'IG', TIKTOK:'TikTok', YOUTUBE:'YT', LINKEDIN:'LinkedIn'};
+  var CE_FORMATS=['F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','F13','F14','F15','F16','F17','C1','C2','C3','C4','C5','C6','C7'];
+  var CE_ANGLES=['corporate pain','how we fix it','client proof',"Jordan's story"], CE_HOOKSTYLES=['call-out','contrarian','story','proof'], CE_LOCS=['desk','car','mirror','kitchen','gym','outside'], CE_EFFORTS=['high','med','low'];
+  var CE_QUICK=['07:30','12:00','17:30','19:00','20:30'];
   var CE_SLOT_ORDER={high:0, low:1, carousel:2}, CE_SLOT_LABEL={high:'High-effort reel', low:'Low-effort reel', carousel:'Carousel'};
   var CE_LOCATIONS=['desk','car','mirror','kitchen','gym','outside'];
   var CE_WEEK_SLOTS=18;
   var CE_TEST_MONTH={start:'2026-11-03', end:'2026-12-03'};
   var CE_SCHEDULE='Scanner Mon/Wed/Fri 4:47am · Review + batch Sun 4:13pm';
   var CE_METRICS=[['n','Posts'],['posts','Posts'],['count','Posts'],['medianViews','Median views'],['avgViews','Avg views'],['views','Views'],['likes','Likes'],['comments','Comments'],['saves','Saves'],['shares','Shares'],['follows','Follows'],['dms','DMs'],['keywordComments','Keyword comments'],['applications','Applications'],['score','Score'],['value','Value']];
-  var ceView=(function(){ var v=read('hqCeView'); return ['week','ideas','perf','scan'].indexOf(v)>=0 ? v : 'week'; })();
+  var ceView=(function(){ var v=read('hqCeView'); return ['library','week','ideas','perf','scan'].indexOf(v)>=0 ? v : 'library'; })();
   var ceWeekOffset=0, ceShowFilming=false, ceOpenId=null, ceCopyTexts={}, ceBusy={};
   var ceFilters={status:'', funnel:'', format:'', type:'', office:false};
 
@@ -2285,7 +2387,15 @@ body{padding:0;}
   function ceFunnel(v){ var s=String(v==null?'':v).trim().toUpperCase(); if(s==='TOP'||s==='TOF') return 'TOF'; if(s==='MID'||s==='MOF') return 'MOF'; if(s==='BOTTOM'||s==='BOF'||s==='PROOF') return 'BOF'; return null; }
   function ceFunnelChip(v){ var f=ceFunnel(v); return f ? '<span class="chip ce-'+f.toLowerCase()+'">'+f+'</span>' : '<span class="chip grey">no funnel</span>'; }
   function ceFormatChip(v){ var s=String(v==null?'':v).trim(); return s ? '<span class="chip stage ce-fmt">'+esc(s.length<=4?s.toUpperCase():s)+'</span>' : '<span class="chip grey">no format</span>'; }
-  function ceStatusChip(s){ var i=ceIdx(s), cls = s==='posted'?'good':(s==='skipped'?'grey':(i>=1?'warn':'stage')); return '<span class="chip '+cls+'">'+esc(ceStatusLabel(s||'to_film'))+'</span>'; }
+  function ceStatusChip(s, q){
+    s=s||'to_film'; var pst=q&&q.posting&&q.posting.status;
+    var cls = s==='posted'?'good':(s==='awaiting_approval'?'warn':(s==='changes_requested'?'ce-purple':(s==='needs_jordan'||s==='error'?'crit':(s==='skipped'||s==='cancelled'?'grey':(ceIdx(s)>=1?'warn':'stage')))));
+    var label = s==='changes_requested' ? 'Changes requested – being reworked' : ceStatusLabel(s);
+    var out='<span class="chip '+cls+'">'+esc(label)+'</span>';
+    if(pst==='error' && s!=='error') out+='<span class="chip crit">Error</span>';
+    if(q&&q.reEditRequested&&s!=='posted') out+='<span class="chip ce-purple">Re-edit queued</span>';
+    return out;
+  }
   function ceText(v){ var s = v==null ? '' : (Array.isArray(v) ? v.map(function(x){ return x==null?'':String(x); }).join('\n') : (typeof v==='object' ? JSON.stringify(v) : String(v))); return s.trim(); }
   function ceCap(s){ s=ceText(s); return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
   function ceLink(shortcode, url){ if(url && /^https?:\/\//i.test(String(url))) return String(url); if(shortcode) return 'https://www.instagram.com/p/'+encodeURIComponent(String(shortcode))+'/'; return null; }
@@ -2313,7 +2423,10 @@ body{padding:0;}
     var root=$('ceRoot'); if(!root) return;
     document.querySelectorAll('#ceViewSeg button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-ceview')===ceView?'true':'false'); });
     ceCopyTexts={};
-    root.innerHTML = ceView==='ideas' ? ceRenderIdeas() : (ceView==='perf' ? ceRenderPerf() : (ceView==='scan' ? ceRenderScan() : ceRenderWeek()));
+    var typing=document.activeElement && root.contains(document.activeElement) && /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName) && document.activeElement.value;
+    if(typing){ ceRenderSheet(); return; } // never wipe text Jordan is typing in a card; the next change re-renders
+    root.innerHTML = ceView==='ideas' ? ceRenderIdeas() : (ceView==='perf' ? ceRenderPerf() : (ceView==='scan' ? ceRenderScan() : (ceView==='week' ? ceRenderWeek() : ceRenderLibrary())));
+    if(ceView==='library' && ceLib.focusQ){ var qi=$('ceLibQ'); if(qi){ qi.focus(); try{ qi.setSelectionRange(qi.value.length, qi.value.length); }catch(e){} } ceLib.focusQ=false; }
     ceRenderSheet();
   };
 
@@ -2327,7 +2440,7 @@ body{padding:0;}
     if(st!=='ok'){ setText('ceSub', st==='loading'?'Loading…':'Sync error'); return '<div class="panel">'+head+ceStateBox(st,'the weekly plan')+'</div>'; }
     var slots=ceWeekSlots(ws).sort(function(a,b){ return String(a._date||'').localeCompare(String(b._date||'')) || ceSlotOrder(a)-ceSlotOrder(b) || String(a.id).localeCompare(String(b.id)); });
     var live=slots.filter(function(q){ return q.status!=='skipped'; });
-    var filmed=live.filter(function(q){ return ceIdx(q.status)>=1; }).length, approved=live.filter(function(q){ return ceIdx(q.status)>=3; }).length, posted=live.filter(function(q){ return q.status==='posted'; }).length;
+    var filmed=live.filter(function(q){ return ceIdx(q.status)>=1; }).length, approved=live.filter(function(q){ return ceIdx(q.status)>=5; }).length, posted=live.filter(function(q){ return q.status==='posted'; }).length;
     var toFilm=slots.filter(function(q){ return !q.status || q.status==='to_film'; });
     if(!slots.length){
       setText('ceSub', 'No plan for the week of '+label);
@@ -2374,40 +2487,124 @@ body{padding:0;}
   }
 
   /* --- Script sheet: hooks, beats, ending, caption, LinkedIn, slides + status stepper --- */
+  /* --- Post sheet: preview, timeline, schedule controls, feedback, every section editable (admin, until posted) --- */
   function ceRenderSheet(){
     var el=$('ceSheet'); if(!el) return;
     var q=ceOpenId ? ceFindSlot(ceOpenId) : null;
-    if(!q){ ceOpenId=null; el.hidden=true; el.innerHTML=''; return; }
-    var card=el.querySelector('.ce-sheet-card'), sc=card?card.scrollTop:0, wasOpen=!el.hidden;
-    var date=HQ.isDayKey(q.date)?q.date:null, idx=ceIdx(q.status||'to_film');
-    function block(title, body, copyKey, copyText){ return '<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">'+esc(title)+'</span>'+(copyText?ceCopyBtn(copyKey, copyText, 'Copy all'):'')+'</div>'+body+'</div>'; }
-    function lines(arr, prefix){ if(!Array.isArray(arr)||!arr.length) return '<div class="ce-txt muted">– not in this slot\'s brief</div>'; return arr.map(function(h,i){ var t=ceText(h); return '<div class="ce-line"><div class="t"><span class="muted">'+(i+1)+'.</span> '+esc(t||'–')+'</div>'+ceCopyBtn(prefix+i, t)+'</div>'; }).join(''); }
-    function single(v, key){ var t=ceText(v); if(!t) return '<div class="ce-txt muted">– not in this slot\'s brief</div>'; return '<div class="ce-line"><div class="t">'+esc(t)+'</div>'+ceCopyBtn(key, t)+'</div>'; }
+    if(!q){ ceOpenId=null; ceEdit=null; el.hidden=true; el.innerHTML=''; return; }
+    var wasOpen=!el.hidden;
+    if(wasOpen && el.querySelector('[data-ce-editor]') && ceEdit && ceEdit.id===q.id && !ceEdit.force) return; // an editor is open: keep Jordan's typing
+    if(wasOpen){ var ta=el.querySelector('textarea.ce-fb'); if(ta && ta.value && !ceEdit) return; }
+    if(ceEdit) ceEdit.force=false;
+    var card=el.querySelector('.ce-sheet-card'), sc=card?card.scrollTop:0;
+    var date=HQ.isDayKey(q.date)?q.date:null, idx=ceIdx(q.status||'to_film'), posted=cePosted(q), lock=ceLocked(q), canEdit=isAdmin && !posted;
+    var p=q.posting||{}, v=q.video||{};
+    function block(title, body, copyKey, copyText, section){ return '<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">'+esc(title)+'</span><span class="ce-chips">'+(copyText?ceCopyBtn(copyKey, copyText, 'Copy all'):'')+(section&&canEdit&&!(ceEdit&&ceEdit.id===q.id&&ceEdit.section===section)?'<button type="button" class="btn small" data-ce-edit="'+section+'">Edit</button>':'')+'</span></div>'+((ceEdit&&ceEdit.id===q.id&&ceEdit.section===section)?ceEditor(q, section):body)+'</div>'; }
+    function lines(arr, prefix, marks){ if(!Array.isArray(arr)||!arr.length) return '<div class="ce-txt muted">– not in this slot\'s brief</div>'; return arr.map(function(h,i){ var t=ceText(h), m=marks?marks(t,i):''; return '<div class="ce-line"><div class="t"><span class="muted">'+(i+1)+'.</span> '+esc(t||'–')+(m?' '+m:'')+'</div>'+ceCopyBtn(prefix+i, t)+'</div>'; }).join(''); }
+    function single(val, key){ var t=ceText(val); if(!t) return '<div class="ce-txt muted">– not in this slot\'s brief</div>'; return '<div class="ce-line"><div class="t">'+esc(t)+'</div>'+ceCopyBtn(key, t)+'</div>'; }
     var meta=[date?HQ.fmtDay(date,'wd'):(q.day?String(q.day):'no day'), CE_SLOT_LABEL[ceSlotKey(q)]||'slot –', ceCap(q.effort)?ceCap(q.effort)+' effort':'effort –', ceText(q.location)||'location –'];
     if(q.angle) meta.push(ceText(q.angle)+' angle'); if(q.hookStyle) meta.push(ceText(q.hookStyle)+' hook');
-    var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status)+'</div><h2 style="margin-top:6px">'+esc(ceText(q.title)||'Untitled slot')+'</h2><div class="ce-meta" style="margin-top:4px">'+esc(meta.join(' · '))+'</div></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
-    html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Status</span>'+(isAdmin?'':'<span class="f-note">View only: your role can\'t change the status.</span>')+'</div><div class="ce-steps">'+CE_STATUS.map(function(s,i){ var cls=i===idx?' cur':(i<idx?' done':''); return '<button type="button" class="ce-step'+cls+'" data-ce-status="'+s+'"'+(isAdmin?'':' disabled')+' aria-pressed="'+(i===idx?'true':'false')+'">'+(i<idx?'✓ ':'')+esc(CE_STATUS_LABEL[s])+'</button>'; }).join('')+'</div>'+
-      '<div class="ce-chips">'+(q.statusAt?'<span class="f-note">Set '+esc(relTime(q.statusAt)||'')+'.</span>':'')+(isAdmin?(q.status==='skipped'?'<button type="button" class="btn small" data-ce-status="to_film">Un-skip</button>':'<button type="button" class="btn small" data-ce-status="skipped">Skip this slot</button>'):'')+'</div></div>';
-    html+=block('Hooks'+(Array.isArray(q.hooks)?' ('+q.hooks.length+')':''), lines(q.hooks,'hook'), 'hooks', Array.isArray(q.hooks)?q.hooks.map(ceText).join('\n'):'');
-    html+=block('Beats', lines(q.body,'beat'), 'beats', Array.isArray(q.body)?q.body.map(ceText).join('\n'):'');
-    html+=block('Ending', single(q.ending,'ending'));
-    html+=block('Caption', single(q.caption,'caption'));
-    html+=block('LinkedIn version', single(q.linkedin,'linkedin'));
-    if(ceSlotKey(q)==='carousel' || (Array.isArray(q.slides)&&q.slides.length)) html+=block('Slides'+(Array.isArray(q.slides)?' ('+q.slides.length+')':''), lines(q.slides,'slide'), 'slides', Array.isArray(q.slides)?q.slides.map(ceText).join('\n\n'):'');
-    if(q.status==='posted' || q.postedShortcode || q.metrics){
-      var m=q.metrics||{}, link=ceLink(q.postedShortcode, null);
-      html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Results</span>'+(link?'<a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">Open post ↗</a>':'')+'</div><div class="ce-metrics">'+[['views','Views'],['likes','Likes'],['comments','Comments'],['saves','Saves'],['shares','Shares'],['follows','Follows']].map(function(k){ return '<div class="ce-metric"><div class="label">'+k[1]+'</div><div class="v">'+num(m[k[0]])+'</div></div>'; }).join('')+'</div>'+(q.metrics?'':'<div class="f-note">– = the Sunday review hasn\'t pulled this post\'s numbers yet.</div>')+'</div>';
+    var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+cePlatformChips(q)+'</div><h2 style="margin-top:6px">'+esc(ceText(q.title)||'Untitled slot')+'</h2><div class="ce-meta" style="margin-top:4px">'+esc(meta.join(' · '))+'</div></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
+    if(ceSheetMsg && ceSheetMsg.id===q.id) html+='<div class="'+(ceSheetMsg.err?'ce-note':'f-note')+'" role="status">'+esc(ceSheetMsg.text)+'</div>';
+    // preview
+    if(v.previewUrl || v.thumbnailUrl) html+='<div class="ce-block" style="border-top:none;padding-top:0">'+(v.previewUrl?'<video class="ce-video" controls playsinline preload="metadata"'+(v.thumbnailUrl?' poster="'+esc(v.thumbnailUrl)+'"':'')+' src="'+esc(v.previewUrl)+'"></video>':'<img class="ce-thumb" style="width:120px;height:213px" src="'+esc(v.thumbnailUrl)+'" alt="">')+(v.durationS!=null?'<div class="f-note">'+esc(num(v.durationS,1))+' s · '+esc(v.file||'')+'</div>':'')+'</div>';
+    else if(q.status==='editing' || q.status==='filmed') html+='<div class="ce-block" style="border-top:none;padding-top:0"><div class="f-note">No preview yet: the pipeline uploads the edit as soon as it is rendered.</div></div>';
+    if(q.needsJordan && q.status==='needs_jordan') html+='<div class="ce-note"><b>Needs you:</b> '+esc(ceText(q.needsJordan.reason))+(isAdmin?' <button type="button" class="btn small" data-ce-act="fixed" data-id="'+esc(q.id)+'">Mark fixed</button>':'')+'</div>';
+    if(p.status==='error' && p.error) html+='<div class="ce-note"><b>Posting error:</b> '+esc(ceText(p.error))+'</div>';
+    if(q.scriptChangedAfterEdit && !posted) html+='<div class="ce-note">The video was cut from the old script.'+(isAdmin&&!q.reEditRequested?' <button type="button" class="btn small" data-ce-act="reedit" data-id="'+esc(q.id)+'">Re-edit video</button>':(q.reEditRequested?' Re-edit queued; the pipeline picks it up within 20 minutes.':''))+'</div>';
+    // status stepper (main states only) + side state
+    html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Status</span>'+(isAdmin?'':'<span class="f-note">View only: your role can\'t change the status.</span>')+'</div><div class="ce-steps">'+CE_STATUS.map(function(st,i){ var cls=i===idx?' cur':(i<idx?' done':''); return '<button type="button" class="ce-step'+cls+'" data-ce-status="'+st+'"'+(isAdmin&&!posted?'':' disabled')+' aria-pressed="'+(i===idx?'true':'false')+'">'+(i<idx?'✓ ':'')+esc(CE_STATUS_LABEL[st])+'</button>'; }).join('')+'</div>'+
+      '<div class="ce-chips">'+(idx<0?'<span class="f-note">Side state: '+esc(ceStatusLabel(q.status))+'.</span>':'')+(q.statusAt?'<span class="f-note">Set '+esc(relTime(q.statusAt)||'')+'.</span>':'')+(isAdmin&&!posted?(q.status==='skipped'?'<button type="button" class="btn small" data-ce-status="to_film">Un-skip</button>':'<button type="button" class="btn small" data-ce-status="skipped">Skip this slot</button>'):'')+'</div></div>';
+    // timeline
+    var tl=[['Filmed', q.footage&&q.footage.filmedAt],['Rendered', v.renderedAt||v.uploadedAt],['Approved', q.approval&&q.approval.approvedAt],['Scheduled', p.scheduledAt],['Posts at', p.scheduledFor],['Posted', p.postedAt],['Pulled', p.cancelledAt],['Moved by you', p.movedAt],['Edited by you', q.editedByJordanAt]].filter(function(x){ return x[1]; });
+    if(tl.length) html+='<div class="ce-block"><span class="ce-k">Timeline</span><div class="ce-timeline">'+tl.map(function(x){ return '<div><span>'+esc(x[0])+'</span><span class="muted">'+esc(ceWhenFull(x[1]))+'</span></div>'; }).join('')+'</div></div>';
+    // schedule controls
+    var at=cePostAtMs(q), hm=at?HQ.sydParts(at).h*60+HQ.sydParts(at).min:null, hmStr=hm==null?null:HQ.pad(Math.floor(hm/60))+':'+HQ.pad(hm%60);
+    html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Schedule</span>'+(ceMoving[q.id]?'<span class="ce-spin" aria-label="moving"></span>':'')+'</div>';
+    html+='<div class="ce-txt">'+(at?esc(ceWhenFull(at))+(p.status==='scheduled'?' · scheduled':(p.plannedFor?' · planned, not scheduled yet':' · slot time'))+(p.scheduleSource?' ('+esc(p.scheduleSource)+')':''):'– no time yet')+'</div>';
+    if(lock.locked) html+='<div class="f-note">'+esc(lock.why)+'. Day and time can\'t change.</div>';
+    else if(isAdmin) html+='<div class="ce-fbrow"><select class="input" data-ce-moveday="'+esc(q.id)+'" aria-label="Day">'+ceDayOptions(date)+'</select><select class="input" data-ce-time="'+esc(q.id)+'" aria-label="Time">'+ceTimeOptions(hmStr)+'</select></div><div class="f-note">Changes move the post straight away'+(p.status==='scheduled'?' (bundle.social first, then here)':'')+'.</div>';
+    var links=p.permalinks||{}; var ids=p.postIds||(p.postId?{INSTAGRAM:p.postId}:{});
+    if(Object.keys(ids).length||Object.keys(links).length) html+='<div class="ce-txt">'+Object.keys(ids).map(function(pl){ return esc(CE_PLATFORM_SHORT[pl]||pl)+': '+(links[pl.toLowerCase()]?'<a class="ce-a" href="'+esc(links[pl.toLowerCase()])+'" target="_blank" rel="noopener">open ↗</a>':'<span class="mono">'+esc(String(ids[pl]).slice(0,8))+'</span>'); }).join(' · ')+'</div>';
+    if(Array.isArray(p.trials)&&p.trials.length) html+='<div class="f-note">'+p.trials.length+' trial reel'+(p.trials.length===1?'':'s')+': '+p.trials.map(function(t){ return esc(ceWhenFull(t.scheduledFor)); }).join(', ')+'</div>';
+    if(isAdmin){
+      var acts='';
+      if(q.status==='awaiting_approval') acts+='<button type="button" class="btn primary" data-ce-act="approve" data-id="'+esc(q.id)+'">✓ Approve</button>';
+      if(p.status==='scheduled'&&!lock.locked) acts+=(p.cancelRequested?'<span class="chip grey">Pull requested · the pipeline picks it up within 20 minutes</span>':'<button type="button" class="btn" data-ce-act="pull" data-id="'+esc(q.id)+'">Pull from schedule</button>');
+      if(acts) html+='<div class="ce-chips" style="margin-top:4px">'+acts+'</div>';
     }
-    if(q.sourceIdea){
-      var idea=(state.contentIdeas||[]).find(function(i){ return i.id===q.sourceIdea || i.shortcode===q.sourceIdea; }), il=ceLink(q.sourceIdea, idea&&idea.url);
-      html+='<div class="ce-block"><span class="ce-k">Source idea</span><div class="ce-txt">'+(idea&&idea.creator?'@'+esc(String(idea.creator).replace(/^@/,''))+' · ':'')+(il?'<a class="ce-a" href="'+esc(il)+'" target="_blank" rel="noopener">'+esc(String(q.sourceIdea))+' ↗</a>':esc(String(q.sourceIdea)))+'</div></div>';
+    html+='</div>';
+    // feedback
+    if(!posted){
+      var fb=Array.isArray(q.feedback)?q.feedback:[];
+      html+='<div class="ce-block"><span class="ce-k">Feedback</span>'+(fb.length?'<div class="ce-thread">'+fb.slice().reverse().map(function(f){ return '<div class="ce-fb"><div class="meta">'+esc(ceCap(f.part||'other'))+' · '+esc(relTime(f.at)||'')+(f.resolved?' · done':' · being reworked')+'</div><div>'+esc(ceText(f.text))+'</div>'+(f.reply?'<div class="reply"><div class="meta">Pipeline'+(f.resolvedAt?' · '+esc(relTime(f.resolvedAt)||''):'')+'</div>'+esc(ceText(f.reply))+'</div>':'')+'</div>'; }).join('')+'</div>':'')+(isAdmin?ceFeedbackBox(q.id):'')+'</div>';
+    }
+    // content
+    var filmedSet=(q.footage&&Array.isArray(q.footage.hooksFilmed)?q.footage.hooksFilmed:[]).map(function(h){ return ceText(h.hook||h.text).toLowerCase(); });
+    var trialBy={}; (p.trials||[]).forEach(function(t){ if(t.hook) trialBy[ceText(t.hook).toLowerCase()]=t; });
+    html+=block('Caption'+(q.caption?' ('+String(q.caption).length+' / 2,200)':''), single(q.caption,'caption'), null, null, 'caption');
+    html+=block('LinkedIn version', single(q.linkedin,'linkedin'), null, null, 'linkedin');
+    html+=block('Sound', '<div class="ce-txt">'+esc(ceSoundLabel(q.sound))+(q.sound&&q.sound.soundSwap?'<div class="f-note">'+esc(q.sound.soundSwap)+'</div>':'')+'</div>', null, null, 'sound');
+    html+=block('Hooks'+(Array.isArray(q.hooks)?' ('+q.hooks.length+')':''), lines(q.hooks,'hook', function(t){ var k=t.toLowerCase(), out=''; if(filmedSet.indexOf(k)>=0) out+='<span class="chip good">filmed</span>'; if(trialBy[k]) out+='<span class="chip grey">trial · '+esc(ceWhenFull(trialBy[k].scheduledFor))+'</span>'; return out; }), 'hooks', Array.isArray(q.hooks)?q.hooks.map(ceText).join('\n'):'', 'hooks');
+    html+=block('Beats', lines(q.body,'beat'), 'beats', Array.isArray(q.body)?q.body.map(ceText).join('\n'):'', 'beats');
+    html+=block('Ending', single(q.ending,'ending'), null, null, 'ending');
+    if(ceSlotKey(q)==='carousel' || (Array.isArray(q.slides)&&q.slides.length) || (ceEdit&&ceEdit.id===q.id&&ceEdit.section==='slides')) html+=block('Slides'+(Array.isArray(q.slides)?' ('+q.slides.length+')':''), lines(q.slides,'slide'), 'slides', Array.isArray(q.slides)?q.slides.map(ceText).join('\n\n'):'', 'slides');
+    html+=block('Format, funnel, angle, hook style, location, effort', '<div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+'<span class="chip grey">'+esc(ceText(q.angle)||'angle –')+'</span><span class="chip grey">'+esc(ceText(q.hookStyle)||'hook style –')+'</span><span class="chip grey">'+esc(ceText(q.location)||'location –')+'</span><span class="chip grey">'+esc(ceCap(q.effort)||'effort –')+'</span></div>', null, null, 'meta');
+    if(!posted && p.status!=='scheduled') html+=block('Platforms', '<div class="ce-chips">'+cePlatformChips(q)+'</div>', null, null, 'platforms');
+    if(q.sourceIdea){ var idea=(state.contentIdeas||[]).find(function(i){ return i.id===q.sourceIdea || i.shortcode===q.sourceIdea; }), il=ceLink(q.sourceIdea, idea&&idea.url); html+='<div class="ce-block"><span class="ce-k">Source idea</span><div class="ce-txt">'+(idea&&idea.creator?'@'+esc(String(idea.creator).replace(/^@/,''))+' · ':'')+(il?'<a class="ce-a" href="'+esc(il)+'" target="_blank" rel="noopener">'+esc(String(q.sourceIdea))+' ↗</a>':esc(String(q.sourceIdea)))+' · <button type="button" class="btn small" data-ce-goidea="'+esc(q.sourceIdea)+'">Open in Idea Bank</button></div></div>'; }
+    if(q.footage&&q.footage.folder) html+='<div class="ce-block"><span class="ce-k">Footage</span><div class="ce-txt">'+esc(q.footage.folder)+(Array.isArray(q.footage.files)?' · '+q.footage.files.length+' file'+(q.footage.files.length===1?'':'s'):'')+(q.footage.filmedAt?' · picked up '+esc(relTime(q.footage.filmedAt)||''):'')+'</div></div>';
+    if(q.status==='posted' || q.postedShortcode || q.metrics){
+      var m=q.metrics||{}, link=links.instagram||ceLink(q.postedShortcode, null);
+      html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Results</span>'+(link?'<a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">Open post ↗</a>':'')+'</div>'+ceMetricsGrid(m)+(m.at24h||m.at7d?'<div class="ce-metrics2">'+(m.at24h?'24h: '+esc(ceMetricsLine(m.at24h)):'24h: –')+' · '+(m.at7d?'7d: '+esc(ceMetricsLine(m.at7d)):'7d: – not pulled yet')+'</div>':'<div class="f-note">– = the pipeline pulls numbers 24 h and 7 d after posting.</div>')+'</div>';
     }
     el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>';
     el.hidden=false;
     var c2=el.querySelector('.ce-sheet-card'); if(c2&&sc) c2.scrollTop=sc;
     if(!wasOpen){ var cb=$('ceSheetClose'); if(cb) cb.focus(); }
+    if(ceEdit&&ceEdit.id===q.id){ var fi=el.querySelector('[data-ce-editor] .input'); if(fi&&!wasOpen) fi.focus(); }
+    if(ceScrollFb){ ceScrollFb=false; var fbEl=el.querySelector('textarea.ce-fb'); if(fbEl){ fbEl.scrollIntoView({block:'center'}); fbEl.focus(); } }
   }
-
+  function ceMetricsGrid(m){ return '<div class="ce-metrics">'+[['views','Views'],['likes','Likes'],['comments','Comments'],['saves','Saves'],['shares','Shares'],['follows','Follows']].map(function(k){ return '<div class="ce-metric"><div class="label">'+k[1]+'</div><div class="v">'+num(m[k[0]])+'</div></div>'; }).join('')+'</div>'; }
+  function ceMetricsLine(m){ return [['views','views'],['likes','likes'],['saves','saves'],['shares','shares']].map(function(k){ return num(m[k[0]])+' '+k[1]; }).join(' · '); }
+  function ceFeedbackBox(id){ return '<div class="ce-fbbox"><span class="ce-k">What needs changing?</span><div class="ce-fbrow"><select class="input ce-fbpart" aria-label="Part" data-id="'+esc(id)+'">'+['edit','caption','sound','hook','script','timing','other'].map(function(x){ return '<option value="'+x+'">'+ceCap(x)+'</option>'; }).join('')+'</select></div><textarea class="input ce-fb" data-id="'+esc(id)+'" placeholder="Say exactly what to change. The pipeline follows your words literally." aria-label="Feedback"></textarea><div class="ce-fbrow"><button type="button" class="btn primary" data-ce-act="sendfb" data-id="'+esc(id)+'">Send</button><span class="f-note">Sets the post to "Changes requested"; the pipeline reworks it within 20 minutes.</span></div></div>'; }
+  // editor for one section of the sheet (admin, not posted). Save goes through the content-update function.
+  function ceEditor(q, section){
+    var E=function(v){ return esc(v==null?'':String(v)); };
+    var acts='<div class="acts"><button type="button" class="btn primary" data-ce-save="'+section+'">Save</button><button type="button" class="btn" data-ce-cancel>Cancel</button><span class="f-note">Esc cancels.</span></div>';
+    var list=function(arr, name, label){ arr=Array.isArray(arr)?arr:[]; if(!arr.length) arr=['']; return '<div data-ce-list="'+name+'">'+arr.map(function(x,i){ return '<div class="li"><input class="input" type="text" value="'+E(ceText(x))+'" aria-label="'+esc(label)+' '+(i+1)+'"><button type="button" class="icon-btn sm" data-ce-li="up" aria-label="Move up">↑</button><button type="button" class="icon-btn sm" data-ce-li="down" aria-label="Move down">↓</button><button type="button" class="icon-btn sm" data-ce-li="del" aria-label="Remove">✕</button></div>'; }).join('')+'</div><div class="acts"><button type="button" class="btn small" data-ce-li="add">Add '+esc(label.toLowerCase())+'</button></div>'; };
+    var sel=function(name, opts, cur, label, allowBlank){ var list=opts.slice(); if(cur && list.indexOf(cur)<0) list.unshift(cur); return '<label>'+esc(label)+'<select class="input" data-ce-f="'+name+'">'+(allowBlank?'<option value="">–</option>':'')+list.map(function(o){ return '<option value="'+E(o)+'"'+(o===cur?' selected':'')+'>'+E(o)+'</option>'; }).join('')+'</select></label>'; };
+    var body='';
+    if(section==='title') body='<input class="input" type="text" data-ce-f="title" value="'+E(q.title)+'" maxlength="140" aria-label="Title">';
+    else if(section==='hooks') body=list(q.hooks,'hooks','Hook');
+    else if(section==='beats') body=list(q.body,'body','Beat');
+    else if(section==='slides') body=list(q.slides,'slides','Slide');
+    else if(section==='ending') body='<textarea class="input" data-ce-f="ending" aria-label="Ending">'+E(q.ending)+'</textarea>';
+    else if(section==='linkedin') body='<textarea class="input" data-ce-f="linkedin" aria-label="LinkedIn version" style="min-height:140px">'+E(q.linkedin)+'</textarea>';
+    else if(section==='caption') body='<textarea class="input" data-ce-f="caption" data-ce-count="2200" aria-label="Caption" style="min-height:180px">'+E(q.caption)+'</textarea><div class="count" data-ce-countout>'+String(q.caption||'').length+' / 2,200</div>';
+    else if(section==='meta') body='<div class="grid">'+sel('format',CE_FORMATS,ceText(q.format),'Format',true)+sel('funnel',['TOF','MOF','BOF'],ceFunnel(q.funnel)||'','Funnel',true)+sel('angle',CE_ANGLES,ceText(q.angle),'Angle',true)+sel('hookStyle',CE_HOOKSTYLES,ceText(q.hookStyle),'Hook style',true)+sel('location',CE_LOCS,ceText(q.location),'Location',true)+sel('effort',CE_EFFORTS,ceText(q.effort),'Effort',true)+'</div>';
+    else if(section==='sound'){
+      var bank=(state.contentSounds||[]).filter(function(x){ return x && !String(x.id).startsWith('_') && x.igAudioId; });
+      var cur=q.sound&&q.sound.id?String(q.sound.id):'', vol=q.sound&&HQ.isNum(q.sound.musicSoundVolume)?Math.min(30,q.sound.musicSoundVolume):10;
+      body='<label>Sound<select class="input" data-ce-f="soundId"><option value=""'+(cur?'':' selected')+'>No music</option>'+bank.map(function(x){ return '<option value="'+E(x.igAudioId)+'" data-bank="'+E(x.id)+'" data-title="'+E(x.igAudioTitle||((x.artist||'')+' – '+(x.title||'')))+'"'+(String(x.igAudioId)===cur?' selected':'')+'>'+E((x.artist?x.artist+' – ':'')+(x.title||x.id))+(x.apiAvailable===false?' (not on bundle.social)':'')+'</option>'; }).join('')+'</select></label><label>Music volume <output data-ce-volout>'+vol+'</output><input type="range" min="0" max="30" step="1" value="'+vol+'" data-ce-f="volume" aria-label="Music volume"></label><div class="f-note">Original audio stays at 100. Talking heads: 8–12 or no music.</div>';
+    }
+    else if(section==='platforms'){ var have=cePlatforms(q); body='<div class="ce-chips">'+['INSTAGRAM','TIKTOK','YOUTUBE','LINKEDIN'].map(function(pl){ return '<label class="chip grey" style="min-height:36px;cursor:pointer"><input type="checkbox" data-ce-pl="'+pl+'"'+(have.indexOf(pl)>=0?' checked':'')+'> '+esc(CE_PLATFORM_SHORT[pl])+'</label>'; }).join('')+'</div><div class="f-note">LinkedIn posts only once it is connected.</div>'; }
+    return '<div class="ce-editor" data-ce-editor="'+section+'">'+body+acts+'</div>';
+  }
+  function ceCollectEditor(root, section, q){
+    var f=function(n){ var el=root.querySelector('[data-ce-f="'+n+'"]'); return el?el.value:null; };
+    var listVals=function(){ return Array.prototype.map.call(root.querySelectorAll('[data-ce-list] input'), function(i){ return i.value.trim(); }).filter(Boolean); };
+    if(section==='title') return {title:f('title')};
+    if(section==='hooks') return {hooks:listVals()};
+    if(section==='beats') return {body:listVals()};
+    if(section==='slides') return {slides:listVals()};
+    if(section==='ending') return {ending:f('ending')};
+    if(section==='linkedin') return {linkedin:f('linkedin')};
+    if(section==='caption') return {caption:f('caption')};
+    if(section==='meta') return {format:f('format'), funnel:f('funnel'), angle:f('angle'), hookStyle:f('hookStyle'), location:f('location'), effort:f('effort')};
+    if(section==='sound'){ var selEl=root.querySelector('[data-ce-f="soundId"]'), opt=selEl&&selEl.options[selEl.selectedIndex]; var id=selEl?selEl.value:''; var vol=parseInt(f('volume'),10); if(!id) return {sound:{id:null, bankId:null, title:'No music', musicSoundVolume:0, videoOriginalSoundVolume:100, setBy:'jordan'}}; return {sound:{id:id, bankId:opt.getAttribute('data-bank'), title:opt.getAttribute('data-title'), musicSoundVolume:isNaN(vol)?10:vol, videoOriginalSoundVolume:100, setBy:'jordan'}}; }
+    if(section==='platforms') return {platforms:Array.prototype.filter.call(root.querySelectorAll('[data-ce-pl]'), function(c){ return c.checked; }).map(function(c){ return c.getAttribute('data-ce-pl'); })};
+    return {};
+  }
   /* --- Idea Bank: content_ideas, newest first --- */
   function ceRenderIdeas(){
     var st=ceLoadState('contentIdeas');
@@ -2566,22 +2763,241 @@ body{padding:0;}
     if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(ceCopyFallback(text)); });
     else done(ceCopyFallback(text));
   }
+  /* --- events: views, cards, sheet, editor, feedback, moves, drag --- */
+  var ceEdit=null, ceSheetMsg=null, ceMoving={}, ceScrollFb=false;
+  var ceLib={status:'', platform:'', format:'', funnel:'', from:'', to:'', q:'', focusQ:false};
+  var ceCalOffset=0, ceRulesOpen=false;
+  function ceSetSheetMsg(id, text, err){ ceSheetMsg={id:id, text:text, err:!!err}; if(!err) setTimeout(function(){ if(ceSheetMsg&&ceSheetMsg.text===text){ ceSheetMsg=null; ceRenderSheet(); } }, 2500); }
+  async function ceInvoke(name, body){
+    if(!supaClient || !supaClient.functions) throw new Error('Not connected.');
+    var r=await supaClient.functions.invoke(name, {body:body});
+    if(r.error){ var msg=r.error.message||'Request failed'; try{ if(r.error.context && typeof r.error.context.json==='function'){ var ctx=await r.error.context.json(); if(ctx&&ctx.error) msg=ctx.error; } }catch(e){} throw new Error(msg); }
+    if(r.data && r.data.error) throw new Error(r.data.error);
+    return r.data||{};
+  }
+  async function ceMove(id, dayKey, hm){
+    if(!isAdmin) return; var q=ceFindSlot(id); if(!q) return;
+    var lock=ceLocked(q); if(lock.locked){ showBanner(lock.why+': this post can\'t be moved.'); return; }
+    var parts=String(hm).split(':').map(Number); var at=new Date(HQ.sydMidnight(dayKey)+(parts[0]*60+parts[1])*60000).toISOString();
+    ceMoving[id]=true; renderNow('content'); ceRenderSheet();
+    try{ var data=await ceInvoke('content-reschedule', {id:id, postDate:at}); Object.assign(q, {date:data.date, day:data.day, weekStart:data.weekStart, posting:data.posting||q.posting}); ceSetSheetMsg(id, 'Moved to '+ceWhenFull(at)+(data.movedInBundle?' (bundle.social updated)':'')); }
+    catch(e){ console.error('content-reschedule failed', e); showBanner('Couldn\'t move "'+(ceText(q.title)||id)+'": '+e.message); ceSetSheetMsg(id, e.message, true); }
+    ceMoving[id]=false; renderNow('content'); ceRenderSheet();
+  }
+  async function ceSaveSection(id, section){
+    var q=ceFindSlot(id), root=document.querySelector('#ceSheet [data-ce-editor]'); if(!q||!root) return;
+    var fields=ceCollectEditor(root, section, q);
+    if(typeof fields.caption==='string' && fields.caption.length>2200){ ceSetSheetMsg(id, 'Captions max out at 2,200 characters.', true); ceEdit.force=true; ceRenderSheet(); return; }
+    var btn=root.querySelector('[data-ce-save]'); if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+    try{ var data=await ceInvoke('content-update', {id:id, fields:fields}); Object.assign(q, data.saved||fields); ceEdit=null; ceSetSheetMsg(id, 'Saved'+(data.updatedInBundle?' and updated on bundle.social':'')+(data.saved&&data.saved.scriptChangedAfterEdit?'. The video was cut from the old script.':'')); }
+    catch(e){ console.error('content-update failed', e); ceSetSheetMsg(id, e.message, true); ceEdit.force=true; }
+    renderNow('content'); ceRenderSheet();
+  }
+  async function ceAdminAct(act, id, btn){
+    if(!isAdmin||!db) return; var q=ceFindSlot(id); if(!q) return; var now=ceNowIso(), patch=null, ok='';
+    if(act==='approve'){ patch={status:'approved', statusAt:now, approval:{approvedAt:now, by:currentUser&&currentUser.email||'admin'}}; ok='Approved. The pipeline schedules it within 20 minutes.'; }
+    else if(act==='fixed'){ patch={status:'filmed', statusAt:now, needsJordan:Object.assign({}, q.needsJordan||{}, {fixedAt:now})}; ok='Marked fixed; the next run retries.'; }
+    else if(act==='reedit'){ patch={reEditRequested:true, reEditRequestedAt:now}; ok='Re-edit queued.'; }
+    else if(act==='pull'){ if(!window.confirm('Pull "'+(ceText(q.title)||id)+'" from the schedule? The pipeline deletes the scheduled post'+((q.posting&&q.posting.trials||[]).length?' and its trials':'')+' within 20 minutes.')) return; patch={posting:Object.assign({}, q.posting||{}, {cancelRequested:true, cancelRequestedAt:now})}; ok='Requested, the pipeline picks it up within 20 minutes.'; }
+    else if(act==='sendfb'){
+      var scope=(btn&&btn.closest('.ce-fbbox'))||document, box=scope.querySelector('textarea.ce-fb[data-id="'+CSS.escape(id)+'"]'), partEl=scope.querySelector('select.ce-fbpart[data-id="'+CSS.escape(id)+'"]');
+      var text=box?box.value.trim():''; if(!text){ if(box) box.focus(); return; }
+      var fb=(Array.isArray(q.feedback)?q.feedback:[]).slice(); fb.push({id:(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now()), at:now, part:partEl?partEl.value:'other', text:text, resolved:false, by:currentUser&&currentUser.email||'admin'});
+      patch={feedback:fb, status:'changes_requested', statusAt:now}; ok='Sent. The pipeline reworks it within 20 minutes.'; if(box) box.value='';
+    }
+    if(!patch) return;
+    var prev={}; Object.keys(patch).forEach(function(k){ prev[k]=q[k]; }); Object.assign(q, patch); renderNow('content'); ceSetSheetMsg(id, ok); ceRenderSheet();
+    try{ await db.collection('content_queue').doc(id).update(patch); }
+    catch(e){ console.error(act+' failed', e); Object.assign(q, prev); renderNow('content'); ceSetSheetMsg(id, 'Couldn\'t save: '+(e.message||'try again'), true); ceRenderSheet(); showBanner('Couldn\'t save that change. Check you are signed in as admin and try again.'); }
+  }
+  async function ceApproveAll(){
+    var rows=(state.contentQueue||[]).filter(function(q){ return q.status==='awaiting_approval'; });
+    if(!rows.length) return; if(!window.confirm('Approve all '+rows.length+' waiting post'+(rows.length===1?'':'s')+'? The pipeline schedules them within 20 minutes.')) return;
+    for(var i=0;i<rows.length;i++) await ceAdminAct('approve', rows[i].id);
+  }
+  async function ceSetAutoPost(on){
+    if(!isAdmin||!db) return;
+    if(on && !window.confirm('Edits will be scheduled without your approval. Posts already waiting still need approving.')) return;
+    var now=ceNowIso(); state.contentPosting=Object.assign({}, state.contentPosting||{}, {autoPost:on, autoPostChangedAt:now}); renderNow('content');
+    try{ await db.doc('meta/posting').update({autoPost:on, autoPostChangedAt:now, autoPostChangedBy:currentUser&&currentUser.email||'admin'}); }
+    catch(e){ console.error('autoPost write failed', e); showBanner('Couldn\'t save the Auto post switch.'); }
+  }
   (function ceEvents(){
     var seg=$('ceViewSeg'); if(seg) seg.addEventListener('click', function(ev){ var b=ev.target.closest('button[data-ceview]'); if(b) ceSetView(b.getAttribute('data-ceview')); });
     var view=$('viewContent'), sheet=$('ceSheet');
     function onClick(ev){
       var t=ev.target;
       var wk=t.closest('[data-cewk]'); if(wk){ var d=parseInt(wk.getAttribute('data-cewk'),10); ceWeekOffset = d===0 ? 0 : ceWeekOffset+d; renderNow('content'); return; }
-      var op=t.closest('[data-ce-open]'); if(op){ ceOpenId=op.getAttribute('data-ce-open'); ceRenderSheet(); return; }
+      var cw=t.closest('[data-cecal]'); if(cw){ var d2=parseInt(cw.getAttribute('data-cecal'),10); ceCalOffset = d2===0 ? 0 : ceCalOffset+d2; renderNow('content'); return; }
+      var op=t.closest('[data-ce-open]'); if(op){ if(ceDrag.moved) return; ceOpenId=op.getAttribute('data-ce-open'); ceEdit=null; ceScrollFb=op.hasAttribute('data-ce-fb'); ceRenderSheet(); return; }
       var cp=t.closest('[data-ce-copy]'); if(cp){ ceCopy(cp, ceCopyTexts[cp.getAttribute('data-ce-copy')]); return; }
       var stb=t.closest('[data-ce-status]'); if(stb){ if(!stb.disabled) ceSetStatus(ceOpenId, stb.getAttribute('data-ce-status')); return; }
       var ia=t.closest('[data-ce-idea]'); if(ia){ ceIdeaAction(ia.getAttribute('data-id'), ia.getAttribute('data-ce-idea')); return; }
+      var gi=t.closest('[data-ce-goidea]'); if(gi){ ceOpenId=null; ceRenderSheet(); ceFilters={status:'', funnel:'', format:'', type:'', office:false}; ceSetView('ideas'); return; }
       var off=t.closest('[data-cef-office]'); if(off){ ceFilters.office=!ceFilters.office; renderNow('content'); return; }
-      var a=t.closest('[data-ce]'); if(a){ var k=a.getAttribute('data-ce'); if(k==='filming'){ ceShowFilming=!ceShowFilming; renderNow('content'); } else if(k==='close'){ ceOpenId=null; ceRenderSheet(); } else if(k==='approve-core'){ ceApproveCore(); } }
+      var st=t.closest('[data-celf]'); if(st){ var v=st.getAttribute('data-celf'); ceLib.status = ceLib.status===v ? '' : v; renderNow('content'); var lists=$('ceLibLists'); if(lists&&ceLib.status) lists.scrollIntoView({behavior:'smooth', block:'start'}); return; }
+      var ed=t.closest('[data-ce-edit]'); if(ed){ ceEdit={id:ceOpenId, section:ed.getAttribute('data-ce-edit'), force:true}; ceRenderSheet(); return; }
+      var sv=t.closest('[data-ce-save]'); if(sv){ ceSaveSection(ceOpenId, sv.getAttribute('data-ce-save')); return; }
+      var cn=t.closest('[data-ce-cancel]'); if(cn){ ceEdit=null; ceRenderSheet(); return; }
+      var li=t.closest('[data-ce-li]'); if(li){ var kind=li.getAttribute('data-ce-li'), box=li.closest('[data-ce-editor]'), listEl=box&&box.querySelector('[data-ce-list]'); if(!listEl) return; if(kind==='add'){ var tmpl=listEl.querySelector('.li'); var n=tmpl.cloneNode(true); n.querySelector('input').value=''; listEl.appendChild(n); n.querySelector('input').focus(); } else { var row=li.closest('.li'); if(kind==='del'){ if(listEl.querySelectorAll('.li').length>1) row.remove(); else row.querySelector('input').value=''; } else if(kind==='up'&&row.previousElementSibling) listEl.insertBefore(row, row.previousElementSibling); else if(kind==='down'&&row.nextElementSibling) listEl.insertBefore(row.nextElementSibling, row); } return; }
+      var ac=t.closest('[data-ce-act]'); if(ac){ ceAdminAct(ac.getAttribute('data-ce-act'), ac.getAttribute('data-id'), ac); return; }
+      var aa=t.closest('[data-ce-approveall]'); if(aa){ ceApproveAll(); return; }
+      var ap=t.closest('[data-ce-autopost]'); if(ap){ ceSetAutoPost(ap.getAttribute('data-ce-autopost')==='on'); return; }
+      var ru=t.closest('[data-ce-rules]'); if(ru){ ceRulesOpen=!ceRulesOpen; renderNow('content'); return; }
+      var a=t.closest('[data-ce]'); if(a){ var k=a.getAttribute('data-ce'); if(k==='filming'){ ceShowFilming=!ceShowFilming; renderNow('content'); } else if(k==='close'){ ceOpenId=null; ceEdit=null; ceRenderSheet(); } else if(k==='approve-core'){ ceApproveCore(); } }
     }
-    if(view){ view.addEventListener('click', onClick); view.addEventListener('change', function(ev){ var s=ev.target.closest('select[data-cef]'); if(!s) return; ceFilters[s.getAttribute('data-cef')]=s.value; renderNow('content'); }); }
-    if(sheet){ sheet.addEventListener('click', function(ev){ if(ev.target===sheet){ ceOpenId=null; ceRenderSheet(); return; } onClick(ev); }); document.addEventListener('keydown', function(ev){ if(ev.key==='Escape' && ceOpenId){ ceOpenId=null; ceRenderSheet(); } }); }
+    function onChange(ev){
+      var s=ev.target.closest('select[data-cef]'); if(s){ ceFilters[s.getAttribute('data-cef')]=s.value; renderNow('content'); return; }
+      var lf=ev.target.closest('[data-celib]'); if(lf){ ceLib[lf.getAttribute('data-celib')]=lf.value; renderNow('content'); return; }
+      var tm=ev.target.closest('select[data-ce-time]'); if(tm){ var id=tm.getAttribute('data-ce-time'), q=ceFindSlot(id); if(!q) return; var at=cePostAtMs(q), day=HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):HQ.sydNow().key); ceMove(id, day, tm.value); return; }
+      var md=ev.target.closest('select[data-ce-moveday]'); if(md){ var id2=md.getAttribute('data-ce-moveday'), q2=ceFindSlot(id2); if(!q2||!md.value) return; var at2=cePostAtMs(q2), hm=at2?HQ.pad(HQ.sydParts(at2).h)+':'+HQ.pad(HQ.sydParts(at2).min):(ceSlotTimes()[ceSlotKey(q2)]||'19:00'); ceMove(id2, md.value, hm); return; }
+    }
+    function onInput(ev){
+      var cnt=ev.target.closest('[data-ce-count]'); if(cnt){ var out=cnt.parentElement.querySelector('[data-ce-countout]'); var max=+cnt.getAttribute('data-ce-count'); if(out){ out.textContent=cnt.value.length.toLocaleString('en-AU')+' / '+max.toLocaleString('en-AU'); out.classList.toggle('over', cnt.value.length>max); } return; }
+      var vol=ev.target.closest('[data-ce-f="volume"]'); if(vol){ var o=vol.parentElement.querySelector('[data-ce-volout]'); if(o) o.textContent=vol.value; return; }
+      var qq=ev.target.closest('#ceLibQ'); if(qq){ clearTimeout(ceLib._t); ceLib._t=setTimeout(function(){ ceLib.q=qq.value; ceLib.focusQ=true; renderNow('content'); }, 250); }
+    }
+    if(view){ view.addEventListener('click', onClick); view.addEventListener('change', onChange); view.addEventListener('input', onInput); }
+    if(sheet){ sheet.addEventListener('click', function(ev){ if(ev.target===sheet){ if(ceEdit){ ceEdit=null; ceRenderSheet(); return; } ceOpenId=null; ceRenderSheet(); return; } onClick(ev); }); sheet.addEventListener('change', onChange); sheet.addEventListener('input', onInput);
+      document.addEventListener('keydown', function(ev){ if(ev.key==='Escape' && ceOpenId){ if(ceEdit){ ceEdit=null; ceRenderSheet(); } else { ceOpenId=null; ceRenderSheet(); } } }); }
+    // drag to another day: mouse drags after 6 px; touch needs a 350 ms long-press first so the page still scrolls
+    if(view){
+      view.addEventListener('pointerdown', function(ev){
+        var card=ev.target.closest('.ce-cal-card[data-ce-drag]'); if(!card || !isAdmin) return; if(ev.target.closest('select,button,a,input')) return;
+        ceDrag={id:card.getAttribute('data-ce-drag'), card:card, x0:ev.clientX, y0:ev.clientY, pointerId:ev.pointerId, touch:ev.pointerType!=='mouse', armed:ev.pointerType==='mouse', moved:false, ghost:null, over:null};
+        if(ceDrag.touch) ceDrag.timer=setTimeout(function(){ if(ceDrag.card===card){ ceDrag.armed=true; try{ card.setPointerCapture(ev.pointerId); }catch(e){} card.classList.add('drag'); if(navigator.vibrate) navigator.vibrate(10); } }, 350);
+      });
+      view.addEventListener('pointermove', function(ev){
+        if(!ceDrag.card || ev.pointerId!==ceDrag.pointerId) return;
+        var dx=ev.clientX-ceDrag.x0, dy=ev.clientY-ceDrag.y0;
+        if(!ceDrag.armed){ if(Math.hypot(dx,dy)>10) ceDragEnd(false); return; }
+        if(!ceDrag.moved && Math.hypot(dx,dy)<6) return;
+        if(!ceDrag.moved){ ceDrag.moved=true; try{ ceDrag.card.setPointerCapture(ev.pointerId); }catch(e){} var g=ceDrag.card.cloneNode(true); g.classList.add('ce-ghost'); g.removeAttribute('data-ce-drag'); document.body.appendChild(g); ceDrag.ghost=g; ceDrag.card.classList.add('moving'); }
+        if(ceDrag.ghost){ ceDrag.ghost.style.left=(ev.clientX-80)+'px'; ceDrag.ghost.style.top=(ev.clientY-20)+'px'; }
+        ev.preventDefault();
+        var under=document.elementFromPoint(ev.clientX, ev.clientY), day=under&&under.closest('.ce-cal-day[data-day]');
+        if(ceDrag.over&&ceDrag.over!==day) ceDrag.over.classList.remove('over');
+        if(day){ day.classList.add('over'); } ceDrag.over=day||null;
+      }, {passive:false});
+      var up=function(ev){ if(!ceDrag.card || (ev.pointerId!=null && ev.pointerId!==ceDrag.pointerId)) return; ceDragEnd(true, ev); };
+      view.addEventListener('pointerup', up); view.addEventListener('pointercancel', function(){ ceDragEnd(false); });
+    }
   })();
+  var ceDrag={};
+  function ceDragEnd(drop, ev){
+    var d=ceDrag; ceDrag={moved:d.moved}; setTimeout(function(){ ceDrag.moved=false; }, 50);
+    if(d.timer) clearTimeout(d.timer);
+    if(d.ghost) d.ghost.remove(); if(d.over) d.over.classList.remove('over');
+    if(d.card){ d.card.classList.remove('drag'); d.card.classList.remove('moving'); }
+    if(drop && d.moved && d.over){ var day=d.over.getAttribute('data-day'), q=ceFindSlot(d.id); if(q && day && day!==(HQ.isDayKey(q.date)?q.date:null)){ var at=cePostAtMs(q), hm=at?HQ.pad(HQ.sydParts(at).h)+':'+HQ.pad(HQ.sydParts(at).min):(ceSlotTimes()[ceSlotKey(q)]||'19:00'); ceMove(d.id, day, hm); } }
+  }
+
+  /* --- Library: pipeline strip, auto post, waiting for you, calendar, up next, posted, the rest --- */
+  function cePosted(q){ var ps=q.posting&&q.posting.status; return q.status==='posted' || ps==='posted'; }
+  function ceLocked(q){ var ps=q.posting&&q.posting.status; if(q.status==='posted'||['posted','posting','publishing'].indexOf(ps)>=0) return {locked:true, why:'Posted'}; var at=cePostAtMs(q); if(ps==='scheduled' && at && at-Date.now()<5*60000) return {locked:true, why:'Posting now'}; return {locked:false}; }
+  function ceSlotTimes(){ var p=state.contentPosting||{}; return Object.assign({high:'19:00', low:'12:00', carousel:'07:30', trialSpacingMin:90}, p.slotTimes||{}); }
+  function cePostAtMs(q){ var p=q.posting||{}; if(p.scheduledFor&&HQ.parseTs(p.scheduledFor)!=null) return HQ.parseTs(p.scheduledFor); if(p.plannedFor&&HQ.parseTs(p.plannedFor)!=null) return HQ.parseTs(p.plannedFor); if(HQ.isDayKey(q.date)){ var hm=ceSlotTimes()[ceSlotKey(q)]; if(hm){ var pr=hm.split(':').map(Number); return HQ.sydMidnight(q.date)+(pr[0]*60+pr[1])*60000; } } return null; }
+  function ceHasTime(q){ var p=q.posting||{}; return !!(p.scheduledFor||p.plannedFor); }
+  function cePlatforms(q){ var p=q.posting||{}; var list=Array.isArray(p.platforms)&&p.platforms.length?p.platforms:['INSTAGRAM','TIKTOK','YOUTUBE']; return list.map(function(x){ return String(x).toUpperCase(); }); }
+  function cePlatformChips(q){ return cePlatforms(q).map(function(pl){ return '<span class="chip grey">'+esc(CE_PLATFORM_SHORT[pl]||pl)+'</span>'; }).join(''); }
+  function ceWhenFull(when){ var t=HQ.parseTs(when); if(t==null) return '–'; var k=HQ.sydDay(t), today=HQ.sydNow().key, lbl = k===today?'Today':(k===HQ.addDays(today,1)?'Tomorrow':(k===HQ.addDays(today,-1)?'Yesterday':HQ.fmtDay(k,'wd'))); return lbl+' '+HQ.fmtTime(t); }
+  function ceWhenShort(when){ var t=HQ.parseTs(when); if(t==null) return '– no time'; var k=HQ.sydDay(t), today=HQ.sydNow().key, p=HQ.sydParts(t); var lbl = k===today?(p.h>=17?'Tonight':'Today'):(k===HQ.addDays(today,1)?'Tomorrow':HQ.fmtDay(k,'wd')); var ms=t-Date.now(), cd=''; if(ms>0&&ms<24*3600000){ var h=Math.floor(ms/3600000), m=Math.round((ms%3600000)/60000); cd='in '+(h?h+'h ':'')+m+'m'; } return {label:lbl+' '+HQ.fmtTime(t), countdown:cd}; }
+  function ceThumb(q){ var v=q.video||{}; return v.thumbnailUrl ? '<img class="ce-thumb" src="'+esc(v.thumbnailUrl)+'" alt="" loading="lazy">' : '<div class="ce-thumb ph">'+(q.status==='to_film'?'not filmed':(q.status==='filmed'||q.status==='editing'?'edit pending':'no thumbnail'))+'</div>'; }
+  function ceSoundLabel(snd){ if(!snd) return '– sound not chosen yet'; if(!snd.id) return esc(snd.title||'No music'); return (snd.title||snd.id)+' · music '+(HQ.isNum(snd.musicSoundVolume)?snd.musicSoundVolume:'–')+' / voice '+(HQ.isNum(snd.videoOriginalSoundVolume)?snd.videoOriginalSoundVolume:'–'); }
+  function ceTimeOptions(cur){ var out='<option value="">Time…</option><optgroup label="Quick">'+CE_QUICK.map(function(h){ return '<option value="'+h+'"'+(h===cur?' selected':'')+'>'+esc(ceHmLabel(h))+'</option>'; }).join('')+'</optgroup><optgroup label="6:00am – 11:45pm">'; for(var m=6*60;m<=23*60+45;m+=15){ var h=HQ.pad(Math.floor(m/60))+':'+HQ.pad(m%60); out+='<option value="'+h+'"'+(h===cur&&CE_QUICK.indexOf(h)<0?' selected':'')+'>'+esc(ceHmLabel(h))+'</option>'; } return out+'</optgroup>'; }
+  function ceHmLabel(hm){ var p=hm.split(':').map(Number), h12=p[0]%12||12; return h12+':'+HQ.pad(p[1])+(p[0]>=12?'pm':'am'); }
+  function ceDayOptions(cur){ var today=HQ.sydNow().key, out='<option value="">Move to…</option>'; for(var i=0;i<21;i++){ var k=HQ.addDays(today,i); out+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':HQ.fmtDay(k,'wd')))+'</option>'; } return out; }
+  function ceLibCard(q, opts){
+    opts=opts||{}; var w=ceWhenShort(cePostAtMs(q)), cap=ceText(q.caption).split('\n').filter(Boolean)[0]||'', trials=(q.posting&&q.posting.trials||[]).length;
+    return '<div class="ce-row">'+ceThumb(q)+'<div class="main"><button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="when">'+esc(w.label)+(w.countdown?'<small>'+esc(w.countdown)+'</small>':'')+'</span><span class="ce-chips">'+cePlatformChips(q)+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+'</span><span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span>'+(cap?'<span class="ce-meta">'+esc(cap.slice(0,140))+(cap.length>140?'…':'')+'</span>':'')+'<span class="ce-meta">'+esc(ceSoundLabel(q.sound))+(trials?' · '+trials+' trial'+(trials===1?'':'s'):'')+(q.sourceIdea?' · from idea':'')+'</span>'+(opts.extra||'')+'</button></div></div>';
+  }
+  function ceRenderLibrary(){
+    var st=ceLoadState('contentQueue');
+    if(st!=='ok'){ setText('ceSub', st==='loading'?'Loading…':'Sync error'); return '<div class="panel"><h2>Library</h2>'+ceStateBox(st,'the content library')+'</div>'; }
+    var rows=(state.contentQueue||[]).slice(), posting=state.contentPosting||{}, ap=state.contentAutopost||{}, now=Date.now();
+    var count=function(f){ return rows.filter(f).length; };
+    var stages=CE_STATUS.map(function(s){ return {s:s, n:count(function(q){ return (q.status||'to_film')===s; })}; });
+    var nj=count(function(q){ return q.status==='needs_jordan'; }), er=count(function(q){ return q.status==='error' || (q.posting&&q.posting.status==='error'); });
+    setText('ceSub', rows.length+' posts · '+stages[6].n+' scheduled · '+stages[7].n+' posted'+(nj?' · '+nj+' need you':''));
+    var html='';
+    // auto post + last run
+    html+='<div class="panel"><div class="ce-auto">'+(isAdmin?'<button type="button" class="ce-toggle '+(posting.autoPost===true?'on':'off')+'" data-ce-autopost="'+(posting.autoPost===true?'off':'on')+'" aria-pressed="'+(posting.autoPost===true?'true':'false')+'"><span class="knob" aria-hidden="true"></span>'+(posting.autoPost===true?'Auto post: ON':'Auto post: OFF – I approve each post')+'</button>':'<span class="chip '+(posting.autoPost===true?'good':'warn')+'">'+(posting.autoPost===true?'Auto post: ON':'Auto post: OFF – Jordan approves each post')+'</span>')+
+      '<span class="f-note">'+(state.contentMetaLoaded.autopost ? (ap.lastRunAt ? 'Pipeline ran '+esc(relTime(ap.lastRunAt)||'')+' · '+(ap.ok===false?'<b style="color:var(--crit)">failed</b>':'ok')+(ap.note?' · '+esc(ceText(ap.note)):'') : 'Pipeline has not run yet (no meta/autopost record).') : 'Loading the pipeline record…')+'</span></div>';
+    html+='<div class="ce-strip">'+stages.map(function(x,i){ return (i?'<span class="arrow">→</span>':'')+'<button type="button" class="ce-stage'+(x.n?'':' zero')+'" data-celf="'+x.s+'" aria-pressed="'+(ceLib.status===x.s?'true':'false')+'"><b>'+x.n+'</b>'+esc(CE_STATUS_LABEL[x.s])+'</button>'; }).join('')+
+      '<span class="arrow"> </span><button type="button" class="ce-stage red'+(nj?'':' zero')+'" data-celf="needs_jordan" aria-pressed="'+(ceLib.status==='needs_jordan'?'true':'false')+'"><b>'+nj+'</b>Needs Jordan</button><button type="button" class="ce-stage red'+(er?'':' zero')+'" data-celf="error" aria-pressed="'+(ceLib.status==='error'?'true':'false')+'"><b>'+er+'</b>Errors</button></div></div>';
+    // needs jordan
+    var njRows=rows.filter(function(q){ return q.status==='needs_jordan'; }).sort(function(a,b){ return (HQ.parseTs(b.statusAt)||0)-(HQ.parseTs(a.statusAt)||0); });
+    if(njRows.length) html+='<div class="panel" style="border-color:var(--crit)"><h2 style="color:var(--crit)">Needs you · '+njRows.length+'</h2><p class="rule">The pipeline stopped on these. Fix the cause, then mark it fixed and the next run retries.</p><div class="ce-list">'+njRows.map(function(q){ return ceLibCard(q, {extra:'<span class="ce-note">'+esc(ceText(q.needsJordan&&q.needsJordan.reason)||'no reason recorded')+'</span>'}); }).join('')+'</div></div>';
+    // waiting for you
+    var wait=rows.filter(function(q){ return q.status==='awaiting_approval'; }).sort(function(a,b){ return (cePostAtMs(a)||9e15)-(cePostAtMs(b)||9e15); });
+    if(wait.length){
+      html+='<div class="panel" style="border-color:var(--warn)"><div class="chart-head"><div><h2>Waiting for you · '+wait.length+'</h2><p class="rule" style="margin-top:4px">Watch the edit, then approve or ask for changes. Approved posts are scheduled within 20 minutes.</p></div>'+(isAdmin&&wait.length>1?'<button type="button" class="btn" data-ce-approveall>Approve all</button>':'')+'</div><div class="ce-list">'+wait.map(function(q){
+        var v=q.video||{}, at=cePostAtMs(q), hmStr=at?HQ.pad(HQ.sydParts(at).h)+':'+HQ.pad(HQ.sydParts(at).min):null;
+        return '<div class="ce-wait"><div>'+(v.previewUrl?'<video class="ce-video" controls playsinline preload="metadata"'+(v.thumbnailUrl?' poster="'+esc(v.thumbnailUrl)+'"':'')+' src="'+esc(v.previewUrl)+'"></video>':'<div class="ce-thumb ph" style="width:100%;max-width:200px;height:200px">no preview uploaded yet</div>')+'</div><div class="side"><button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="ce-chips">'+cePlatformChips(q)+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+'</span><span class="ttl" style="font-weight:700">'+esc(ceText(q.title)||'Untitled slot')+'</span></button>'+
+          '<div class="ce-fbrow"><span class="when" style="font-family:Anton,Impact,sans-serif;font-size:18px">'+esc(ceWhenShort(at).label)+'</span>'+(isAdmin?'<select class="input" data-ce-time="'+esc(q.id)+'" aria-label="Time">'+ceTimeOptions(hmStr)+'</select>':'')+(ceMoving[q.id]?'<span class="ce-spin"></span>':'')+'</div>'+
+          '<div class="ce-txt" style="max-height:150px;overflow:auto">'+esc(ceText(q.caption)||'– caption not written yet')+'</div><div class="ce-meta">'+esc(ceSoundLabel(q.sound))+'</div>'+
+          (isAdmin?'<div class="ce-big"><button type="button" class="btn primary" data-ce-act="approve" data-id="'+esc(q.id)+'">✓ Approve</button><button type="button" class="btn" data-ce-open="'+esc(q.id)+'" data-ce-fb>Request changes</button></div>'+ceFeedbackBox(q.id):'')+'</div></div>';
+      }).join('')+'</div></div>';
+    }
+    html+=ceRenderCalendar(rows);
+    // filters
+    var formats=[]; rows.forEach(function(q){ var f=ceText(q.format); if(f&&formats.indexOf(f)<0) formats.push(f); }); formats.sort();
+    var sel=function(name, opts, cur, label){ return '<select class="input" data-celib="'+name+'" aria-label="'+esc(label)+'">'+opts.map(function(o){ return '<option value="'+esc(o[0])+'"'+(o[0]===cur?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('')+'</select>'; };
+    var statusOpts=[['','All statuses']].concat(CE_STATUS.concat(CE_SIDE).map(function(x){ return [x, CE_STATUS_LABEL[x]]; }));
+    html+='<div class="panel" id="ceLibLists"><h2>All posts</h2><div class="ce-libfilters">'+sel('status',statusOpts,ceLib.status,'Status')+sel('platform',[['','All platforms'],['INSTAGRAM','Instagram'],['TIKTOK','TikTok'],['YOUTUBE','YouTube'],['LINKEDIN','LinkedIn']],ceLib.platform,'Platform')+sel('format',[['','All formats']].concat(formats.map(function(x){ return [x,x]; })),ceLib.format,'Format')+sel('funnel',[['','All funnels'],['TOF','TOF'],['MOF','MOF'],['BOF','BOF']],ceLib.funnel,'Funnel')+'<input class="input" type="date" data-celib="from" value="'+esc(ceLib.from)+'" aria-label="From"><input class="input" type="date" data-celib="to" value="'+esc(ceLib.to)+'" aria-label="To"><input class="input" type="search" id="ceLibQ" value="'+esc(ceLib.q)+'" placeholder="Search title, caption, script" aria-label="Search" style="flex:1;min-width:160px"></div>';
+    var f=ceLib, ql=f.q.trim().toLowerCase();
+    var shown=rows.filter(function(q){
+      if(f.status && !((q.status||'to_film')===f.status || (f.status==='error'&&q.posting&&q.posting.status==='error'))) return false;
+      if(f.platform && cePlatforms(q).indexOf(f.platform)<0) return false;
+      if(f.format && ceText(q.format)!==f.format) return false;
+      if(f.funnel && ceFunnel(q.funnel)!==f.funnel) return false;
+      var day=HQ.isDayKey(q.date)?q.date:(cePostAtMs(q)?HQ.sydDay(cePostAtMs(q)):null);
+      if(f.from && (!day || day<f.from)) return false; if(f.to && (!day || day>f.to)) return false;
+      if(ql){ var hay=[q.title,q.caption,q.ending,q.linkedin].concat(q.hooks||[],q.body||[],q.slides||[]).map(ceText).join(' ').toLowerCase(); if(hay.indexOf(ql)<0) return false; }
+      return true;
+    });
+    var filtered=!!(f.status||f.platform||f.format||f.funnel||f.from||f.to||ql);
+    html+='<div class="f-note">'+shown.length+' of '+rows.length+(filtered?' (filtered)':'')+'</div>';
+    // up next
+    var next=shown.filter(function(q){ return q.posting&&q.posting.status==='scheduled'&&!cePosted(q); }).sort(function(a,b){ return (cePostAtMs(a)||9e15)-(cePostAtMs(b)||9e15); });
+    html+='<h3>Up next · '+next.length+'</h3>';
+    if(!next.length) html+='<div class="empty-state">Nothing scheduled'+(filtered?' in this filter':'')+'. Approved posts are scheduled by the pipeline within 20 minutes.</div>';
+    else { var byDay={}, order=[]; next.forEach(function(q){ var k=HQ.sydDay(cePostAtMs(q))||'none'; if(!byDay[k]){ byDay[k]=[]; order.push(k); } byDay[k].push(q); }); html+=order.map(function(k){ return '<div class="ce-daygroup"><h3 class="small">'+esc(k==='none'?'No day':(k===HQ.sydNow().key?'Today · ':'')+HQ.fmtDay(k,'wd'))+'</h3><div class="ce-list">'+byDay[k].map(function(q){ return ceLibCard(q); }).join('')+'</div></div>'; }).join(''); }
+    // posted
+    var postedRows=shown.filter(cePosted).sort(function(a,b){ return (HQ.parseTs(b.posting&&b.posting.postedAt||b.statusAt)||0)-(HQ.parseTs(a.posting&&a.posting.postedAt||a.statusAt)||0); });
+    html+='<h3>Posted · '+postedRows.length+'</h3>';
+    if(!postedRows.length) html+='<div class="empty-state">Nothing posted'+(filtered?' in this filter':' yet')+'.</div>';
+    else html+='<div class="ce-list">'+postedRows.map(function(q){ var m=q.metrics||{}, links=(q.posting&&q.posting.permalinks)||{}; var link=links.instagram||ceLink(q.postedShortcode,null); return ceLibCard(q, {extra:'<span class="ce-metrics2">'+(m.at24h?'24h: '+esc(ceMetricsLine(m.at24h)):'24h: –')+' · '+(m.at7d?'7d: '+esc(ceMetricsLine(m.at7d)):'7d: –')+'</span>'})+(link?'<div class="f-note" style="margin-top:-4px"><a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">Open post ↗</a></div>':''); }).join('')+'</div>';
+    // everything else
+    var rest=shown.filter(function(q){ return !cePosted(q) && !(q.posting&&q.posting.status==='scheduled') && q.status!=='awaiting_approval' && q.status!=='needs_jordan'; }).sort(function(a,b){ return String(a.date||'9999').localeCompare(String(b.date||'9999')) || ceSlotOrder(a)-ceSlotOrder(b); });
+    html+='<h3>To film, filmed, editing, edited · '+rest.length+'</h3>';
+    if(!rest.length) html+='<div class="empty-state">Nothing else'+(filtered?' in this filter':'')+'.</div>';
+    else html+='<div class="ce-list">'+rest.map(function(q){ return ceLibCard(q); }).join('')+'</div>';
+    html+='</div>';
+    // rules learned
+    var learn=Array.isArray(ap.learnings)?ap.learnings.slice().reverse():[];
+    html+='<div class="panel ce-rules"><button type="button" class="ce-open" data-ce-rules aria-expanded="'+(ceRulesOpen?'true':'false')+'"><span style="font-weight:700;font-size:var(--t-s)">'+(ceRulesOpen?'▾':'▸')+' Rules the editor has learned · '+learn.length+'</span></button>'+(ceRulesOpen?(learn.length?'<ul>'+learn.map(function(l){ return '<li>'+esc(ceText(l.rule))+' <span class="muted">· '+esc(relTime(l.at)||'')+(l.fromRowId?' · from '+esc(l.fromRowId):'')+'</span></li>'; }).join('')+'</ul>':'<div class="empty-state">No rules yet. Feedback that reads as a general rule lands here and in PREFERENCES.md.</div>'):'')+'</div>';
+    return html;
+  }
+  function ceRenderCalendar(rows){
+    var today=HQ.sydNow().key, ws=HQ.addDays(HQ.weekStart(today), ceCalOffset*7), we=HQ.addDays(ws,6), days=HQ.dayRange(ws,we);
+    var inWeek=rows.filter(function(q){ var at=cePostAtMs(q); var k=HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):null); return k && k>=ws && k<=we; });
+    var noTime=inWeek.filter(function(q){ return !ceHasTime(q) && !cePosted(q); });
+    var html='<div class="panel"><div class="chart-head"><div><h2>Calendar · '+esc(HQ.fmtDay(ws,'short'))+' – '+esc(HQ.fmtDay(we,'short'))+'</h2><p class="rule" style="margin-top:4px">'+(isAdmin?'Drag a card to another day (hold, then drag, on a phone) or use Move to… and the time dropdown. Moves update bundle.social straight away.':'Sydney days. Only the admin can move posts.')+'</p></div><div class="range" role="group" aria-label="Week"><button type="button" data-cecal="-1">← Prev</button><button type="button" data-cecal="0" aria-pressed="'+(ceCalOffset===0?'true':'false')+'">This week</button><button type="button" data-cecal="1">Next →</button></div></div>';
+    html+='<div class="ce-cal">'+days.map(function(d){
+      var mine=inWeek.filter(function(q){ var at=cePostAtMs(q); return at && (ceHasTime(q)||cePosted(q)) && HQ.sydDay(at)===d; }).sort(function(a,b){ return cePostAtMs(a)-cePostAtMs(b); });
+      return '<div class="ce-cal-day" data-day="'+d+'"><div class="dh"><span>'+esc(HQ.DAYN[HQ.dowOf(d)].slice(0,3))+(d===today?'<i class="ce-dot" aria-hidden="true"></i>':'')+'</span><span>'+esc(HQ.fmtDay(d,'short'))+'</span></div>'+(mine.length?mine.map(ceCalCard).join(''):'<div class="ce-empty">–</div>')+'</div>';
+    }).join('')+'</div>';
+    if(noTime.length) html+='<div class="ce-notime"><span class="ce-k">No time yet · '+noTime.length+'</span><div class="f-note" style="margin-bottom:6px">Slots without a planned time. Pick a day and time to plan one; the pipeline otherwise uses the slot default ('+esc(ceHmLabel(ceSlotTimes().high))+' high, '+esc(ceHmLabel(ceSlotTimes().low))+' low, '+esc(ceHmLabel(ceSlotTimes().carousel))+' carousel).</div><div class="ce-cal">'+noTime.map(ceCalCard).join('')+'</div></div>';
+    return html+'</div>';
+  }
+  function ceCalCard(q){
+    var at=cePostAtMs(q), lock=ceLocked(q), canMove=isAdmin&&!lock.locked, hasTime=ceHasTime(q)||cePosted(q), hmStr=at&&hasTime?HQ.pad(HQ.sydParts(at).h)+':'+HQ.pad(HQ.sydParts(at).min):null;
+    return '<div class="ce-cal-card'+(ceMoving[q.id]?' moving':'')+(canMove&&hasTime?' drag':'')+'"'+(canMove&&hasTime?' data-ce-drag="'+esc(q.id)+'"':'')+'>'+
+      '<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="t">'+(hasTime&&at?esc(HQ.fmtTime(at)):'–')+(ceMoving[q.id]?' <span class="ce-spin"></span>':'')+'</span>'+(lock.locked?'<span class="lock">'+esc(lock.why)+'</span>':(!hasTime?'<span class="lock">'+esc(HQ.isDayKey(q.date)?HQ.fmtDay(q.date,'wd'):'no day')+' · no time yet</span>':''))+'</button>'+
+      '<div class="row">'+ceThumb(q)+'<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span><span class="ce-chips">'+cePlatformChips(q)+'</span><span class="ce-chips">'+ceStatusChip(q.status,q)+'</span></button></div>'+
+      (canMove?'<select class="input" data-ce-time="'+esc(q.id)+'" aria-label="Time">'+ceTimeOptions(hmStr)+'</select><select class="input" data-ce-moveday="'+esc(q.id)+'" aria-label="Move to day">'+ceDayOptions(HQ.isDayKey(q.date)?q.date:null)+'</select>':'')+'</div>';
+  }
 
   /* ---------- data layer ---------- */
   function subscribe(){
@@ -2616,6 +3032,9 @@ body{padding:0;}
     doc('meta/contentScan', 'content', function(d){ state.contentScan=d; state.contentMetaLoaded.scan=true; });
     doc('meta/contentReview', 'content', function(d){ state.contentReview=d; state.contentMetaLoaded.review=true; });
     doc('meta/contentBatch', 'content', function(d){ state.contentBatch=d; state.contentMetaLoaded.batch=true; });
+    sub(db.collection('content_sounds').limit(200), 'content', 'contentSounds');
+    doc('meta/autopost', 'content', function(d){ state.contentAutopost=d; state.contentMetaLoaded.autopost=true; });
+    doc('meta/posting', 'content', function(d){ state.contentPosting=d; state.contentMetaLoaded.posting=true; });
     doc('meta/goal', 'meta', function(d){ state.goal=d; });
     doc('meta/ghlSync', 'meta', function(d){ state.ghlMeta=d; });
     doc('meta/routineCalls', 'meta', function(d){ state.routineCalls=d; });
@@ -2682,6 +3101,7 @@ body{padding:0;}
     isAdmin = !!(profile && profile.role==='admin');
     currentUser = user ? { email:user.email, firstName: (profile && profile.display_name) ? String(profile.display_name).split(/\s+/)[0] : (user.email && /^jordan/i.test(user.email) ? 'Jordan' : null) } : null;
     $('tabStripe').hidden = !isAdmin; var ss=$('sheetStripe'); if(ss) ss.hidden=!isAdmin; var gb=$('sbGroupBusiness'); if(gb) gb.hidden=!isAdmin;
+    supaClient = client;
     try{ db = makeSupabaseDb(client); }catch(e){ db=null; }
     if(!db){ showBanner("Live sync isn't available in this view, so changes here won't be saved."); setView(currentView, false); return; }
     subscribe();

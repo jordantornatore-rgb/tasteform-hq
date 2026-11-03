@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.4.0 — 3 Nov 2026 (Content Library + autopost pipeline hooks)
+
+- Content Engine: new default **Library** view (pipeline strip with live counts, Needs you, Waiting for you with inline previews + Approve / Approve all / Request changes, Mon–Sun calendar with drag-to-move, Move to… and 15-minute time dropdowns through `content-reschedule`, Up next, Posted with 24 h / 7 d metrics, filters + search, rules the editor has learned). Auto post switch (`meta/posting.autoPost`).
+- Post sheet: video preview, timeline, schedule controls, feedback thread, every section editable through `content-update` (caption count / 2,200, hooks reorder, sound from `content_sounds`, platforms before scheduling), Pull from schedule, Mark fixed, Re-edit video.
+- Statuses extended to `to_film, filmed, editing, edited, awaiting_approval, approved, scheduled, posted` + side states `changes_requested, needs_jordan, error, skipped, cancelled`.
+- `supabase/functions/content-pipeline`: data door for the Mac Mini pipeline (deploy pending).
+
 ## 2.3.0 — 3 Nov 2026 (Content Engine tab)
 
 - New **Content Engine** tab (Growth group; phone → More) with four views: **This week** (Mon–Sun board of `content_queue`, progress out of 18, filming list by location, script sheet with copy buttons and a status stepper that merges only `status` + `statusAt`), **Idea Bank** (`content_ideas` newest first, filters, Skip / Use next week), **Performance** (`meta/contentReview`: top/bottom 3, format leaderboard, hook style, angle, test-month countdown, "Approve these 5" → `meta/contentScan.coreFormats`) and **Scanner** (watchlist + last run). Admin-only writes, Sydney dates, `–` with a reason for anything missing. See `CONTENT_ENGINE.md`.
