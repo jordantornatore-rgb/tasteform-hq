@@ -201,5 +201,36 @@ test('edge cases: null fields, missing plan, no dates, very long captions', () =
   assert.strictEqual(HQ.stageLabel({ stage: 'nope' }), 'Opener sent');
 });
 
+// ---- Email sequences ----
+test('email stats count distinct contacts, only among people sent that email', () => {
+  const steps = [
+    { id: 's1', order: 1, sequence: 'a', delayDays: 0 }, { id: 's2', order: 2, sequence: 'a', delayDays: 2 }, { id: 's3', order: 3, sequence: 'a', delayDays: 2 }];
+  const T0 = '2026-11-04T00:00:00Z', T1 = '2026-11-05T00:00:00Z';
+  const ev = [
+    { contactId: 'c1', step: 's1', event: 'enrolled', at: T0, tags: ['recipe: hsp', 'country: au', 'vip'] },
+    { contactId: 'c1', step: 's1', event: 'sent', at: T0, tags: ['recipe: hsp', 'country: au'] },
+    { contactId: 'c1', step: 's1', event: 'opened', at: T0, count: 3 },
+    { contactId: 'c2', step: 's1', event: 'enrolled', at: T0, tags: ['recipe: wrap', 'country: uk'] },
+    { contactId: 'c2', step: 's1', event: 'sent', at: T0 },
+    { contactId: 'c2', step: 's1', event: 'replied', at: T1 },
+    { contactId: 'c3', step: 's1', event: 'enrolled', at: T1 },
+    { contactId: 'c4', step: 's1', event: 'opened', at: T1 }, // opened with no sent row: ignored
+    { contactId: 'c5', step: 's1', event: 'enrolled', at: T0 }, { contactId: 'c5', step: 's1', event: 'sent', at: T0 }, { contactId: 'c5', step: 's1', event: 'unsubscribed', at: T0 }];
+  const NOW = Date.parse('2026-11-06T12:00:00Z');
+  const r = HQ.emailStats(steps, ev, NOW);
+  const p1 = r.perStep[0];
+  assert.strictEqual(p1.sent, 3); assert.strictEqual(p1.opened, 1); assert.strictEqual(p1.replied, 1); assert.strictEqual(p1.unsubscribed, 1);
+  assert.strictEqual(p1.openRate, 33); assert.strictEqual(p1.replyRate, 33);
+  assert.strictEqual(r.perStep[1].sent, 0); assert.strictEqual(r.perStep[1].replyRate, null);
+  // up next: c3 enrolled, nothing sent -> s1 due now; c1 sent s1 at T0, s2 due T0+2d (<= NOW); c2 replied, c5 unsubscribed -> out
+  assert.strictEqual(r.upNext[0].dueNow, 1); assert.strictEqual(r.upNext[1].dueNow, 1); assert.strictEqual(r.upNext[1].later, 0);
+  assert.strictEqual(r.upNext[2].dueNow + r.upNext[2].later, 0);
+  // tag splits only use "group: value" tags
+  assert.deepStrictEqual(p1.byGroup.recipe.map(x => x.value).sort(), ['hsp', 'wrap']);
+  assert.strictEqual(p1.byGroup.country.find(x => x.value === 'uk').replyRate, 100);
+  assert.strictEqual(r.sentLog.length, 3); assert.strictEqual(r.totals.repliedContacts, 1);
+  const e = HQ.emailStats([], [], NOW); assert.strictEqual(e.totals.replyRate, null); assert.ok(!/NaN|undefined/.test(JSON.stringify(e)));
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

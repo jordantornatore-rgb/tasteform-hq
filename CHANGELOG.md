@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.7.0 — 4 Nov 2026 (Email tab)
+
+- **Email** tab (admin only): Up next (each email in the GHL sequence, subject + body, draft/live, who is due it), Sent (every send with opened / replied and tags), Performance (reply %, opens and unsubs per email, split by recipe, job and country tags). See `EMAIL.md`.
+- Supabase: `email_steps`, `email_events` (admin-only RLS), `meta/emailSync`; edge function `ghl-email-event` takes GHL workflow webhooks (refuses everything until the `GHL_WEBHOOK_KEY` secret is set). The 5 emails of the recipe opener sequence are seeded as drafts.
+- `HQ.emailStats` in `hq-core.js` with a unit test.
+- The live-sync shim now pages tables in 1,000-row chunks, so no table is silently cut at PostgREST's row cap.
+
 ## 2.6.0 — 4 Nov 2026 (Content Engine workflow v2: Jordan writes the scripts)
 
 - **Script editor** (full screen on a phone, side panel on desktop) from "Turn into a reel" in the Idea Bank, any open slot on the calendar or board, "+ New reel" (Library and under every calendar day) and "Edit script" on a post: title, up to 5 spoken hooks with the idea's hooks as tap-to-use chips, visual hook (the idea's visual hooks as chips), the script (auto-grows, word count, read time), editing notes, CTA, format / funnel / location, a slot picker over the open slots of the next 3 weeks or a new day + slot, the source idea panel, the old AI beats read-only. Local draft autosave every 3 s. Saves through `content-update` (`create` for new reels).

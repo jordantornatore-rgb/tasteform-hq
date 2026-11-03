@@ -22,7 +22,7 @@ if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 const NOW_ISO = process.env.HQ_NOW || '2026-10-21T04:00:00Z'; // 3pm Sydney, 21 Oct 2026
 
 function loadFixture(t) { const p = path.join(FIX, t + '.json'); return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : []; }
-const TABLES = ['dm_threads', 'dm_daily', 'contacts', 'script_reviews', 'tf_responses', 'tf_daily', 'ig_posts', 'ig_stories', 'posts', 'meta', 'ads_daily', 'ads_campaigns', 'stripe_summary', 'stripe_subscriptions', 'stripe_daily', 'content_ideas', 'content_queue', 'content_creators', 'content_sounds'];
+const TABLES = ['dm_threads', 'dm_daily', 'contacts', 'script_reviews', 'tf_responses', 'tf_daily', 'ig_posts', 'ig_stories', 'posts', 'meta', 'ads_daily', 'ads_campaigns', 'stripe_summary', 'stripe_subscriptions', 'stripe_daily', 'content_ideas', 'content_queue', 'content_creators', 'content_sounds', 'email_steps', 'email_events'];
 const fixtures = {}; TABLES.forEach(t => { fixtures[t] = loadFixture(t); });
 const docs = t => fixtures[t].map(r => Object.assign({ id: r.id }, r.data));
 
@@ -54,6 +54,16 @@ function contentFixtures(today) {
     ideas: [{ id: 'test-idea1', data: { shortcode: 'IDEA1', url: 'https://www.instagram.com/reel/IDEA1/', creator: 'someone', followers: 120000, lane: 'format', type: 'reel', format: 'F6', funnel: 'MOF', views: 200000, shares: 4000, comments: 900, status: 'new', pinned: true, foundAt: NOW_ISO, adaptation: 'Run it as a desk-job version.', whyItWorked: 'High share rate.', hooks: ['Idea hook one', 'Idea hook two'], visualHooks: ['Close-up of a lunchbox'], talkingPoints: ['Point one', 'Point two'], related: [{ url: 'https://www.instagram.com/reel/REL1/', creator: 'other', followers: 5000, views: 80000, shares: 900, comments: 100, stageNote: 'same topic' }] } }],
   };
 }
+// Email fixtures (synthetic): two emails, three contacts — one replied, one opened, one due next.
+{ const at = h => new Date(NOW + h * 3600e3).toISOString();
+  fixtures.email_steps = fixtures.email_steps.concat([
+    { id: 'test-e1', data: { order: 1, sequence: 'opener', name: 'Was it that shit', delayDays: 0, audience: 'Everyone', subject: 'was it that shit huh?', body: '{{contact.first_name}}, did you make the [RECIPE]?', status: 'draft' } },
+    { id: 'test-e2', data: { order: 2, sequence: 'opener', name: 'Corporate tagger', delayDays: 2, audience: 'No reply yet', subject: "you're one of them aren't you", body: 'is that you too?', status: 'draft', note: 'A reply tags the contact corporate' } }]);
+  const ev = (c, step, event, h, tags) => ({ id: c + ':' + step + ':' + event, data: { contactId: c, step, event, at: at(h), tags: tags || [], firstName: 'Name' + c } });
+  fixtures.email_events = fixtures.email_events.concat([
+    ev('a', 'test-e1', 'enrolled', -72, ['recipe: hsp', 'country: au']), ev('a', 'test-e1', 'sent', -72, ['recipe: hsp', 'country: au']), ev('a', 'test-e1', 'opened', -70),
+    ev('b', 'test-e1', 'enrolled', -72, ['recipe: hsp', 'country: uk', 'job: corporate']), ev('b', 'test-e1', 'sent', -72, ['recipe: hsp', 'country: uk', 'job: corporate']), ev('b', 'test-e1', 'replied', -60),
+    ev('c', 'test-e1', 'enrolled', -1)]); }
 { const cf = contentFixtures(TODAY); fixtures.content_queue = fixtures.content_queue.concat(cf.queue); fixtures.content_ideas = fixtures.content_ideas.concat(cf.ideas); }
 const dms = docs('dm_threads'), tfDaily = docs('tf_daily'), tfResponses = docs('tf_responses'), contacts = docs('contacts');
 const leads = dms.filter(d => d.category === 'lead' && !d.notApplicable);
@@ -94,7 +104,7 @@ function serve() {
 }
 
 const mockSrc = fs.readFileSync(path.join(__dirname, 'mock-supabase.js'), 'utf8');
-const TABS = ['today', 'funnel', 'leads', 'dms', 'follow', 'magnets', 'apps', 'ads', 'content', 'stripe', 'routine'];
+const TABS = ['today', 'funnel', 'leads', 'dms', 'follow', 'magnets', 'apps', 'ads', 'content', 'email', 'stripe', 'routine'];
 let passed = 0, failed = 0; const failures = [];
 function check(name, fn) { try { fn(); passed++; } catch (e) { failed++; failures.push(name + ': ' + (e && e.message)); console.log('  FAIL ' + name + ' — ' + (e && e.message)); } }
 
@@ -132,7 +142,7 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       const label = `${width}px ${dark ? 'dark' : 'light'} ${role}`;
       const { context, page, console_ } = await openPage(browser, url, { width, dark, role });
       for (const tab of TABS) {
-        if ((tab === 'stripe' || tab === 'routine') && role !== 'admin') {
+        if ((tab === 'stripe' || tab === 'routine' || tab === 'email') && role !== 'admin') {
           // non-admin: the tab button must be hidden and navigating by hash must bounce to Today
           await page.evaluate(t => window.__hq.setView(t), tab);
           check(`${label} ${tab}: admin-only view bounces to today`, () => assert.strictEqual(page.url().endsWith('#today') || true, true));

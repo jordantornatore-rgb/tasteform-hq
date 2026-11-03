@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '2.2.1';
+  HQ.VERSION = '2.7.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -597,6 +597,92 @@
     L.push('Funnel 7d: ' + f.map(function (s) { return s.label.replace(/ \(.*\)/, '') + ' ' + (s.value == null ? '–' : s.value); }).join(' · '));
     L.push('Dashboard: <https://jordantornatore-rgb.github.io/tasteform-hq/|TasteForm HQ>');
     return L.join('\n');
+  };
+
+  /* ---------- Email (GHL sequences) ----------
+     steps:  email_steps rows {id, order, sequence, name, delayDays, subject, body, audience, status}
+     events: email_events rows {contactId, step, event (enrolled|sent|opened|clicked|replied|bounced|unsubscribed), at, tags[], firstName, country}
+     Every count is distinct contacts with a real event row. Rates are null (→ "–") until something is sent.
+     Tags follow "group: value" (recipe: hsp, country: au, job: corporate) so the page can split by group. */
+  HQ.EMAIL_TAG_GROUPS = ['recipe', 'job', 'country'];
+  HQ.emailTagGroup = function (tag) {
+    var m = /^\s*([a-z]+)\s*:\s*(.+?)\s*$/i.exec(String(tag || ''));
+    return m && HQ.EMAIL_TAG_GROUPS.indexOf(m[1].toLowerCase()) >= 0 ? { group: m[1].toLowerCase(), value: m[2].toLowerCase() } : null;
+  };
+  HQ.emailStats = function (steps, events, nowMs) {
+    nowMs = HQ.isNum(nowMs) ? nowMs : Date.now();
+    steps = (steps || []).slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+    events = (events || []).filter(function (e) { return e && e.contactId && e.step && e.event; });
+    var byKey = {}; // step|event -> {contactId: event}
+    var contacts = {}; // contactId -> {firstName, tags, country, sent:{step:at}, replied:bool}
+    events.forEach(function (e) {
+      var k = e.step + '|' + e.event;
+      (byKey[k] = byKey[k] || {})[e.contactId] = e;
+      var c = contacts[e.contactId] = contacts[e.contactId] || { contactId: e.contactId, firstName: '', tags: [], country: '', sent: {}, enrolledAt: null, replied: false, stopped: false };
+      if (e.firstName) c.firstName = e.firstName;
+      if (e.country) c.country = e.country;
+      if (e.tags && e.tags.length) c.tags = e.tags;
+      if (e.event === 'sent') c.sent[e.step] = e.at;
+      if (e.event === 'enrolled') c.enrolledAt = c.enrolledAt || e.at;
+      if (e.event === 'replied') c.replied = true;
+      if (e.event === 'unsubscribed' || e.event === 'bounced') c.stopped = true;
+    });
+    function who(step, ev) { return byKey[step + '|' + ev] || {}; }
+    function countAmongSent(step, ev) { var s = who(step, 'sent'), x = who(step, ev), n = 0; Object.keys(x).forEach(function (id) { if (s[id]) n++; }); return n; }
+    var perStep = steps.map(function (st) {
+      var sent = Object.keys(who(st.id, 'sent')).length;
+      var opened = countAmongSent(st.id, 'opened'), replied = countAmongSent(st.id, 'replied'), clicked = countAmongSent(st.id, 'clicked');
+      var bounced = countAmongSent(st.id, 'bounced'), unsub = countAmongSent(st.id, 'unsubscribed');
+      var groups = {};
+      Object.keys(who(st.id, 'sent')).forEach(function (id) {
+        (contacts[id].tags || []).forEach(function (t) {
+          var g = HQ.emailTagGroup(t); if (!g) return;
+          var row = ((groups[g.group] = groups[g.group] || {})[g.value] = groups[g.group][g.value] || { value: g.value, sent: 0, opened: 0, replied: 0 });
+          row.sent++; if (who(st.id, 'opened')[id]) row.opened++; if (who(st.id, 'replied')[id]) row.replied++;
+        });
+      });
+      Object.keys(groups).forEach(function (g) {
+        groups[g] = Object.keys(groups[g]).map(function (v) { var r = groups[g][v]; r.openRate = HQ.pct(r.opened, r.sent); r.replyRate = HQ.pct(r.replied, r.sent); return r; })
+          .sort(function (a, b) { return b.sent - a.sent || a.value.localeCompare(b.value); });
+      });
+      var lastSentAt = null; Object.keys(who(st.id, 'sent')).forEach(function (id) { var t = HQ.parseTs(who(st.id, 'sent')[id].at); if (t && (!lastSentAt || t > lastSentAt)) lastSentAt = t; });
+      return { id: st.id, step: st, sent: sent, opened: opened, clicked: clicked, replied: replied, bounced: bounced, unsubscribed: unsub,
+        openRate: HQ.pct(opened, sent), replyRate: HQ.pct(replied, sent), byGroup: groups, lastSentAt: lastSentAt };
+    });
+    // Up next: each contact still in a sequence moves to the step after the last one sent to them.
+    var DAY = 86400000, seqs = {};
+    steps.forEach(function (st) { (seqs[st.sequence || 'main'] = seqs[st.sequence || 'main'] || []).push(st); });
+    var upNext = {}; steps.forEach(function (st) { upNext[st.id] = { id: st.id, step: st, dueNow: 0, later: 0, nextDueAt: null }; });
+    Object.keys(contacts).forEach(function (id) {
+      var c = contacts[id]; if (c.replied || c.stopped) return;
+      Object.keys(seqs).forEach(function (sq) {
+        var list = seqs[sq], lastIdx = -1, lastAt = null;
+        list.forEach(function (st, i) { if (c.sent[st.id]) { lastIdx = i; lastAt = HQ.parseTs(c.sent[st.id]); } });
+        var next = list[lastIdx + 1]; if (!next) return;
+        var base = lastIdx < 0 ? HQ.parseTs(c.enrolledAt) : lastAt;
+        if (!base) return; // never enrolled in this sequence
+        var due = base + (lastIdx < 0 ? 0 : (next.delayDays || 0) * DAY);
+        var u = upNext[next.id]; if (due <= nowMs) u.dueNow++; else u.later++;
+        if (!u.nextDueAt || due < u.nextDueAt) u.nextDueAt = due;
+      });
+    });
+    var sentLog = [];
+    Object.keys(byKey).forEach(function (k) {
+      if (!/\|sent$/.test(k)) return;
+      var step = k.split('|')[0];
+      Object.keys(byKey[k]).forEach(function (id) {
+        var e = byKey[k][id], c = contacts[id];
+        sentLog.push({ contactId: id, firstName: c.firstName, country: c.country, tags: c.tags, step: step, at: e.at,
+          opened: !!who(step, 'opened')[id], replied: !!who(step, 'replied')[id] });
+      });
+    });
+    sentLog.sort(function (a, b) { return (HQ.parseTs(b.at) || 0) - (HQ.parseTs(a.at) || 0); });
+    var totSent = 0, totOpen = 0, totReply = 0;
+    perStep.forEach(function (p) { totSent += p.sent; totOpen += p.opened; totReply += p.replied; });
+    var repliedContacts = Object.keys(contacts).filter(function (id) { return contacts[id].replied; }).length;
+    return { perStep: perStep, upNext: steps.map(function (st) { return upNext[st.id]; }), sentLog: sentLog,
+      totals: { contacts: Object.keys(contacts).length, sent: totSent, opened: totOpen, replied: totReply, repliedContacts: repliedContacts,
+        openRate: HQ.pct(totOpen, totSent), replyRate: HQ.pct(totReply, totSent) } };
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = HQ;
