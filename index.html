@@ -739,6 +739,62 @@ body{padding:0;}
   .wait-name a,.fu-name a,.review-name a,.op-name a,.card-name a,table.scores td a,.disqual-item a{display:inline-block;padding:12px 0;margin:-12px 0;min-height:var(--tap);line-height:20px;}
   .mini{min-height:var(--tap);}
 }
+
+/* ---------- Challenge tab ---------- */
+.ch-top-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.ch-scanchip{border:none;cursor:pointer;min-height:32px;padding:4px 10px;}
+.ch-scanchip.grey{border:1px solid var(--border);}
+.ch-msg{border-radius:var(--r-m);padding:10px 12px;font-size:var(--t-s);font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.ch-msg.good{background:var(--good-soft);color:var(--good);} .ch-msg.warn{background:var(--warn-soft);color:var(--warn);} .ch-msg.crit{background:var(--crit-soft);color:var(--crit);}
+.ch-note{background:var(--info-soft);border-radius:var(--r-m);padding:10px 12px;font-size:var(--t-s);color:var(--text-2);}
+.linkish{background:none;border:none;padding:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline;}
+.ch-board{display:flex;flex-direction:column;gap:6px;}
+.ch-item{border:1px solid var(--border);border-radius:var(--r-m);background:var(--surface-2);overflow:hidden;}
+.ch-item.open{border-color:var(--border-strong);}
+.ch-row{display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;color:var(--text);padding:10px 12px;min-height:var(--tap);cursor:pointer;text-align:left;font:inherit;}
+.ch-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
+.ch-rank{width:32px;height:32px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-family:Anton,Impact,sans-serif;font-size:16px;background:var(--surface);border:1px solid var(--border);color:var(--muted);flex-shrink:0;}
+.ch-rank.top{background:var(--text);color:var(--bg);border-color:var(--text);}
+.ch-who{flex:1;min-width:0;display:flex;flex-direction:column;}
+.ch-who b{font-size:var(--t-m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ch-who small{font-size:var(--t-xs);color:var(--muted);}
+.ch-pts{font-family:Anton,Impact,sans-serif;font-size:24px;line-height:1;text-align:right;}
+.ch-pts small{font-family:inherit;font-size:var(--t-xs);color:var(--muted);margin-left:3px;font-family:'Open Sans',system-ui,sans-serif;}
+.ch-row .chev{color:var(--muted);transition:transform .15s;}
+.ch-item.open .ch-row .chev{transform:rotate(180deg);}
+.ch-detail{padding:4px 12px 14px;display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--border);background:var(--surface);}
+.ch-tbl td,.ch-tbl th{font-size:var(--t-s);}
+.ch-tbl small{color:var(--muted);}
+.ch-tbl tr.tot td{font-weight:700;border-top:1px solid var(--border-strong);}
+.ch-cov{display:flex;gap:6px;flex-wrap:wrap;padding-top:8px;}
+.ch-log{display:flex;flex-direction:column;gap:8px;}
+.ch-log-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+.ch-log-head label{display:flex;gap:6px;align-items:center;}
+.ch-log-btns{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px;}
+.ch-logbtn{justify-content:space-between;text-align:left;min-height:var(--tap);}
+.ch-logbtn[aria-pressed="true"]{background:var(--good-soft);color:var(--good);border-color:var(--good);}
+.ch-p{font-weight:500;color:var(--muted);font-size:var(--t-xs);white-space:nowrap;}
+.ch-logbtn[aria-pressed="true"] .ch-p{color:var(--good);}
+.ch-manual{display:flex;flex-direction:column;gap:4px;}
+.ch-mrow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:var(--t-s);padding:4px 0;border-top:1px dashed var(--border);}
+.ch-queue,.ch-dms{display:flex;flex-direction:column;gap:10px;}
+.ch-rv,.ch-dm{border:1px solid var(--border);border-radius:var(--r-m);padding:12px;background:var(--surface-2);display:flex;flex-direction:column;gap:8px;}
+.ch-rv-top,.ch-dm-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.ch-rv-ev{font-size:var(--t-s);color:var(--text-2);}
+.ch-rv-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ch-rv-btns .btn{min-height:var(--tap);}
+.ch-rv-why{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.ch-other{display:flex;gap:6px;flex:1;min-width:220px;}
+.ch-other .input{flex:1;min-width:0;}
+.ch-draft{white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:var(--t-m);line-height:1.5;margin:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-s);padding:10px 12px;color:var(--text);flex:1;min-width:0;}
+.ch-dm-msg{display:flex;gap:8px;align-items:flex-start;}
+.ch-dm-msg .btn{flex-shrink:0;}
+.ch-health{display:flex;flex-direction:column;gap:2px;}
+.ch-hrow{display:grid;grid-template-columns:14px 120px 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:var(--t-s);}
+.ch-hrow .dot{width:10px;height:10px;border-radius:999px;background:var(--muted);}
+.ch-hrow .dot.green{background:var(--good);} .ch-hrow .dot.amber{background:var(--warn);} .ch-hrow .dot.red{background:var(--crit);}
+@media (max-width:520px){ #chViewSeg{display:grid;grid-template-columns:1fr 1fr;width:100%;border-radius:var(--r-l);} #chViewSeg button{border-radius:var(--r-m);} .ch-hrow{grid-template-columns:14px 92px 1fr;} .ch-dm-msg{flex-direction:column;} .ch-dm-msg .btn{align-self:flex-end;} .ch-pts{font-size:20px;} }
+@media (pointer:coarse),(max-width:760px){ #viewChallenge .input,#viewChallenge .ch-scanchip,#viewChallenge .linkish{min-height:var(--tap);} }
 </style>
 </head>
 <body>
@@ -794,6 +850,7 @@ body{padding:0;}
       <button class="tab" role="tab" id="tabContent" aria-selected="false" aria-controls="viewContent" data-view="content"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5l2 4M14 5l2 4M10 12l4 2.5-4 2.5z"/></svg><span>Content Engine</span></button>
       <div class="sb-group" id="sbGroupBusiness" hidden>Business</div>
       <button class="tab" role="tab" id="tabStripe" aria-selected="false" aria-controls="viewStripe" data-view="stripe" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Revenue</span><kbd>9</kbd></button>
+      <button class="tab" role="tab" id="tabChallenge" aria-selected="false" aria-controls="viewChallenge" data-view="challenge" hidden><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg><span>Challenge</span><span class="tab-badge" id="chBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Routine</span><kbd>0</kbd></button>
     </nav>
     <div class="sb-foot">
@@ -1235,6 +1292,21 @@ body{padding:0;}
     <div id="stripeRoot" style="display:flex;flex-direction:column;gap:var(--s4);"></div>
   </section>
 
+  <!-- ===== CHALLENGE (admin only; challenge_* rows are admin-only in the database) ===== -->
+  <section id="viewChallenge" role="tabpanel" aria-labelledby="tabChallenge" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="top">
+      <div><h1>Challenge</h1><div class="sub" id="chSub">Loading…</div></div>
+      <div class="ch-top-right"><select class="input" id="chMonth" aria-label="Month"></select><button type="button" class="chip grey ch-scanchip" id="chScanChip" data-chview="health">Scan: –</button></div>
+    </div>
+    <div class="seg-filter" role="group" aria-label="Challenge view" id="chViewSeg">
+      <button type="button" data-chview="board" aria-pressed="true">Leaderboard</button>
+      <button type="button" data-chview="review" aria-pressed="false" id="chSegReview">Review</button>
+      <button type="button" data-chview="drafts" aria-pressed="false">Monday drafts</button>
+      <button type="button" data-chview="health" aria-pressed="false">Scan health</button>
+    </div>
+    <div id="chRoot" style="display:flex;flex-direction:column;gap:var(--s4);"><div class="panel"><div class="empty-state">Loading…</div></div></div>
+  </section>
+
   <!-- ===== ROUTINE (admin only) ===== -->
   <section id="viewRoutine" role="tabpanel" aria-labelledby="tabRoutine" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div id="routineRoot" style="display:flex;flex-direction:column;gap:var(--s4);">
@@ -1289,6 +1361,7 @@ body{padding:0;}
       <button class="sheet-btn" data-view="magnets">Magnets <span class="tab-badge" id="magBadgeBb" hidden></span></button>
       <button class="sheet-btn" data-view="ads">Ads</button>
       <button class="sheet-btn" data-view="stripe" id="sheetStripe" hidden>Revenue</button>
+      <button class="sheet-btn" data-view="challenge" id="sheetChallenge" hidden>Challenge <span class="tab-badge" id="chBadgeBb" hidden></span></button>
       <button class="sheet-btn" data-view="routine" id="sheetRoutine" hidden>Routine</button>
       <button class="sheet-btn" id="sheetTheme">Theme: system</button>
       <button class="sheet-btn" id="sheetSignOut">Sign out</button>
@@ -1452,7 +1525,7 @@ body{padding:0;}
     today:['dms','daily','contacts','tfResponses','tfDaily','igPosts','igStories','meta','stripe'],
     funnel:['tfResponses','tfDaily','igPosts','igStories','meta','dms','daily','ads'],
     leads:['contacts','meta','dms'], dms:['dms','daily','reviews','contacts','meta'], follow:['dms','meta'], magnets:['dms','meta'],
-    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], stripe:['stripe','meta'], routine:[]
+    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], stripe:['stripe','meta'], challenge:[], routine:[]
   };
   var dirty = {global:true}, raf = null, currentView = 'today';
   window.__hqRenders = 0; // counted by the perf test
@@ -1470,14 +1543,14 @@ body{padding:0;}
   Object.keys(VIEW_DEPS).forEach(function(v){ dirty[v]=true; });
 
   /* ---------- views ---------- */
-  var VIEWS={today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', stripe:'viewStripe', routine:'viewRoutine'};
-  var ADMIN_VIEWS={stripe:1, routine:1};
+  var VIEWS={today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', stripe:'viewStripe', challenge:'viewChallenge', routine:'viewRoutine'};
+  var ADMIN_VIEWS={stripe:1, routine:1, challenge:1};
   function setView(view, push){
     if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='today';
     currentView = view;
     Object.keys(VIEWS).forEach(function(k){ var el=$(VIEWS[k]); if(el) el.hidden = k!==view; });
     document.querySelectorAll('[data-view]').forEach(function(b){ b.setAttribute('aria-selected', b.getAttribute('data-view')===view?'true':'false'); });
-    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['leads','magnets','ads','content','stripe','routine'].indexOf(view)>=0?'true':'false');
+    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['leads','magnets','ads','content','stripe','challenge','routine'].indexOf(view)>=0?'true':'false');
     document.querySelectorAll('#tabRow .tab').forEach(function(t){ t.setAttribute('tabindex', t.getAttribute('data-view')===view?'0':'-1'); });
     if(push!==false){ try{ history.replaceState(null,'','#'+view); }catch(e){} }
     closeSheet();
@@ -1518,7 +1591,7 @@ body{padding:0;}
   (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'today'; })();
 
   /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
-  var VIEW_LABEL={today:'Today', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', stripe:'Revenue', routine:'Routine'};
+  var VIEW_LABEL={today:'Today', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', stripe:'Revenue', challenge:'Challenge', routine:'Routine'};
   var VIEW_KEYS={'1':'today','2':'dms','3':'follow','4':'magnets','5':'leads','6':'funnel','7':'apps','8':'ads','9':'stripe','0':'routine'};
   var appEl=$('appRoot');
   function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
@@ -3368,6 +3441,762 @@ body{padding:0;}
   });
   document.addEventListener('tf-auth-signed-out', function(){ state.admin=false; state.days={}; state.calls=null; state.view=null; client=null; if(timer) clearInterval(timer); if(poller) clearInterval(poller); var tab=$('tabRoutine'); if(tab) tab.hidden=true; var sheet=$('sheetRoutine'); if(sheet) sheet.hidden=true; });
   window.__routine={buildBlocks:buildBlocks, weekStats:weekStats, dayStats:dayStats, state:state, render:render};
+})();
+</script>
+<script>
+/* ---------- Challenge tab (admin only; the challenge_* tables are admin-only in the database too) ----------
+   Source of truth: meta/challengeConfig (points) and the Claude Doc "TasteForm Monthly Client Challenge".
+   Points on the leaderboard = the sum of CONFIRMED challenge_events for the month. Nothing is estimated:
+   a number we don't have yet shows "–". */
+(function(){
+  'use strict';
+  var esc=HQ.esc, addDays=HQ.addDays, weekStart=HQ.weekStart;
+  var POLL_MS=30000;
+  var TYPES={
+    checkin_on_time:{label:'Check-in on time', cat:'acc'},
+    one_on_one:{label:'1:1 attended or booked', cat:'acc'},
+    weight_logged:{label:'Weight logged', cat:'acc'},
+    food_logged:{label:'Food logged', cat:'acc'},
+    training_session:{label:'Training session', cat:'acc'},
+    steps_target:{label:'Steps target hit', cat:'acc'},
+    perfect_week:{label:'Perfect week', cat:'acc'},
+    group_message:{label:'Group chat message', cat:'com'},
+    group_reply:{label:'Reply to another client', cat:'com'},
+    other_photo:{label:'Other photo', cat:'com'},
+    progress_photo:{label:'Progress photo', cat:'com'},
+    story_tag:{label:'Story tag', cat:'soc'},
+    trained_by_bio:{label:'"Trained by" bio link', cat:'soc'},
+    before_after_story:{label:'Before/after story', cat:'soc'},
+    testimonial:{label:'Testimonial', cat:'soc'},
+    prize_story:{label:'Prize story post', cat:'soc'},
+    referral_call:{label:'Referral call attended', cat:'ref'},
+    referral_paid:{label:'Referral first payment', cat:'ref'}
+  };
+  // Structural limits from the doc (counts, not points; points always come from challengeConfig).
+  var CAPS={ checkin_on_time:{per:'week',n:1}, progress_photo:{per:'week',n:1}, perfect_week:{per:'week',n:1}, story_tag:{per:'week',n:3}, other_photo:{per:'day',n:1},
+    before_after_story:{per:'month',n:1}, testimonial:{per:'month',n:1}, trained_by_bio:{per:'month',n:1}, prize_story:{per:'month',n:1}, training_session:{per:'week',n:'plan'} };
+  var REJECT_REASONS={
+    training_session:['Not enough sets logged','Back-logged, not on the day','Copied from earlier weeks','Not a real session'],
+    progress_photo:['Not a physique shot','Blurry or badly lit','Repost of an older photo','Body not clearly visible'],
+    _:['Not real','Duplicate','Doesn\'t meet the rule']
+  };
+  var client=null, timer=null;
+  var S={ admin:false, active:false, view:'board', month:null, open:{}, rejecting:{}, busy:{}, msg:null, msgKind:'good', undo:null,
+    cfg:null, scan:null, members:[], clients:[], scores:[], reviews:[], pendingEvents:[], events:{}, loaded:{}, sig:{} };
+  function $(id){ return document.getElementById(id); }
+  function nowMs(){ return Date.now(); }
+  function today(){ return HQ.sydNow(nowMs()).key; }
+  function curMonth(){ return today().slice(0,7); }
+  function monthOf(d){ return HQ.isDayKey(d)?d.slice(0,7):null; }
+  function nextMonth(m){ var y=+m.slice(0,4), mo=+m.slice(5,7)+1; if(mo>12){ mo=1; y++; } return y+'-'+HQ.pad(mo); }
+  function monthStart(m){ return m+'-01'; }
+  function monthEnd(m){ return addDays(nextMonth(m)+'-01',-1); }
+  function monthLabel(m){ var MON=['January','February','March','April','May','June','July','August','September','October','November','December']; return MON[+m.slice(5,7)-1]+' '+m.slice(0,4); }
+  function ord(n){ var s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+  function plural(n,w,p){ return n+' '+(n===1?w:(p||w+'s')); }
+  function fnv(str){ var h=0x811c9dc5; for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,0x01000193)>>>0; } return h>>>0; }
+  function hashHex(s){ return ('0000000'+fnv(s).toString(16)).slice(-8); }
+
+  /* ---------- config ---------- */
+  function pts(type, opts){
+    var p=S.cfg&&S.cfg.points; if(!p) return null;
+    if(type==='prize_story'){ var v=p.prizeStoryPost!=null?p.prizeStoryPost:p.prize_story; v=(v&&typeof v==='object')?v.pts:v; return HQ.isNum(+v)&&v!==''&&v!=null?+v:null; }
+    var e=p[type]; if(e==null) return null;
+    if(typeof e==='number') return e;
+    if(opts&&opts.kept&&e.ptsKept!=null) return +e.ptsKept;
+    return e.pts!=null&&!isNaN(+e.pts)?+e.pts:null;
+  }
+  function startDate(){ return (S.cfg&&HQ.isDayKey(S.cfg.startDate))?S.cfg.startDate:null; }
+  function firstChallengeMonth(){ var s=(S.cfg&&S.cfg.firstStartDate)||startDate(); return s?s.slice(0,7):curMonth(); }
+  function monthFrom(m){ var s=startDate(), ms=monthStart(m); return (s && monthOf(s)===m && s>ms)?s:ms; }
+  function scoredThrough(){ var s=S.scan&&S.scan.scoredThrough; return HQ.isDayKey(s)?s:null; }
+  // last fully scored day inside month m (null = the scan hasn't scored any day of m yet)
+  function scoredTo(m){ var st=scoredThrough(), from=monthFrom(m); if(!st||st<from) return null; var me=monthEnd(m); return st<me?st:me; }
+  function weekCap(memberId, type){ var c=CAPS[type]; if(!c) return null; if(c.n==='plan'){ var mm=memberById(memberId), pl=mm&&mm.plan; return pl&&HQ.isNum(+pl.sessionsPerWeek)&&+pl.sessionsPerWeek>0?+pl.sessionsPerWeek:null; } return c.n; }
+
+  /* ---------- members + events ---------- */
+  function memberById(id){ for(var i=0;i<S.allMembers.length;i++) if(S.allMembers[i].id===id) return S.allMembers[i]; return null; }
+  function buildMembers(){
+    var by={};
+    S.clients.forEach(function(c){ by[c.id]=Object.assign({}, c); });
+    S.members.forEach(function(c){ by[c.id]=Object.assign({}, by[c.id]||{}, c); });
+    S.allMembers=Object.keys(by).map(function(k){ return by[k]; });
+  }
+  S.allMembers=[];
+  function evMember(e){ return e.member || String(e.id||'').split('|')[0]; }
+  function evPoints(e){ var n=+e.points; return isNaN(n)?0:n; }
+  function monthEvents(m){ return S.events[m]||null; }
+  function confirmed(list){ return (list||[]).filter(function(e){ return e.status==='confirmed'; }); }
+  function memberName(id){ var m=memberById(id); return (m&&(m.name||m.whatsappName||m.oneFitName))||id; }
+  function firstName(id){ return String(memberName(id)).split(/\s+/)[0]; }
+
+  function standings(m, upTo){
+    var evs=monthEvents(m); if(!evs) return null;
+    var tot={}, has={};
+    confirmed(evs).forEach(function(e){ if(upTo && e.date && e.date>upTo) return; var id=evMember(e); tot[id]=(tot[id]||0)+evPoints(e); has[id]=true; });
+    evs.forEach(function(e){ has[evMember(e)]=true; });
+    var arrived=!!scoredTo(m);
+    var rows=S.allMembers.filter(function(mm){ return mm.active!==false || has[mm.id]; }).map(function(mm){
+      var known = arrived || has[mm.id];
+      return { id:mm.id, name:memberName(mm.id), points: known?(tot[mm.id]||0):null };
+    });
+    rows.sort(function(a,b){ if(a.points==null&&b.points==null) return a.name.localeCompare(b.name); if(a.points==null) return 1; if(b.points==null) return -1; return b.points-a.points || a.name.localeCompare(b.name); });
+    var ranked=rows.filter(function(r){ return r.points!=null; });
+    ranked.forEach(function(r,i){ r.rank = (i>0 && ranked[i-1].points===r.points) ? ranked[i-1].rank : i+1; });
+    var first=ranked.length?ranked[0].points:null, fifth=ranked.length>=5?ranked[4].points:null;
+    rows.forEach(function(r){
+      if(r.points==null){ r.rank=null; r.gap1=null; r.gap5=null; return; }
+      r.gap1=first-r.points; r.gap5 = r.rank<=5 ? 0 : (fifth==null?null:fifth-r.points);
+    });
+    return { rows:rows, first:first, fifth:fifth, arrived:arrived, ranked:ranked.length };
+  }
+
+  /* what a client actually did in month m (optionally limited to a date range) */
+  function activity(memberId, m, from, to){
+    var evs=(monthEvents(m)||[]).filter(function(e){ return evMember(e)===memberId && (!from || !e.date || e.date>=from) && (!to || !e.date || e.date<=to); });
+    var A={ byType:{}, pts:0, flagged:0, overCap:0, manual:[], weeks:{} };
+    evs.forEach(function(e){
+      var t=e.type||String(e.id).split('|')[1];
+      var b=A.byType[t]||(A.byType[t]={n:0, count:0, pts:0, review:0, over:0, days:{}});
+      if(e.status==='confirmed'){ b.n++; b.count+=(+e.count>0?+e.count:1); b.pts+=evPoints(e); A.pts+=evPoints(e); if(e.date) b.days[e.date]=1;
+        if(t==='training_session' && e.date){ var wk=weekStart(e.date); A.weeks[wk]=(A.weeks[wk]||0)+1; } }
+      else if(e.status==='needs_review'){ b.review++; A.flagged++; }
+      else if(e.status==='over_cap'){ b.over++; A.overCap++; }
+      if(e.source==='manual' && e.status!=='cancelled') A.manual.push(e);
+    });
+    return A;
+  }
+  function n(A,t){ return (A.byType[t]&&A.byType[t].n)||0; }
+  function cnt(A,t){ return (A.byType[t]&&A.byType[t].count)||0; }
+  function ptsOf(A,t){ return (A.byType[t]&&A.byType[t].pts)||0; }
+  function daysBetween(a,b){ if(!a||!b||b<a) return 0; var c=0, d=a; while(d<=b && c<400){ c++; d=addDays(d,1); } return c; }
+  function coverageFor(memberId){
+    var cov=(S.scan&&S.scan.coverage)||{}, out=[];
+    (cov.failed||[]).forEach(function(f){ if(f && (f.member===memberId || f.member===memberName(memberId))) out.push((f.source||'source')+': '+(f.reason||'not read')); });
+    if((cov.unmatched||[]).indexOf(memberId)>=0 || (cov.unmatched||[]).indexOf(memberName(memberId))>=0) out.push('Not matched in 1FIT');
+    if((cov.noIgHandle||[]).indexOf(memberId)>=0 || (cov.noIgHandle||[]).indexOf(memberName(memberId))>=0) out.push('No Instagram handle');
+    return out;
+  }
+  function noStepTarget(memberId){ var l=((S.scan&&S.scan.coverage)||{}).noStepTarget||[]; return l.indexOf(memberId)>=0 || l.indexOf(memberName(memberId))>=0; }
+
+  /* ---------- data loading ---------- */
+  function q(t){ return client.from(t).select('*'); }
+  function rows(res){ return ((res&&res.data)||[]).map(function(r){ return Object.assign({id:r.id}, r.data||{}); }); }
+  function changed(key, v){ var s=JSON.stringify(v); if(S.sig[key]===s) return false; S.sig[key]=s; return true; }
+  async function loadAll(){
+    if(!client || !S.admin) return;
+    try{
+      var month=S.month||curMonth();
+      var draftsMonth=draftWeek().month;
+      var months=[month]; if(draftsMonth && months.indexOf(draftsMonth)<0) months.push(draftsMonth);
+      var res=await Promise.all([
+        client.from('meta').select('*').eq('id','challengeConfig').maybeSingle(),
+        client.from('meta').select('*').eq('id','challengeScan').maybeSingle(),
+        q('challenge_members'), q('challenge_clients'), q('challenge_scores'), q('challenge_reviews'),
+        q('challenge_events').eq('data->>status','needs_review')
+      ].concat(months.map(function(m){ return q('challenge_events').eq('data->>month', m); })));
+      var err=res.filter(function(r){ return r && r.error; })[0];
+      if(err){ S.loadError=err.error.message||'load failed'; render(); return; }
+      S.loadError=null;
+      var dirty=false;
+      var cfg=res[0].data?res[0].data.data:null, scan=res[1].data?res[1].data.data:null;
+      if(changed('cfg',cfg)){ S.cfg=cfg; dirty=true; }
+      if(changed('scan',scan)){ S.scan=scan; dirty=true; }
+      if(changed('members',res[2].data)){ S.members=rows(res[2]); dirty=true; }
+      if(changed('clients',res[3].data)){ S.clients=rows(res[3]); dirty=true; }
+      if(changed('scores',res[4].data)){ S.scores=rows(res[4]); dirty=true; }
+      if(changed('reviews',res[5].data)){ S.reviews=rows(res[5]); dirty=true; }
+      if(changed('pending',res[6].data)){ S.pendingEvents=rows(res[6]); dirty=true; }
+      months.forEach(function(m,i){ var r=res[7+i]; if(changed('ev:'+m, r.data)){ S.events[m]=rows(r); dirty=true; } S.loaded[m]=true; });
+      S.loaded.base=true;
+      if(dirty){ buildMembers(); syncBadge(); render(); syncScores(month); }
+    }catch(e){ S.loadError=String(e&&e.message||e); render(); }
+  }
+
+  /* ---------- writes ---------- */
+  function nowIso(){ return new Date(nowMs()).toISOString(); }
+  async function mergeRow(table, id, patch){
+    var cur=await client.from(table).select('*').eq('id', id).maybeSingle(); if(cur.error) throw cur.error;
+    var data=Object.assign({}, (cur.data&&cur.data.data)||{}, patch);
+    var res=await client.from(table).upsert({ id:id, data:data, updated_at:nowIso() }); if(res.error) throw res.error;
+    return data;
+  }
+  function putLocal(e){
+    var m=e.month; if(!m) return; var list=S.events[m]||(S.events[m]=[]), i=list.findIndex(function(x){ return x.id===e.id; });
+    if(i>=0) list[i]=e; else list.push(e);
+    S.pendingEvents=S.pendingEvents.filter(function(x){ return x.id!==e.id; }); if(e.status==='needs_review') S.pendingEvents.push(e);
+    S.sig={}; // force the next poll to re-read
+  }
+  async function writeEvent(id, data){
+    var full=await mergeRow('challenge_events', id, data); full.id=id; putLocal(full);
+    if(full.month && full.member) await writeScore(full.member, full.month);
+    return full;
+  }
+  function scoreRow(memberId, m){
+    var A=activity(memberId, m), by={};
+    Object.keys(A.byType).forEach(function(t){ var b=A.byType[t]; if(b.n||b.pts) by[t]={n:b.n, count:b.count, points:b.pts}; });
+    return { member:memberId, name:memberName(memberId), month:m, points:A.pts, breakdown:by, flagged:A.flagged };
+  }
+  async function writeScore(memberId, m){
+    if(!S.events[m]) return; // only when we hold the whole month
+    var row=scoreRow(memberId, m); row.updatedAt=nowIso(); row.source='hq';
+    var res=await client.from('challenge_scores').upsert({ id:memberId+'|'+m, data:row, updated_at:row.updatedAt }); if(res.error) throw res.error;
+    var i=S.scores.findIndex(function(s){ return s.id===memberId+'|'+m; }); var loc=Object.assign({id:memberId+'|'+m}, row); if(i>=0) S.scores[i]=loc; else S.scores.push(loc);
+  }
+  var syncing=false;
+  async function syncScores(m){ // keep challenge_scores equal to the confirmed events (only rows that differ are written)
+    if(syncing || !S.events[m] || !S.admin) return; syncing=true;
+    try{
+      var st=standings(m); if(!st) return;
+      for(var i=0;i<st.rows.length;i++){
+        var r=st.rows[i]; if(r.points==null) continue;
+        var want=scoreRow(r.id, m), have=S.scores.find(function(s){ return s.id===r.id+'|'+m; });
+        if(have && have.points===want.points && JSON.stringify(have.breakdown||{})===JSON.stringify(want.breakdown)) continue;
+        if(!have && want.points===0 && !Object.keys(want.breakdown).length) continue;
+        await writeScore(r.id, m);
+      }
+    }catch(e){ console.warn('challenge_scores sync skipped: '+(e&&e.message||e)); }
+    finally{ syncing=false; }
+  }
+  function flash(text, kind, undo){ S.msg=text; S.msgKind=kind||'good'; S.undo=undo||null; render(); clearTimeout(flash.t); flash.t=setTimeout(function(){ S.msg=null; S.undo=null; render(); }, undo?9000:5000); }
+
+  /* cap check for an approval: would this push the client past the doc's limit? */
+  function capExceeded(memberId, type, date, m, excludeId){
+    var c=CAPS[type]; if(!c||!date) return null; var lim=weekCap(memberId,type); if(lim==null) return null;
+    var evs=confirmed(monthEvents(m)||[]).filter(function(e){ return evMember(e)===memberId && (e.type===type) && e.id!==excludeId; });
+    var same=evs.filter(function(e){ if(!e.date) return false; if(c.per==='day') return e.date===date; if(c.per==='week') return weekStart(e.date)===weekStart(date); return true; });
+    return same.length>=lim ? (lim+' per '+c.per) : null;
+  }
+
+  /* ---------- review queue ---------- */
+  function reviewItems(){
+    var out=[];
+    S.pendingEvents.forEach(function(e){ if(e.reviewedBy) return; out.push({ kind:'event', id:e.id, member:evMember(e), type:e.type||String(e.id).split('|')[1], date:e.date, month:e.month, evidence:e.evidence, source:e.source, raw:e }); });
+    S.reviews.forEach(function(r){ var st=r.status||'pending'; if(st!=='pending' && st!=='needs_review') return; if(out.some(function(o){ return o.id===r.eventId; })) return;
+      out.push({ kind:'review', id:r.id, member:r.member, type:r.type, date:r.date, month:r.month||monthOf(r.date), evidence:r.evidence||r.reason, source:r.source, raw:r }); });
+    var pri={training_session:0, progress_photo:1};
+    out.sort(function(a,b){ var pa=pri[a.type]!=null?pri[a.type]:2, pb=pri[b.type]!=null?pri[b.type]:2; return pa-pb || String(b.date||'').localeCompare(String(a.date||'')); });
+    return out;
+  }
+  function eventIdFor(item){ if(item.kind==='event') return item.id; var r=item.raw; return r.eventId || (item.member+'|'+item.type+'|'+(r.key||item.date||item.id)); }
+  async function approve(item){
+    var m=item.month||monthOf(item.date); if(!m){ flash('Can\'t approve: the item has no date or month.','crit'); return; }
+    var eid=eventIdFor(item), p=item.raw.pointsIfApproved!=null?+item.raw.pointsIfApproved:pts(item.type);
+    if(p==null){ flash('No points for "'+item.type+'" in challengeConfig, so nothing was written.','crit'); return; }
+    if(!S.events[m]) await loadMonth(m);
+    var cap=capExceeded(item.member, item.type, item.date, m, eid), stamp=nowIso();
+    var data={ member:item.member, type:item.type, date:item.date||null, month:m, points:cap?0:p, status:cap?'over_cap':'confirmed', source:item.source||(item.raw&&item.raw.source)||'review', reviewedBy:'jordan', reviewedAt:stamp, reviewNote:cap?('Approved, but the '+cap+' limit was already reached'):'Approved in HQ' };
+    if(item.evidence) data.evidence=item.evidence;
+    await writeEvent(eid, data);
+    if(item.kind==='review') await mergeRow('challenge_reviews', item.id, { status:'approved', reviewedAt:stamp, reviewedBy:'jordan', eventId:eid, points:data.points });
+    S.reviews=S.reviews.map(function(r){ return r.id===item.id?Object.assign({}, r, {status:'approved'}):r; });
+    flash(cap ? ('Approved. '+memberName(item.member)+' already hit the '+cap+' limit, so it scores 0.') : ('Approved: +'+p+' to '+memberName(item.member)+'.'), cap?'warn':'good');
+  }
+  async function reject(item, reason){
+    var m=item.month||monthOf(item.date), stamp=nowIso(), eid=eventIdFor(item);
+    if(m) await writeEvent(eid, { member:item.member, type:item.type, date:item.date||null, month:m, points:0, status:'rejected', rejectReason:reason, reviewedBy:'jordan', reviewedAt:stamp, source:item.source||'review' });
+    if(item.kind==='review') await mergeRow('challenge_reviews', item.id, { status:'rejected', rejectReason:reason, reviewedAt:stamp, reviewedBy:'jordan', eventId:eid });
+    S.reviews=S.reviews.map(function(r){ return r.id===item.id?Object.assign({}, r, {status:'rejected'}):r; });
+    delete S.rejecting[item.id];
+    flash('Rejected: '+reason+'.','good');
+  }
+  async function loadMonth(m){ var r=await q('challenge_events').eq('data->>month', m); if(r.error) throw r.error; S.events[m]=rows(r); S.loaded[m]=true; }
+
+  /* ---------- manual log ---------- */
+  var MANUAL=[
+    {type:'one_on_one', label:'1:1 attended / booked', keyed:false},
+    {type:'referral_call', label:'Referral call attended', keyed:false},
+    {type:'referral_paid', label:'Referral first payment cleared', keyed:false, dated:true},
+    {type:'testimonial', label:'Testimonial', keyed:'month'},
+    {type:'prize_story', label:'Prize story post', keyed:'next'}
+  ];
+  function manualPlan(memberId, type, date){
+    var spec=MANUAL.find(function(x){ return x.type===type; }); if(!spec) return null;
+    var m = spec.keyed==='next' ? nextMonth(S.month) : monthOf(date);
+    var id = spec.keyed ? (memberId+'|'+type+'|'+m) : (memberId+'|'+type+'|manual-'+date+'-'+nowMs().toString(36));
+    return { id:id, month:m, date: spec.keyed==='next' ? today() : date, points:pts(type) };
+  }
+  function existingKeyed(memberId, type, m){ var evs=monthEvents(m)||[]; return evs.find(function(e){ return e.id===memberId+'|'+type+'|'+m && e.status==='confirmed'; }); }
+  async function logManual(memberId, type){
+    var dEl=document.querySelector('[data-ch-date="'+cssEsc(memberId)+'"]'), date=(dEl&&dEl.value)||today();
+    if(!HQ.isDayKey(date)){ flash('Pick a valid date first.','crit'); return; }
+    var plan=manualPlan(memberId, type, date); if(!plan) return;
+    if(plan.points==null){ flash('No points for "'+type+'" in challengeConfig, so nothing was written.','crit'); return; }
+    if(!S.events[plan.month]) await loadMonth(plan.month);
+    if((type==='testimonial'||type==='prize_story') && existingKeyed(memberId, type, plan.month)){ flash(TYPES[type].label+' is already logged for '+memberName(memberId)+' in '+monthLabel(plan.month)+' (max 1 a month).','warn'); return; }
+    var data={ member:memberId, type:type, date:plan.date, month:plan.month, points:plan.points, status:'confirmed', source:'manual', evidence:'Logged by Jordan in HQ', loggedAt:nowIso(), loggedBy:'jordan', reviewedBy:'jordan' };
+    await writeEvent(plan.id, data);
+    var where = plan.month===S.month ? '' : ' (counts in '+monthLabel(plan.month)+')';
+    flash('+'+plan.points+' '+TYPES[type].label.toLowerCase()+' for '+memberName(memberId)+where+'.','good', {id:plan.id, month:plan.month});
+  }
+  async function undo(id, month){
+    var list=S.events[month]||[], e=list.find(function(x){ return x.id===id; }); if(!e) return;
+    await writeEvent(id, { status:'cancelled', points:0, cancelledAt:nowIso(), cancelledBy:'jordan', member:evMember(e), month:month });
+    flash((TYPES[e.type]?TYPES[e.type].label:'Event')+' undone and removed from '+memberName(evMember(e))+'\'s total.','good');
+  }
+  function cssEsc(s){ return String(s).replace(/["\\]/g,'\\$&'); }
+
+  /* ---------- Monday drafts ---------- */
+  function draftWeek(){
+    var t=today(), ws=addDays(weekStart(t),-7), we=addDays(ws,6);
+    return { start:ws, end:we, month:monthOf(we), weekNo: Math.floor((Date.parse(ws+'T00:00:00Z')/864e5+3)/7) };
+  }
+  var GREET=['Hey','Yo','Morning','What\'s good'];
+  var POS_OUT=[
+    function(c){ return 'just looked at the leaderboard and you\'re sitting '+c.ord+' on '+c.pts+' points, which is '+c.g5+' off the top 5 and '+c.g1+' off first.'; },
+    function(c){ return 'leaderboard has you '+c.ord+' on '+c.pts+', only '+c.g5+' off the top 5 now and '+c.g1+' off first.'; },
+    function(c){ return 'you\'re '+c.ord+' on '+c.pts+' this week, '+c.g5+' off 5th and '+c.g1+' off top spot.'; },
+    function(c){ return 'quick one, you\'re sitting '+c.ord+' with '+c.pts+' points. That\'s '+c.g5+' behind 5th and '+c.g1+' behind first.'; },
+    function(c){ return 'you\'re '+c.ord+' on the leaderboard right now with '+c.pts+'. '+c.g5+' points gets you into the top 5, '+c.g1+' gets you to first.'; },
+    function(c){ return 'checked the standings and you\'re '+c.ord+' on '+c.pts+', '+c.g5+' points shy of the top 5 and '+c.g1+' off the lead.'; },
+    function(c){ return 'you\'ve got '+c.pts+' on the board, good for '+c.ord+'. Top 5 is '+c.g5+' away and first is '+c.g1+' away.'; },
+    function(c){ return c.ord+' place right now on '+c.pts+'. You\'re '+c.g5+' off the top 5 and '+c.g1+' behind first.'; },
+    function(c){ return 'had a look at the board, you\'re '+c.ord+' with '+c.pts+'. '+c.g5+' more gets you top 5, '+c.g1+' more and you\'re leading.'; },
+    function(c){ return 'standings have you '+c.ord+' on '+c.pts+' points, '+c.g5+' from 5th and '+c.g1+' from top spot.'; }
+  ];
+  var POS_FIRST=[
+    function(c){ return 'you\'re sitting top of the leaderboard on '+c.pts+', '+c.lead+' clear of second.'; },
+    function(c){ return 'you\'re out in front on '+c.pts+', '+c.lead+' ahead of 2nd.'; },
+    function(c){ return 'top spot is yours right now with '+c.pts+', '+c.lead+' points up on second.'; },
+    function(c){ return 'you\'re leading the whole thing on '+c.pts+', with a '+c.lead+' point buffer over 2nd.'; },
+    function(c){ return 'number one on the board with '+c.pts+', '+c.lead+' clear.'; },
+    function(c){ return 'still on top with '+c.pts+', and '+c.lead+' points between you and second.'; }
+  ];
+  var POS_TIED=[
+    function(c){ return 'you\'re tied on top of the leaderboard on '+c.pts+'.'; },
+    function(c){ return 'it\'s dead level at the top, you\'re joint 1st on '+c.pts+'.'; },
+    function(c){ return 'you\'re sharing top spot on '+c.pts+' right now.'; },
+    function(c){ return 'joint first on '+c.pts+', nothing between you and the lead.'; },
+    function(c){ return 'you\'re level on '+c.pts+' for first place.'; }
+  ];
+  var POS_TOP=[
+    function(c){ return 'you\'re '+c.ord+' on '+c.pts+', just '+c.g1+' off first.'; },
+    function(c){ return 'sitting '+c.ord+' on '+c.pts+', '+c.g1+' behind the top spot.'; },
+    function(c){ return 'you\'re in the top 5, '+c.ord+' on '+c.pts+' and '+c.g1+' off first.'; },
+    function(c){ return c.ord+' on the leaderboard with '+c.pts+', '+c.g1+' points off the lead.'; },
+    function(c){ return 'leaderboard has you '+c.ord+' on '+c.pts+', '+c.g1+' off 1st.'; },
+    function(c){ return 'you\'re '+c.ord+' right now on '+c.pts+'. Only '+c.g1+' between you and first.'; }
+  ];
+  // focus areas: g = gerund form ("focus on X"), i = imperative form ("I'd X")
+  var AREAS={
+    checkin:{g:'getting your check-in in on time', i:'get your check-in in on time', grp:'check-ins coming in late'},
+    training:{g:'hitting every session in your plan', i:'hit every session in your plan', grp:'sessions getting missed'},
+    food:{g:'logging your food every day', i:'log your food every day', grp:'food logging dropping off'},
+    weight:{g:'logging your weight each morning', i:'log your weight each morning', grp:'weigh-ins getting skipped'},
+    chat:{g:'getting a bit more involved in the chat', i:'get a bit more involved in the chat', grp:'the chat going quiet'},
+    photo:{g:'chucking a progress photo in the group', i:'chuck a progress photo in the group', grp:'not many progress photos coming through'},
+    tags:{g:'tagging me in a story or two', i:'tag me in a story or two', grp:'not many story tags'},
+    bio:{g:'putting "trained by @jordantornatore" in your bio', i:'put "trained by @jordantornatore" in your bio', grp:'bio links'},
+    oneonone:{g:'booking in your 1:1', i:'book in your 1:1', grp:'1:1s not getting booked'},
+    steps:{g:'hitting your step target', i:'hit your step target', grp:'step targets getting missed'}
+  };
+  var INTRO_OUT=[
+    {f:'g', t:function(l){ return 'In terms of what you can improve on, what I\'d focus on is '+l+'.'; }},
+    {f:'g', t:function(l){ return 'Biggest wins for you this week would be '+l+'.'; }},
+    {f:'i', t:function(l){ return 'If I were you I\'d '+l+' this week.'; }},
+    {f:'g', t:function(l){ return 'What\'d move you up quickest is '+l+'.'; }},
+    {f:'g', t:function(l){ return 'Main things I\'d lock in are '+l+'.'; }},
+    {f:'g', t:function(l){ return 'This week I\'d put the effort into '+l+'.'; }},
+    {f:'g', t:function(l){ return 'Easiest points for you right now are '+l+'.'; }},
+    {f:'i', t:function(l){ return 'To jump a few spots I\'d '+l+'.'; }},
+    {f:'i', t:function(l){ return 'Quickest way to close the gap is to '+l+'.'; }},
+    {f:'g', t:function(l){ return 'I\'d be looking at '+l+' this week.'; }}
+  ];
+  var INTRO_FIRST=[
+    {f:'i', t:function(l, chase){ return 'To hold it, I\'d '+l+'.'+(chase?' '+chase+'\'s right on your tail.':''); }},
+    {f:'g', t:function(l, chase){ return 'Best way to stay up there is '+l+'.'+(chase?' '+chase+' isn\'t far behind.':''); }},
+    {f:'i', t:function(l, chase){ return 'To keep the gap I\'d '+l+'.'+(chase?' '+chase+'\'s coming.':''); }},
+    {f:'g', t:function(l){ return 'What keeps you on top is '+l+'.'; }},
+    {f:'g', t:function(l, chase){ return 'Points still on the table for you: '+l+'.'+(chase?' '+chase+' will be chasing.':''); }},
+    {f:'i', t:function(l){ return 'To lock it in I\'d '+l+'.'; }}
+  ];
+  var INTRO_TOP=[
+    {f:'g', t:function(l){ return 'What\'d get you over the line is '+l+'.'; }},
+    {f:'i', t:function(l){ return 'To push for first I\'d '+l+'.'; }},
+    {f:'g', t:function(l){ return 'Quickest way to close it is '+l+'.'; }},
+    {f:'g', t:function(l){ return 'I\'d start with '+l+'.'; }},
+    {f:'i', t:function(l){ return 'If I were you I\'d '+l+' this week.'; }},
+    {f:'g', t:function(l){ return 'Biggest gains for you are '+l+'.'; }}
+  ];
+  function joinList(a){ return a.length<=1?(a[0]||''):a.slice(0,-1).join(', ')+' and '+a[a.length-1]; }
+  function weekFacts(memberId, wk){
+    var m=wk.month, from=wk.start<monthFrom(m)?monthFrom(m):wk.start, to=wk.end, days=daysBetween(from,to), A=activity(memberId, m, from, to);
+    var mm=memberById(memberId)||{}, spw=weekCap(memberId,'training_session'), partial=from>wk.start;
+    var F={ A:A, days:days, spw:spw, partial:partial, sessions:n(A,'training_session'), checkin:n(A,'checkin_on_time'), weight:Object.keys((A.byType.weight_logged||{days:{}}).days).length,
+      food:Object.keys((A.byType.food_logged||{days:{}}).days).length, chatPts:ptsOf(A,'group_message')+ptsOf(A,'group_reply'), photo:n(A,'progress_photo'), tags:n(A,'story_tag'), steps:n(A,'steps_target') };
+    var gaps=[], cap=(S.cfg&&+S.cfg.weeklyChatCap)||null;
+    function gap(k, v){ if(v!=null && v>0) gaps.push({k:k, v:v}); }
+    if(pts('checkin_on_time')!=null) gap('checkin', F.checkin?0:pts('checkin_on_time'));
+    if(spw && !partial && pts('training_session')!=null) gap('training', Math.max(0, spw-F.sessions)*pts('training_session'));
+    if(pts('food_logged')!=null) gap('food', (days-F.food)*pts('food_logged'));
+    if(pts('weight_logged')!=null) gap('weight', (days-F.weight)*pts('weight_logged'));
+    if(cap) gap('chat', Math.max(0, cap-F.chatPts));
+    if(pts('progress_photo')!=null) gap('photo', F.photo?0:pts('progress_photo'));
+    var tagCap=weekCap(memberId,'story_tag'); if(pts('story_tag')!=null && tagCap) gap('tags', Math.max(0, tagCap-F.tags)*pts('story_tag'));
+    var MA=activity(memberId, m); if(!n(MA,'trained_by_bio') && pts('trained_by_bio')!=null && wk.allowBio && wk.end<=addDays(monthFrom(m),13)) gap('bio', pts('trained_by_bio', {kept:mm.bioScoredBefore}));
+    if(!n(MA,'one_on_one') && pts('one_on_one')!=null) gap('oneonone', pts('one_on_one'));
+    if(!noStepTarget(memberId) && cnt(MA,'steps_target')>0 && pts('steps_target')!=null) gap('steps', (days-F.steps)*pts('steps_target'));
+    // rank by missed points, weighted toward the doc's accountability habits (chat/tags have big caps but matter less)
+    var W={checkin:1.5, training:1.5, food:1.5, weight:1.3, photo:1.2, oneonone:1, steps:1, tags:0.7, chat:0.5, bio:0.3};
+    gaps.forEach(function(g){ g.w=g.v*(W[g.k]||1); });
+    gaps.sort(function(a,b){ return b.w-a.w; });
+    F.gaps=gaps; F.focus=gaps.slice(0,3).map(function(g){ return g.k; });
+    var hi=null, v=fnv(memberId+wk.start);
+    function pick(a){ return a[v%a.length]; }
+    if(spw && F.sessions>=spw && !partial) hi=pick(['solid week in the gym','didn\'t miss a session last week','every session done last week','gym was locked in last week']);
+    else if(days>=5 && F.food>=days) hi=pick(['food logged every single day','every day of food logged','food logging was spot on']);
+    else if(F.photo) hi=pick(['good to see the progress pic','progress pic looked good','love the progress photo']);
+    else if(F.tags>=2) hi=pick(['appreciate the story tags','thanks for the story tags']);
+    else if(cap && F.chatPts>=cap*0.66) hi=pick(['loving the energy in the chat','good to see you in the chat']);
+    else if(F.checkin) hi=pick(['check-in came through on time','nice one getting the check-in in on time']);
+    F.highlight=hi;
+    return F;
+  }
+  function memberHistory(memberId){ var mm=memberById(memberId)||{}; return Array.isArray(mm.dmHistory)?mm.dmHistory:[]; }
+  function buildDrafts(){
+    var wk=draftWeek(); wk.allowBio=true;
+    var sd=startDate(), m=wk.month;
+    if(!m) return {error:'No week to report on yet.'};
+    if(sd && wk.end<sd) return {error:'First Monday drafts arrive on '+HQ.fmtDay(addDays(weekStart(sd),7))+' (the week of the challenge start has to finish first).'};
+    if(!S.events[m]) return {error:'Loading '+monthLabel(m)+'…'};
+    var st=scoredThrough();
+    if(!st || st<wk.end) return {error:'The scan has only scored through '+(st?HQ.fmtDay(st):'nothing yet')+', so last week ('+HQ.fmtDay(wk.start,'short')+' – '+HQ.fmtDay(wk.end,'short')+') isn\'t complete. Drafts appear once it has scored Sunday.'};
+    var board=standings(m, wk.end); if(!board || !board.ranked) return {error:'No scored clients yet.'};
+    var weekIdx=Math.floor((Date.parse(wk.start+'T00:00:00Z')-Date.parse(weekStart(monthFrom(m))+'T00:00:00Z'))/(7*864e5))+1;
+    var ranked=board.rows.filter(function(r){ return r.points!=null; });
+    var facts={}; ranked.forEach(function(r){ facts[r.id]=weekFacts(r.id, wk); });
+    // group post
+    var top=ranked.filter(function(r){ return r.rank<=5; });
+    var HEAD=['Week '+weekIdx+' leaderboard\'s in boys','Week '+weekIdx+' standings are in boys','Leaderboard update, week '+weekIdx,'Week '+weekIdx+' of the challenge, here\'s the top 5','Here\'s where week '+weekIdx+' landed boys'];
+    var lines=[HEAD[wk.weekNo%HEAD.length], ''];
+    var bd={}, have={}; top.forEach(function(r){ bd[r.id]=monthBreakdown(r.id, m, wk.end); bd[r.id].forEach(function(x){ have[x.k]=(have[x.k]||0)+1; }); });
+    top.forEach(function(r){
+      var parts=bd[r.id].slice(), order=['train','checkin','food','photo','tags','perfect','ref','ba','oneonone','chat','weight'];
+      parts.sort(function(a,b){ var ca=have[a.k]===top.length?1:0, cb=have[b.k]===top.length?1:0; return ca-cb || b.p-a.p || order.indexOf(a.k)-order.indexOf(b.k); });
+      var txt=parts.slice(0, parts.length>3?3:parts.length).map(function(x){ return x.t; }).join(', ');
+      txt = txt ? txt.charAt(0).toUpperCase()+txt.slice(1) : 'On the board';
+      lines.push(r.rank+'. '+firstName(r.id)+', '+r.points+'. '+txt);
+    });
+    var spread=(board.first!=null && board.fifth!=null)?board.first-board.fifth:null, grp={};
+    ranked.forEach(function(r){ facts[r.id].gaps.forEach(function(g){ if(g.k!=='bio'&&g.k!=='oneonone') grp[g.k]=(grp[g.k]||0)+g.v; }); });
+    var bigK=Object.keys(grp).sort(function(a,b){ return grp[b]-grp[a]; })[0];
+    var tail=[];
+    if(spread!=null){ var SPREAD= spread<=60 ? ['Only '+spread+' points between 1st and 5th, so it\'s wide open.', 'Just '+spread+' points separates 1st and 5th, anyone\'s game.', 'Gap from 1st to 5th is only '+spread+', tight as.'] : [spread+' points between 1st and 5th, plenty of time to close it.', spread+' points separates 1st and 5th, still heaps of month left to chase it down.', 'Gap from 1st to 5th is '+spread+', there\'s time to reel it in.']; tail.push(SPREAD[wk.weekNo%SPREAD.length]); }
+    if(bigK){ var BIG=['Biggest thing I\'m seeing across the group is '+AREAS[bigK].grp+', so tighten that up.','Main thing holding the group back is '+AREAS[bigK].grp+', let\'s fix that this week.','If there\'s one thing to sharpen across the board it\'s '+AREAS[bigK].grp+'.']; tail.push(BIG[(wk.weekNo+1)%BIG.length]); }
+    tail.push('Let\'s go.');
+    lines.push(''); lines.push(tail.join(' '));
+    var group=lines.join('\n');
+    // private messages
+    var used={}, dms=[];
+    var second=ranked.find(function(r){ return r.rank===2; }), tiedTop=ranked.filter(function(r){ return r.rank===1; }).length>1;
+    ranked.forEach(function(r){
+      var F=facts[r.id], hist=memberHistory(r.id), recent=hist.filter(function(h){ return h && h.week && h.week<wk.start && h.week>=addDays(wk.start,-28); });
+      var isFirst=r.rank===1, isTop=r.rank<=5, set=isFirst?'F':(isTop?'T':'O');
+      var posSet = isFirst ? (tiedTop?POS_TIED:POS_FIRST) : (isTop?POS_TOP:POS_OUT);
+      var introSet = isFirst ? INTRO_FIRST : (isTop?INTRO_TOP:INTRO_OUT);
+      var P=posSet.length, I=introSet.length, w=wk.weekNo, h1=fnv('g'+r.id), h2=fnv('p'+r.id), h3=fnv('i'+r.id);
+      var prev=recent.filter(function(x){ return x.week===addDays(wk.start,-7); })[0];
+      var prevP = prev&&prev.pos&&prev.pos.charAt(0)===set ? +prev.pos.slice(1) : (h2+w-1)%P;
+      var prevI = prev&&prev.combo&&prev.combo.charAt(0)===set ? +prev.combo.split('.')[2] : (h3+w-1)%I;
+      var c={ ord:ord(r.rank), pts:r.points, g1:r.gap1, g5:r.gap5, lead: second?r.points-second.points:r.points };
+      var focus=F.focus.length?F.focus:['food','photo','chat'];
+      var chase=isFirst&&second&&!tiedTop?firstName(second.id):null;
+      function make(o1, o2){
+        var pi=(h2+w+o1)%P, ii=(h3+w+o2)%I, gi=(h1+w+o1+o2)%GREET.length;
+        var hl=F.highlight && (h1+w)%3!==0 ? F.highlight+(((h1+w)%2)?' bro. ':'. ') : '';
+        var pos=posSet[pi](c); if(hl) pos=pos.charAt(0).toUpperCase()+pos.slice(1);
+        var intro=introSet[ii];
+        return { pi:pi, ii:ii, key:set+gi+'.'+pi+'.'+ii, m1:GREET[gi]+' '+firstName(r.id)+', '+hl+pos, m2:intro.t(joinList(focus.map(function(fk){ return AREAS[fk][intro.f]; })), chase) };
+      }
+      function inHist(x){ return recent.some(function(h){ return h.h1===hashHex(x.m1.slice(0,60)) || h.h2===hashHex(x.m2.slice(0,60)); }); }
+      var pick=null;
+      var passes=[
+        function(x){ return !used['p'+set+x.pi] && !used['i'+set+x.ii] && x.pi!==prevP && x.ii!==prevI; },
+        function(x){ return !used['p'+set+x.pi] && x.pi!==prevP && x.ii!==prevI; },
+        function(x){ return !used[x.key] && x.pi!==prevP; },
+        function(x){ return !used[x.key]; }
+      ];
+      for(var pass=0; pass<passes.length && !pick; pass++)
+        for(var o1=0;o1<P && !pick;o1++) for(var o2=0;o2<I && !pick;o2++){ var x=make(o1,o2); if(!inHist(x) && passes[pass](x)) pick=x; }
+      if(!pick) return;
+      used[pick.key]=1; used['p'+set+pick.pi]=1; used['i'+set+pick.ii]=1;
+      dms.push({ id:r.id, name:memberName(r.id), rank:r.rank, points:r.points, gap1:r.gap1, gap5:r.gap5, msg1:pick.m1, msg2:pick.m2, combo:pick.key, focus:F.focus, cov:coverageFor(r.id) });
+    });
+    return { week:wk, weekIdx:weekIdx, group:group, dms:dms, month:m };
+  }
+  function monthBreakdown(memberId, m, upTo){
+    var A=activity(memberId, m, null, upTo), parts=[], push=function(k,t,p){ parts.push({k:k,t:t,p:p}); }, from=monthFrom(m), to=upTo||scoredTo(m);
+    var spw=weekCap(memberId,'training_session'), ses=n(A,'training_session');
+    var fullWeeks=[], d=weekStart(from); while(to && addDays(d,6)<=to){ if(d>=from) fullWeeks.push(d); d=addDays(d,7); }
+    var missed=spw ? fullWeeks.filter(function(w){ return (A.weeks[w]||0)<spw; }).length : null;
+    if(ses) push('train',spw && fullWeeks.length && missed===0 ? 'didn\'t miss a session' : 'trained '+plural(ses,'session'), ptsOf(A,'training_session'));
+    var weeks=0; d=weekStart(from); while(to && d<=to){ weeks++; d=addDays(d,7); }
+    var ci=n(A,'checkin_on_time'); if(ci) push('checkin',ci>=weeks && weeks>1 ? 'every check-in on time' : plural(ci,'check-in')+' on time', ptsOf(A,'checkin_on_time'));
+    var days=to?daysBetween(from,to):0, food=Object.keys((A.byType.food_logged||{days:{}}).days).length;
+    if(food) push('food',days && food>=days ? 'logged food every single day' : 'food logged '+food+(days?'/'+days:'')+' days', ptsOf(A,'food_logged'));
+    if(n(A,'progress_photo')) push('photo',plural(n(A,'progress_photo'),'progress photo'), ptsOf(A,'progress_photo'));
+    if(n(A,'story_tag')) push('tags',plural(n(A,'story_tag'),'story tag'), ptsOf(A,'story_tag'));
+    if(n(A,'perfect_week')) push('perfect',plural(n(A,'perfect_week'),'perfect week'), ptsOf(A,'perfect_week'));
+    if(n(A,'referral_call')||n(A,'referral_paid')) push('ref','brought in a referral', ptsOf(A,'referral_call')+ptsOf(A,'referral_paid'));
+    if(n(A,'before_after_story')) push('ba','posted his before/after', ptsOf(A,'before_after_story'));
+    if(n(A,'one_on_one')) push('oneonone','showed up to his 1:1', ptsOf(A,'one_on_one'));
+    var chat=ptsOf(A,'group_message')+ptsOf(A,'group_reply'); if(chat) push('chat',chat>=40?'all over the chat':'getting involved in the chat', chat);
+    var wt=Object.keys((A.byType.weight_logged||{days:{}}).days).length; if(wt) push('weight','weighed in '+plural(wt,'day'), ptsOf(A,'weight_logged'));
+    return parts;
+  }
+  async function recordCopy(memberId, msgIdx, d, wkStart){
+    try{
+      var hist=memberHistory(memberId).filter(function(h){ return h && h.week>=addDays(wkStart,-28) && !(h.week===wkStart); });
+      var mine=memberHistory(memberId).find(function(h){ return h && h.week===wkStart; }) || {week:wkStart};
+      mine.h1=hashHex(d.msg1.slice(0,60)); mine.h2=hashHex(d.msg2.slice(0,60)); mine.pos=d.combo.charAt(0)+d.combo.split('.')[1]; mine.combo=d.combo; mine['copied'+msgIdx]=nowIso();
+      hist.push(mine);
+      var data=await mergeRow('challenge_members', memberId, { dmHistory:hist.slice(-6) });
+      var i=S.members.findIndex(function(x){ return x.id===memberId; }); if(i>=0) S.members[i]=Object.assign({id:memberId}, data); else S.members.push(Object.assign({id:memberId}, data));
+      buildMembers();
+    }catch(e){ console.warn('could not record the copied message: '+(e&&e.message||e)); }
+  }
+  function copyText(text){
+    return new Promise(function(resolve){
+      function fallback(){ try{ var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); var ok=document.execCommand && document.execCommand('copy'); document.body.removeChild(ta); resolve(!!ok); }catch(e){ resolve(false); } }
+      if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function(){ resolve(true); }, fallback); else fallback();
+    });
+  }
+
+  /* ---------- scan health ---------- */
+  var SOURCES=[{k:'onefit', label:'1FIT', alias:['1fit','onefit','1FIT']},{k:'instagram', label:'Instagram', alias:['instagram','ig']},{k:'whatsapp', label:'WhatsApp', alias:['whatsapp','wa']}];
+  function scanHealth(){
+    var sc=S.scan; if(!sc || !sc.lastScanAt) return { level:'grey', text:'No challenge scan has run yet', sources:SOURCES.map(function(s){ return {label:s.label, level:'grey', text:'–'}; }) };
+    var h=HQ.hoursSince(sc.lastScanAt, nowMs()), failed = sc.status==='failed' || sc.lastRunOk===false || !!sc.lastError;
+    var level = failed ? 'red' : (h!=null && h>26 ? 'amber' : 'green');
+    var text = failed ? ('Failed'+(sc.lastError?': '+sc.lastError:'')) : (h>26 ? HQ.relTime(sc.lastScanAt, nowMs())+', over 26 hours ago' : HQ.relTime(sc.lastScanAt, nowMs()));
+    var cov=sc.coverage||{}, fails=Array.isArray(cov.failed)?cov.failed:[], srcObj=sc.sources||{};
+    var sources=SOURCES.map(function(s){
+      var o=null; s.alias.concat([s.k]).forEach(function(a){ if(!o && srcObj[a]) o=srcObj[a]; });
+      if(o){ var ok=o.ok===true||o.status==='ok', fail=o.ok===false||o.status==='failed'||o.status==='skipped';
+        return { label:s.label, level: fail?'red':(ok?(o.partial?'amber':'green'):'grey'), text: fail?(o.reason||'did not come through'):(ok?('came through'+(o.at?' '+HQ.relTime(o.at, nowMs()):'')+(o.partial?(' · '+o.partial):'')):'–') }; }
+      var mine=fails.filter(function(f){ var src=String(f&&f.source||'').toLowerCase(); return s.alias.some(function(a){ return src.indexOf(a.toLowerCase())>=0; }); });
+      var whole=mine.filter(function(f){ return !f.member || f.member==='*' || f.member==='all'; });
+      if(whole.length) return { label:s.label, level:'red', text: whole[0].reason||'did not come through' };
+      if(mine.length) return { label:s.label, level:'amber', text: 'came through, '+plural(mine.length,'client')+' not read' };
+      if(!sc.coverage) return { label:s.label, level:'grey', text:'– (the scan didn\'t report coverage)' };
+      return { label:s.label, level:'green', text:'came through' };
+    });
+    return { level:level, text:text, sources:sources, failed:failed };
+  }
+
+  /* ---------- render ---------- */
+  function chipCls(l){ return {red:'crit', amber:'warn', green:'good', grey:'grey'}[l]||'grey'; }
+  function syncBadge(){ var c=reviewItems().length, b=$('chBadge'); if(b){ b.hidden=!c; b.textContent=c; } var bb=$('chBadgeBb'); if(bb){ bb.hidden=!c; bb.textContent=c; } }
+  function render(){
+    if(!S.admin || !$('chRoot')) return;
+    syncBadge();
+    if(!S.active) return;
+    var m=S.month||curMonth();
+    // month picker
+    var months=[], fm=firstChallengeMonth(), cm=curMonth(), x=fm<cm?fm:cm;
+    while(x<=cm && months.length<36){ months.push(x); x=nextMonth(x); }
+    Object.keys(S.events).forEach(function(k){ if(months.indexOf(k)<0 && /^\d{4}-\d{2}$/.test(k) && (S.events[k]||[]).length) months.push(k); });
+    if(months.indexOf(m)<0) months.push(m); months.sort().reverse();
+    var sel=$('chMonth'); if(sel){ var opts=months.map(function(k){ return '<option value="'+k+'"'+(k===m?' selected':'')+'>'+esc(monthLabel(k))+(k===cm?' (now)':'')+'</option>'; }).join(''); if(sel.innerHTML!==opts) sel.innerHTML=opts; }
+    var hl=scanHealth(), sub=[];
+    var sd=startDate(); if(sd && monthOf(sd)===m) sub.push((sd>today()?'Starts ':'Started ')+HQ.fmtDay(sd,'wd'));
+    var st=scoredTo(m); sub.push(st?'scored through '+HQ.fmtDay(st,'wd'):'no days scored yet');
+    $('chSub').textContent=monthLabel(m)+' · '+sub.join(' · ');
+    var chip=$('chScanChip'); if(chip){ chip.className='chip ch-scanchip '+chipCls(hl.level); chip.textContent= hl.level==='grey'?'Scan: none yet':(hl.failed?'Scan failed':(hl.level==='amber'?'Scan stale':'Scan OK')); chip.setAttribute('data-level', hl.level); }
+    document.querySelectorAll('#chViewSeg [data-chview]').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-chview')===S.view?'true':'false'); });
+    var rc=reviewItems().length; setT('chSegReview', rc?'Review · '+rc:'Review');
+    var html='';
+    if(S.msg) html+='<div class="ch-msg '+esc(S.msgKind)+'" role="status">'+esc(S.msg)+(S.undo?' <button type="button" class="btn small" data-ch-undo="'+esc(S.undo.id)+'" data-month="'+esc(S.undo.month)+'">Undo</button>':'')+'</div>';
+    if(S.loadError) html+='<div class="panel" style="border-color:var(--crit)"><h2>Couldn\'t load the challenge</h2><p class="rule">'+esc(S.loadError)+'. Retrying every 30 seconds.</p></div>';
+    if(!S.loaded.base){ html+='<div class="panel"><div class="empty-state">Loading…</div></div>'; $('chRoot').innerHTML=html; return; }
+    if(!S.cfg) html+='<div class="panel" style="border-color:var(--crit)"><h2>No challengeConfig</h2><p class="rule">meta/challengeConfig is missing, so no points can be shown or logged.</p></div>';
+    if(S.view==='board') html+=renderBoard(m);
+    else if(S.view==='review') html+=renderReview();
+    else if(S.view==='drafts') html+=renderDrafts();
+    else if(S.view==='health') html+=renderHealth(hl);
+    var root=$('chRoot'), keep={}; root.querySelectorAll('[data-ch-date]').forEach(function(i){ keep[i.getAttribute('data-ch-date')]=i.value; });
+    var other=root.querySelector('[data-ch-reason-text]'), otherVal=other?{id:other.getAttribute('data-ch-reason-text'), v:other.value}:null;
+    root.innerHTML=html;
+    root.querySelectorAll('[data-ch-date]').forEach(function(i){ var k=i.getAttribute('data-ch-date'); if(keep[k]) i.value=keep[k]; });
+    if(otherVal){ var o2=root.querySelector('[data-ch-reason-text="'+cssEsc(otherVal.id)+'"]'); if(o2) o2.value=otherVal.v; }
+  }
+  function setT(id,t){ var el=$(id); if(el) el.textContent=t; }
+  function fmtPts(v){ return v==null?'–':String(v); }
+  function renderBoard(m){
+    var st=standings(m);
+    if(!st) return '<div class="panel"><div class="empty-state">Loading '+esc(monthLabel(m))+'…</div></div>';
+    var h='';
+    var leader=st.rows.filter(function(r){ return r.rank===1; });
+    h+='<div class="kpis">'+
+      kpi('Clients in', S.allMembers.filter(function(x){ return x.active!==false; }).length||'–', 'active in the group')+
+      kpi('Leader', leader.length?esc(leader.map(function(r){ return firstName(r.id); }).join(' & ')):'–', leader.length?leader[0].points+' pts':(st.arrived?'no points yet':'scan hasn\'t scored a day yet'))+
+      kpi('1st → 5th', (st.first!=null&&st.fifth!=null)?(st.first-st.fifth):'–', (st.first!=null&&st.fifth!=null)?'points apart':'needs 5 scored clients')+
+      kpi('To review', reviewItems().length, reviewItems().length?'<button type="button" class="linkish" data-chview="review">open the queue</button>':'nothing waiting', true)+
+    '</div>';
+    h+='<div class="panel"><div class="chart-head"><div><h2>Leaderboard · '+esc(monthLabel(m))+'</h2><p class="rule" style="margin-top:4px">Confirmed points only. Tap a client to see what they did and log referrals, 1:1s and testimonials.</p></div></div>';
+    if(!st.arrived) h+='<div class="ch-note">The challenge scan hasn\'t scored a day of '+esc(monthLabel(m))+' yet, so totals show "–" until it does'+(startDate()&&monthOf(startDate())===m&&startDate()>today()?' (the challenge starts '+esc(HQ.fmtDay(startDate()))+')':'')+'. Anything you log by hand still counts.</div>';
+    if(!st.rows.length) h+='<div class="empty-state">No clients in challenge_members or challenge_clients yet.</div>';
+    h+='<div class="ch-board">';
+    var tied1=st.rows.filter(function(z){ return z.rank===1; }).length>1;
+    st.rows.forEach(function(r){
+      var open=!!S.open[r.id];
+      var gaps = r.points==null ? 'no points yet' : (r.rank===1 ? (tied1?'Tied 1st':'Leader') : (r.gap1+' off 1st'))+' · '+(r.rank<=5?'Top 5':(r.gap5==null?'–':r.gap5+' off 5th'));
+      h+='<div class="ch-item'+(open?' open':'')+'"><button type="button" class="ch-row" data-ch-open="'+esc(r.id)+'" aria-expanded="'+(open?'true':'false')+'">'+
+        '<span class="ch-rank'+(r.rank&&r.rank<=5?' top':'')+'">'+(r.rank==null?'–':r.rank)+'</span>'+
+        '<span class="ch-who"><b>'+esc(r.name)+'</b><small>'+esc(gaps)+'</small></span>'+
+        '<span class="ch-pts">'+fmtPts(r.points)+'<small>pts</small></span><span class="chev" aria-hidden="true">▾</span></button>'+
+        (open?renderDetail(r.id, m):'')+'</div>';
+    });
+    h+='</div></div>';
+    return h;
+  }
+  function kpi(label, value, note, raw){ return '<div class="kpi"><div class="label">'+esc(label)+'</div><div class="value">'+(raw?value:esc(value))+'</div><div class="note">'+note+'</div></div>'; }
+  function renderDetail(id, m){
+    var A=activity(id, m), to=scoredTo(m), from=monthFrom(m), days=to?daysBetween(from,to):null, mm=memberById(id)||{}, spw=weekCap(id,'training_session');
+    function dash(v){ return to?v:'–'; }
+    var wt=Object.keys((A.byType.weight_logged||{days:{}}).days).length, fd=Object.keys((A.byType.food_logged||{days:{}}).days).length;
+    var wks=Object.keys(A.weeks).sort().map(function(w){ return HQ.fmtDay(w,'short')+': '+A.weeks[w]+(spw?'/'+spw:''); });
+    var weeksScored=to?Object.keys((function(){ var o={}, d=from; while(d<=to){ o[weekStart(d)]=1; d=addDays(d,1); } return o; })()).length:null;
+    var rowsH=[
+      ['Training sessions', to?(n(A,'training_session')+' done'+(spw?' · '+spw+' a week prescribed':' · plan not read yet')+(A.byType.training_session&&A.byType.training_session.review?' · '+A.byType.training_session.review+' flagged':'')+(A.byType.training_session&&A.byType.training_session.over?' · '+A.byType.training_session.over+' over cap':'')+(wks.length?'<br><small>'+esc(wks.join(' · '))+'</small>':'')):'–', 'training_session', true],
+      ['Check-ins on time', dash(n(A,'checkin_on_time')+(weeksScored?' of '+plural(weeksScored,'week')+' scored':'')), 'checkin_on_time'],
+      ['1:1s', String(n(A,'one_on_one')), 'one_on_one'],
+      ['Weight logged', to?(wt+' of '+plural(days,'day')):'–', 'weight_logged'],
+      ['Food logged', to?(fd+' of '+plural(days,'day')):'–', 'food_logged'],
+      ['Steps target hit', noStepTarget(id)?'no step target in 1FIT':dash(plural(n(A,'steps_target'),'day')), 'steps_target'],
+      ['Perfect weeks', dash(String(n(A,'perfect_week'))+(A.byType.perfect_week&&A.byType.perfect_week.review?' · '+A.byType.perfect_week.review+' to review':'')), 'perfect_week'],
+      ['Chat messages', dash(String(cnt(A,'group_message'))), 'group_message'],
+      ['Replies to clients', dash(String(cnt(A,'group_reply'))), 'group_reply'],
+      ['Other photos', dash(String(n(A,'other_photo'))), 'other_photo'],
+      ['Progress photos', dash(String(n(A,'progress_photo'))+(A.byType.progress_photo&&A.byType.progress_photo.review?' · '+A.byType.progress_photo.review+' to review':'')), 'progress_photo'],
+      ['Story tags', dash(String(n(A,'story_tag'))), 'story_tag'],
+      ['"Trained by" bio link', n(A,'trained_by_bio')?'Yes':dash('Not seen'), 'trained_by_bio'],
+      ['Before/after story', n(A,'before_after_story')?'Yes':dash('No'), 'before_after_story'],
+      ['Testimonial', n(A,'testimonial')?'Yes':'No', 'testimonial'],
+      ['Referral calls attended', String(n(A,'referral_call')), 'referral_call'],
+      ['Referral payments cleared', String(n(A,'referral_paid')), 'referral_paid'],
+      ['Prize story post', n(A,'prize_story')?'Yes':'No', 'prize_story']
+    ];
+    var h='<div class="ch-detail">';
+    var cov=coverageFor(id); if(cov.length) h+='<div class="ch-cov">'+cov.map(function(c){ return '<span class="chip warn">'+esc(c)+'</span>'; }).join('')+'</div>';
+    h+='<div class="table-wrap"><table class="scores ch-tbl"><thead><tr><th>What</th><th>Did</th><th class="num">Pts</th></tr></thead><tbody>';
+    rowsH.forEach(function(r){ var p=ptsOf(A,r[2]); h+='<tr><td>'+esc(r[0])+'</td><td>'+(r[3]?r[1]:esc(r[1]))+'</td><td class="num">'+(p?p:(to||A.byType[r[2]]?'0':'–'))+'</td></tr>'; });
+    h+='<tr class="tot"><td>Total</td><td></td><td class="num">'+(to||A.pts?A.pts:'–')+'</td></tr></tbody></table></div>';
+    // manual log
+    h+='<div class="ch-log"><div class="ch-log-head"><b>Log by hand</b><label class="f-note">Date <input class="input" type="date" data-ch-date="'+esc(id)+'" value="'+esc(today())+'" max="'+esc(addDays(today(),1))+'" aria-label="Date for '+esc(memberName(id))+'"></label></div><div class="ch-log-btns">';
+    MANUAL.forEach(function(spec){
+      var p=pts(spec.type), busy=S.busy[id+'|'+spec.type];
+      var tm = spec.keyed==='next' ? nextMonth(m) : null;
+      var done = spec.keyed==='month' ? existingKeyed(id, spec.type, m) : (spec.keyed==='next' ? existingKeyed(id, spec.type, tm) : null);
+      var note = spec.keyed==='next' ? ' → '+monthLabel(tm).split(' ')[0] : '';
+      h+='<button type="button" class="btn ch-logbtn" data-ch-log="'+esc(spec.type)+'" data-member="'+esc(id)+'"'+(p==null||busy||(done&&spec.keyed!=='next'&&spec.keyed!=='month')?' disabled':'')+(done?' aria-pressed="true"':'')+'>'+
+        (done?'✓ ':'+')+esc(spec.label)+' <span class="ch-p">'+(p==null?'not in config':(done?'logged':p+' pts'+note))+'</span></button>';
+    });
+    h+='</div><div class="f-note">1:1s from Google Calendar are added by the scan; tap only for one that isn\'t in the calendar. Referral and 1:1 points land in the month of the date above. The prize post counts in the month after '+esc(monthLabel(m))+'.</div>';
+    if(A.manual.length){
+      h+='<div class="ch-manual">'+A.manual.slice().sort(function(a,b){ return String(b.loggedAt||'').localeCompare(String(a.loggedAt||'')); }).map(function(e){ return '<div class="ch-mrow"><span>'+esc(TYPES[e.type]?TYPES[e.type].label:e.type)+' · '+esc(e.date?HQ.fmtDay(e.date,'short'):'')+' · +'+evPoints(e)+'</span><button type="button" class="btn small" data-ch-undo="'+esc(e.id)+'" data-month="'+esc(e.month)+'">Undo</button></div>'; }).join('')+'</div>';
+    }
+    // prize-post logged into next month shows here too
+    var nm=nextMonth(m), pe=(S.events[nm]||[]).filter(function(e){ return evMember(e)===id && e.source==='manual' && e.status==='confirmed' && e.type==='prize_story'; });
+    if(pe.length) h+='<div class="ch-manual">'+pe.map(function(e){ return '<div class="ch-mrow"><span>Prize story post · counts in '+esc(monthLabel(nm))+' · +'+evPoints(e)+'</span><button type="button" class="btn small" data-ch-undo="'+esc(e.id)+'" data-month="'+esc(nm)+'">Undo</button></div>'; }).join('')+'</div>';
+    h+='</div></div>';
+    return h;
+  }
+  function renderReview(){
+    var items=reviewItems();
+    var h='<div class="panel"><h2>Review queue · '+items.length+'</h2><p class="rule">Sessions and photos the scan wasn\'t sure about. Approve writes the points from challengeConfig (still inside the doc\'s weekly limits); reject records why.</p>';
+    if(!items.length){ h+='<div class="empty-state">Nothing waiting. Flagged sessions and photos land here after each scan.</div></div>'; return h; }
+    h+='<div class="ch-queue">';
+    items.forEach(function(it){
+      var p=it.raw.pointsIfApproved!=null?+it.raw.pointsIfApproved:pts(it.type), busy=S.busy['rv|'+it.id], rj=S.rejecting[it.id];
+      var reasons=REJECT_REASONS[it.type]||REJECT_REASONS._;
+      h+='<div class="ch-rv"><div class="ch-rv-top"><span class="chip '+(it.type==='training_session'?'grey':(it.type==='progress_photo'?'warn':'grey'))+'">'+esc(TYPES[it.type]?TYPES[it.type].label:it.type)+'</span><b>'+esc(memberName(it.member))+'</b><span class="f-note">'+esc(it.date?HQ.fmtDay(it.date,'wd'):'no date')+(it.source?' · '+esc(it.source):'')+'</span></div>'+
+        '<div class="ch-rv-ev">'+esc(it.evidence||'No reason given by the scan.')+'</div>';
+      if(!rj) h+='<div class="ch-rv-btns"><button type="button" class="btn primary" data-ch-approve="'+esc(it.id)+'"'+(busy||p==null?' disabled':'')+'>✓ Approve'+(p!=null?' +'+p:'')+'</button><button type="button" class="btn" data-ch-reject="'+esc(it.id)+'"'+(busy?' disabled':'')+'>✕ Reject</button></div>';
+      else h+='<div class="ch-rv-why"><span class="f-note">Why?</span>'+reasons.map(function(r){ return '<button type="button" class="btn small" data-ch-reason="'+esc(it.id)+'" data-reason="'+esc(r)+'">'+esc(r)+'</button>'; }).join('')+
+        '<span class="ch-other"><input class="input" type="text" maxlength="120" placeholder="Other reason" data-ch-reason-text="'+esc(it.id)+'" aria-label="Other reason"><button type="button" class="btn small" data-ch-reason-other="'+esc(it.id)+'">Reject</button></span><button type="button" class="btn small" data-ch-reject-cancel="'+esc(it.id)+'">Cancel</button></div>';
+      h+='</div>';
+    });
+    return h+'</div></div>';
+  }
+  function renderDrafts(){
+    var D=buildDrafts();
+    var h='<div class="panel"><h2>Monday drafts</h2><p class="rule">Written from the confirmed points. Nothing is sent: copy each one into WhatsApp yourself. Wording changes per client and per week, and copying records it so the next 4 weeks never repeat it.</p>';
+    if(D.error) return h+'<div class="empty-state">'+esc(D.error)+'</div></div>';
+    h+='<div class="f-note">Week '+D.weekIdx+': '+esc(HQ.fmtDay(D.week.start,'short'))+' – '+esc(HQ.fmtDay(D.week.end,'short'))+' · standings as of Sunday night.</div></div>';
+    h+='<div class="panel"><div class="chart-head"><h2>Group post · top 5</h2><button type="button" class="btn" data-ch-copy="group">Copy</button></div><pre class="ch-draft" id="chDraftGroup">'+esc(D.group)+'</pre></div>';
+    h+='<div class="panel"><h2>Private messages · '+D.dms.length+'</h2><p class="rule">Two messages each: send the first, then the second.</p><div class="ch-dms">';
+    D.dms.forEach(function(d, i){
+      h+='<div class="ch-dm"><div class="ch-dm-head"><b>'+esc(d.name)+'</b><span class="chip '+(d.rank<=5?'good':'grey')+'">'+esc(ord(d.rank))+' · '+d.points+' pts</span></div>'+
+        (d.cov.length?'<div class="ch-cov">'+d.cov.map(function(c){ return '<span class="chip warn">'+esc(c)+'</span>'; }).join('')+'</div>':'')+
+        '<div class="ch-dm-msg"><pre class="ch-draft">'+esc(d.msg1)+'</pre><button type="button" class="btn small" data-ch-copy="dm" data-i="'+i+'" data-n="1">Copy 1</button></div>'+
+        '<div class="ch-dm-msg"><pre class="ch-draft">'+esc(d.msg2)+'</pre><button type="button" class="btn small" data-ch-copy="dm" data-i="'+i+'" data-n="2">Copy 2</button></div></div>';
+    });
+    h+='</div></div>';
+    S.lastDrafts=D;
+    return h;
+  }
+  function renderHealth(hl){
+    var sc=S.scan||{}, h='<div class="panel"><div class="chart-head"><div><h2>Scan health</h2><p class="rule" style="margin-top:4px">Daily challenge scan (Mac Mini Chrome, about 12:30pm). Amber after 26 hours without a run, red if the last run failed.</p></div><span class="chip '+chipCls(hl.level)+'">'+esc(hl.level==='green'?'OK':hl.level==='amber'?'Stale':hl.level==='red'?'Failed':'No scan yet')+'</span></div>';
+    h+='<div class="ch-health"><div class="ch-hrow"><span class="dot '+hl.level+'"></span><b>Last scan</b><span>'+esc(sc.lastScanAt?HQ.fmtDay(HQ.sydDay(sc.lastScanAt),'wd')+' '+HQ.fmtTime(sc.lastScanAt)+' · ':'')+esc(hl.text)+'</span></div>';
+    hl.sources.forEach(function(s){ h+='<div class="ch-hrow"><span class="dot '+s.level+'"></span><b>'+esc(s.label)+'</b><span>'+esc(s.text)+'</span></div>'; });
+    h+='<div class="ch-hrow"><span class="dot '+(scoredThrough()?'green':'grey')+'"></span><b>Scored through</b><span>'+esc(scoredThrough()?HQ.fmtDay(scoredThrough()):'–')+'</span></div>';
+    var cov=sc.coverage||{};
+    if(cov.complete===false || (cov.resume&&cov.resume.length)) h+='<div class="ch-hrow"><span class="dot amber"></span><b>Coverage</b><span>Incomplete'+(cov.resume&&cov.resume.length?': '+esc(cov.resume.length+' item'+(cov.resume.length>1?'s':'')+' carried to the next run'):'')+'</span></div>';
+    h+='</div>';
+    var lists=[['Not matched in 1FIT', cov.unmatched],['No Instagram handle', cov.noIgHandle],['No step target set', cov.noStepTarget]];
+    lists.forEach(function(l){ if(l[1]&&l[1].length) h+='<div class="f-note"><b>'+esc(l[0])+':</b> '+esc(l[1].map(function(x){ return memberName(x); }).join(', '))+'</div>'; });
+    if(Array.isArray(cov.failed) && cov.failed.length) h+='<div class="f-note"><b>Not read:</b> '+esc(cov.failed.map(function(f){ return (f.member&&f.member!=='*'?memberName(f.member)+' ':'')+'('+(f.source||'?')+(f.reason?': '+f.reason:'')+')'; }).join('; '))+'</div>';
+    return h+'</div>';
+  }
+
+  /* ---------- events ---------- */
+  function findItem(id){ return reviewItems().find(function(x){ return x.id===id; }); }
+  async function guarded(key, fn){ if(S.busy[key]) return; S.busy[key]=true; render(); try{ await fn(); }catch(e){ console.warn('challenge write failed: '+(e&&e.message||e)); flash('Couldn\'t save: '+(e&&e.message||e)+'. Nothing was changed.','crit'); } finally{ delete S.busy[key]; render(); } }
+  document.addEventListener('click', function(ev){
+    if(!S.admin) return;
+    var t=ev.target.closest && ev.target.closest('#viewChallenge [data-chview],#viewChallenge [data-ch-open],#viewChallenge [data-ch-log],#viewChallenge [data-ch-approve],#viewChallenge [data-ch-reject],#viewChallenge [data-ch-reason],#viewChallenge [data-ch-reason-other],#viewChallenge [data-ch-reject-cancel],#viewChallenge [data-ch-undo],#viewChallenge [data-ch-copy]');
+    if(!t) return;
+    if(t.hasAttribute('data-chview')){ S.view=t.getAttribute('data-chview'); store('hqChView', S.view); render(); return; }
+    if(t.hasAttribute('data-ch-open')){ var id=t.getAttribute('data-ch-open'); S.open[id]=!S.open[id]; render(); return; }
+    if(t.hasAttribute('data-ch-log')){ var mem=t.getAttribute('data-member'), ty=t.getAttribute('data-ch-log'); guarded(mem+'|'+ty, function(){ return logManual(mem, ty); }); return; }
+    if(t.hasAttribute('data-ch-approve')){ var it=findItem(t.getAttribute('data-ch-approve')); if(it) guarded('rv|'+it.id, function(){ return approve(it); }); return; }
+    if(t.hasAttribute('data-ch-reject')){ S.rejecting[t.getAttribute('data-ch-reject')]=true; render(); return; }
+    if(t.hasAttribute('data-ch-reject-cancel')){ delete S.rejecting[t.getAttribute('data-ch-reject-cancel')]; render(); return; }
+    if(t.hasAttribute('data-ch-reason')){ var it2=findItem(t.getAttribute('data-ch-reason')), why=t.getAttribute('data-reason'); if(it2) guarded('rv|'+it2.id, function(){ return reject(it2, why); }); return; }
+    if(t.hasAttribute('data-ch-reason-other')){ var rid=t.getAttribute('data-ch-reason-other'), inp=document.querySelector('[data-ch-reason-text="'+cssEsc(rid)+'"]'), txt=inp&&inp.value.trim(); if(!txt){ if(inp) inp.focus(); return; } var it3=findItem(rid); if(it3) guarded('rv|'+it3.id, function(){ return reject(it3, txt); }); return; }
+    if(t.hasAttribute('data-ch-undo')){ var uid=t.getAttribute('data-ch-undo'), um=t.getAttribute('data-month'); guarded('undo|'+uid, function(){ return undo(uid, um); }); return; }
+    if(t.hasAttribute('data-ch-copy')){
+      var D=S.lastDrafts; if(!D) return; var kind=t.getAttribute('data-ch-copy'), text, d=null, ni=null;
+      if(kind==='group') text=D.group; else { d=D.dms[+t.getAttribute('data-i')]; ni=t.getAttribute('data-n'); text=d?(ni==='1'?d.msg1:d.msg2):''; }
+      var label=t.textContent;
+      copyText(text).then(function(ok){ t.textContent=ok?'Copied':'Select & copy'; setTimeout(function(){ t.textContent=label; }, 1500); if(ok && d) recordCopy(d.id, ni, d, D.week.start); });
+      return;
+    }
+  });
+  document.addEventListener('change', function(ev){
+    if(!S.admin) return;
+    if(ev.target && ev.target.id==='chMonth'){ S.month=ev.target.value; S.open={}; if(!S.events[S.month]) loadMonth(S.month).then(function(){ render(); syncScores(S.month); }, function(e){ flash('Couldn\'t load '+monthLabel(S.month)+': '+(e&&e.message||e),'crit'); }); render(); }
+  });
+  function store(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function readS(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  document.addEventListener('hq-view', function(ev){ S.active = ev.detail && ev.detail.view==='challenge'; if(S.active){ render(); loadAll(); } });
+
+  /* ---------- boot (admin only) ---------- */
+  function setVisible(on){ ['tabChallenge','sheetChallenge'].forEach(function(id){ var el=$(id); if(el) el.hidden=!on; }); }
+  document.addEventListener('tf-auth-ready', function(ev){
+    var role=ev.detail && ev.detail.profile && ev.detail.profile.role;
+    if(role==='admin'){
+      client=ev.detail.supabase; S.admin=true; setVisible(true);
+      var v=readS('hqChView'); if(v && ['board','review','drafts','health'].indexOf(v)>=0) S.view=v;
+      S.month=curMonth(); loadAll();
+      if(timer) clearInterval(timer); timer=setInterval(function(){ if(S.active || document.visibilityState!=='hidden') loadAll(); }, POLL_MS);
+    } else {
+      client=null; S.admin=false; setVisible(false); var root=$('chRoot'); if(root) root.innerHTML='<div class="panel"><h2>Challenge</h2><p class="rule">This tab is admin only.</p></div>';
+    }
+  });
+  document.addEventListener('tf-auth-signed-out', function(){ S.admin=false; client=null; S.events={}; S.members=[]; S.clients=[]; S.reviews=[]; S.pendingEvents=[]; S.sig={}; S.loaded={}; if(timer) clearInterval(timer); setVisible(false); });
+  window.__challenge={ S:S, standings:standings, activity:activity, buildDrafts:buildDrafts, scanHealth:scanHealth, reviewItems:reviewItems, pts:pts, render:render, loadAll:loadAll, weekFacts:weekFacts, draftWeek:draftWeek };
 })();
 </script>
 </body></html>

@@ -15,7 +15,7 @@
       var filters = [], single = false;
       var q = {
         select: function () { return q; },
-        eq: function (c, v) { filters.push(function (r) { return r[c] === v; }); return q; },
+        eq: function (c, v) { var m = /^data->>(\w+)$/.exec(c); filters.push(m ? function (r) { var x = r.data && r.data[m[1]]; return x != null && String(x) === String(v); } : function (r) { return r[c] === v; }); return q; },
         like: function (c, p) { var re = new RegExp('^' + String(p).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/%/g, '.*') + '$'); filters.push(function (r) { return re.test(String(r[c])); }); return q; },
         maybeSingle: function () { single = true; return q; },
         then: function (res, rej) {
