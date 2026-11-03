@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.1 — 3 Nov 2026 (points only count once their day has passed)
+
+- A point counts only when its date is today or earlier, and scanned points never before the challenge start (`counts()`); future bookings show as "booked ahead". 1:1s score the day after the call, not when booked. Manual log refuses future dates.
+
 ## 2.5.0 — 3 Nov 2026 (Challenge tab)
 
 - New **Challenge** tab (Business group; phone → More), admin only. Four views:

@@ -56,7 +56,7 @@ function buildFixtures(scoredThrough, extra) {
     dm_threads: [], dm_daily: [], contacts: [], tf_responses: [], tf_daily: [], ig_posts: [], ig_stories: [] };
 }
 function expectedBoard(fx, month) {
-  const tot = {}; fx.challenge_events.forEach(e => { const d = e.data; if (d.month === month && d.status === 'confirmed') tot[d.member] = (tot[d.member] || 0) + d.points; });
+  const tot = {}; fx.challenge_events.forEach(e => { const d = e.data; if (d.month === month && d.status === 'confirmed' && !(d.date > '2026-11-17') && !(d.date < '2026-11-04' && d.source !== 'manual')) tot[d.member] = (tot[d.member] || 0) + d.points; });
   const rows = MEMBERS.map(([id, name]) => ({ id, name, points: tot[id] || 0 })).sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
   rows.forEach((r, i) => { r.rank = i && rows[i - 1].points === r.points ? rows[i - 1].rank : i + 1; });
   return rows;
@@ -157,10 +157,14 @@ async function layoutChecks(page, label, width) {
       await page.click('[data-ch-log="one_on_one"][data-member="tom"]'); await page.waitForTimeout(150);
       await page.click('[data-ch-log="testimonial"][data-member="tom"]'); await page.waitForTimeout(150);
       await page.click('[data-ch-log="prize_story"][data-member="tom"]'); await page.waitForTimeout(150);
-      await page.fill('[data-ch-date="tom"]', '2026-12-01');
+      await page.evaluate(() => { const el = document.querySelector('[data-ch-date="tom"]'); el.removeAttribute('max'); el.value = '2026-12-01'; });
+      await page.click('[data-ch-log="referral_paid"][data-member="tom"]'); await page.waitForTimeout(150);
+      const msgF = await page.evaluate(() => (document.querySelector('.ch-msg') || {}).innerText || '');
+      check('manual: a future date is refused', () => assert.ok(/hasn.t happened yet/.test(msgF), msgF));
+      await page.fill('[data-ch-date="tom"]', '2026-10-30');
       await page.click('[data-ch-log="referral_paid"][data-member="tom"]'); await page.waitForTimeout(150);
       const msg = await page.evaluate(() => (document.querySelector('.ch-msg') || {}).innerText || '');
-      check('manual: referral paid says it counts in December', () => assert.ok(/December 2026/.test(msg), msg));
+      check('manual: referral paid says it counts in October', () => assert.ok(/October 2026/.test(msg), msg));
       await page.fill('[data-ch-date="tom"]', '2026-11-17');
       await page.click('[data-ch-log="referral_call"][data-member="tom"]'); await page.waitForTimeout(150);
       let evs = await table(page, 'challenge_events');
@@ -169,7 +173,7 @@ async function layoutChecks(page, label, width) {
       check('manual: 1:1 = 15 in Nov', () => assert.deepStrictEqual(byType('one_on_one').map(e => [e.points, e.month, e.status]), [[15, '2026-11', 'confirmed']]));
       check('manual: testimonial = 75, keyed by month', () => assert.deepStrictEqual(byType('testimonial').map(e => [e.id, e.points]), [['tom|testimonial|2026-11', 75]]));
       check('manual: prize story = 50 in next month', () => assert.deepStrictEqual(byType('prize_story').map(e => [e.id, e.points, e.month]), [['tom|prize_story|2026-12', 50, '2026-12']]));
-      check('manual: referral paid = 250 dated to the month it cleared', () => assert.deepStrictEqual(byType('referral_paid').map(e => [e.points, e.month, e.date]), [[250, '2026-12', '2026-12-01']]));
+      check('manual: referral paid = 250 dated to the month it cleared', () => assert.deepStrictEqual(byType('referral_paid').map(e => [e.points, e.month, e.date]), [[250, '2026-10', '2026-10-30']]));
       check('manual: referral call = 50', () => assert.deepStrictEqual(byType('referral_call').map(e => [e.points, e.month]), [[50, '2026-11']]));
       const testiBtn = await page.evaluate(() => document.querySelector('[data-ch-log="testimonial"][data-member="tom"]').getAttribute('aria-pressed'));
       check('manual: testimonial shows logged', () => assert.strictEqual(testiBtn, 'true'));
@@ -178,7 +182,8 @@ async function layoutChecks(page, label, width) {
       check('manual: second testimonial in a month is refused', () => assert.strictEqual(evs.filter(e => e.member === 'tom' && e.type === 'testimonial').length, 1));
       let scores = await table(page, 'challenge_scores');
       check('scores: tom|2026-11 updated', () => assert.strictEqual(scores.find(s => s.id === 'tom|2026-11').points, tomBefore + 15 + 75 + 50));
-      check('scores: tom|2026-12 written for the next-month points', () => assert.strictEqual(scores.find(s => s.id === 'tom|2026-12').points, 300));
+      check('scores: tom|2026-12 written for the next-month points', () => assert.strictEqual(scores.find(s => s.id === 'tom|2026-12').points, 50));
+      check('scores: tom|2026-10 written for the October payment', () => assert.strictEqual(scores.find(s => s.id === 'tom|2026-10').points, 250));
       const ptsNow = await page.evaluate(() => document.querySelector('[data-ch-open="tom"] .ch-pts').firstChild.textContent);
       check('board: tom total updates straight away', () => assert.strictEqual(+ptsNow, tomBefore + 140));
       // undo the 1:1
@@ -249,6 +254,38 @@ async function layoutChecks(page, label, width) {
       const t = await page.evaluate(() => document.getElementById('chRoot').innerText);
       check('drafts: blank with a reason when last week is not fully scored', () => assert.ok(/only scored through/.test(t), t));
       await context.close();
+    }
+
+    // ---- nothing counts before its day has passed (bug Jordan saw on 3 Nov: booked 1:1s scoring before the start) ----
+    {
+      const fx5 = buildFixtures('2026-11-03');
+      const add = (id, d) => fx5.challenge_events.push({ id, data: Object.assign({ month: '2026-11', points: 15, source: 'calendar' }, d) });
+      add('adam|one_on_one|a', { member: 'adam', type: 'one_on_one', date: '2026-11-05', status: 'scheduled', points: 0 });
+      add('tom|one_on_one|b', { member: 'tom', type: 'one_on_one', date: '2026-11-04', status: 'confirmed' }); // future-dated but marked confirmed
+      add('jack|one_on_one|c', { member: 'jack', type: 'one_on_one', date: '2026-11-02', status: 'confirmed' }); // before the challenge start
+      fx5.meta[1].data.scoredThrough = null;
+      const { context, page, log } = await open(browser, url, { fx: fx5, now: '2026-11-03T04:00:00Z' });
+      await goChallenge(page, 'board');
+      const st = await page.evaluate(() => window.__challenge.standings('2026-11'));
+      check('pre-start: nobody has points (all "–")', () => assert.deepStrictEqual(st.rows.filter(r => r.points != null).map(r => [r.id, r.points]), []));
+      const t = await page.evaluate(() => document.getElementById('chRoot').innerText);
+      check('pre-start: leader shows "–"', () => assert.ok(!/75 pts|15 pts/.test(t), t.slice(0, 400)));
+      await page.evaluate(() => { window.__challenge.S.open = { adam: true }; window.__challenge.render(); });
+      const t2 = await page.evaluate(() => document.getElementById('chRoot').innerText);
+      check('pre-start: adam shows his 1:1 as booked ahead', () => assert.ok(/1 booked ahead/.test(t2), t2.slice(0, 1500)));
+      const max = await page.evaluate(() => document.querySelector('[data-ch-date="adam"]').getAttribute('max'));
+      check('manual log: no future dates', () => assert.strictEqual(max, '2026-11-03'));
+      check('pre-start: no console errors', () => assert.deepStrictEqual(log.errors, []));
+      await context.close();
+      // same fixture later in the month: the 4 and 5 Nov 1:1s now count once confirmed, the pre-start one never does
+      const fx6 = JSON.parse(JSON.stringify(fx5)); fx6.meta[1].data.scoredThrough = '2026-11-16';
+      fx6.challenge_events.find(e => e.id === 'adam|one_on_one|a').data = Object.assign({}, fx6.challenge_events.find(e => e.id === 'adam|one_on_one|a').data, { status: 'confirmed', points: 15 });
+      fx6.challenge_events.push({ id: 'liam|one_on_one|d', data: { member: 'liam', type: 'one_on_one', date: '2026-11-25', month: '2026-11', points: 15, status: 'confirmed', source: 'calendar' } });
+      const o2 = await open(browser, url, { fx: fx6, now: NOW });
+      await goChallenge(o2.page, 'board');
+      const a = await o2.page.evaluate(() => { const C = window.__challenge; return ['adam', 'tom', 'jack', 'liam'].map(id => C.activity(id, '2026-11').byType.one_on_one || {}).map(b => [b.n || 0, b.ahead || 0]); });
+      check('after the day: past 1:1s count, pre-start and future ones do not', () => assert.deepStrictEqual(a, [[1, 0], [1, 0], [0, 0], [0, 1]]));
+      await o2.context.close();
     }
 
     // ---- scan health ----
