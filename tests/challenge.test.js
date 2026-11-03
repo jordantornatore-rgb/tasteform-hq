@@ -18,7 +18,7 @@ if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 // ---------- seeded mock data ----------
 const CONFIG = { week: 'Mon-Sun Sydney', month: '2026-11', startDate: '2026-11-04', weeklyChatCap: 60, points: {
   story_tag: { pts: 10 }, one_on_one: { pts: 15 }, food_logged: { pts: 2 }, group_reply: { pts: 6 }, other_photo: { pts: 10 }, testimonial: { pts: 75 },
-  perfect_week: { pts: 20 }, steps_target: { pts: 2 }, group_message: { pts: 3 }, referral_call: { pts: 50 }, referral_paid: { pts: 250 }, weight_logged: { pts: 1 },
+  perfect_week: { pts: 20 }, group_message: { pts: 3 }, referral_call: { pts: 50 }, referral_paid: { pts: 250 }, weight_logged: { pts: 1 },
   prizeStoryPost: 50, progress_photo: { pts: 25 }, trained_by_bio: { pts: 75, ptsKept: 25 }, checkin_on_time: { pts: 10 }, training_session: { pts: 5 }, before_after_story: { pts: 100 } } };
 const P = t => (t === 'prize_story' ? CONFIG.points.prizeStoryPost : CONFIG.points[t].pts);
 const MEMBERS = [['adam', 'Adam Test', 4, 0.95], ['hader', 'Hader Test', 4, 0.9], ['tom', 'Tom Test', 3, 0.6], ['jack', 'Jack Test', 4, 0.7], ['liam', 'Liam Test', 4, 0.5],
@@ -252,7 +252,10 @@ async function layoutChecks(page, label, width) {
     }
 
     // ---- scan health ----
-    for (const [name, patch, level] of [['fresh', {}, 'green'], ['stale', { lastScanAt: '2026-11-15T20:00:00Z' }, 'amber'], ['failed', { status: 'failed', lastError: 'Chrome unreachable' }, 'red'], ['none', { lastScanAt: null }, 'grey']]) {
+    for (const [name, patch, level] of [['fresh', {}, 'green'], ['stale', { lastScanAt: '2026-11-15T20:00:00Z' }, 'amber'], ['failed', { status: 'failed', lastError: 'Chrome unreachable' }, 'red'], ['none', { lastScanAt: null }, 'grey'],
+      // shape the real scan wrote on 3 Nov: no status field, every browser source failed for 'all'
+      ['allSourcesDown', { coverage: { complete: false, note: 'Window empty', notIn1Fit: ['Ben Rando'], notInWhatsApp: [], resume: ['1FIT roster refresh'], failed: ['1fit', 'whatsapp', 'instagram'].map(s => ({ member: 'all', source: s, reason: 'Chrome unreachable' })) } }, 'red'],
+      ['oneSourceDown', { coverage: { complete: false, failed: [{ member: 'all', source: 'whatsapp', reason: 'WhatsApp unlinked' }] } }, 'amber']]) {
       const fx4 = buildFixtures('2026-11-16', { scan: patch });
       const { context, page, log } = await open(browser, url, { fx: fx4, now: NOW });
       await goChallenge(page, 'health');
@@ -261,6 +264,9 @@ async function layoutChecks(page, label, width) {
       const t = await page.evaluate(() => document.getElementById('chRoot').innerText);
       if (name === 'fresh') check('health: 1FIT amber (one client not read), WhatsApp green', () => { assert.ok(/1FIT\s+came through, 1 client not read/.test(t), t); assert.ok(/WhatsApp\s+came through/.test(t), t); });
       if (name === 'failed') check('health: failure reason shown', () => assert.ok(/Chrome unreachable/.test(t)));
+      if (name === 'allSourcesDown') check('health: roster lists + resume shown', () => { assert.ok(/not an active 1FIT client/.test(t), t); assert.ok(/Ben Rando/.test(t), t); assert.ok(/Carried to next run/.test(t), t); });
+      if (name === 'oneSourceDown') check('health: WhatsApp red, reason shown', () => assert.ok(/WhatsApp\s+WhatsApp unlinked/.test(t), t));
+      check(`health ${name}: no steps anywhere`, () => assert.ok(!/step target/i.test(t), t));
       check(`health ${name}: no console errors`, () => assert.deepStrictEqual(log.errors, []));
       await context.close();
     }

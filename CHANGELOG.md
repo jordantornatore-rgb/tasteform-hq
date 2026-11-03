@@ -3,14 +3,15 @@
 ## 2.5.0 — 3 Nov 2026 (Challenge tab)
 
 - New **Challenge** tab (Business group; phone → More), admin only. Four views:
-  - **Leaderboard**: every client ranked by confirmed points for the month (sum of `challenge_events` with status `confirmed`), gap to 1st and to 5th, month picker (defaults to the current Sydney month). Tap a client for what they actually did (sessions done vs prescribed per week, check-ins on time, 1:1s, weight/food days of days scored, steps, perfect weeks, chat messages/replies, photos, story tags, bio link, before/after, testimonial, referral calls/payments, prize post) and the points for each. "–" until the scan has scored a day; coverage gaps shown per client.
+  - **Leaderboard**: every client ranked by confirmed points for the month (sum of `challenge_events` with status `confirmed`), gap to 1st and to 5th, month picker (defaults to the current Sydney month). Tap a client for what they actually did (sessions done vs prescribed per week, check-ins on time, 1:1s, weight/food days of days scored, perfect weeks, chat messages/replies, photos, story tags, bio link, before/after, testimonial, referral calls/payments, prize post) and the points for each. "–" until the scan has scored a day; coverage gaps shown per client.
   - **Log by hand** (inside each client): 1:1, referral call (50), referral first payment (250, month of the date picked), testimonial (75, once a month), prize story post (50, credited to the following month). Each tap writes a `challenge_events` row (`source: manual`) and refreshes that client's `challenge_scores` row; Undo marks it `cancelled` (never deletes).
   - **Review**: `needs_review` events plus pending `challenge_reviews` rows. Approve writes the challengeConfig points (still inside the doc's weekly limits, otherwise `over_cap`, 0); Reject records the reason. Both set `reviewedBy: jordan` so the scan never rewrites them.
   - **Monday drafts**: the top-5 group post and two private messages per client (position line, then their top 3 focus areas by missed points), following the doc's rules. Each part of the wording rotates per client and per week; Copy stores a short hash on the member (`dmHistory`) so the next 4 weeks never repeat it. Blank with a reason until the scan has scored the Sunday.
   - **Scan health**: last challenge scan, 1FIT / Instagram / WhatsApp from `meta/challengeScan` (`sources` if present, otherwise derived from `coverage.failed`); amber after 26 h, red when the last run failed.
-- Points always come from `meta/challengeConfig`; nothing hard-coded.
+- Points always come from `meta/challengeConfig`; nothing hard-coded. No steps anywhere (the doc says steps never score).
+- Scan health: overall red when every source failed even if the scan wrote no `status`; amber when some did; shows `notIn1Fit`, `notInWhatsApp`, the scan note and items carried to the next run.
 - `challenge_scores` (id `<member>|<month>`) is kept equal to the confirmed events whenever the tab is open.
-- RLS: `challenge_clients`, `challenge_events`, `challenge_scores`, `challenge_reviews` and `challenge_members` are admin-only (`is_admin()`), see `supabase/migrations/20261103_challenge_tables_admin_only.sql`.
+- RLS: `challenge_clients`, `challenge_events`, `challenge_scores`, `challenge_reviews`, `challenge_members` and the `meta` rows `challengeConfig`/`challengeScan` are admin-only (`is_admin()`), see `supabase/migrations/20261103_challenge_tables_admin_only.sql`.
 - Tests: `tests/challenge.test.js` (seeded mock data, 99 checks); `tests/mock-supabase.js` understands `eq('data->>field', v)`.
 
 ## 2.4.0 — 3 Nov 2026 (Content Library + autopost pipeline hooks)

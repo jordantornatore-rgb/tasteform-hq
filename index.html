@@ -3458,7 +3458,6 @@ body{padding:0;}
     weight_logged:{label:'Weight logged', cat:'acc'},
     food_logged:{label:'Food logged', cat:'acc'},
     training_session:{label:'Training session', cat:'acc'},
-    steps_target:{label:'Steps target hit', cat:'acc'},
     perfect_week:{label:'Perfect week', cat:'acc'},
     group_message:{label:'Group chat message', cat:'com'},
     group_reply:{label:'Reply to another client', cat:'com'},
@@ -3577,7 +3576,6 @@ body{padding:0;}
     if((cov.noIgHandle||[]).indexOf(memberId)>=0 || (cov.noIgHandle||[]).indexOf(memberName(memberId))>=0) out.push('No Instagram handle');
     return out;
   }
-  function noStepTarget(memberId){ var l=((S.scan&&S.scan.coverage)||{}).noStepTarget||[]; return l.indexOf(memberId)>=0 || l.indexOf(memberName(memberId))>=0; }
 
   /* ---------- data loading ---------- */
   function q(t){ return client.from(t).select('*'); }
@@ -3787,8 +3785,7 @@ body{padding:0;}
     photo:{g:'chucking a progress photo in the group', i:'chuck a progress photo in the group', grp:'not many progress photos coming through'},
     tags:{g:'tagging me in a story or two', i:'tag me in a story or two', grp:'not many story tags'},
     bio:{g:'putting "trained by @jordantornatore" in your bio', i:'put "trained by @jordantornatore" in your bio', grp:'bio links'},
-    oneonone:{g:'booking in your 1:1', i:'book in your 1:1', grp:'1:1s not getting booked'},
-    steps:{g:'hitting your step target', i:'hit your step target', grp:'step targets getting missed'}
+    oneonone:{g:'booking in your 1:1', i:'book in your 1:1', grp:'1:1s not getting booked'}
   };
   var INTRO_OUT=[
     {f:'g', t:function(l){ return 'In terms of what you can improve on, what I\'d focus on is '+l+'.'; }},
@@ -3823,7 +3820,7 @@ body{padding:0;}
     var m=wk.month, from=wk.start<monthFrom(m)?monthFrom(m):wk.start, to=wk.end, days=daysBetween(from,to), A=activity(memberId, m, from, to);
     var mm=memberById(memberId)||{}, spw=weekCap(memberId,'training_session'), partial=from>wk.start;
     var F={ A:A, days:days, spw:spw, partial:partial, sessions:n(A,'training_session'), checkin:n(A,'checkin_on_time'), weight:Object.keys((A.byType.weight_logged||{days:{}}).days).length,
-      food:Object.keys((A.byType.food_logged||{days:{}}).days).length, chatPts:ptsOf(A,'group_message')+ptsOf(A,'group_reply'), photo:n(A,'progress_photo'), tags:n(A,'story_tag'), steps:n(A,'steps_target') };
+      food:Object.keys((A.byType.food_logged||{days:{}}).days).length, chatPts:ptsOf(A,'group_message')+ptsOf(A,'group_reply'), photo:n(A,'progress_photo'), tags:n(A,'story_tag') };
     var gaps=[], cap=(S.cfg&&+S.cfg.weeklyChatCap)||null;
     function gap(k, v){ if(v!=null && v>0) gaps.push({k:k, v:v}); }
     if(pts('checkin_on_time')!=null) gap('checkin', F.checkin?0:pts('checkin_on_time'));
@@ -3835,9 +3832,8 @@ body{padding:0;}
     var tagCap=weekCap(memberId,'story_tag'); if(pts('story_tag')!=null && tagCap) gap('tags', Math.max(0, tagCap-F.tags)*pts('story_tag'));
     var MA=activity(memberId, m); if(!n(MA,'trained_by_bio') && pts('trained_by_bio')!=null && wk.allowBio && wk.end<=addDays(monthFrom(m),13)) gap('bio', pts('trained_by_bio', {kept:mm.bioScoredBefore}));
     if(!n(MA,'one_on_one') && pts('one_on_one')!=null) gap('oneonone', pts('one_on_one'));
-    if(!noStepTarget(memberId) && cnt(MA,'steps_target')>0 && pts('steps_target')!=null) gap('steps', (days-F.steps)*pts('steps_target'));
     // rank by missed points, weighted toward the doc's accountability habits (chat/tags have big caps but matter less)
-    var W={checkin:1.5, training:1.5, food:1.5, weight:1.3, photo:1.2, oneonone:1, steps:1, tags:0.7, chat:0.5, bio:0.3};
+    var W={checkin:1.5, training:1.5, food:1.5, weight:1.3, photo:1.2, oneonone:1, tags:0.7, chat:0.5, bio:0.3};
     gaps.forEach(function(g){ g.w=g.v*(W[g.k]||1); });
     gaps.sort(function(a,b){ return b.w-a.w; });
     F.gaps=gaps; F.focus=gaps.slice(0,3).map(function(g){ return g.k; });
@@ -3981,6 +3977,10 @@ body{padding:0;}
       if(!sc.coverage) return { label:s.label, level:'grey', text:'– (the scan didn\'t report coverage)' };
       return { label:s.label, level:'green', text:'came through' };
     });
+    // the scan doesn't always write a status: treat "every source failed" as a failed run, "some failed" as amber
+    var redSrc=sources.filter(function(x){ return x.level==='red'; }).length;
+    if(!failed && redSrc===sources.length){ failed=true; level='red'; text='Failed: none of 1FIT, Instagram or WhatsApp came through · '+HQ.relTime(sc.lastScanAt, nowMs()); }
+    else if(level==='green' && redSrc){ level='amber'; text=HQ.relTime(sc.lastScanAt, nowMs())+' · '+plural(redSrc,'source')+' didn\'t come through'; }
     return { level:level, text:text, sources:sources, failed:failed };
   }
 
@@ -4063,7 +4063,6 @@ body{padding:0;}
       ['1:1s', String(n(A,'one_on_one')), 'one_on_one'],
       ['Weight logged', to?(wt+' of '+plural(days,'day')):'–', 'weight_logged'],
       ['Food logged', to?(fd+' of '+plural(days,'day')):'–', 'food_logged'],
-      ['Steps target hit', noStepTarget(id)?'no step target in 1FIT':dash(plural(n(A,'steps_target'),'day')), 'steps_target'],
       ['Perfect weeks', dash(String(n(A,'perfect_week'))+(A.byType.perfect_week&&A.byType.perfect_week.review?' · '+A.byType.perfect_week.review+' to review':'')), 'perfect_week'],
       ['Chat messages', dash(String(cnt(A,'group_message'))), 'group_message'],
       ['Replies to clients', dash(String(cnt(A,'group_reply'))), 'group_reply'],
@@ -4144,9 +4143,12 @@ body{padding:0;}
     var cov=sc.coverage||{};
     if(cov.complete===false || (cov.resume&&cov.resume.length)) h+='<div class="ch-hrow"><span class="dot amber"></span><b>Coverage</b><span>Incomplete'+(cov.resume&&cov.resume.length?': '+esc(cov.resume.length+' item'+(cov.resume.length>1?'s':'')+' carried to the next run'):'')+'</span></div>';
     h+='</div>';
-    var lists=[['Not matched in 1FIT', cov.unmatched],['No Instagram handle', cov.noIgHandle],['No step target set', cov.noStepTarget]];
+    var lists=[['Not matched in 1FIT', cov.unmatched],['In the group but not an active 1FIT client (don\'t score)', cov.notIn1Fit],['Active client not found in the WhatsApp group', cov.notInWhatsApp],['No Instagram handle', cov.noIgHandle]];
     lists.forEach(function(l){ if(l[1]&&l[1].length) h+='<div class="f-note"><b>'+esc(l[0])+':</b> '+esc(l[1].map(function(x){ return memberName(x); }).join(', '))+'</div>'; });
-    if(Array.isArray(cov.failed) && cov.failed.length) h+='<div class="f-note"><b>Not read:</b> '+esc(cov.failed.map(function(f){ return (f.member&&f.member!=='*'?memberName(f.member)+' ':'')+'('+(f.source||'?')+(f.reason?': '+f.reason:'')+')'; }).join('; '))+'</div>';
+    var perClient=(Array.isArray(cov.failed)?cov.failed:[]).filter(function(f){ return f && f.member && f.member!=='*' && f.member!=='all'; });
+    if(cov.note) h+='<div class="f-note"><b>Scan note:</b> '+esc(cov.note)+'</div>';
+    if(cov.resume&&cov.resume.length) h+='<div class="f-note"><b>Carried to next run:</b> '+esc(cov.resume.join('; '))+'</div>';
+    if(perClient.length) h+='<div class="f-note"><b>Not read:</b> '+esc(perClient.map(function(f){ return (f.member&&f.member!=='*'?memberName(f.member)+' ':'')+'('+(f.source||'?')+(f.reason?': '+f.reason:'')+')'; }).join('; '))+'</div>';
     return h+'</div>';
   }
 
