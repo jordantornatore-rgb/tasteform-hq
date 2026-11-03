@@ -1,11 +1,13 @@
 // Data door for the Mac Mini autopost pipeline (no Supabase MCP there). Authenticated by the bundle.social key,
 // which the Mac holds in its Keychain and the database holds in the Vault (bundle_api_key()).
 // Body: { op: "merge", table, rows:[{id,data}] } | { op: "select", table, ids?:[], since?, limit? } | { op: "get", table, id }
+//     | { op: "previewUpload", path: "<rowId>/<file>.mp4|jpg" } -> a signed upload URL in the private content-previews bucket
 // merge goes through hq_merge, so only the fields sent are changed. Tables are limited to the content set.
 // Deploy: supabase functions deploy content-pipeline   (verify_jwt stays on; the Mac sends the public anon key as the bearer)
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const TABLES = ["content_queue", "content_ideas", "content_creators", "content_sounds", "meta", "ig_posts"];
+const READ_ONLY = ["ads_daily", "ads_campaigns"]; // ad-candidate cross-check; never written from the Mac
 function json(status: number, body: unknown) {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 }
@@ -25,8 +27,16 @@ Deno.serve(async (req) => {
 
   let body: Record<string, any>;
   try { body = await req.json(); } catch { return json(400, { error: "Bad request." }); }
+  if (body.op === "previewUpload") {
+    const p = String(body.path || "");
+    if (!/^[A-Za-z0-9_-]{3,120}\/[A-Za-z0-9._-]{1,120}\.(mp4|jpg)$/.test(p)) return json(400, { error: "path must be <rowId>/<file>.mp4|jpg" });
+    const { data, error } = await admin.storage.from("content-previews").createSignedUploadUrl(p, { upsert: true });
+    if (error) return json(500, { error: error.message });
+    return json(200, { ok: true, path: p, signedUrl: data.signedUrl, token: data.token });
+  }
   const table = String(body.table || "");
-  if (!TABLES.includes(table)) return json(400, { error: "Table not allowed: " + table });
+  if (!TABLES.includes(table) && !READ_ONLY.includes(table)) return json(400, { error: "Table not allowed: " + table });
+  if (READ_ONLY.includes(table) && body.op === "merge") return json(403, { error: "Read-only table: " + table });
 
   if (body.op === "merge") {
     const rows = Array.isArray(body.rows) ? body.rows : null;

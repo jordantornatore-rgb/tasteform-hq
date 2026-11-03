@@ -31,6 +31,30 @@ const SYD = 'Australia/Sydney';
 function sydDay(iso) { const d = new Date(iso); if (isNaN(d)) return null; const p = {}; new Intl.DateTimeFormat('en-GB', { timeZone: SYD, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(d).forEach(x => { p[x.type] = x.value; }); return `${p.year}-${p.month}-${p.day}`; }
 function addDays(key, n) { const t = new Date(key + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); }
 const NOW = Date.parse(NOW_ISO), TODAY = sydDay(NOW_ISO);
+// ---- Content Engine v2 fixtures (synthetic, committed; no real data). One row per state the Library must show:
+// open slot (needs_script), to_film with Jordan's script, awaiting approval with 5 versions, trialing, scheduled with a
+// low-confidence winner, posted (gold + ad candidate), needs_jordan and a posting error. Dates follow the test's "now".
+function contentFixtures(today) {
+  const d = n => addDays(today, n);
+  const ws = k => { const t = new Date(k + 'T00:00:00Z'); const w = t.getUTCDay(); t.setUTCDate(t.getUTCDate() + (w === 0 ? -6 : 1 - w)); return t.toISOString().slice(0, 10); };
+  const row = (id, data) => ({ id: 'test-' + id, data: Object.assign({ weekStart: ws(data.date), day: ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date(data.date + 'T00:00:00Z').getUTCDay()] }, data) });
+  const vars = ['v1', 'v2', 'v3', 'v4', 'v5'].map((v, i) => ({ v, diff: i ? 'opener ' + i : 'main edit', file: 'x/' + v + '.mp4', mediaUrl: 'https://media.example.test/' + v + '.mp4', coverUrl: 'https://media.example.test/' + v + '.jpg', bet: i === 0 }));
+  const at = h => new Date(NOW + h * 3600e3).toISOString();
+  return {
+    queue: [
+      row('open', { date: d(9), slot: 'high', format: 'F6', funnel: 'TOF', status: 'needs_script', title: 'Open slot', hooks: ['AI hook to tap'], body: ['old beat one'] }),
+      row('tofilm', { date: d(2), slot: 'low', format: 'F7', funnel: 'MOF', status: 'to_film', location: 'desk', title: 'Desk lunch', hooks: ['Hook A', 'Hook B'], visualHook: 'Lunchbox slam on desk', script: 'Line one.\nLine two of the script.', editNotes: '0:02 text "lunch"', cta: 'Link in my bio', editedByJordanAt: NOW_ISO }),
+      row('await', { date: d(4), slot: 'high', format: 'F6', funnel: 'TOF', status: 'awaiting_approval', title: 'Waiting reel', caption: 'Line one of the caption.\nLine two.\nLine three is hidden behind more.', linkedin: 'Professionals and TasteForm.', sound: { bankId: 'x', title: 'Bed', musicVolume: 10, voiceVolume: 100 }, video: { file: 'x/v1.mp4', previewUrl: 'https://media.example.test/v1.mp4', thumbnailUrl: 'https://media.example.test/v1.jpg', variants: vars } }),
+      row('trial', { date: d(3), slot: 'high', format: 'F6', funnel: 'MOF', status: 'trialing', title: 'Trialing reel', caption: 'c', video: { file: 'x/v1.mp4', variants: vars }, posting: { status: 'trialing', provider: 'outstand', plannedFor: at(72), platforms: ['INSTAGRAM', 'YOUTUBE', 'LINKEDIN'], trialMode: 'full', trials: vars.map((v, i) => ({ v: v.v, diff: v.diff, postId: 'p' + i, scheduledFor: at(-1 + i * 25 / 60), postedAt: i < 2 ? at(-1) : null, shortcode: i < 2 ? 'TRIAL' + i + 'abc' : null, metrics: i < 2 ? { views: 300 + i * 50, likes: 10, comments: 1, shares: 2, saves: 3, follows: null } : null })) } }),
+      row('sched', { date: d(1), slot: 'high', format: 'F2', funnel: 'BOF', status: 'scheduled', title: 'Scheduled reel', caption: 'Cap', winner: { v: 'v2', why: 'BOF: best comments per view' }, winnerConfidence: 'low', video: { file: 'x/v2.mp4', previewUrl: 'https://media.example.test/v2.mp4', variants: vars }, posting: { status: 'scheduled', provider: 'outstand', postId: 'pMAIN', postIds: { INSTAGRAM: 'pMAIN' }, scheduledFor: at(24), platforms: ['INSTAGRAM', 'YOUTUBE', 'LINKEDIN'], ytClaimRisk: true } }),
+      row('posted', { date: d(-8), slot: 'high', format: 'F2', funnel: 'TOF', status: 'posted', title: 'Posted reel', goldStandard: true, goldAt: NOW_ISO, postedShortcode: 'POSTED123', adCandidate: true, adWhy: 'TOF views 2.4x your 30-day median (6 posts)', metrics: { views: 5000, at24h: { views: 3000 }, at7d: { views: 5000 } }, posting: { status: 'posted', provider: 'outstand', postId: 'pOLD', postedAt: at(-8 * 24), permalinks: { instagram: 'https://www.instagram.com/reel/POSTED123/' } } }),
+      row('nj', { date: d(5), slot: 'low', format: 'F7', funnel: 'TOF', status: 'needs_jordan', title: 'Blocked reel', needsJordan: { reason: 'Need: B-roll of the office lift', at: NOW_ISO } }),
+      row('err', { date: d(6), slot: 'low', format: 'F7', funnel: 'TOF', status: 'approved', title: 'Errored reel', posting: { status: 'error', provider: 'outstand', error: 'instagram: media has edit lists' } }),
+    ],
+    ideas: [{ id: 'test-idea1', data: { shortcode: 'IDEA1', url: 'https://www.instagram.com/reel/IDEA1/', creator: 'someone', followers: 120000, lane: 'format', type: 'reel', format: 'F6', funnel: 'MOF', views: 200000, shares: 4000, comments: 900, status: 'new', pinned: true, foundAt: NOW_ISO, adaptation: 'Run it as a desk-job version.', whyItWorked: 'High share rate.', hooks: ['Idea hook one', 'Idea hook two'], visualHooks: ['Close-up of a lunchbox'], talkingPoints: ['Point one', 'Point two'], related: [{ url: 'https://www.instagram.com/reel/REL1/', creator: 'other', followers: 5000, views: 80000, shares: 900, comments: 100, stageNote: 'same topic' }] } }],
+  };
+}
+{ const cf = contentFixtures(TODAY); fixtures.content_queue = fixtures.content_queue.concat(cf.queue); fixtures.content_ideas = fixtures.content_ideas.concat(cf.ideas); }
 const dms = docs('dm_threads'), tfDaily = docs('tf_daily'), tfResponses = docs('tf_responses'), contacts = docs('contacts');
 const leads = dms.filter(d => d.category === 'lead' && !d.notApplicable);
 const exp = {};
@@ -104,7 +128,7 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
   const { srv, url } = await serve();
   const browser = await pw.chromium.launch(process.env.HQ_CHROME ? { executablePath: process.env.HQ_CHROME } : {});
   try {
-    for (const width of [1280, 390]) for (const dark of [false, true]) for (const role of ['admin', 'limited']) {
+    for (const width of (process.env.HQ_ONLY_CONTENT ? [] : [1280, 390])) for (const dark of [false, true]) for (const role of ['admin', 'limited']) {
       const label = `${width}px ${dark ? 'dark' : 'light'} ${role}`;
       const { context, page, console_ } = await openPage(browser, url, { width, dark, role });
       for (const tab of TABS) {
@@ -175,6 +199,81 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await context.close();
     }
 
+    // ---- Content Engine v2: Library states, phone preview with versions, script editor, filming sheet, Idea Bank ----
+    for (const width of [1280, 390]) {
+      const lbl = `content v2 ${width}px`;
+      const { context, page, console_ } = await openPage(browser, url, { width, dark: width === 390, role: 'admin' });
+      const sheetText = () => page.evaluate(() => document.getElementById('ceSheet').innerText);
+      const sheetOpen = () => page.evaluate(() => !document.getElementById('ceSheet').hidden);
+      const noBad = (name, txt) => check(`${lbl} ${name}: no NaN/undefined`, () => { const bad = txt.match(/\bNaN\b|\bundefined\b|\bnull\b|Infinity|\[object/); assert.ok(!bad, 'found ' + (bad && bad[0]) + ' near ' + txt.slice(Math.max(0, (bad && bad.index) - 60), (bad && bad.index) + 60)); });
+      const sheetTargets = async (name) => { if (width !== 390) return; const small = await page.evaluate(() => Array.from(document.querySelectorAll('#ceSheet button, #ceSheet a[href]')).filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.height < 32 || (r.height < 44 && r.width < 44)); }).map(el => el.textContent.trim().slice(0, 20) + ':' + Math.round(el.getBoundingClientRect().height))); check(`${lbl} ${name}: sheet touch targets`, () => assert.deepStrictEqual(small, [])); const sw = await page.evaluate(() => document.documentElement.scrollWidth), cw = await page.evaluate(() => document.documentElement.clientWidth); check(`${lbl} ${name}: no horizontal scroll`, () => assert.ok(sw <= cw + 1, sw + ' > ' + cw)); };
+      await page.evaluate(() => window.__hq.setView('content')); await page.click('#ceViewSeg [data-ceview="library"]'); await page.waitForTimeout(250);
+      const lib = await visibleText(page);
+      check(`${lbl}: pipeline strip has Needs script and Trialing`, () => assert.ok(/Needs script/i.test(lib) && /Trialing/i.test(lib), lib.slice(0, 400)));
+      check(`${lbl}: needs-you reason and waiting card show`, () => assert.ok(/Need: B-roll of the office lift/.test(lib) && /Waiting for you/i.test(lib)));
+      check(`${lbl}: up next includes the trialing reel`, () => assert.ok(/Trialing reel/.test(lib)));
+      noBad('library', lib);
+      // phone preview with 5 versions
+      await page.click('[data-ce-play="test-await"]'); await page.waitForTimeout(200);
+      check(`${lbl}: preview opens`, () => assert.ok(true));
+      const tabs = await page.$$eval('#ceSheet .ce-vtab', els => els.map(e => e.textContent));
+      check(`${lbl}: preview has 5 version tabs`, () => assert.strictEqual(tabs.length, 5, JSON.stringify(tabs)));
+      const pv = await sheetText(); noBad('preview', pv);
+      check(`${lbl}: preview caption is clamped with …more, approve is there`, () => assert.ok(/…more/.test(pv) && /Approve/.test(pv) && /jordantornatore/.test(pv) && /10% under voice/.test(pv), pv));
+      await sheetTargets('preview');
+      await page.click('#ceSheet [data-ce-pv="v3"]'); await page.waitForTimeout(100);
+      const sel = await page.$eval('#ceSheet .ce-vtab[aria-selected="true"]', e => e.getAttribute('data-ce-pv'));
+      check(`${lbl}: version tab switches`, () => assert.strictEqual(sel, 'v3'));
+      await page.keyboard.press('Escape'); await page.waitForTimeout(80);
+      // filming sheet
+      await page.click('#ceRoot [data-ce="filmsheet"]'); await page.waitForTimeout(150);
+      const film = await sheetText(); noBad('filming sheet', film);
+      check(`${lbl}: filming sheet shows the script, hooks and visual hook`, () => assert.ok(/Desk lunch/i.test(film) && /Line two of the script/.test(film) && /Hook A/.test(film) && /Lunchbox slam/.test(film) && /Desk/i.test(film), JSON.stringify(film.slice(0, 900))));
+      await sheetTargets('filming sheet');
+      await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
+      // open slot -> script editor with the old AI beats as reference and AI hooks as chips
+      await page.evaluate(() => { const b = document.querySelector('#ceRoot [data-ce-open="test-open"]'); b.click(); }); await page.waitForTimeout(150);
+      const ed1 = await sheetText(); noBad('script editor (open slot)', ed1);
+      check(`${lbl}: open slot opens the script editor with the old beats as reference`, () => assert.ok(/Script editor/i.test(ed1) && /Old AI-drafted beats/i.test(ed1), JSON.stringify(ed1.slice(0, 900))));
+      const chip = await page.$$eval('#ceSheet [data-cs-usehook]', els => els.map(e => e.getAttribute('data-cs-usehook')));
+      check(`${lbl}: AI hooks become tap-to-use chips, not prefilled`, () => assert.ok(chip.includes('AI hook to tap'), JSON.stringify(chip)));
+      await sheetTargets('script editor');
+      await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
+      // Idea Bank: research card + Turn into a reel
+      await page.click('#ceViewSeg [data-ceview="ideas"]'); await page.waitForTimeout(150);
+      const ideas = await visibleText(page); noBad('idea bank', ideas);
+      check(`${lbl}: idea card shows lane, adaptation, stage numbers and similar reels`, () => assert.ok(/Format lane/.test(ideas) && /Run it as a desk-job version/i.test(ideas) && /share rate/.test(ideas) && /2\.0%/.test(ideas) && /Similar high performers/i.test(ideas) && /Talking points/i.test(ideas), JSON.stringify(ideas.slice(ideas.indexOf("Idea Bank"), ideas.indexOf("Idea Bank")+1500))));
+      await page.click('[data-ce-toreel="test-idea1"]'); await page.waitForTimeout(150);
+      const ed2 = await sheetText(); noBad('script editor (idea)', ed2);
+      check(`${lbl}: idea opens the editor with its hooks, visual hooks and open slots`, () => assert.ok(/Idea hook one/.test(ed2) && /Close-up of a lunchbox/.test(ed2) && /Source idea/i.test(ed2) && /open slot/i.test(ed2), ed2.slice(0, 500)));
+      await page.click('#ceSheet [data-cs-usehook="Idea hook one"]');
+      const h0 = await page.$eval('#ceSheet [data-cs-hook="0"]', e => e.value);
+      check(`${lbl}: tapping a hook chip fills the first hook`, () => assert.strictEqual(h0, 'Idea hook one'));
+      await page.fill('#ceSheet [data-cs="script"]', 'one two three four five'); await page.dispatchEvent('#ceSheet [data-cs="script"]', 'input');
+      const wc = await page.$eval('#ceSheet [data-cs-wc]', e => e.textContent);
+      check(`${lbl}: word count + read time`, () => assert.ok(/^5 words · ~2s read/.test(wc), wc));
+      await page.waitForTimeout(3300);
+      const draft = await page.evaluate(() => { try { return localStorage.getItem('hqScriptDraft:new:test-idea1:'); } catch (e) { return null; } });
+      check(`${lbl}: the draft autosaves on this device`, () => assert.ok(draft && /one two three four five/.test(draft), String(draft)));
+      await page.keyboard.press('Escape'); await page.waitForTimeout(80);
+      // post sheet: winner, YouTube claim note, trials, gold
+      await page.click('#ceViewSeg [data-ceview="library"]'); await page.waitForTimeout(150);
+      await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-trial"]').click()); await page.waitForTimeout(150);
+      const st = await sheetText(); noBad('post sheet (trialing)', st);
+      check(`${lbl}: trialing sheet lists the trial versions with numbers`, () => assert.ok(/Trial reels/i.test(st) && /350 views/.test(st) && /v5/.test(st), JSON.stringify(st.slice(0, 1500))));
+      await page.keyboard.press('Escape');
+      await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-sched"]').click()); await page.waitForTimeout(150);
+      const ss = await sheetText(); noBad('post sheet (scheduled)', ss);
+      check(`${lbl}: scheduled sheet shows the winner, low confidence and the YouTube claim note`, () => assert.ok(/🏆/.test(ss) && /low confidence/.test(ss) && /YouTube may claim/.test(ss) && /Gold standard|gold standard/.test(ss), JSON.stringify(ss.slice(0, 1500))));
+      await page.keyboard.press('Escape');
+      // performance: ad candidates
+      await page.click('#ceViewSeg [data-ceview="perf"]'); await page.waitForTimeout(150);
+      const perf = await visibleText(page);
+      check(`${lbl}: Turn into an ad lists the ad candidate`, () => assert.ok(/Turn into an ad/i.test(perf) && /Posted reel/.test(perf) && /2\.4x your 30-day median/.test(perf), JSON.stringify(perf.slice(0, 900))));
+      check(`${lbl}: zero console errors`, () => assert.deepStrictEqual(console_.errors, []));
+      check(`${lbl}: zero console warnings`, () => assert.deepStrictEqual(console_.warnings, []));
+      await context.close();
+    }
     // ---- perf: idle polling with unchanged data must not render; only the active tab renders ----
     {
       const { context, page } = await openPage(browser, url, { width: 1280, dark: false, role: 'admin' });

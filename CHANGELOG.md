@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.6.0 — 4 Nov 2026 (Content Engine workflow v2: Jordan writes the scripts)
+
+- **Script editor** (full screen on a phone, side panel on desktop) from "Turn into a reel" in the Idea Bank, any open slot on the calendar or board, "+ New reel" (Library and under every calendar day) and "Edit script" on a post: title, up to 5 spoken hooks with the idea's hooks as tap-to-use chips, visual hook (the idea's visual hooks as chips), the script (auto-grows, word count, read time), editing notes, CTA, format / funnel / location, a slot picker over the open slots of the next 3 weeks or a new day + slot, the source idea panel, the old AI beats read-only. Local draft autosave every 3 s. Saves through `content-update` (`create` for new reels).
+- **Filming sheet**: every to_film script for the next 2 weeks by location, hooks numbered, script in big type, printable.
+- **Open slots**: `needs_script` shells are dashed "Write script" cards; "Needs script" and "Trialing" join the pipeline strip and the status stepper.
+- **Phone preview** on every card with a render (▶; desktop hover plays muted; one video at a time): 9:16 frame, username row, caption with "…more", time, platforms, sound line, the 5 trial versions as tabs with live numbers, 🏆 winner with its why and confidence, Approve / Request changes. Plays `previewUrl`, a version's media, or a 1-hour signed URL from `content-previews`; a failed load says so and flags `video.previewBroken`.
+- **Post sheet**: Jordan's script, visual hook, editing notes and CTA replace the beats (old beats read-only); trial reels with each version's numbers and the winner; ⭐ "Make this the gold standard for <format>"; YouTube claim-risk note; LinkedIn shows the TasteForm tag and warns when it's missing; sound editor for mixed-in music (bank track + volume); Outstand wording.
+- **Idea Bank**: lane chip and filter, sort by lane/funnel, pinned on top, "How to make it yours", the source reel with stage-right numbers (`–` with the reason when not public), follower jump, similar high performers, hook options, visual hook ideas and talking points with Copy.
+- **Editing standards** panel (gold reel per format, inspo reels saved to `meta/autopost.formatInspo`) and **Turn into an ad** on Performance.
+- `supabase/functions/content-update` and `content-reschedule` sources are now in the repo (they also keep a separate YouTube post in line; deploy pending).
+- Tests: Content Engine v2 block in `tests/ui.test.js` with committed synthetic rows; `HQ_ONLY_CONTENT=1` runs just that block plus the edge cases.
+
 ## 2.5.1 — 3 Nov 2026 (points only count once their day has passed)
 
 - A point counts only when its date is today or earlier, and scanned points never before the challenge start (`counts()`); future bookings show as "booked ahead". 1:1s score the day after the call, not when booked. Manual log refuses future dates.

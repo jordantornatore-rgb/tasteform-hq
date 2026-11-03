@@ -717,6 +717,72 @@ body{padding:0;}
 .ce-note{font-size:var(--t-s);color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px;}
 .ce-libfilters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .ce-libfilters .input{min-width:0;max-width:100%;}
+/* ===== Content Engine v2: script editor, filming sheet, phone preview, research cards ===== */
+.ce-play{position:relative;padding:0;border:none;background:none;cursor:pointer;flex-shrink:0;display:block;border-radius:8px;color:inherit;}
+.ce-play .pl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;text-shadow:0 1px 6px rgba(0,0,0,.7);pointer-events:none;}
+.ce-play:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.ce-cal-card.open,.ce-card.open{border-style:dashed;border-color:var(--border-strong);background:transparent;}
+.ce-cal-card.open{text-align:left;cursor:pointer;color:inherit;font:inherit;}
+.ce-write{font-size:var(--t-xs);font-weight:700;color:var(--accent);}
+.ce-addday{border:1px dashed var(--border);background:none;color:var(--muted);border-radius:var(--r-m);min-height:32px;font-size:var(--t-xs);font-weight:700;cursor:pointer;width:100%;font-family:inherit;}
+.ce-addday:hover{border-color:var(--accent);color:var(--accent);}
+.ce-sheet.side{justify-content:flex-end;}
+@media (min-width:761px){.ce-sheet.side{align-items:stretch;padding:0;}.ce-sheet.side .ce-sheet-card{max-width:880px;max-height:100vh;height:100vh;border-radius:0;}}
+@media (max-width:760px){.ce-sheet.side{align-items:stretch;}.ce-sheet.side .ce-sheet-card{max-height:100vh;height:100vh;border-radius:0;}.ce-addday{min-height:var(--tap);}}
+.ce-script textarea.input{min-height:56px;overflow:hidden;}
+.ce-script textarea[data-cs="script"]{min-height:260px;font-size:17px;line-height:1.6;}
+.ce-script [data-cs-hook]{margin-bottom:6px;}
+.ce-newslot[hidden],[data-ce-liwarn][hidden]{display:none !important;}
+.ce-chipbtn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:6px 12px;min-height:36px;font-size:var(--t-xs);cursor:pointer;text-align:left;max-width:100%;overflow-wrap:anywhere;font-family:inherit;}
+.ce-chipbtn:hover{border-color:var(--accent);}
+@media (pointer:coarse){.ce-chipbtn{min-height:var(--tap);}}
+.ce-idea-panel{border:1px solid var(--border);border-radius:var(--r-m);padding:4px 10px 10px;background:var(--bg);display:flex;flex-direction:column;gap:8px;}
+.ce-idea-panel summary{cursor:pointer;font-weight:700;font-size:var(--t-s);min-height:var(--tap);display:flex;align-items:center;}
+.ce-phone{display:flex;flex-direction:column;gap:8px;max-width:380px;margin:0 auto;width:100%;}
+.ce-phone-frame{aspect-ratio:9/16;width:100%;max-height:68vh;background:#000;border-radius:18px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin:0 auto;}
+.ce-phone-video{width:100%;height:100%;object-fit:contain;background:#000;display:block;}
+.ce-phone-empty{color:#ddd;font-size:var(--t-s);padding:20px;text-align:center;}
+.ce-phone-user{display:flex;align-items:center;gap:8px;font-size:var(--t-s);}
+.ce-phone-user .av{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+.ce-phone-cap{font-size:var(--t-s);line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;}
+.ce-more{border:none;background:none;color:var(--muted);font:inherit;cursor:pointer;padding:0 0 0 4px;min-height:32px;min-width:52px;}
+.ce-vtabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+.ce-vtab{flex:0 0 auto;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:var(--r-m);padding:6px 10px;min-height:var(--tap);display:flex;flex-direction:column;gap:2px;text-align:left;max-width:170px;cursor:pointer;font-size:var(--t-xs);font-family:inherit;}
+.ce-vtab[aria-selected="true"]{background:var(--text);color:var(--bg);border-color:var(--text);}
+.ce-vtab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px;}
+.ce-vtab .n{opacity:.8;font-variant-numeric:tabular-nums;}
+.ce-win{font-size:var(--t-s);font-weight:600;background:var(--good-soft);color:var(--good);border-radius:8px;padding:6px 10px;}
+.ce-trials{display:flex;flex-direction:column;gap:4px;}
+.ce-trial{font-size:var(--t-s);border-left:3px solid var(--border);padding:2px 8px;}
+.ce-trial.won{border-left-color:var(--good);}
+.ce-script-read{font-size:16px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;overflow:auto;}
+.chip.ce-li{background:#0A66C2;color:#fff;}
+.chip.ce-lane{background:var(--info-soft);color:var(--text-2);}
+.ce-stagenums{display:flex;gap:4px 12px;flex-wrap:wrap;font-size:var(--t-s);}
+.ce-stagenums b{font-variant-numeric:tabular-nums;}
+.ce-stagenums i{color:var(--muted);font-style:normal;font-size:var(--t-xs);}
+.ce-rels{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;}
+.ce-rel{border:1px solid var(--border);border-radius:var(--r-s);padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:var(--t-xs);color:inherit;text-decoration:none;min-height:var(--tap);min-width:0;overflow-wrap:anywhere;}
+.ce-rel:hover{border-color:var(--accent);}
+.ce-copylist{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:var(--t-s);}
+.ce-copylist li > div{display:flex;gap:6px;justify-content:space-between;align-items:flex-start;}
+.ce-copylist li span{min-width:0;overflow-wrap:anywhere;}
+.ce-idea.focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset;}
+.ce-film{border-top:1px solid var(--border);padding:12px 0;display:flex;flex-direction:column;gap:6px;break-inside:avoid;}
+.ce-film h3{font-size:var(--t-l);margin:0;}
+.ce-film-script{font-size:20px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;}
+.ce-film ol{margin:0;padding-left:22px;font-size:17px;line-height:1.5;}
+.ce-film-loc{font-family:'Anton',Impact,sans-serif;font-size:22px;letter-spacing:.02em;margin-top:8px;}
+.ce-std{display:flex;flex-direction:column;gap:8px;}
+.ce-std-row{border-top:1px solid var(--border);padding-top:8px;display:flex;flex-direction:column;gap:6px;}
+.ce-fromidea{align-self:flex-start;}
+@media print{
+  body *{visibility:hidden !important;}
+  #ceSheet,#ceSheet *{visibility:visible !important;}
+  #ceSheet{position:absolute;inset:0;background:#fff;display:block;padding:0;}
+  #ceSheet .ce-sheet-card{max-height:none;height:auto;overflow:visible;border:none;color:#000;background:#fff;}
+  #ceSheet .no-print{display:none !important;}
+}
 .ce-rules summary{cursor:pointer;font-weight:600;font-size:var(--t-s);min-height:var(--tap);display:flex;align-items:center;}
 .ce-rules ul{margin:4px 0 0;padding-left:18px;font-size:var(--t-s);}
 .ce-metrics2{font-size:var(--t-s);color:var(--text-2);font-variant-numeric:tabular-nums;}
@@ -2438,9 +2504,9 @@ body{padding:0;}
      Tables: content_ideas (Scanner briefs, id = Instagram shortcode), content_queue (Sunday batch slots,
      id = <weekStart>-<day>-<hi|lo|car>), content_creators (watchlist); meta rows contentScan / contentReview.
      Every write is a merge into data (db.doc().update) and only runs for admins; everyone signed in can read. */
-  var CE_STATUS=['to_film','filmed','editing','edited','awaiting_approval','approved','scheduled','posted'];
+  var CE_STATUS=['needs_script','to_film','filmed','editing','edited','awaiting_approval','approved','trialing','scheduled','posted'];
   var CE_SIDE=['changes_requested','needs_jordan','error','skipped','cancelled'];
-  var CE_STATUS_LABEL={to_film:'To film', filmed:'Filmed', editing:'Editing', edited:'Edited', awaiting_approval:'Needs your OK', approved:'Approved', scheduled:'Scheduled', posted:'Posted', skipped:'Skipped', changes_requested:'Changes requested', needs_jordan:'Needs Jordan', error:'Error', cancelled:'Pulled'};
+  var CE_STATUS_LABEL={needs_script:'Needs script', trialing:'Trialing', to_film:'To film', filmed:'Filmed', editing:'Editing', edited:'Edited', awaiting_approval:'Needs your OK', approved:'Approved', scheduled:'Scheduled', posted:'Posted', skipped:'Skipped', changes_requested:'Changes requested', needs_jordan:'Needs Jordan', error:'Error', cancelled:'Pulled'};
   var CE_PLATFORM_SHORT={INSTAGRAM:'IG', TIKTOK:'TikTok', YOUTUBE:'YT', LINKEDIN:'LinkedIn'};
   var CE_FORMATS=['F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','F13','F14','F15','F16','F17','C1','C2','C3','C4','C5','C6','C7'];
   var CE_ANGLES=['corporate pain','how we fix it','client proof',"Jordan's story"], CE_HOOKSTYLES=['call-out','contrarian','story','proof'], CE_LOCS=['desk','car','mirror','kitchen','gym','outside'], CE_EFFORTS=['high','med','low'];
@@ -2453,7 +2519,9 @@ body{padding:0;}
   var CE_METRICS=[['n','Posts'],['posts','Posts'],['count','Posts'],['medianViews','Median views'],['avgViews','Avg views'],['views','Views'],['likes','Likes'],['comments','Comments'],['saves','Saves'],['shares','Shares'],['follows','Follows'],['dms','DMs'],['keywordComments','Keyword comments'],['applications','Applications'],['score','Score'],['value','Value']];
   var ceView=(function(){ var v=read('hqCeView'); return ['library','week','ideas','perf','scan'].indexOf(v)>=0 ? v : 'library'; })();
   var ceWeekOffset=0, ceShowFilming=false, ceOpenId=null, ceCopyTexts={}, ceBusy={};
-  var ceFilters={status:'', funnel:'', format:'', type:'', office:false};
+  var ceFilters={status:'', funnel:'', format:'', type:'', office:false, lane:'', sort:'new'};
+  var CE_LANES=[['niche','Niche'],['fitness','Fitness'],['format','Format'],['audience','Audience']];
+  var ceScript=null, ceScriptTimer=null, ceFilm=false, ceFilmForce=false, cePreview=null, ceSigned={}, ceBroken={}, ceIdeaFocus=null, ceStdOpen=false, ceInspoEdit=null, ceHoverEl=null;
 
   function ceIdx(s){ return CE_STATUS.indexOf(String(s||'')); }
   function ceStatusLabel(s){ return CE_STATUS_LABEL[s] || (s ? String(s) : 'no status'); }
@@ -2462,7 +2530,7 @@ body{padding:0;}
   function ceFormatChip(v){ var s=String(v==null?'':v).trim(); return s ? '<span class="chip stage ce-fmt">'+esc(s.length<=4?s.toUpperCase():s)+'</span>' : '<span class="chip grey">no format</span>'; }
   function ceStatusChip(s, q){
     s=s||'to_film'; var pst=q&&q.posting&&q.posting.status;
-    var cls = s==='posted'?'good':(s==='awaiting_approval'?'warn':(s==='changes_requested'?'ce-purple':(s==='needs_jordan'||s==='error'?'crit':(s==='skipped'||s==='cancelled'?'grey':(ceIdx(s)>=1?'warn':'stage')))));
+    var cls = s==='posted'?'good':(s==='awaiting_approval'?'warn':(s==='changes_requested'?'ce-purple':(s==='needs_jordan'||s==='error'?'crit':(s==='skipped'||s==='cancelled'?'grey':(ceIdx(s)>=ceIdx('filmed')?'warn':'stage')))));
     var label = s==='changes_requested' ? 'Changes requested – being reworked' : ceStatusLabel(s);
     var out='<span class="chip '+cls+'">'+esc(label)+'</span>';
     if(pst==='error' && s!=='error') out+='<span class="chip crit">Error</span>';
@@ -2492,6 +2560,47 @@ body{padding:0;}
   }
   function ceFindSlot(id){ return (state.contentQueue||[]).find(function(q){ return q.id===id; }) || null; }
 
+
+  /* --- v2 helpers: video sources (public URL or a 1-hour signed Storage URL), sound line, words --- */
+  function ceVideoOf(q, v){
+    var vid=q.video||{}, list=Array.isArray(vid.variants)?vid.variants:[], ver=v?list.find(function(x){ return x.v===v; }):null;
+    if(ver) return {url:ver.mediaUrl||null, path:ver.storagePath||null, poster:ver.coverUrl||vid.thumbnailUrl||null, v:ver.v};
+    return {url:vid.previewUrl||null, path:vid.storagePath||null, poster:vid.thumbnailUrl||null, v:null};
+  }
+  function ceHasVideo(q){ var x=ceVideoOf(q); return !!(x.url||x.path); }
+  function ceVideoTag(q, v, cls){ var x=ceVideoOf(q, v); if(!x.url&&!x.path) return ''; return '<video class="'+(cls||'ce-video')+'" controls playsinline preload="metadata" data-ce-vid="'+esc(q.id)+'"'+(x.poster?' poster="'+esc(x.poster)+'"':'')+(x.url?' src="'+esc(x.url)+'"':' data-ce-path="'+esc(x.path)+'"')+'></video>'; }
+  async function ceAttachSources(root){
+    var list=root?root.querySelectorAll('video[data-ce-path]:not([src])'):[];
+    for(var i=0;i<list.length;i++){
+      var el=list[i], p=el.getAttribute('data-ce-path'), c=ceSigned[p];
+      if(c && Date.now()-c.at<50*60000){ el.src=c.url; continue; }
+      try{ if(!supaClient||!supaClient.storage) throw new Error('no storage'); var r=await supaClient.storage.from('content-previews').createSignedUrl(p, 3600); if(r.error||!r.data) throw (r.error||new Error('no url')); ceSigned[p]={url:r.data.signedUrl, at:Date.now()}; el.src=r.data.signedUrl; }
+      catch(e){ ceVideoFailed(el); }
+    }
+  }
+  function ceVideoFailed(el){
+    var id=el.getAttribute('data-ce-vid'); if(!id) return;
+    var anchor=(el.closest&&el.closest('.ce-phone-frame'))||el, nx=anchor.nextElementSibling; if(!nx || !nx.classList.contains('ce-vidfail')){ var n=document.createElement('div'); n.className='ce-note ce-vidfail'; n.textContent='Preview didn’t load – the pipeline re-uploads on its next run.'; anchor.insertAdjacentElement('afterend', n); }
+    if(ceBroken[id]||!isAdmin||!db) return; ceBroken[id]=true;
+    var q=ceFindSlot(id); if(!q||!q.video||q.video.previewBroken) return;
+    var video=Object.assign({}, q.video, {previewBroken:true, previewBrokenAt:ceNowIso()}); q.video=video;
+    db.collection('content_queue').doc(id).update({video:video}).catch(function(){});
+  }
+  function ceSoundLine(snd){
+    if(!snd) return '– sound not chosen yet';
+    var title=snd.title||snd.bankId||snd.id||'';
+    if(!title || title==='No music' || (!snd.bankId && !snd.id && !snd.file)) return title||'No music';
+    var vol=HQ.isNum(snd.musicVolume)?snd.musicVolume:(HQ.isNum(snd.musicSoundVolume)?snd.musicSoundVolume:null);
+    return title+(vol==null?'':(vol>=60?' · full mix':' · '+vol+'% under voice'));
+  }
+  function ceWords(s){ s=ceText(s); return s?s.split(/\s+/).filter(Boolean).length:0; }
+  function ceReadTime(w){ var sec=Math.round(w/2.5); return sec<60?sec+'s read':Math.floor(sec/60)+'m '+HQ.pad(sec%60)+'s read'; }
+  function ceTrialNums(m){ return [['views','views'],['likes','likes'],['comments','comments'],['shares','shares'],['saves','saves'],['follows','follows']].filter(function(k){ return HQ.isNum(m[k[0]]); }).map(function(k){ return num(m[k[0]])+' '+k[1]; }).join(' · ')||'numbers –'; }
+  function ceIdeaById(id){ return id?(state.contentIdeas||[]).find(function(i){ return i.id===id||i.shortcode===id; })||null:null; }
+  function ceLinkedinRead(t){ t=ceText(t); if(!t) return '<div class="ce-txt muted">– not written yet</div>'; return '<div class="ce-line"><div class="t">'+esc(t).replace(/@?\[?TasteForm\]?(\(urn:li:organization:\d+\))?/g, '<span class="chip ce-li">@TasteForm</span>')+'</div>'+ceCopyBtn('linkedin', t)+'</div>'; }
+  function ceCloseOverlays(){ if(ceScript){ ceSaveDraft(); } if(ceScriptTimer){ clearInterval(ceScriptTimer); ceScriptTimer=null; } ceScript=null; ceFilm=false; cePreview=null; }
+  function ceCloseAll(){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceRenderSheet(); }
+
   RENDER.content = function(){
     var root=$('ceRoot'); if(!root) return;
     document.querySelectorAll('#ceViewSeg button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-ceview')===ceView?'true':'false'); });
@@ -2499,6 +2608,7 @@ body{padding:0;}
     var typing=document.activeElement && root.contains(document.activeElement) && /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName) && document.activeElement.value;
     if(typing){ ceRenderSheet(); return; } // never wipe text Jordan is typing in a card; the next change re-renders
     root.innerHTML = ceView==='ideas' ? ceRenderIdeas() : (ceView==='perf' ? ceRenderPerf() : (ceView==='scan' ? ceRenderScan() : (ceView==='week' ? ceRenderWeek() : ceRenderLibrary())));
+    if(ceView==='ideas' && ceIdeaFocus){ var fe=root.querySelector('[data-idea-id="'+CSS.escape(ceIdeaFocus)+'"]'); if(fe){ fe.classList.add('focus'); try{ fe.scrollIntoView({block:'center'}); }catch(e){} } ceIdeaFocus=null; }
     if(ceView==='library' && ceLib.focusQ){ var qi=$('ceLibQ'); if(qi){ qi.focus(); try{ qi.setSelectionRange(qi.value.length, qi.value.length); }catch(e){} } ceLib.focusQ=false; }
     ceRenderSheet();
   };
@@ -2513,7 +2623,7 @@ body{padding:0;}
     if(st!=='ok'){ setText('ceSub', st==='loading'?'Loading…':'Sync error'); return '<div class="panel">'+head+ceStateBox(st,'the weekly plan')+'</div>'; }
     var slots=ceWeekSlots(ws).sort(function(a,b){ return String(a._date||'').localeCompare(String(b._date||'')) || ceSlotOrder(a)-ceSlotOrder(b) || String(a.id).localeCompare(String(b.id)); });
     var live=slots.filter(function(q){ return q.status!=='skipped'; });
-    var filmed=live.filter(function(q){ return ceIdx(q.status)>=1; }).length, approved=live.filter(function(q){ return ceIdx(q.status)>=5; }).length, posted=live.filter(function(q){ return q.status==='posted'; }).length;
+    var filmed=live.filter(function(q){ return ceIdx(q.status)>=ceIdx('filmed'); }).length, approved=live.filter(function(q){ return ceIdx(q.status)>=ceIdx('approved'); }).length, posted=live.filter(function(q){ return q.status==='posted'; }).length;
     var toFilm=slots.filter(function(q){ return !q.status || q.status==='to_film'; });
     if(!slots.length){
       setText('ceSub', 'No plan for the week of '+label);
@@ -2525,7 +2635,7 @@ body{padding:0;}
     function prog(lbl, n, cls){ return '<div class="row '+cls+'"><span>'+lbl+'</span><div class="bar" role="progressbar" aria-label="'+lbl+'" aria-valuemin="0" aria-valuemax="'+CE_WEEK_SLOTS+'" aria-valuenow="'+n+'"><i style="width:'+Math.min(100, n/CE_WEEK_SLOTS*100)+'%"></i></div><span class="n">'+n+' / '+CE_WEEK_SLOTS+'</span></div>'; }
     var html='<div class="panel">'+head+'<div class="ce-prog">'+prog('Filmed',filmed,'filmed')+prog('Approved',approved,'approved')+prog('Posted',posted,'posted')+'</div>';
     if(slots.length!==CE_WEEK_SLOTS || slots.length!==live.length) html+='<div class="f-note">'+slots.length+' slot'+(slots.length===1?'':'s')+' in this week\'s plan'+(slots.length-live.length?', '+(slots.length-live.length)+' skipped':'')+'. The bars count out of the 18 the plan aims for.</div>';
-    html+='<div><button type="button" class="btn'+(ceShowFilming?' primary':'')+'" data-ce="filming" aria-pressed="'+(ceShowFilming?'true':'false')+'">Filming list · '+toFilm.length+' to film</button></div></div>';
+    html+='<div class="ce-chips"><button type="button" class="btn'+(ceShowFilming?' primary':'')+'" data-ce="filming" aria-pressed="'+(ceShowFilming?'true':'false')+'">Filming list · '+toFilm.length+' to film</button><button type="button" class="btn" data-ce="filmsheet">Filming sheet (2 weeks)</button></div></div>';
     if(ceShowFilming) html+=ceRenderFilming(toFilm);
     var days=HQ.dayRange(ws,we);
     html+='<div class="ce-board">'+days.map(function(d){
@@ -2538,11 +2648,11 @@ body{padding:0;}
   }
   function ceCard(q){
     var loc=ceText(q.location), eff=ceCap(q.effort);
-    return '<button type="button" class="ce-card'+(q.status==='posted'?' posted':'')+(q.status==='skipped'?' skipped':'')+'" data-ce-open="'+esc(q.id)+'" aria-label="Open script: '+esc(ceText(q.title)||q.id)+'">'+
+    return '<button type="button" class="ce-card'+(q.status==='posted'?' posted':'')+(q.status==='skipped'?' skipped':'')+(q.status==='needs_script'?' open':'')+'" data-ce-open="'+esc(q.id)+'" aria-label="Open script: '+esc(ceText(q.title)||q.id)+'">'+
       '<div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+'</div>'+
       '<div class="ce-title">'+esc(ceText(q.title)||'Untitled slot')+'</div>'+
       '<div class="ce-meta">'+esc(eff?eff+' effort':'effort –')+' · '+esc(loc||'location –')+'</div>'+
-      '<div class="ce-chips">'+ceStatusChip(q.status)+'</div></button>';
+      '<div class="ce-chips">'+ceStatusChip(q.status)+(q.status==='needs_script'?'<span class="ce-write">✎ Write script</span>':'')+'</div></button>';
   }
   function ceRenderFilming(toFilm){
     var groups={}; toFilm.forEach(function(q){ var l=String(q.location||'').trim().toLowerCase(), k=CE_LOCATIONS.indexOf(l)>=0 ? l : (l ? 'other' : 'none'); (groups[k]=groups[k]||[]).push(q); });
@@ -2563,6 +2673,10 @@ body{padding:0;}
   /* --- Post sheet: preview, timeline, schedule controls, feedback, every section editable (admin, until posted) --- */
   function ceRenderSheet(){
     var el=$('ceSheet'); if(!el) return;
+    if(ceScript){ ceRenderScriptEditor(el); return; }
+    if(ceFilm){ ceRenderFilmSheet(el); return; }
+    if(cePreview){ ceRenderPreview(el); return; }
+    if(el.getAttribute('data-mode')){ el.removeAttribute('data-mode'); el.classList.remove('side'); el.innerHTML=''; }
     var q=ceOpenId ? ceFindSlot(ceOpenId) : null;
     if(!q){ ceOpenId=null; ceEdit=null; el.hidden=true; el.innerHTML=''; return; }
     var wasOpen=!el.hidden;
@@ -2580,11 +2694,14 @@ body{padding:0;}
     var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+cePlatformChips(q)+'</div><h2 style="margin-top:6px">'+esc(ceText(q.title)||'Untitled slot')+'</h2><div class="ce-meta" style="margin-top:4px">'+esc(meta.join(' · '))+'</div></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
     if(ceSheetMsg && ceSheetMsg.id===q.id) html+='<div class="'+(ceSheetMsg.err?'ce-note':'f-note')+'" role="status">'+esc(ceSheetMsg.text)+'</div>';
     // preview
-    if(v.previewUrl || v.thumbnailUrl) html+='<div class="ce-block" style="border-top:none;padding-top:0">'+(v.previewUrl?'<video class="ce-video" controls playsinline preload="metadata"'+(v.thumbnailUrl?' poster="'+esc(v.thumbnailUrl)+'"':'')+' src="'+esc(v.previewUrl)+'"></video>':'<img class="ce-thumb" style="width:120px;height:213px" src="'+esc(v.thumbnailUrl)+'" alt="">')+(v.durationS!=null?'<div class="f-note">'+esc(num(v.durationS,1))+' s · '+esc(v.file||'')+'</div>':'')+'</div>';
-    else if(q.status==='editing' || q.status==='filmed') html+='<div class="ce-block" style="border-top:none;padding-top:0"><div class="f-note">No preview yet: the pipeline uploads the edit as soon as it is rendered.</div></div>';
+    var vtag=ceVideoTag(q, null, 'ce-video'), nVers=Array.isArray(v.variants)?v.variants.length:0;
+    if(vtag || v.thumbnailUrl) html+='<div class="ce-block" style="border-top:none;padding-top:0">'+(vtag||'<img class="ce-thumb" style="width:120px;height:213px" src="'+esc(v.thumbnailUrl)+'" alt="">')+'<div class="ce-chips">'+(vtag?'<button type="button" class="btn small" data-ce-play="'+esc(q.id)+'">▶ Phone preview'+(nVers>1?' · '+nVers+' versions':'')+'</button>':'')+(v.durationS!=null?'<span class="f-note">'+esc(num(v.durationS,1))+' s</span>':'')+'</div></div>';
+    else if(['needs_script','to_film','filmed','editing'].indexOf(q.status)>=0) html+='<div class="ce-block" style="border-top:none;padding-top:0"><div class="f-note">Not edited yet ('+esc(ceStatusLabel(q.status))+'). The pipeline uploads the edit as soon as it is rendered.</div></div>';
     if(q.needsJordan && q.status==='needs_jordan') html+='<div class="ce-note"><b>Needs you:</b> '+esc(ceText(q.needsJordan.reason))+(isAdmin?' <button type="button" class="btn small" data-ce-act="fixed" data-id="'+esc(q.id)+'">Mark fixed</button>':'')+'</div>';
     if(p.status==='error' && p.error) html+='<div class="ce-note"><b>Posting error:</b> '+esc(ceText(p.error))+'</div>';
     if(q.scriptChangedAfterEdit && !posted) html+='<div class="ce-note">The video was cut from the old script.'+(isAdmin&&!q.reEditRequested?' <button type="button" class="btn small" data-ce-act="reedit" data-id="'+esc(q.id)+'">Re-edit video</button>':(q.reEditRequested?' Re-edit queued; the pipeline picks it up within 20 minutes.':''))+'</div>';
+    if(['approved','trialing','scheduled','posted'].indexOf(q.status)>=0 && q.format) html+= q.goldStandard ? '<div class="f-note">⭐ Gold standard for '+esc(ceText(q.format))+(q.goldCopiedAt?' · copied to templates/'+esc(ceText(q.format))+'/gold/':' · the pipeline copies it on its next run')+'</div>' : (isAdmin?'<div><button type="button" class="btn" data-ce-act="gold" data-id="'+esc(q.id)+'">⭐ Make this the gold standard for '+esc(ceText(q.format))+'</button></div>':'');
+    if(p.ytClaimRisk && !posted) html+='<div class="f-note">YouTube may claim or mute the music on this one (no licensed track fitted).</div>';
     // status stepper (main states only) + side state
     html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Status</span>'+(isAdmin?'':'<span class="f-note">View only: your role can\'t change the status.</span>')+'</div><div class="ce-steps">'+CE_STATUS.map(function(st,i){ var cls=i===idx?' cur':(i<idx?' done':''); return '<button type="button" class="ce-step'+cls+'" data-ce-status="'+st+'"'+(isAdmin&&!posted?'':' disabled')+' aria-pressed="'+(i===idx?'true':'false')+'">'+(i<idx?'✓ ':'')+esc(CE_STATUS_LABEL[st])+'</button>'; }).join('')+'</div>'+
       '<div class="ce-chips">'+(idx<0?'<span class="f-note">Side state: '+esc(ceStatusLabel(q.status))+'.</span>':'')+(q.statusAt?'<span class="f-note">Set '+esc(relTime(q.statusAt)||'')+'.</span>':'')+(isAdmin&&!posted?(q.status==='skipped'?'<button type="button" class="btn small" data-ce-status="to_film">Un-skip</button>':'<button type="button" class="btn small" data-ce-status="skipped">Skip this slot</button>'):'')+'</div></div>';
@@ -2596,14 +2713,16 @@ body{padding:0;}
     html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Schedule</span>'+(ceMoving[q.id]?'<span class="ce-spin" aria-label="moving"></span>':'')+'</div>';
     html+='<div class="ce-txt">'+(at?esc(ceWhenFull(at))+(p.status==='scheduled'?' · scheduled':(p.plannedFor?' · planned, not scheduled yet':' · slot time'))+(p.scheduleSource?' ('+esc(p.scheduleSource)+')':''):'– no time yet')+'</div>';
     if(lock.locked) html+='<div class="f-note">'+esc(lock.why)+'. Day and time can\'t change.</div>';
-    else if(isAdmin) html+='<div class="ce-fbrow"><select class="input" data-ce-moveday="'+esc(q.id)+'" aria-label="Day">'+ceDayOptions(date)+'</select><select class="input" data-ce-time="'+esc(q.id)+'" aria-label="Time">'+ceTimeOptions(hmStr)+'</select></div><div class="f-note">Changes move the post straight away'+(p.status==='scheduled'?' (bundle.social first, then here)':'')+'.</div>';
+    else if(isAdmin) html+='<div class="ce-fbrow"><select class="input" data-ce-moveday="'+esc(q.id)+'" aria-label="Day">'+ceDayOptions(date)+'</select><select class="input" data-ce-time="'+esc(q.id)+'" aria-label="Time">'+ceTimeOptions(hmStr)+'</select></div><div class="f-note">Changes move the post straight away'+(p.status==='scheduled'?' (Outstand first, then here)':'')+'.</div>';
     var links=p.permalinks||{}; var ids=p.postIds||(p.postId?{INSTAGRAM:p.postId}:{});
     if(Object.keys(ids).length||Object.keys(links).length) html+='<div class="ce-txt">'+Object.keys(ids).map(function(pl){ return esc(CE_PLATFORM_SHORT[pl]||pl)+': '+(links[pl.toLowerCase()]?'<a class="ce-a" href="'+esc(links[pl.toLowerCase()])+'" target="_blank" rel="noopener">open ↗</a>':'<span class="mono">'+esc(String(ids[pl]).slice(0,8))+'</span>'); }).join(' · ')+'</div>';
-    if(Array.isArray(p.trials)&&p.trials.length) html+='<div class="f-note">'+p.trials.length+' trial reel'+(p.trials.length===1?'':'s')+': '+p.trials.map(function(t){ return esc(ceWhenFull(t.scheduledFor)); }).join(', ')+'</div>';
+    if(Array.isArray(p.trials)&&p.trials.length) html+='<div class="ce-trials"><span class="ce-k">Trial reels · '+(p.trialMode==='short'?'short test':'72-hour test')+(p.status==='trialing'&&p.plannedFor?' · the winner goes to everyone '+esc(ceWhenFull(p.plannedFor)):'')+'</span>'+p.trials.map(function(t){ var won=q.winner&&q.winner.v===t.v; return '<div class="ce-trial'+(won?' won':'')+'"><b>'+esc(t.v||'–')+(won?' 🏆':'')+'</b> <span class="muted">'+esc(ceText(t.diff))+'</span><div class="ce-meta">'+(t.cancelled?'pulled':(t.postedAt?'out '+esc(ceWhenFull(t.postedAt)):'goes out '+esc(ceWhenFull(t.scheduledFor))))+(t.metrics?' · '+esc(ceTrialNums(t.metrics)):(t.postedAt?' · numbers – (pulled every 12 h)':''))+(t.shortcode?' · <a class="ce-a" href="https://www.instagram.com/reel/'+esc(t.shortcode)+'/" target="_blank" rel="noopener">open ↗</a>':'')+'</div></div>'; }).join('')+(q.winner?'<div class="ce-win">🏆 '+esc(q.winner.v)+': '+esc(ceText(q.winner.why))+(q.winnerConfidence==='low'?' <span class="chip warn">low confidence</span>':'')+'</div>':'')+'</div>';
+    if(q.noTrial) html+='<div class="f-note">No trial: '+esc(ceText(q.noTrial))+'.</div>';
+    if(q.winner && !(Array.isArray(p.trials)&&p.trials.length)) html+='<div class="ce-win">🏆 '+esc(q.winner.v)+': '+esc(ceText(q.winner.why))+(q.winnerConfidence==='low'?' <span class="chip warn">low confidence</span>':'')+'</div>';
     if(isAdmin){
       var acts='';
       if(q.status==='awaiting_approval') acts+='<button type="button" class="btn primary" data-ce-act="approve" data-id="'+esc(q.id)+'">✓ Approve</button>';
-      if(p.status==='scheduled'&&!lock.locked) acts+=(p.cancelRequested?'<span class="chip grey">Pull requested · the pipeline picks it up within 20 minutes</span>':'<button type="button" class="btn" data-ce-act="pull" data-id="'+esc(q.id)+'">Pull from schedule</button>');
+      if((p.status==='scheduled'||p.status==='trialing')&&!lock.locked) acts+=(p.cancelRequested?'<span class="chip grey">Pull requested · the pipeline picks it up within 20 minutes</span>':'<button type="button" class="btn" data-ce-act="pull" data-id="'+esc(q.id)+'">Pull from schedule</button>');
       if(acts) html+='<div class="ce-chips" style="margin-top:4px">'+acts+'</div>';
     }
     html+='</div>';
@@ -2616,11 +2735,15 @@ body{padding:0;}
     var filmedSet=(q.footage&&Array.isArray(q.footage.hooksFilmed)?q.footage.hooksFilmed:[]).map(function(h){ return ceText(h.hook||h.text).toLowerCase(); });
     var trialBy={}; (p.trials||[]).forEach(function(t){ if(t.hook) trialBy[ceText(t.hook).toLowerCase()]=t; });
     html+=block('Caption'+(q.caption?' ('+String(q.caption).length+' / 2,200)':''), single(q.caption,'caption'), null, null, 'caption');
-    html+=block('LinkedIn version', single(q.linkedin,'linkedin'), null, null, 'linkedin');
-    html+=block('Sound', '<div class="ce-txt">'+esc(ceSoundLabel(q.sound))+(q.sound&&q.sound.soundSwap?'<div class="f-note">'+esc(q.sound.soundSwap)+'</div>':'')+'</div>', null, null, 'sound');
+    html+=block('LinkedIn version', ceLinkedinRead(q.linkedin), null, null, 'linkedin');
+    html+=block('Sound', '<div class="ce-txt">♪ '+esc(ceSoundLabel(q.sound))+(q.sound&&q.sound.soundSwap?'<div class="f-note">'+esc(q.sound.soundSwap)+'</div>':'')+'</div>', null, null, 'sound');
     html+=block('Hooks'+(Array.isArray(q.hooks)?' ('+q.hooks.length+')':''), lines(q.hooks,'hook', function(t){ var k=t.toLowerCase(), out=''; if(filmedSet.indexOf(k)>=0) out+='<span class="chip good">filmed</span>'; if(trialBy[k]) out+='<span class="chip grey">trial · '+esc(ceWhenFull(trialBy[k].scheduledFor))+'</span>'; return out; }), 'hooks', Array.isArray(q.hooks)?q.hooks.map(ceText).join('\n'):'', 'hooks');
-    html+=block('Beats', lines(q.body,'beat'), 'beats', Array.isArray(q.body)?q.body.map(ceText).join('\n'):'', 'beats');
-    html+=block('Ending', single(q.ending,'ending'), null, null, 'ending');
+    var wc=ceWords(q.script);
+    html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Script'+(wc?' · '+wc+' words · ~'+esc(ceReadTime(wc)):'')+'</span><span class="ce-chips">'+(q.script?ceCopyBtn('script', q.script, 'Copy'):'')+(isAdmin&&!posted?'<button type="button" class="btn small" data-ce-script="'+esc(q.id)+'">'+(q.script?'Edit script':'Write script')+'</button>':'')+'</span></div>'+(q.script?'<div class="ce-script-read">'+esc(q.script)+'</div>':'<div class="ce-txt muted">– no script yet. Jordan writes it in the script editor.</div>')+'</div>';
+    html+='<div class="ce-block"><span class="ce-k">Visual hook</span>'+single(q.visualHook,'visualHook')+'</div>';
+    html+='<div class="ce-block"><span class="ce-k">Editing notes</span>'+single(q.editNotes,'editNotes')+'</div>';
+    html+='<div class="ce-block"><span class="ce-k">CTA / ending line</span>'+single(q.cta||q.ending,'cta')+'</div>';
+    if(Array.isArray(q.body)&&q.body.length) html+='<div class="ce-block"><span class="ce-k">AI-drafted beats (reference only)</span>'+lines(q.body,'beat')+'</div>';
     if(ceSlotKey(q)==='carousel' || (Array.isArray(q.slides)&&q.slides.length) || (ceEdit&&ceEdit.id===q.id&&ceEdit.section==='slides')) html+=block('Slides'+(Array.isArray(q.slides)?' ('+q.slides.length+')':''), lines(q.slides,'slide'), 'slides', Array.isArray(q.slides)?q.slides.map(ceText).join('\n\n'):'', 'slides');
     html+=block('Format, funnel, angle, hook style, location, effort', '<div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+'<span class="chip grey">'+esc(ceText(q.angle)||'angle –')+'</span><span class="chip grey">'+esc(ceText(q.hookStyle)||'hook style –')+'</span><span class="chip grey">'+esc(ceText(q.location)||'location –')+'</span><span class="chip grey">'+esc(ceCap(q.effort)||'effort –')+'</span></div>', null, null, 'meta');
     if(!posted && p.status!=='scheduled') html+=block('Platforms', '<div class="ce-chips">'+cePlatformChips(q)+'</div>', null, null, 'platforms');
@@ -2631,7 +2754,7 @@ body{padding:0;}
       html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Results</span>'+(link?'<a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">Open post ↗</a>':'')+'</div>'+ceMetricsGrid(m)+(m.at24h||m.at7d?'<div class="ce-metrics2">'+(m.at24h?'24h: '+esc(ceMetricsLine(m.at24h)):'24h: –')+' · '+(m.at7d?'7d: '+esc(ceMetricsLine(m.at7d)):'7d: – not pulled yet')+'</div>':'<div class="f-note">– = the pipeline pulls numbers 24 h and 7 d after posting.</div>')+'</div>';
     }
     el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>';
-    el.hidden=false;
+    el.hidden=false; ceAttachSources(el);
     var c2=el.querySelector('.ce-sheet-card'); if(c2&&sc) c2.scrollTop=sc;
     if(!wasOpen){ var cb=$('ceSheetClose'); if(cb) cb.focus(); }
     if(ceEdit&&ceEdit.id===q.id){ var fi=el.querySelector('[data-ce-editor] .input'); if(fi&&!wasOpen) fi.focus(); }
@@ -2652,15 +2775,15 @@ body{padding:0;}
     else if(section==='beats') body=list(q.body,'body','Beat');
     else if(section==='slides') body=list(q.slides,'slides','Slide');
     else if(section==='ending') body='<textarea class="input" data-ce-f="ending" aria-label="Ending">'+E(q.ending)+'</textarea>';
-    else if(section==='linkedin') body='<textarea class="input" data-ce-f="linkedin" aria-label="LinkedIn version" style="min-height:140px">'+E(q.linkedin)+'</textarea>';
+    else if(section==='linkedin') body='<textarea class="input" data-ce-f="linkedin" aria-label="LinkedIn version" style="min-height:140px">'+E(q.linkedin)+'</textarea><div class="ce-note" data-ce-liwarn'+(/TasteForm/.test(q.linkedin||'')?' hidden':'')+'>Add the word "TasteForm" so the post tags the page. If it\'s missing, saving adds the closing line back.</div>';
     else if(section==='caption') body='<textarea class="input" data-ce-f="caption" data-ce-count="2200" aria-label="Caption" style="min-height:180px">'+E(q.caption)+'</textarea><div class="count" data-ce-countout>'+String(q.caption||'').length+' / 2,200</div>';
     else if(section==='meta') body='<div class="grid">'+sel('format',CE_FORMATS,ceText(q.format),'Format',true)+sel('funnel',['TOF','MOF','BOF'],ceFunnel(q.funnel)||'','Funnel',true)+sel('angle',CE_ANGLES,ceText(q.angle),'Angle',true)+sel('hookStyle',CE_HOOKSTYLES,ceText(q.hookStyle),'Hook style',true)+sel('location',CE_LOCS,ceText(q.location),'Location',true)+sel('effort',CE_EFFORTS,ceText(q.effort),'Effort',true)+'</div>';
     else if(section==='sound'){
-      var bank=(state.contentSounds||[]).filter(function(x){ return x && !String(x.id).startsWith('_') && x.igAudioId; });
-      var cur=q.sound&&q.sound.id?String(q.sound.id):'', vol=q.sound&&HQ.isNum(q.sound.musicSoundVolume)?Math.min(30,q.sound.musicSoundVolume):10;
-      body='<label>Sound<select class="input" data-ce-f="soundId"><option value=""'+(cur?'':' selected')+'>No music</option>'+bank.map(function(x){ return '<option value="'+E(x.igAudioId)+'" data-bank="'+E(x.id)+'" data-title="'+E(x.igAudioTitle||((x.artist||'')+' – '+(x.title||'')))+'"'+(String(x.igAudioId)===cur?' selected':'')+'>'+E((x.artist?x.artist+' – ':'')+(x.title||x.id))+(x.apiAvailable===false?' (not on bundle.social)':'')+'</option>'; }).join('')+'</select></label><label>Music volume <output data-ce-volout>'+vol+'</output><input type="range" min="0" max="30" step="1" value="'+vol+'" data-ce-f="volume" aria-label="Music volume"></label><div class="f-note">Original audio stays at 100. Talking heads: 8–12 or no music.</div>';
+      var bank=(state.contentSounds||[]).filter(function(x){ return x && !String(x.id).startsWith('_'); });
+      var cur=q.sound&&q.sound.bankId?String(q.sound.bankId):'', vol=q.sound&&HQ.isNum(q.sound.musicVolume)?Math.min(30,q.sound.musicVolume):(q.sound&&HQ.isNum(q.sound.musicSoundVolume)?Math.min(30,q.sound.musicSoundVolume):10);
+      body='<label>Sound<select class="input" data-ce-f="soundId"><option value=""'+(cur?'':' selected')+'>No music</option>'+bank.map(function(x){ return '<option value="'+E(x.id)+'" data-title="'+E(x.igAudioTitle||((x.artist?x.artist+' – ':'')+(x.title||x.id)))+'"'+(String(x.id)===cur?' selected':'')+'>'+E((x.artist?x.artist+' – ':'')+(x.title||x.id))+(x.vibe?' · '+E(x.vibe):'')+'</option>'; }).join('')+'</select></label><label>Music volume <output data-ce-volout>'+vol+'</output><input type="range" min="0" max="30" step="1" value="'+vol+'" data-ce-f="volume" aria-label="Music volume"></label><div class="f-note">Mixed into the video file; your voice stays at 100. Talking heads: 8–12. Changing it re-renders the video.</div>';
     }
-    else if(section==='platforms'){ var have=cePlatforms(q); body='<div class="ce-chips">'+['INSTAGRAM','TIKTOK','YOUTUBE','LINKEDIN'].map(function(pl){ return '<label class="chip grey" style="min-height:36px;cursor:pointer"><input type="checkbox" data-ce-pl="'+pl+'"'+(have.indexOf(pl)>=0?' checked':'')+'> '+esc(CE_PLATFORM_SHORT[pl])+'</label>'; }).join('')+'</div><div class="f-note">LinkedIn posts only once it is connected.</div>'; }
+    else if(section==='platforms'){ var have=cePlatforms(q); body='<div class="ce-chips">'+['INSTAGRAM','TIKTOK','YOUTUBE','LINKEDIN'].map(function(pl){ return '<label class="chip grey" style="min-height:36px;cursor:pointer"><input type="checkbox" data-ce-pl="'+pl+'"'+(have.indexOf(pl)>=0?' checked':'')+'> '+esc(CE_PLATFORM_SHORT[pl])+'</label>'; }).join('')+'</div><div class="f-note">TikTok posts once it is connected in Outstand.</div>'; }
     return '<div class="ce-editor" data-ce-editor="'+section+'">'+body+acts+'</div>';
   }
   function ceCollectEditor(root, section, q){
@@ -2674,7 +2797,7 @@ body{padding:0;}
     if(section==='linkedin') return {linkedin:f('linkedin')};
     if(section==='caption') return {caption:f('caption')};
     if(section==='meta') return {format:f('format'), funnel:f('funnel'), angle:f('angle'), hookStyle:f('hookStyle'), location:f('location'), effort:f('effort')};
-    if(section==='sound'){ var selEl=root.querySelector('[data-ce-f="soundId"]'), opt=selEl&&selEl.options[selEl.selectedIndex]; var id=selEl?selEl.value:''; var vol=parseInt(f('volume'),10); if(!id) return {sound:{id:null, bankId:null, title:'No music', musicSoundVolume:0, videoOriginalSoundVolume:100, setBy:'jordan'}}; return {sound:{id:id, bankId:opt.getAttribute('data-bank'), title:opt.getAttribute('data-title'), musicSoundVolume:isNaN(vol)?10:vol, videoOriginalSoundVolume:100, setBy:'jordan'}}; }
+    if(section==='sound'){ var selEl=root.querySelector('[data-ce-f="soundId"]'), opt=selEl&&selEl.options[selEl.selectedIndex]; var id=selEl?selEl.value:''; var vol=parseInt(f('volume'),10); if(!id) return {sound:{bankId:null, title:'No music', musicVolume:0, voiceVolume:100, mixedIntoFile:true, setBy:'jordan'}}; return {sound:{bankId:id, title:opt.getAttribute('data-title'), musicVolume:isNaN(vol)?10:vol, voiceVolume:100, mixedIntoFile:true, setBy:'jordan'}}; }
     if(section==='platforms') return {platforms:Array.prototype.filter.call(root.querySelectorAll('[data-ce-pl]'), function(c){ return c.checked; }).map(function(c){ return c.getAttribute('data-ce-pl'); })};
     return {};
   }
@@ -2682,12 +2805,18 @@ body{padding:0;}
   function ceRenderIdeas(){
     var st=ceLoadState('contentIdeas');
     if(st!=='ok'){ setText('ceSub', st==='loading'?'Loading…':'Sync error'); return '<div class="panel"><h2>Idea Bank</h2>'+ceStateBox(st,'the Idea Bank')+'</div>'; }
-    var all=(state.contentIdeas||[]).slice().sort(function(a,b){ return (HQ.parseTs(b.foundAt)||0)-(HQ.parseTs(a.foundAt)||0) || String(b.id).localeCompare(String(a.id)); });
+    var laneIdx=function(l){ var i=CE_LANES.map(function(x){ return x[0]; }).indexOf(String(l||'').toLowerCase()); return i<0?9:i; }, funIdx=function(f){ var i=['TOF','MOF','BOF'].indexOf(ceFunnel(f)); return i<0?9:i; };
+    var all=(state.contentIdeas||[]).slice().sort(function(a,b){
+      var pa=a.pinned&&a.status!=='skipped'?0:1, pb=b.pinned&&b.status!=='skipped'?0:1; if(pa!==pb) return pa-pb;
+      if(ceFilters.sort==='lane'){ var d=laneIdx(a.lane)-laneIdx(b.lane) || funIdx(a.funnel)-funIdx(b.funnel); if(d) return d; }
+      return (HQ.parseTs(b.foundAt)||0)-(HQ.parseTs(a.foundAt)||0) || String(b.id).localeCompare(String(a.id));
+    });
     if(!all.length){ setText('ceSub','Idea Bank · empty'); return '<div class="panel"><h2>Idea Bank</h2><div class="empty-state">Scanner runs Mon/Wed/Fri. First briefs land after the next run.</div></div>'; }
     var formats=[]; all.forEach(function(i){ var f=ceText(i.format); if(f && formats.indexOf(f)<0) formats.push(f); }); formats.sort();
     var f=ceFilters;
     var shown=all.filter(function(i){
       if(f.status && (i.status||'new')!==f.status) return false;
+      if(f.lane && String(i.lane||'').toLowerCase()!==f.lane) return false;
       if(f.funnel && ceFunnel(i.funnel)!==f.funnel) return false;
       if(f.format && ceText(i.format)!==f.format) return false;
       if(f.type && String(i.type||'').toLowerCase()!==f.type) return false;
@@ -2695,35 +2824,62 @@ body{padding:0;}
       return true;
     });
     var pinned=all.filter(function(i){ return i.pinned && i.status!=='skipped'; }).length;
-    setText('ceSub', all.length+' idea'+(all.length===1?'':'s')+' · '+pinned+' pinned for next week');
+    setText('ceSub', all.length+' idea'+(all.length===1?'':'s')+' · '+pinned+' pinned');
     function sel(name, opts, cur, label){ return '<select class="input" data-cef="'+name+'" aria-label="'+esc(label)+'">'+opts.map(function(o){ return '<option value="'+esc(o[0])+'"'+(o[0]===cur?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('')+'</select>'; }
-    var html='<div class="panel"><h2>Idea Bank</h2><p class="rule">Briefs the Scanner saved from the watchlist, newest first. Skip what you won\'t make; "Use next week" pins it so the Sunday batch takes it first.</p>'+
-      '<div class="ce-filters">'+sel('status',[['','All statuses'],['new','New'],['planned','Planned'],['filmed','Filmed'],['skipped','Skipped']],f.status,'Status')+sel('funnel',[['','All funnels'],['TOF','TOF'],['MOF','MOF'],['BOF','BOF']],f.funnel,'Funnel')+sel('format',[['','All formats']].concat(formats.map(function(x){ return [x,x]; })),f.format,'Format')+sel('type',[['','Reels + carousels'],['reel','Reels'],['carousel','Carousels']],f.type,'Type')+'<button type="button" class="btn" data-cef-office aria-pressed="'+(f.office?'true':'false')+'">Officemaxxing</button><span class="f-note">'+shown.length+' of '+all.length+'</span></div>';
+    var html='<div class="panel"><h2>Idea Bank</h2><p class="rule">Research from the Scanner: what worked, by the numbers that matter for its funnel stage, with hooks, visual hooks and talking points. You write the script: "Turn into a reel" opens the script editor with the idea attached.</p>'+
+      '<div class="ce-filters">'+sel('lane',[['','All lanes']].concat(CE_LANES),f.lane,'Lane')+sel('status',[['','All statuses'],['new','New'],['planned','Planned'],['filmed','Filmed'],['skipped','Skipped']],f.status,'Status')+sel('funnel',[['','All funnels'],['TOF','TOF'],['MOF','MOF'],['BOF','BOF']],f.funnel,'Funnel')+sel('format',[['','All formats']].concat(formats.map(function(x){ return [x,x]; })),f.format,'Format')+sel('type',[['','Reels + carousels'],['reel','Reels'],['carousel','Carousels']],f.type,'Type')+sel('sort',[['new','Newest first'],['lane','By lane, then funnel']],f.sort,'Sort')+'<button type="button" class="btn" data-cef-office aria-pressed="'+(f.office?'true':'false')+'">Officemaxxing</button><span class="f-note">'+shown.length+' of '+all.length+'</span></div>';
     html+= shown.length ? '<div class="ce-ideas">'+shown.map(ceIdeaCard).join('')+'</div>' : '<div class="empty-state">No ideas match these filters.</div>';
     return html+'</div>';
   }
-  function ceIdeaStat(i){
-    if(HQ.isNum(i.multiple)) return num(i.multiple, i.multiple<10?1:0)+'× the creator\'s median'+(HQ.isNum(i.views)?' · '+num(i.views)+' views':'');
-    if(HQ.isNum(i.views)) return num(i.views)+' views'+(HQ.isNum(i.creatorMedian)?' · creator median '+num(i.creatorMedian):'');
-    if(HQ.isNum(i.likes)||HQ.isNum(i.shares)) return num(i.likes)+' likes · '+num(i.shares)+' shares';
-    return '– no view or like counts saved for this post';
+  function ceLaneChip(l){ var x=CE_LANES.find(function(p){ return p[0]===String(l||'').toLowerCase(); }); return x?'<span class="chip ce-lane">'+esc(x[1])+' lane</span>':'<span class="chip grey">no lane</span>'; }
+  // The numbers that matter for the funnel stage. Never estimated: missing numbers show "–" with the reason.
+  function ceStageNums(x, funnel){
+    var f=ceFunnel(funnel)||'TOF', out=[], v=HQ.isNum(x.views)?x.views:null;
+    var pct=function(a){ return (a*100).toFixed(a<0.01?2:1)+'%'; };
+    if(f==='TOF'){
+      out.push(['views', v!=null?num(v):'–', v!=null?'':'not public']);
+      out.push(['× creator median', HQ.isNum(x.multiple)?num(x.multiple, x.multiple<10?1:0)+'×':'–', HQ.isNum(x.multiple)?'':'creator median not known']);
+    } else if(f==='MOF'){
+      var sr=HQ.isNum(x.shareRate)?x.shareRate:(v&&HQ.isNum(x.shares)?x.shares/v:null), cr=HQ.isNum(x.commentRate)?x.commentRate:(v&&HQ.isNum(x.comments)?x.comments/v:null);
+      out.push(['share rate', sr!=null?pct(sr):'–', sr!=null?'':'shares or views not public']);
+      out.push(['comment rate', cr!=null?pct(cr):'–', cr!=null?'':'comments or views not public']);
+    } else {
+      out.push(['keyword comments', HQ.isNum(x.keywordComments)?num(x.keywordComments):'–', HQ.isNum(x.keywordComments)?'':'not counted yet']);
+      out.push(['lead comments', HQ.isNum(x.leadComments)?num(x.leadComments):'–', HQ.isNum(x.leadComments)?'':'not counted yet']);
+    }
+    return out;
+  }
+  function ceStageHtml(x, funnel){ return '<div class="ce-stagenums">'+ceStageNums(x, funnel).map(function(n){ return '<span><b>'+esc(n[1])+'</b> '+esc(n[0])+(n[2]?' <i>('+esc(n[2])+')</i>':'')+'</span>'; }).join('')+'</div>'; }
+  function ceFollowers(x){ if(HQ.isNum(x.followers)) return x.followers; var h=String(x.creator||'').replace(/^@/,'').toLowerCase(), c=(state.contentCreators||[]).find(function(k){ return String(k.handle||k.id).replace(/^@/,'').toLowerCase()===h; }); return c&&HQ.isNum(c.followers)?c.followers:null; }
+  function ceCopyList(prefix, arr, label){
+    arr=(Array.isArray(arr)?arr:[]).map(ceText).filter(Boolean);
+    if(!arr.length) return '<div class="ce-txt muted">– no '+esc(label)+' in this brief</div>';
+    return '<ol class="ce-copylist">'+arr.map(function(h,n){ return '<li><div><span>'+esc(h)+'</span>'+ceCopyBtn(prefix+n, h)+'</div></li>'; }).join('')+'</ol>';
+  }
+  function ceIdeaSource(i){
+    var link=ceLink(i.shortcode||i.id, i.url), fol=ceFollowers(i), rel=Array.isArray(i.related)?i.related:[];
+    var html='<div><span class="ce-k">Source reel</span><div class="ce-txt">'+(link?'<a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">@'+esc(String(i.creator||'creator').replace(/^@/,''))+' ↗</a>':'@'+esc(String(i.creator||'unknown').replace(/^@/,'')))+' · '+(fol!=null?num(fol)+' followers':'followers –')+'</div>'+ceStageHtml(i, i.funnel)+(HQ.isNum(i.followerJump)?'<div class="f-note">Follower jump: +'+num(i.followerJump)+' within 7 days of posting (vs their normal week).</div>':'')+'</div>';
+    if(rel.length) html+='<div><span class="ce-k">Similar high performers</span><div class="ce-rels">'+rel.slice(0,6).map(function(r){ var u=r&&/^https?:\/\//i.test(String(r.url||''))?String(r.url):null, inner='<b>@'+esc(String(r.creator||'creator').replace(/^@/,''))+'</b><span>'+(HQ.isNum(r.followers)?num(r.followers)+' followers':'followers –')+'</span>'+ceStageHtml(r, i.funnel)+(r.stageNote?'<span class="muted">'+esc(ceText(r.stageNote))+'</span>':''); return u?'<a class="ce-rel" href="'+esc(u)+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="ce-rel">'+inner+'</div>'; }).join('')+'</div></div>';
+    return html;
   }
   function ceIdeaCard(i){
-    var link=ceLink(i.shortcode||i.id, i.url), status=i.status||'new', hooks=Array.isArray(i.hooks)?i.hooks.slice(0,3):[];
-    var chips=ceFormatChip(i.format)+ceFunnelChip(i.funnel)+(i.type?'<span class="chip grey">'+esc(String(i.type))+'</span>':'')+(i.officemaxxing?'<span class="chip warn">Officemaxxing</span>':'')+(i.pinned&&status!=='skipped'?'<span class="chip good">Pinned for next week</span>':'')+(status!=='new'?'<span class="chip '+(status==='skipped'?'grey':'stage')+'">'+esc(ceStatusLabel(status))+'</span>':'');
+    var status=i.status||'new';
+    var chips=ceLaneChip(i.lane)+ceFormatChip(i.format)+ceFunnelChip(i.funnel)+(i.type?'<span class="chip grey">'+esc(String(i.type))+'</span>':'')+(i.officemaxxing?'<span class="chip warn">Officemaxxing</span>':'')+(i.pinned&&status!=='skipped'?'<span class="chip good">Pinned</span>':'')+(status!=='new'?'<span class="chip '+(status==='skipped'?'grey':'stage')+'">'+esc(ceStatusLabel(status))+(i.plannedFor&&status==='planned'?' · '+esc(String(i.plannedFor)):'')+'</span>':'');
     var actions='';
     if(isAdmin){
       if(status==='skipped') actions='<button type="button" class="btn small" data-ce-idea="restore" data-id="'+esc(i.id)+'">Restore</button>';
-      else actions=(i.pinned?'<button type="button" class="btn small" data-ce-idea="unpin" data-id="'+esc(i.id)+'">Unpin</button>':'<button type="button" class="btn small primary" data-ce-idea="pin" data-id="'+esc(i.id)+'">Use next week</button>')+'<button type="button" class="btn small" data-ce-idea="skip" data-id="'+esc(i.id)+'">Skip</button>';
+      else actions='<button type="button" class="btn small primary" data-ce-toreel="'+esc(i.id)+'">Turn into a reel</button>'+(i.pinned?'<button type="button" class="btn small" data-ce-idea="unpin" data-id="'+esc(i.id)+'">Unpin</button>':'<button type="button" class="btn small" data-ce-idea="pin" data-id="'+esc(i.id)+'">Pin</button>')+'<button type="button" class="btn small" data-ce-idea="skip" data-id="'+esc(i.id)+'">Skip</button>';
     }
-    return '<div class="ce-idea'+(status==='skipped'?' skipped':'')+'">'+
+    return '<div class="ce-idea'+(status==='skipped'?' skipped':'')+'" data-idea-id="'+esc(i.id)+'">'+
       '<div class="ce-chips" style="justify-content:space-between"><b class="ce-creator">@'+esc(String(i.creator||'unknown creator').replace(/^@/,''))+'</b><span class="ce-meta">'+esc(i.foundAt?'found '+(relTime(i.foundAt)||''):'')+'</span></div>'+
       '<div class="ce-chips">'+chips+'</div>'+
-      '<div class="ce-stat">'+esc(ceIdeaStat(i))+'</div>'+
+      (i.adaptation?'<div><span class="ce-k">How to make it yours</span><div class="ce-txt">'+esc(ceText(i.adaptation))+'</div></div>':(i.jordanVersion?'<div><span class="ce-k">Your version</span><div class="ce-txt">'+esc(ceText(i.jordanVersion))+'</div></div>':''))+
+      ceIdeaSource(i)+
       '<div><span class="ce-k">Why it worked</span><div class="ce-txt">'+esc(ceText(i.whyItWorked)||'– not in this brief')+'</div></div>'+
-      '<div><span class="ce-k">Jordan\'s version</span><div class="ce-txt">'+esc(ceText(i.jordanVersion)||'– not in this brief')+'</div></div>'+
-      '<div><span class="ce-k">Hooks</span>'+(hooks.length?'<ol class="ce-hooks">'+hooks.map(function(h){ return '<li>'+esc(ceText(h))+'</li>'; }).join('')+'</ol>':'<div class="ce-txt muted">– no hooks in this brief</div>')+'</div>'+
-      '<div class="ce-foot">'+(link?'<a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">Open original ↗</a>':'<span class="f-note">no link saved</span>')+actions+'</div></div>';
+      '<div><span class="ce-k">Hook options</span>'+ceCopyList(i.id+':h:', i.hooks, 'hooks')+'</div>'+
+      '<div><span class="ce-k">Visual hook ideas</span>'+ceCopyList(i.id+':v:', i.visualHooks, 'visual hooks')+'</div>'+
+      '<div><span class="ce-k">Talking points</span>'+ceCopyList(i.id+':t:', i.talkingPoints, 'talking points')+'</div>'+
+      '<div class="ce-foot">'+actions+'</div></div>';
   }
 
   /* --- Performance: meta/contentReview + test-month countdown + core-format approval --- */
@@ -2753,6 +2909,7 @@ body{padding:0;}
     else if(today>tm.end){ cdVal='Finished'; cdSmall=HQ.fmtDay(tm.end,'short'); cdNote='Test month '+span+' is over. The core formats below are what to run with.'; }
     else { var dayN=HQ.daysBetween(tm.start, today)+1, left=HQ.daysBetween(today, tm.end); cdVal='Day '+dayN; cdSmall='· '+left+' day'+(left===1?'':'s')+' left'; cdNote='Test month '+span+', Sydney days. Every format gets a run; the review picks the core 5 at the end.'; }
     var html='<div class="hero"><div class="label">Test month</div><div class="value">'+esc(cdVal)+' <small>'+esc(cdSmall)+'</small></div><div class="note">'+esc(cdNote)+'</div></div>';
+    html+=ceAdPanel();
     if(!loaded){ setText('ceSub','Loading…'); return html+'<div class="panel"><h2>Last week</h2>'+ceStateBox('loading','the review')+'</div>'; }
     if(!r){ setText('ceSub','Performance · no review yet'); return html+'<div class="panel"><h2>Last week</h2><div class="empty-state">No review yet. The Sunday review writes meta/contentReview at 4:13pm after the first week with posted slots.</div></div>'; }
     var wk = HQ.isDayKey(r.weekStart) ? 'Week of '+HQ.fmtDay(r.weekStart,'short')+' – '+HQ.fmtDay(HQ.addDays(r.weekStart,6),'short') : 'Last week';
@@ -2853,7 +3010,7 @@ body{padding:0;}
     var lock=ceLocked(q); if(lock.locked){ showBanner(lock.why+': this post can\'t be moved.'); return; }
     var parts=String(hm).split(':').map(Number); var at=new Date(HQ.sydMidnight(dayKey)+(parts[0]*60+parts[1])*60000).toISOString();
     ceMoving[id]=true; renderNow('content'); ceRenderSheet();
-    try{ var data=await ceInvoke('content-reschedule', {id:id, postDate:at}); Object.assign(q, {date:data.date, day:data.day, weekStart:data.weekStart, posting:data.posting||q.posting}); ceSetSheetMsg(id, 'Moved to '+ceWhenFull(at)+(data.movedInBundle?' (bundle.social updated)':'')); }
+    try{ var data=await ceInvoke('content-reschedule', {id:id, postDate:at}); Object.assign(q, {date:data.date, day:data.day, weekStart:data.weekStart, posting:data.posting||q.posting}); ceSetSheetMsg(id, 'Moved to '+ceWhenFull(at)+(data.movedInProvider?' (Outstand updated)':'')); }
     catch(e){ console.error('content-reschedule failed', e); showBanner('Couldn\'t move "'+(ceText(q.title)||id)+'": '+e.message); ceSetSheetMsg(id, e.message, true); }
     ceMoving[id]=false; renderNow('content'); ceRenderSheet();
   }
@@ -2862,7 +3019,7 @@ body{padding:0;}
     var fields=ceCollectEditor(root, section, q);
     if(typeof fields.caption==='string' && fields.caption.length>2200){ ceSetSheetMsg(id, 'Captions max out at 2,200 characters.', true); ceEdit.force=true; ceRenderSheet(); return; }
     var btn=root.querySelector('[data-ce-save]'); if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
-    try{ var data=await ceInvoke('content-update', {id:id, fields:fields}); Object.assign(q, data.saved||fields); ceEdit=null; ceSetSheetMsg(id, 'Saved'+(data.updatedInBundle?' and updated on bundle.social':'')+(data.saved&&data.saved.scriptChangedAfterEdit?'. The video was cut from the old script.':'')); }
+    try{ var data=await ceInvoke('content-update', {id:id, fields:fields}); Object.assign(q, data.saved||fields); ceEdit=null; ceSetSheetMsg(id, 'Saved'+(data.updatedInProvider?' and updated on Outstand':'')+(data.saved&&data.saved.scriptChangedAfterEdit?'. The video was cut from the old script.':'')); }
     catch(e){ console.error('content-update failed', e); ceSetSheetMsg(id, e.message, true); ceEdit.force=true; }
     renderNow('content'); ceRenderSheet();
   }
@@ -2871,6 +3028,8 @@ body{padding:0;}
     if(act==='approve'){ patch={status:'approved', statusAt:now, approval:{approvedAt:now, by:currentUser&&currentUser.email||'admin'}}; ok='Approved. The pipeline schedules it within 20 minutes.'; }
     else if(act==='fixed'){ patch={status:'filmed', statusAt:now, needsJordan:Object.assign({}, q.needsJordan||{}, {fixedAt:now})}; ok='Marked fixed; the next run retries.'; }
     else if(act==='reedit'){ patch={reEditRequested:true, reEditRequestedAt:now}; ok='Re-edit queued.'; }
+    else if(act==='gold'){ var fmt=ceText(q.format); if(!window.confirm('Make "'+(ceText(q.title)||id)+'" the gold standard for '+fmt+'? Every new '+fmt+' edit starts from it.')) return; patch={goldStandard:true, goldAt:now, goldCopiedAt:null}; ok='Gold standard set. The pipeline copies it into templates/'+fmt+'/gold/ on its next run.';
+      (state.contentQueue||[]).filter(function(x){ return x.id!==id && x.goldStandard && ceText(x.format)===fmt; }).forEach(function(x){ x.goldStandard=false; db.collection('content_queue').doc(x.id).update({goldStandard:false, goldReplacedAt:now}).catch(function(){}); }); }
     else if(act==='pull'){ if(!window.confirm('Pull "'+(ceText(q.title)||id)+'" from the schedule? The pipeline deletes the scheduled post'+((q.posting&&q.posting.trials||[]).length?' and its trials':'')+' within 20 minutes.')) return; patch={posting:Object.assign({}, q.posting||{}, {cancelRequested:true, cancelRequestedAt:now})}; ok='Requested, the pipeline picks it up within 20 minutes.'; }
     else if(act==='sendfb'){
       var scope=(btn&&btn.closest('.ce-fbbox'))||document, box=scope.querySelector('textarea.ce-fb[data-id="'+CSS.escape(id)+'"]'), partEl=scope.querySelector('select.ce-fbpart[data-id="'+CSS.escape(id)+'"]');
@@ -2902,11 +3061,24 @@ body{padding:0;}
       var t=ev.target;
       var wk=t.closest('[data-cewk]'); if(wk){ var d=parseInt(wk.getAttribute('data-cewk'),10); ceWeekOffset = d===0 ? 0 : ceWeekOffset+d; renderNow('content'); return; }
       var cw=t.closest('[data-cecal]'); if(cw){ var d2=parseInt(cw.getAttribute('data-cecal'),10); ceCalOffset = d2===0 ? 0 : ceCalOffset+d2; renderNow('content'); return; }
-      var op=t.closest('[data-ce-open]'); if(op){ if(ceDrag.moved) return; ceOpenId=op.getAttribute('data-ce-open'); ceEdit=null; ceScrollFb=op.hasAttribute('data-ce-fb'); ceRenderSheet(); return; }
+      var pl=t.closest('[data-ce-play]'); if(pl){ if(ceDrag.moved) return; ceStopHover(); ceCloseOverlays(); ceOpenId=null; ceEdit=null; cePreview={id:pl.getAttribute('data-ce-play'), v:null, force:true}; ceRenderSheet(); return; }
+      var pv=t.closest('[data-ce-pv]'); if(pv&&cePreview){ cePreview.v=pv.getAttribute('data-ce-pv'); cePreview.force=true; ceRenderSheet(); return; }
+      var mo=t.closest('[data-ce-more]'); if(mo&&cePreview){ cePreview.more=true; cePreview.force=true; ceRenderSheet(); return; }
+      var sct=t.closest('[data-ce-script]'); if(sct){ ceOpenScript({id:sct.getAttribute('data-ce-script')}); return; }
+      var tr=t.closest('[data-ce-toreel]'); if(tr){ ceOpenScript({ideaId:tr.getAttribute('data-ce-toreel')}); return; }
+      var nr=t.closest('[data-ce-newreel]'); if(nr){ var nd=nr.getAttribute('data-ce-newreel'); ceOpenScript({date:HQ.isDayKey(nd)?nd:null}); return; }
+      var uh=t.closest('[data-cs-usehook]'); if(uh){ var tas=uh.closest('.ce-script').querySelectorAll('[data-cs-hook]'); for(var hi=0;hi<tas.length;hi++){ if(!tas[hi].value.trim()){ tas[hi].value=uh.getAttribute('data-cs-usehook'); ceGrow(tas[hi]); tas[hi].focus(); break; } } return; }
+      var uv=t.closest('[data-cs-usevis]'); if(uv){ var vta=uv.closest('.ce-script').querySelector('[data-cs="visualHook"]'); vta.value=(vta.value.trim()?vta.value.replace(/\s+$/,'')+'\n':'')+uv.getAttribute('data-cs-usevis'); ceGrow(vta); vta.focus(); return; }
+      var svs=t.closest('[data-cs-save]'); if(svs){ ceSaveScript(svs); return; }
+      var dsd=t.closest('[data-cs-discard]'); if(dsd&&ceScript){ try{ localStorage.removeItem(ceScriptKey()); }catch(e){} ceScript.lastSig=null; ceScript.force=true; ceScript.noDraft=true; ceRenderSheet(); return; }
+      var ins=t.closest('[data-ce-inspo]'); if(ins){ ceInspoEdit=ins.getAttribute('data-ce-inspo'); renderNow('content'); return; }
+      var inss=t.closest('[data-ce-inspo-save]'); if(inss){ ceSaveInspo(inss.getAttribute('data-ce-inspo-save')); return; }
+      var insc=t.closest('[data-ce-inspo-cancel]'); if(insc){ ceInspoEdit=null; renderNow('content'); return; }
+      var op=t.closest('[data-ce-open]'); if(op){ if(ceDrag.moved) return; var oid=op.getAttribute('data-ce-open'), oq=ceFindSlot(oid); if(oq && oq.status==='needs_script' && isAdmin){ ceOpenScript({id:oid}); return; } ceCloseOverlays(); ceOpenId=oid; ceEdit=null; ceScrollFb=op.hasAttribute('data-ce-fb'); ceRenderSheet(); return; }
       var cp=t.closest('[data-ce-copy]'); if(cp){ ceCopy(cp, ceCopyTexts[cp.getAttribute('data-ce-copy')]); return; }
       var stb=t.closest('[data-ce-status]'); if(stb){ if(!stb.disabled) ceSetStatus(ceOpenId, stb.getAttribute('data-ce-status')); return; }
       var ia=t.closest('[data-ce-idea]'); if(ia){ ceIdeaAction(ia.getAttribute('data-id'), ia.getAttribute('data-ce-idea')); return; }
-      var gi=t.closest('[data-ce-goidea]'); if(gi){ ceOpenId=null; ceRenderSheet(); ceFilters={status:'', funnel:'', format:'', type:'', office:false}; ceSetView('ideas'); return; }
+      var gi=t.closest('[data-ce-goidea]'); if(gi){ ceOpenId=null; ceRenderSheet(); ceFilters={status:'', funnel:'', format:'', type:'', office:false, lane:'', sort:'new'}; ceIdeaFocus=gi.getAttribute('data-ce-goidea'); ceCloseOverlays(); ceSetView('ideas'); return; }
       var off=t.closest('[data-cef-office]'); if(off){ ceFilters.office=!ceFilters.office; renderNow('content'); return; }
       var st=t.closest('[data-celf]'); if(st){ var v=st.getAttribute('data-celf'); ceLib.status = ceLib.status===v ? '' : v; renderNow('content'); var lists=$('ceLibLists'); if(lists&&ceLib.status) lists.scrollIntoView({behavior:'smooth', block:'start'}); return; }
       var ed=t.closest('[data-ce-edit]'); if(ed){ ceEdit={id:ceOpenId, section:ed.getAttribute('data-ce-edit'), force:true}; ceRenderSheet(); return; }
@@ -2917,22 +3089,32 @@ body{padding:0;}
       var aa=t.closest('[data-ce-approveall]'); if(aa){ ceApproveAll(); return; }
       var ap=t.closest('[data-ce-autopost]'); if(ap){ ceSetAutoPost(ap.getAttribute('data-ce-autopost')==='on'); return; }
       var ru=t.closest('[data-ce-rules]'); if(ru){ ceRulesOpen=!ceRulesOpen; renderNow('content'); return; }
-      var a=t.closest('[data-ce]'); if(a){ var k=a.getAttribute('data-ce'); if(k==='filming'){ ceShowFilming=!ceShowFilming; renderNow('content'); } else if(k==='close'){ ceOpenId=null; ceEdit=null; ceRenderSheet(); } else if(k==='approve-core'){ ceApproveCore(); } }
+      var a=t.closest('[data-ce]'); if(a){ var k=a.getAttribute('data-ce'); if(k==='filming'){ ceShowFilming=!ceShowFilming; renderNow('content'); } else if(k==='close'){ ceCloseAll(); } else if(k==='approve-core'){ ceApproveCore(); } else if(k==='filmsheet'){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceFilm=true; ceFilmForce=true; ceRenderSheet(); } else if(k==='print'){ window.print(); } else if(k==='std'){ ceStdOpen=!ceStdOpen; renderNow('content'); } }
     }
     function onChange(ev){
       var s=ev.target.closest('select[data-cef]'); if(s){ ceFilters[s.getAttribute('data-cef')]=s.value; renderNow('content'); return; }
       var lf=ev.target.closest('[data-celib]'); if(lf){ ceLib[lf.getAttribute('data-celib')]=lf.value; renderNow('content'); return; }
+      var sp=ev.target.closest('[data-cs="slotpick"]'); if(sp){ var ns=sp.closest('.ce-script').querySelector('.ce-newslot'); if(ns) ns.hidden=sp.value!=='__new'; return; }
       var tm=ev.target.closest('select[data-ce-time]'); if(tm){ var id=tm.getAttribute('data-ce-time'), q=ceFindSlot(id); if(!q) return; var at=cePostAtMs(q), day=HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):HQ.sydNow().key); ceMove(id, day, tm.value); return; }
       var md=ev.target.closest('select[data-ce-moveday]'); if(md){ var id2=md.getAttribute('data-ce-moveday'), q2=ceFindSlot(id2); if(!q2||!md.value) return; var at2=cePostAtMs(q2), hm=at2?HQ.pad(HQ.sydParts(at2).h)+':'+HQ.pad(HQ.sydParts(at2).min):(ceSlotTimes()[ceSlotKey(q2)]||'19:00'); ceMove(id2, md.value, hm); return; }
     }
     function onInput(ev){
       var cnt=ev.target.closest('[data-ce-count]'); if(cnt){ var out=cnt.parentElement.querySelector('[data-ce-countout]'); var max=+cnt.getAttribute('data-ce-count'); if(out){ out.textContent=cnt.value.length.toLocaleString('en-AU')+' / '+max.toLocaleString('en-AU'); out.classList.toggle('over', cnt.value.length>max); } return; }
+      var csx=ev.target.closest('[data-cs],[data-cs-hook]'); if(csx){ if(csx.hasAttribute('data-cs-grow')) ceGrow(csx); if(csx.getAttribute('data-cs')==='script') ceWordCount(csx); return; }
+      var lit=ev.target.closest('[data-ce-f="linkedin"]'); if(lit){ var lw=lit.parentElement.querySelector('[data-ce-liwarn]'); if(lw) lw.hidden=/TasteForm/.test(lit.value); return; }
       var vol=ev.target.closest('[data-ce-f="volume"]'); if(vol){ var o=vol.parentElement.querySelector('[data-ce-volout]'); if(o) o.textContent=vol.value; return; }
       var qq=ev.target.closest('#ceLibQ'); if(qq){ clearTimeout(ceLib._t); ceLib._t=setTimeout(function(){ ceLib.q=qq.value; ceLib.focusQ=true; renderNow('content'); }, 250); }
     }
     if(view){ view.addEventListener('click', onClick); view.addEventListener('change', onChange); view.addEventListener('input', onInput); }
-    if(sheet){ sheet.addEventListener('click', function(ev){ if(ev.target===sheet){ if(ceEdit){ ceEdit=null; ceRenderSheet(); return; } ceOpenId=null; ceRenderSheet(); return; } onClick(ev); }); sheet.addEventListener('change', onChange); sheet.addEventListener('input', onInput);
-      document.addEventListener('keydown', function(ev){ if(ev.key==='Escape' && ceOpenId){ if(ceEdit){ ceEdit=null; ceRenderSheet(); } else { ceOpenId=null; ceRenderSheet(); } } }); }
+    if(sheet){ sheet.addEventListener('click', function(ev){ if(ev.target===sheet){ if(ceEdit){ ceEdit=null; ceRenderSheet(); return; } ceCloseAll(); return; } onClick(ev); }); sheet.addEventListener('change', onChange); sheet.addEventListener('input', onInput);
+      document.addEventListener('keydown', function(ev){ if(ev.key!=='Escape') return; if(ceEdit&&ceOpenId){ ceEdit=null; ceRenderSheet(); } else if(ceOpenId||ceScript||ceFilm||cePreview){ ceCloseAll(); } }); }
+    // previews: a broken video flags itself; only one video plays at a time; desktop hover plays a card thumbnail muted
+    document.addEventListener('error', function(ev){ var tg=ev.target; if(tg && tg.tagName==='VIDEO' && tg.hasAttribute('data-ce-vid') && tg.getAttribute('src')) ceVideoFailed(tg); }, true);
+    document.addEventListener('play', function(ev){ document.querySelectorAll('video').forEach(function(v){ if(v!==ev.target && !v.paused) v.pause(); }); }, true);
+    if(view){
+      view.addEventListener('mouseover', function(ev){ var b=ev.target.closest&&ev.target.closest('.ce-play[data-ce-hover]'); if(!b||b===ceHoverEl) return; if(!(window.matchMedia&&window.matchMedia('(hover:hover)').matches)) return; ceStopHover(); var img=b.querySelector('.ce-thumb'); var vv=document.createElement('video'); vv.className=img?img.className:'ce-thumb'; vv.muted=true; vv.loop=true; vv.setAttribute('playsinline',''); vv.setAttribute('aria-hidden','true'); vv.src=b.getAttribute('data-ce-hover'); if(img) img.style.display='none'; b.insertBefore(vv, b.firstChild); var pr=vv.play(); if(pr&&pr.catch) pr.catch(function(){}); ceHoverEl=b; });
+      view.addEventListener('mouseout', function(ev){ if(ceHoverEl && !ceHoverEl.contains(ev.relatedTarget)) ceStopHover(); });
+    }
     // drag to another day: mouse drags after 6 px; touch needs a 350 ms long-press first so the page still scrolls
     if(view){
       view.addEventListener('pointerdown', function(ev){
@@ -2971,18 +3153,24 @@ body{padding:0;}
   function ceSlotTimes(){ var p=state.contentPosting||{}; return Object.assign({high:'19:00', low:'12:00', carousel:'07:30', trialSpacingMin:90}, p.slotTimes||{}); }
   function cePostAtMs(q){ var p=q.posting||{}; if(p.scheduledFor&&HQ.parseTs(p.scheduledFor)!=null) return HQ.parseTs(p.scheduledFor); if(p.plannedFor&&HQ.parseTs(p.plannedFor)!=null) return HQ.parseTs(p.plannedFor); if(HQ.isDayKey(q.date)){ var hm=ceSlotTimes()[ceSlotKey(q)]; if(hm){ var pr=hm.split(':').map(Number); return HQ.sydMidnight(q.date)+(pr[0]*60+pr[1])*60000; } } return null; }
   function ceHasTime(q){ var p=q.posting||{}; return !!(p.scheduledFor||p.plannedFor); }
-  function cePlatforms(q){ var p=q.posting||{}; var list=Array.isArray(p.platforms)&&p.platforms.length?p.platforms:['INSTAGRAM','TIKTOK','YOUTUBE']; return list.map(function(x){ return String(x).toUpperCase(); }); }
+  function cePlatforms(q){ var p=q.posting||{}, acc=((state.contentPosting||{}).outstand||{}).accounts||{}; var def=['INSTAGRAM','YOUTUBE','LINKEDIN'].concat(acc.TIKTOK?['TIKTOK']:[]); if(ceSlotKey(q)==='carousel') def=['INSTAGRAM','LINKEDIN']; var list=Array.isArray(p.platforms)&&p.platforms.length?p.platforms:def; return list.map(function(x){ return String(x).toUpperCase(); }); }
   function cePlatformChips(q){ return cePlatforms(q).map(function(pl){ return '<span class="chip grey">'+esc(CE_PLATFORM_SHORT[pl]||pl)+'</span>'; }).join(''); }
   function ceWhenFull(when){ var t=HQ.parseTs(when); if(t==null) return '–'; var k=HQ.sydDay(t), today=HQ.sydNow().key, lbl = k===today?'Today':(k===HQ.addDays(today,1)?'Tomorrow':(k===HQ.addDays(today,-1)?'Yesterday':HQ.fmtDay(k,'wd'))); return lbl+' '+HQ.fmtTime(t); }
   function ceWhenShort(when){ var t=HQ.parseTs(when); if(t==null) return '– no time'; var k=HQ.sydDay(t), today=HQ.sydNow().key, p=HQ.sydParts(t); var lbl = k===today?(p.h>=17?'Tonight':'Today'):(k===HQ.addDays(today,1)?'Tomorrow':HQ.fmtDay(k,'wd')); var ms=t-Date.now(), cd=''; if(ms>0&&ms<24*3600000){ var h=Math.floor(ms/3600000), m=Math.round((ms%3600000)/60000); cd='in '+(h?h+'h ':'')+m+'m'; } return {label:lbl+' '+HQ.fmtTime(t), countdown:cd}; }
-  function ceThumb(q){ var v=q.video||{}; return v.thumbnailUrl ? '<img class="ce-thumb" src="'+esc(v.thumbnailUrl)+'" alt="" loading="lazy">' : '<div class="ce-thumb ph">'+(q.status==='to_film'?'not filmed':(q.status==='filmed'||q.status==='editing'?'edit pending':'no thumbnail'))+'</div>'; }
-  function ceSoundLabel(snd){ if(!snd) return '– sound not chosen yet'; if(!snd.id) return esc(snd.title||'No music'); return (snd.title||snd.id)+' · music '+(HQ.isNum(snd.musicSoundVolume)?snd.musicSoundVolume:'–')+' / voice '+(HQ.isNum(snd.videoOriginalSoundVolume)?snd.videoOriginalSoundVolume:'–'); }
+  function ceThumb(q){
+    var v=q.video||{}, img=v.thumbnailUrl ? '<img class="ce-thumb" src="'+esc(v.thumbnailUrl)+'" alt="" loading="lazy">' : '<div class="ce-thumb ph">'+(q.status==='needs_script'?'write script':(q.status==='to_film'?'not filmed':(q.status==='filmed'||q.status==='editing'?'edit pending':'no thumbnail')))+'</div>';
+    if(!ceHasVideo(q)) return img;
+    var x=ceVideoOf(q);
+    return '<button type="button" class="ce-play" data-ce-play="'+esc(q.id)+'"'+(x.url?' data-ce-hover="'+esc(x.url)+'"':'')+' aria-label="Play '+esc(ceText(q.title)||'post')+'">'+img+'<span class="pl" aria-hidden="true">▶</span></button>';
+  }
+  function ceStopHover(){ var b=ceHoverEl; ceHoverEl=null; if(!b) return; var vv=b.querySelector('video'); if(vv){ try{ vv.pause(); }catch(e){} vv.remove(); } var img=b.querySelector('.ce-thumb'); if(img) img.style.display=''; }
+  function ceSoundLabel(snd){ return ceSoundLine(snd); }
   function ceTimeOptions(cur){ var out='<option value="">Time…</option><optgroup label="Quick">'+CE_QUICK.map(function(h){ return '<option value="'+h+'"'+(h===cur?' selected':'')+'>'+esc(ceHmLabel(h))+'</option>'; }).join('')+'</optgroup><optgroup label="6:00am – 11:45pm">'; for(var m=6*60;m<=23*60+45;m+=15){ var h=HQ.pad(Math.floor(m/60))+':'+HQ.pad(m%60); out+='<option value="'+h+'"'+(h===cur&&CE_QUICK.indexOf(h)<0?' selected':'')+'>'+esc(ceHmLabel(h))+'</option>'; } return out+'</optgroup>'; }
   function ceHmLabel(hm){ var p=hm.split(':').map(Number), h12=p[0]%12||12; return h12+':'+HQ.pad(p[1])+(p[0]>=12?'pm':'am'); }
   function ceDayOptions(cur){ var today=HQ.sydNow().key, out='<option value="">Move to…</option>'; for(var i=0;i<21;i++){ var k=HQ.addDays(today,i); out+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':HQ.fmtDay(k,'wd')))+'</option>'; } return out; }
   function ceLibCard(q, opts){
     opts=opts||{}; var w=ceWhenShort(cePostAtMs(q)), cap=ceText(q.caption).split('\n').filter(Boolean)[0]||'', trials=(q.posting&&q.posting.trials||[]).length;
-    return '<div class="ce-row">'+ceThumb(q)+'<div class="main"><button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="when">'+esc(w.label)+(w.countdown?'<small>'+esc(w.countdown)+'</small>':'')+'</span><span class="ce-chips">'+cePlatformChips(q)+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+'</span><span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span>'+(cap?'<span class="ce-meta">'+esc(cap.slice(0,140))+(cap.length>140?'…':'')+'</span>':'')+'<span class="ce-meta">'+esc(ceSoundLabel(q.sound))+(trials?' · '+trials+' trial'+(trials===1?'':'s'):'')+(q.sourceIdea?' · from idea':'')+'</span>'+(opts.extra||'')+'</button></div></div>';
+    return '<div class="ce-row">'+ceThumb(q)+'<div class="main"><button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="when">'+esc(w.label)+(w.countdown?'<small>'+esc(w.countdown)+'</small>':'')+'</span><span class="ce-chips">'+cePlatformChips(q)+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+'</span><span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span>'+(cap?'<span class="ce-meta">'+esc(cap.slice(0,140))+(cap.length>140?'…':'')+'</span>':'')+'<span class="ce-meta">'+esc(ceSoundLabel(q.sound))+(trials?' · '+trials+' trial'+(trials===1?'':'s'):'')+'</span>'+(opts.extra||'')+'</button>'+(q.sourceIdea?'<button type="button" class="btn small ce-fromidea" data-ce-goidea="'+esc(q.sourceIdea)+'">From idea ›</button>':'')+'</div></div>';
   }
   function ceRenderLibrary(){
     var st=ceLoadState('contentQueue');
@@ -2991,13 +3179,15 @@ body{padding:0;}
     var count=function(f){ return rows.filter(f).length; };
     var stages=CE_STATUS.map(function(s){ return {s:s, n:count(function(q){ return (q.status||'to_film')===s; })}; });
     var nj=count(function(q){ return q.status==='needs_jordan'; }), er=count(function(q){ return q.status==='error' || (q.posting&&q.posting.status==='error'); });
-    setText('ceSub', rows.length+' posts · '+stages[6].n+' scheduled · '+stages[7].n+' posted'+(nj?' · '+nj+' need you':''));
+    var sn=function(s){ var x=stages.find(function(y){ return y.s===s; }); return x?x.n:0; };
+    setText('ceSub', rows.length+' posts · '+sn('needs_script')+' need a script · '+sn('trialing')+' trialing · '+sn('scheduled')+' scheduled · '+sn('posted')+' posted'+(nj?' · '+nj+' need you':''));
     var html='';
     // auto post + last run
     html+='<div class="panel"><div class="ce-auto">'+(isAdmin?'<button type="button" class="ce-toggle '+(posting.autoPost===true?'on':'off')+'" data-ce-autopost="'+(posting.autoPost===true?'off':'on')+'" aria-pressed="'+(posting.autoPost===true?'true':'false')+'"><span class="knob" aria-hidden="true"></span>'+(posting.autoPost===true?'Auto post: ON':'Auto post: OFF – I approve each post')+'</button>':'<span class="chip '+(posting.autoPost===true?'good':'warn')+'">'+(posting.autoPost===true?'Auto post: ON':'Auto post: OFF – Jordan approves each post')+'</span>')+
       '<span class="f-note">'+(state.contentMetaLoaded.autopost ? (ap.lastRunAt ? 'Pipeline ran '+esc(relTime(ap.lastRunAt)||'')+' · '+(ap.ok===false?'<b style="color:var(--crit)">failed</b>':'ok')+(ap.note?' · '+esc(ceText(ap.note)):'') : 'Pipeline has not run yet (no meta/autopost record).') : 'Loading the pipeline record…')+'</span></div>';
     html+='<div class="ce-strip">'+stages.map(function(x,i){ return (i?'<span class="arrow">→</span>':'')+'<button type="button" class="ce-stage'+(x.n?'':' zero')+'" data-celf="'+x.s+'" aria-pressed="'+(ceLib.status===x.s?'true':'false')+'"><b>'+x.n+'</b>'+esc(CE_STATUS_LABEL[x.s])+'</button>'; }).join('')+
-      '<span class="arrow"> </span><button type="button" class="ce-stage red'+(nj?'':' zero')+'" data-celf="needs_jordan" aria-pressed="'+(ceLib.status==='needs_jordan'?'true':'false')+'"><b>'+nj+'</b>Needs Jordan</button><button type="button" class="ce-stage red'+(er?'':' zero')+'" data-celf="error" aria-pressed="'+(ceLib.status==='error'?'true':'false')+'"><b>'+er+'</b>Errors</button></div></div>';
+      '<span class="arrow"> </span><button type="button" class="ce-stage red'+(nj?'':' zero')+'" data-celf="needs_jordan" aria-pressed="'+(ceLib.status==='needs_jordan'?'true':'false')+'"><b>'+nj+'</b>Needs Jordan</button><button type="button" class="ce-stage red'+(er?'':' zero')+'" data-celf="error" aria-pressed="'+(ceLib.status==='error'?'true':'false')+'"><b>'+er+'</b>Errors</button></div>'+
+      '<div class="ce-chips" style="margin-top:8px"><button type="button" class="btn" data-ce="filmsheet">Filming sheet · '+count(function(q){ return q.status==='to_film'; })+' to film</button>'+(isAdmin?'<button type="button" class="btn" data-ce-newreel="">+ New reel</button>':'')+'</div></div>';
     // needs jordan
     var njRows=rows.filter(function(q){ return q.status==='needs_jordan'; }).sort(function(a,b){ return (HQ.parseTs(b.statusAt)||0)-(HQ.parseTs(a.statusAt)||0); });
     if(njRows.length) html+='<div class="panel" style="border-color:var(--crit)"><h2 style="color:var(--crit)">Needs you · '+njRows.length+'</h2><p class="rule">The pipeline stopped on these. Fix the cause, then mark it fixed and the next run retries.</p><div class="ce-list">'+njRows.map(function(q){ return ceLibCard(q, {extra:'<span class="ce-note">'+esc(ceText(q.needsJordan&&q.needsJordan.reason)||'no reason recorded')+'</span>'}); }).join('')+'</div></div>';
@@ -3026,13 +3216,13 @@ body{padding:0;}
       if(f.funnel && ceFunnel(q.funnel)!==f.funnel) return false;
       var day=HQ.isDayKey(q.date)?q.date:(cePostAtMs(q)?HQ.sydDay(cePostAtMs(q)):null);
       if(f.from && (!day || day<f.from)) return false; if(f.to && (!day || day>f.to)) return false;
-      if(ql){ var hay=[q.title,q.caption,q.ending,q.linkedin].concat(q.hooks||[],q.body||[],q.slides||[]).map(ceText).join(' ').toLowerCase(); if(hay.indexOf(ql)<0) return false; }
+      if(ql){ var hay=[q.title,q.caption,q.ending,q.linkedin,q.script,q.visualHook,q.editNotes,q.cta].concat(q.hooks||[],q.body||[],q.slides||[]).map(ceText).join(' ').toLowerCase(); if(hay.indexOf(ql)<0) return false; }
       return true;
     });
     var filtered=!!(f.status||f.platform||f.format||f.funnel||f.from||f.to||ql);
     html+='<div class="f-note">'+shown.length+' of '+rows.length+(filtered?' (filtered)':'')+'</div>';
     // up next
-    var next=shown.filter(function(q){ return q.posting&&q.posting.status==='scheduled'&&!cePosted(q); }).sort(function(a,b){ return (cePostAtMs(a)||9e15)-(cePostAtMs(b)||9e15); });
+    var next=shown.filter(function(q){ return q.posting&&(q.posting.status==='scheduled'||q.posting.status==='trialing')&&!cePosted(q); }).sort(function(a,b){ return (cePostAtMs(a)||9e15)-(cePostAtMs(b)||9e15); });
     html+='<h3>Up next · '+next.length+'</h3>';
     if(!next.length) html+='<div class="empty-state">Nothing scheduled'+(filtered?' in this filter':'')+'. Approved posts are scheduled by the pipeline within 20 minutes.</div>';
     else { var byDay={}, order=[]; next.forEach(function(q){ var k=HQ.sydDay(cePostAtMs(q))||'none'; if(!byDay[k]){ byDay[k]=[]; order.push(k); } byDay[k].push(q); }); html+=order.map(function(k){ return '<div class="ce-daygroup"><h3 class="small">'+esc(k==='none'?'No day':(k===HQ.sydNow().key?'Today · ':'')+HQ.fmtDay(k,'wd'))+'</h3><div class="ce-list">'+byDay[k].map(function(q){ return ceLibCard(q); }).join('')+'</div></div>'; }).join(''); }
@@ -3042,12 +3232,13 @@ body{padding:0;}
     if(!postedRows.length) html+='<div class="empty-state">Nothing posted'+(filtered?' in this filter':' yet')+'.</div>';
     else html+='<div class="ce-list">'+postedRows.map(function(q){ var m=q.metrics||{}, links=(q.posting&&q.posting.permalinks)||{}; var link=links.instagram||ceLink(q.postedShortcode,null); return ceLibCard(q, {extra:'<span class="ce-metrics2">'+(m.at24h?'24h: '+esc(ceMetricsLine(m.at24h)):'24h: –')+' · '+(m.at7d?'7d: '+esc(ceMetricsLine(m.at7d)):'7d: –')+'</span>'})+(link?'<div class="f-note" style="margin-top:-4px"><a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">Open post ↗</a></div>':''); }).join('')+'</div>';
     // everything else
-    var rest=shown.filter(function(q){ return !cePosted(q) && !(q.posting&&q.posting.status==='scheduled') && q.status!=='awaiting_approval' && q.status!=='needs_jordan'; }).sort(function(a,b){ return String(a.date||'9999').localeCompare(String(b.date||'9999')) || ceSlotOrder(a)-ceSlotOrder(b); });
-    html+='<h3>To film, filmed, editing, edited · '+rest.length+'</h3>';
+    var rest=shown.filter(function(q){ return !cePosted(q) && !(q.posting&&(q.posting.status==='scheduled'||q.posting.status==='trialing')) && q.status!=='awaiting_approval' && q.status!=='needs_jordan'; }).sort(function(a,b){ return String(a.date||'9999').localeCompare(String(b.date||'9999')) || ceSlotOrder(a)-ceSlotOrder(b); });
+    html+='<h3>Needs script, to film, filmed, editing, edited · '+rest.length+'</h3>';
     if(!rest.length) html+='<div class="empty-state">Nothing else'+(filtered?' in this filter':'')+'.</div>';
     else html+='<div class="ce-list">'+rest.map(function(q){ return ceLibCard(q); }).join('')+'</div>';
     html+='</div>';
     // rules learned
+    html+=ceStdPanel(rows, ap);
     var learn=Array.isArray(ap.learnings)?ap.learnings.slice().reverse():[];
     html+='<div class="panel ce-rules"><button type="button" class="ce-open" data-ce-rules aria-expanded="'+(ceRulesOpen?'true':'false')+'"><span style="font-weight:700;font-size:var(--t-s)">'+(ceRulesOpen?'▾':'▸')+' Rules the editor has learned · '+learn.length+'</span></button>'+(ceRulesOpen?(learn.length?'<ul>'+learn.map(function(l){ return '<li>'+esc(ceText(l.rule))+' <span class="muted">· '+esc(relTime(l.at)||'')+(l.fromRowId?' · from '+esc(l.fromRowId):'')+'</span></li>'; }).join('')+'</ul>':'<div class="empty-state">No rules yet. Feedback that reads as a general rule lands here and in PREFERENCES.md.</div>'):'')+'</div>';
     return html;
@@ -3055,21 +3246,206 @@ body{padding:0;}
   function ceRenderCalendar(rows){
     var today=HQ.sydNow().key, ws=HQ.addDays(HQ.weekStart(today), ceCalOffset*7), we=HQ.addDays(ws,6), days=HQ.dayRange(ws,we);
     var inWeek=rows.filter(function(q){ var at=cePostAtMs(q); var k=HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):null); return k && k>=ws && k<=we; });
-    var noTime=inWeek.filter(function(q){ return !ceHasTime(q) && !cePosted(q); });
-    var html='<div class="panel"><div class="chart-head"><div><h2>Calendar · '+esc(HQ.fmtDay(ws,'short'))+' – '+esc(HQ.fmtDay(we,'short'))+'</h2><p class="rule" style="margin-top:4px">'+(isAdmin?'Drag a card to another day (hold, then drag, on a phone) or use Move to… and the time dropdown. Moves update bundle.social straight away.':'Sydney days. Only the admin can move posts.')+'</p></div><div class="range" role="group" aria-label="Week"><button type="button" data-cecal="-1">← Prev</button><button type="button" data-cecal="0" aria-pressed="'+(ceCalOffset===0?'true':'false')+'">This week</button><button type="button" data-cecal="1">Next →</button></div></div>';
+    var noTime=inWeek.filter(function(q){ return !ceHasTime(q) && !cePosted(q) && q.status!=='needs_script'; });
+    var html='<div class="panel"><div class="chart-head"><div><h2>Calendar · '+esc(HQ.fmtDay(ws,'short'))+' – '+esc(HQ.fmtDay(we,'short'))+'</h2><p class="rule" style="margin-top:4px">'+(isAdmin?'Drag a card to another day (hold, then drag, on a phone) or use Move to… and the time dropdown. Moves update Outstand straight away. Dashed cards are open slots: tap one to write its script.':'Sydney days. Only the admin can move posts.')+'</p></div><div class="range" role="group" aria-label="Week"><button type="button" data-cecal="-1">← Prev</button><button type="button" data-cecal="0" aria-pressed="'+(ceCalOffset===0?'true':'false')+'">This week</button><button type="button" data-cecal="1">Next →</button></div></div>';
     html+='<div class="ce-cal">'+days.map(function(d){
-      var mine=inWeek.filter(function(q){ var at=cePostAtMs(q); return at && (ceHasTime(q)||cePosted(q)) && HQ.sydDay(at)===d; }).sort(function(a,b){ return cePostAtMs(a)-cePostAtMs(b); });
-      return '<div class="ce-cal-day" data-day="'+d+'"><div class="dh"><span>'+esc(HQ.DAYN[HQ.dowOf(d)].slice(0,3))+(d===today?'<i class="ce-dot" aria-hidden="true"></i>':'')+'</span><span>'+esc(HQ.fmtDay(d,'short'))+'</span></div>'+(mine.length?mine.map(ceCalCard).join(''):'<div class="ce-empty">–</div>')+'</div>';
+      var mine=inWeek.filter(function(q){ var at=cePostAtMs(q); return at && (ceHasTime(q)||cePosted(q)||q.status==='needs_script') && HQ.sydDay(at)===d; }).sort(function(a,b){ return cePostAtMs(a)-cePostAtMs(b); });
+      return '<div class="ce-cal-day" data-day="'+d+'"><div class="dh"><span>'+esc(HQ.DAYN[HQ.dowOf(d)].slice(0,3))+(d===today?'<i class="ce-dot" aria-hidden="true"></i>':'')+'</span><span>'+esc(HQ.fmtDay(d,'short'))+'</span></div>'+(mine.length?mine.map(ceCalCard).join(''):'<div class="ce-empty">–</div>')+(isAdmin&&d>=today?'<button type="button" class="ce-addday" data-ce-newreel="'+d+'" aria-label="New reel on '+esc(HQ.fmtDay(d,'wd'))+'">+ New reel</button>':'')+'</div>';
     }).join('')+'</div>';
     if(noTime.length) html+='<div class="ce-notime"><span class="ce-k">No time yet · '+noTime.length+'</span><div class="f-note" style="margin-bottom:6px">Slots without a planned time. Pick a day and time to plan one; the pipeline otherwise uses the slot default ('+esc(ceHmLabel(ceSlotTimes().high))+' high, '+esc(ceHmLabel(ceSlotTimes().low))+' low, '+esc(ceHmLabel(ceSlotTimes().carousel))+' carousel).</div><div class="ce-cal">'+noTime.map(ceCalCard).join('')+'</div></div>';
     return html+'</div>';
   }
   function ceCalCard(q){
+    if(q.status==='needs_script'){ var oat=cePostAtMs(q); return '<button type="button" class="ce-cal-card open" data-ce-open="'+esc(q.id)+'"><span class="t">'+esc(oat?HQ.fmtTime(oat):'–')+'</span><span class="ttl">'+esc(q.title&&q.title!=='Open slot'?ceText(q.title):(CE_SLOT_LABEL[ceSlotKey(q)]||'Open slot'))+'</span><span class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+'</span><span class="ce-write">'+(isAdmin?'✎ Write script':'Needs script')+'</span></button>'; }
     var at=cePostAtMs(q), lock=ceLocked(q), canMove=isAdmin&&!lock.locked, hasTime=ceHasTime(q)||cePosted(q), hmStr=at&&hasTime?HQ.pad(HQ.sydParts(at).h)+':'+HQ.pad(HQ.sydParts(at).min):null;
     return '<div class="ce-cal-card'+(ceMoving[q.id]?' moving':'')+(canMove&&hasTime?' drag':'')+'"'+(canMove&&hasTime?' data-ce-drag="'+esc(q.id)+'"':'')+'>'+
       '<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="t">'+(hasTime&&at?esc(HQ.fmtTime(at)):'–')+(ceMoving[q.id]?' <span class="ce-spin"></span>':'')+'</span>'+(lock.locked?'<span class="lock">'+esc(lock.why)+'</span>':(!hasTime?'<span class="lock">'+esc(HQ.isDayKey(q.date)?HQ.fmtDay(q.date,'wd'):'no day')+' · no time yet</span>':''))+'</button>'+
       '<div class="row">'+ceThumb(q)+'<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span><span class="ce-chips">'+cePlatformChips(q)+'</span><span class="ce-chips">'+ceStatusChip(q.status,q)+'</span></button></div>'+
       (canMove?'<select class="input" data-ce-time="'+esc(q.id)+'" aria-label="Time">'+ceTimeOptions(hmStr)+'</select><select class="input" data-ce-moveday="'+esc(q.id)+'" aria-label="Move to day">'+ceDayOptions(HQ.isDayKey(q.date)?q.date:null)+'</select>':'')+'</div>';
+  }
+
+
+  /* --- Script editor: Jordan writes his own scripts (spoken hooks, visual hook, script, editing notes, CTA) --- */
+  function ceOpenScript(o){
+    ceCloseOverlays(); ceOpenId=null; ceEdit=null;
+    var q=o.id?ceFindSlot(o.id):null;
+    ceScript={id:o.id||null, ideaId:o.ideaId||(q&&q.sourceIdea)||null, date:o.date||null, slot:o.slot||'high', force:true};
+    ceRenderSheet();
+  }
+  function ceScriptKey(){ return 'hqScriptDraft:'+(ceScript.id||('new:'+(ceScript.ideaId||'')+':'+(ceScript.date||''))); }
+  function ceOpenSlots(){ var today=HQ.sydNow().key, end=HQ.addDays(today,21); return (state.contentQueue||[]).filter(function(q){ return q.status==='needs_script' && HQ.isDayKey(q.date) && q.date>=today && q.date<=end; }).sort(function(a,b){ return a.date.localeCompare(b.date)||ceSlotOrder(a)-ceSlotOrder(b); }); }
+  function ceGrow(t){ if(!t||!t.style) return; t.style.height='auto'; if(t.scrollHeight) t.style.height=t.scrollHeight+'px'; }
+  function ceWordCount(t){ var w=ceWords(t.value), out=t.parentElement&&t.parentElement.querySelector('[data-cs-wc]'); if(out) out.textContent=w+' word'+(w===1?'':'s')+' · ~'+ceReadTime(w); }
+  function ceScriptFields(root){
+    var g=function(k){ var x=root.querySelector('[data-cs="'+k+'"]'); return x?x.value:''; };
+    var hooksAll=Array.prototype.map.call(root.querySelectorAll('[data-cs-hook]'), function(t){ return t.value; });
+    return {title:g('title').trim(), hooksAll:hooksAll, hooks:hooksAll.map(function(h){ return h.trim(); }).filter(Boolean).slice(0,5), visualHook:g('visualHook'), script:g('script'), editNotes:g('editNotes'), cta:g('cta').trim(), format:g('format'), funnel:g('funnel'), location:g('location'), slotpick:g('slotpick'), date:g('date'), slot:g('slot')};
+  }
+  function ceSaveDraft(){
+    if(!ceScript) return; var root=document.querySelector('#ceSheet .ce-script'); if(!root) return;
+    var f=ceScriptFields(root); if(!(f.title||f.script.trim()||f.hooks.length||f.visualHook.trim()||f.editNotes.trim()||f.cta)) return;
+    var sig=JSON.stringify(f); if(sig===ceScript.lastSig) return; ceScript.lastSig=sig;
+    try{ localStorage.setItem(ceScriptKey(), JSON.stringify({at:ceNowIso(), f:f})); var d=root.querySelector('[data-cs-draft]'); if(d) d.textContent='Draft saved on this device '+HQ.fmtTime(new Date().toISOString())+'.'; }catch(e){}
+  }
+  function ceIdeaDetail(idea){
+    var link=ceLink(idea.shortcode||idea.id, idea.url);
+    return (link?'<div class="ce-txt"><a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">Rewatch the original ↗</a></div>':'')+ceIdeaSource(idea)+
+      (idea.adaptation?'<div><span class="ce-k">How to make it yours</span><div class="ce-txt">'+esc(ceText(idea.adaptation))+'</div></div>':'')+
+      (idea.whyItWorked?'<div><span class="ce-k">Why it worked</span><div class="ce-txt">'+esc(ceText(idea.whyItWorked))+'</div></div>':'')+
+      '<div><span class="ce-k">Talking points</span>'+ceCopyList('sp:'+idea.id+':t:', idea.talkingPoints, 'talking points')+'</div>';
+  }
+  function ceRenderScriptEditor(el){
+    if(!ceScript.force && !el.hidden && el.getAttribute('data-mode')==='script') return; // never wipe what Jordan is typing
+    ceScript.force=false; el.setAttribute('data-mode','script'); el.classList.add('side');
+    var q=ceScript.id?ceFindSlot(ceScript.id):null, idea=ceIdeaById(ceScript.ideaId), mine=!!(q&&(q.editedByJordanAt||q.script)), E=function(v){ return esc(v==null?'':String(v)); };
+    var draft=null; if(!ceScript.noDraft){ try{ var raw=localStorage.getItem(ceScriptKey()); if(raw) draft=JSON.parse(raw); }catch(e){ draft=null; } }
+    if(draft && q && q.editedByJordanAt && (HQ.parseTs(draft.at)||0)<(HQ.parseTs(q.editedByJordanAt)||0)) draft=null;
+    ceScript.noDraft=false;
+    var d=(draft&&draft.f)||{}, val=function(k, fb){ return d[k]!=null ? d[k] : fb; };
+    var title=val('title', q&&q.title&&q.title!=='Open slot'&&mine?q.title:'');
+    var hooks=(Array.isArray(d.hooksAll)?d.hooksAll:(mine&&Array.isArray(q.hooks)?q.hooks:[])).slice(0,5).map(ceText); while(hooks.length<5) hooks.push('');
+    var hookChips=[]; (idea&&Array.isArray(idea.hooks)?idea.hooks:[]).concat(!mine&&q&&Array.isArray(q.hooks)?q.hooks:[]).forEach(function(h){ h=ceText(h); if(h&&hookChips.indexOf(h)<0) hookChips.push(h); });
+    var vChips=(idea&&Array.isArray(idea.visualHooks)?idea.visualHooks:[]).map(ceText).filter(Boolean);
+    var fmt=val('format', q?ceText(q.format):(idea?ceText(idea.format):'')), fun=val('funnel', q?(ceFunnel(q.funnel)||''):(idea?(ceFunnel(idea.funnel)||''):'')), loc=val('location', q?ceText(q.location):'');
+    var sel=function(k, opts, cur, label){ var list=opts.slice(); if(cur&&list.indexOf(cur)<0) list.unshift(cur); return '<label>'+esc(label)+'<select class="input" data-cs="'+k+'"><option value="">–</option>'+list.map(function(o){ return '<option value="'+E(o)+'"'+(o===cur?' selected':'')+'>'+E(o)+'</option>'; }).join('')+'</select></label>'; };
+    var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+(q?ceStatusChip(q.status,q):'<span class="chip stage">New reel</span>')+(idea?'<span class="chip grey">from @'+esc(String(idea.creator||'idea').replace(/^@/,''))+'</span>':'')+'</div><h2 style="margin-top:6px">Script editor</h2></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
+    if(!isAdmin) html+='<div class="ce-note">View only: only the admin can save scripts.</div>';
+    if(draft) html+='<div class="f-note">Restored your unsaved draft from '+esc(relTime(draft.at)||'earlier')+'. <button type="button" class="btn small" data-cs-discard>Discard draft</button></div>';
+    if(q && Array.isArray(q.body) && q.body.length && !q.script) html+='<details class="ce-idea-panel"><summary>Old AI-drafted beats (reference only)</summary><ol class="ce-copylist">'+q.body.map(function(b){ return '<li>'+esc(ceText(b))+'</li>'; }).join('')+'</ol></details>';
+    html+='<div class="ce-editor ce-script">';
+    html+='<label>Title<input class="input" type="text" data-cs="title" maxlength="140" value="'+E(title)+'" placeholder="One line"></label>';
+    html+='<div><span class="ce-k">Spoken hooks · up to 5 you\'ll film</span>'+(hookChips.length?'<div class="ce-chips" style="margin-bottom:6px">'+hookChips.slice(0,8).map(function(h){ return '<button type="button" class="ce-chipbtn" data-cs-usehook="'+E(h)+'">+ '+E(h)+'</button>'; }).join('')+'</div>':'')+hooks.map(function(h,i){ return '<textarea class="input" rows="2" data-cs-hook="'+i+'" data-cs-grow aria-label="Hook '+(i+1)+'" placeholder="Hook '+(i+1)+'">'+E(h)+'</textarea>'; }).join('')+'</div>';
+    html+='<div><span class="ce-k">Visual hook · what\'s on screen in the first 1–2 seconds</span>'+(vChips.length?'<div class="ce-chips" style="margin-bottom:6px">'+vChips.map(function(h){ return '<button type="button" class="ce-chipbtn" data-cs-usevis="'+E(h)+'">+ '+E(h)+'</button>'; }).join('')+'</div>':'')+'<textarea class="input" data-cs="visualHook" data-cs-grow aria-label="Visual hook" placeholder="Shot, prop, text overlay, location">'+E(val('visualHook', q&&q.visualHook||''))+'</textarea></div>';
+    html+='<div><span class="ce-k">Script</span><textarea class="input" data-cs="script" data-cs-grow aria-label="Script" placeholder="Write it the way you\'d say it.">'+E(val('script', q&&q.script||''))+'</textarea><div class="count" data-cs-wc></div></div>';
+    html+='<div><span class="ce-k">Editing notes</span><textarea class="input" data-cs="editNotes" data-cs-grow aria-label="Editing notes" style="min-height:120px" placeholder="e.g. 0:03 text \'the scale lied\' / B-roll of me at desk on line 2 / punch in on \'take photos\'">'+E(val('editNotes', q&&q.editNotes||''))+'</textarea></div>';
+    html+='<label>CTA / ending line<input class="input" type="text" data-cs="cta" maxlength="300" value="'+E(val('cta', q?(q.cta||''):''))+'" placeholder="The last line you say"></label>';
+    html+='<div class="grid">'+sel('format',CE_FORMATS,fmt,'Format')+sel('funnel',['TOF','MOF','BOF'],fun,'Funnel')+sel('location',CE_LOCS,loc,'Location')+'</div>';
+    if(q) html+='<div><span class="ce-k">Day and slot</span><div class="ce-txt">'+esc(HQ.isDayKey(q.date)?HQ.fmtDay(q.date,'wd'):'no day')+' · '+esc(CE_SLOT_LABEL[ceSlotKey(q)]||'slot –')+'</div><div class="f-note">Move it from the calendar or the post sheet.</div></div>';
+    else {
+      var opens=ceOpenSlots(), pick=ceScript.date?'__new':(opens[0]?opens[0].id:'__new'), today=HQ.sydNow().key, dayOpts='';
+      for(var i=0;i<28;i++){ var k=HQ.addDays(today,i); dayOpts+='<option value="'+k+'"'+(k===(ceScript.date||today)?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':HQ.fmtDay(k,'wd')))+'</option>'; }
+      html+='<div><span class="ce-k">Day and slot</span><div class="grid"><label>Slot<select class="input" data-cs="slotpick">'+opens.map(function(o){ return '<option value="'+E(o.id)+'"'+(o.id===pick?' selected':'')+'>'+E(HQ.fmtDay(o.date,'wd')+' · '+(CE_SLOT_LABEL[ceSlotKey(o)]||'slot')+(o.format?' · '+o.format:''))+'</option>'; }).join('')+'<option value="__new"'+(pick==='__new'?' selected':'')+'>New slot on a day…</option></select></label></div><div class="grid ce-newslot"'+(pick==='__new'?'':' hidden')+'><label>Day<select class="input" data-cs="date">'+dayOpts+'</select></label><label>Slot type<select class="input" data-cs="slot">'+['high','low','carousel'].map(function(x){ return '<option value="'+x+'"'+(x===(ceScript.slot||'high')?' selected':'')+'>'+esc(CE_SLOT_LABEL[x])+'</option>'; }).join('')+'</select></label></div><div class="f-note">'+(opens.length?opens.length+' open slot'+(opens.length===1?'':'s')+' in the next 3 weeks.':'No open slots in the next 3 weeks; pick a day.')+'</div></div>';
+    }
+    if(idea) html+='<details class="ce-idea-panel"'+(q?'':' open')+'><summary>Source idea · @'+esc(String(idea.creator||'creator').replace(/^@/,''))+'</summary>'+ceIdeaDetail(idea)+'</details>';
+    else if(ceScript.ideaId) html+='<div class="f-note">Source idea '+esc(ceScript.ideaId)+' isn\'t in the Idea Bank any more.</div>';
+    html+='<div class="acts">'+(isAdmin?'<button type="button" class="btn primary" data-cs-save>Save script</button>':'')+'<button type="button" class="btn" data-ce="close">Close</button><span class="f-note" data-cs-draft>Drafts save on this device as you type.</span></div><div data-cs-msg role="status"></div>';
+    html+='</div>';
+    el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>'; el.hidden=false;
+    el.querySelectorAll('[data-cs-grow]').forEach(ceGrow);
+    var sc=el.querySelector('[data-cs="script"]'); if(sc) ceWordCount(sc);
+    if(ceScriptTimer) clearInterval(ceScriptTimer); ceScriptTimer=setInterval(ceSaveDraft, 3000);
+    var cb=$('ceSheetClose'); if(cb) cb.focus();
+  }
+  async function ceSaveScript(btn){
+    var root=document.querySelector('#ceSheet .ce-script'); if(!root||!isAdmin||!ceScript) return;
+    var f=ceScriptFields(root), msg=root.querySelector('[data-cs-msg]');
+    var say=function(t, err){ if(msg){ msg.textContent=t; msg.className=err?'ce-note':'f-note'; } };
+    if(!f.title && !f.script.trim()){ say('Add a title or the script first.', true); return; }
+    var id=ceScript.id, create=null;
+    if(!id){
+      if(f.slotpick && f.slotpick!=='__new') id=f.slotpick;
+      else {
+        if(!HQ.isDayKey(f.date)){ say('Pick a day.', true); return; }
+        var dn=['sun','mon','tue','wed','thu','fri','sat'][HQ.dowOf(f.date)], code={high:'hi',low:'lo',carousel:'car'}[f.slot]||'hi';
+        id=HQ.weekStart(f.date)+'-'+dn+'-'+code+'-'+Math.random().toString(36).slice(2,6); create={date:f.date, slot:f.slot||'high'};
+      }
+    }
+    var fields={title:f.title, hooks:f.hooks, visualHook:f.visualHook, script:f.script, editNotes:f.editNotes, cta:f.cta};
+    if(f.format) fields.format=f.format; if(f.funnel) fields.funnel=f.funnel; if(f.location) fields.location=f.location;
+    if(ceScript.ideaId) fields.sourceIdea=ceScript.ideaId;
+    var oldKey=ceScriptKey(); btn.disabled=true; btn.textContent='Saving…';
+    try{
+      var data=await ceInvoke('content-update', create?{id:id, create:create, fields:fields}:{id:id, fields:fields});
+      var saved=data.saved||fields, q=ceFindSlot(id);
+      if(q) Object.assign(q, saved); else state.contentQueue=(state.contentQueue||[]).concat([Object.assign({id:id}, saved)]);
+      try{ localStorage.removeItem(oldKey); }catch(e){}
+      var idea=ceIdeaById(ceScript.ideaId); if(idea){ idea.status='planned'; idea.plannedFor=id; }
+      ceScript.id=id; ceScript.lastSig=null;
+      var nq=ceFindSlot(id); say('Saved'+(nq&&nq.status==='to_film'?'. It\'s on the filming sheet.':'.'), false);
+    }catch(e){ say('Couldn\'t save: '+e.message+'. Your draft is kept on this device.', true); }
+    btn.disabled=false; btn.textContent='Save script'; renderNow('content');
+  }
+
+  /* --- Filming sheet: every to_film script for the next 2 weeks, by location, big type, printable --- */
+  function ceRenderFilmSheet(el){
+    if(!ceFilmForce && !el.hidden && el.getAttribute('data-mode')==='film') return;
+    ceFilmForce=false; el.setAttribute('data-mode','film'); el.classList.remove('side');
+    var today=HQ.sydNow().key, end=HQ.addDays(today,13);
+    var rows=(state.contentQueue||[]).filter(function(q){ return q.status==='to_film' && HQ.isDayKey(q.date) && q.date>=today && q.date<=end; }).sort(function(a,b){ return a.date.localeCompare(b.date)||ceSlotOrder(a)-ceSlotOrder(b); });
+    var groups={}; rows.forEach(function(q){ var l=String(q.location||'').trim().toLowerCase(), k=CE_LOCATIONS.indexOf(l)>=0?l:(l?'other':'none'); (groups[k]=groups[k]||[]).push(q); });
+    var html='<div class="ce-sheet-head"><div><h2>Filming sheet</h2><div class="ce-meta">'+esc(HQ.fmtDay(today,'short'))+' – '+esc(HQ.fmtDay(end,'short'))+' · '+rows.length+' script'+(rows.length===1?'':'s')+' to film, by location</div></div><div class="ce-chips no-print"><button type="button" class="btn" data-ce="print">Print</button><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div></div>';
+    if(!rows.length) html+='<div class="empty-state">Nothing to film in the next 2 weeks. Scripts land here once you save them in the script editor.</div>';
+    CE_LOCATIONS.concat(['other','none']).filter(function(k){ return groups[k]; }).forEach(function(k){
+      html+='<div class="ce-film-loc">'+esc(k==='other'?'Other locations':(k==='none'?'No location set':ceCap(k)))+' · '+groups[k].length+'</div>';
+      html+=groups[k].map(function(q){
+        var hooks=(Array.isArray(q.hooks)?q.hooks:[]).map(ceText).filter(Boolean);
+        return '<article class="ce-film"><div class="ce-meta">'+esc(HQ.fmtDay(q.date,'wd'))+' · '+esc(CE_SLOT_LABEL[ceSlotKey(q)]||'slot')+' · '+esc(ceText(q.format)||'format –')+(k==='other'?' · '+esc(ceText(q.location)):'')+'</div><h3>'+esc(ceText(q.title)||'Untitled')+'</h3>'+
+          (hooks.length?'<div><span class="ce-k">Hooks to film</span><ol>'+hooks.map(function(h){ return '<li>'+esc(h)+'</li>'; }).join('')+'</ol></div>':'')+
+          (q.visualHook?'<div><span class="ce-k">Visual hook</span><div class="ce-txt">'+esc(ceText(q.visualHook))+'</div></div>':'')+
+          '<div><span class="ce-k">Script</span><div class="ce-film-script">'+(q.script?esc(q.script):'– no script yet')+'</div></div>'+
+          (q.cta?'<div><span class="ce-k">Ending line</span><div class="ce-film-script">'+esc(ceText(q.cta))+'</div></div>':'')+
+          (q.editNotes?'<div><span class="ce-k">Editing notes</span><div class="ce-txt">'+esc(ceText(q.editNotes))+'</div></div>':'')+'</article>';
+      }).join('');
+    });
+    el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>'; el.hidden=false;
+    var cb=$('ceSheetClose'); if(cb) cb.focus();
+  }
+
+  /* --- Phone preview: the final video as it will read on Instagram, with the 5 trial versions --- */
+  function ceRenderPreview(el){
+    var q=ceFindSlot(cePreview.id); if(!q){ cePreview=null; el.hidden=true; el.innerHTML=''; el.removeAttribute('data-mode'); return; }
+    var key='pv:'+q.id+':'+(cePreview.v||'')+':'+(q.status||'')+':'+(cePreview.more?1:0)+':'+((q.winner&&q.winner.v)||'');
+    if(!cePreview.force && !el.hidden && el.getAttribute('data-mode')===key) return; // keep the video playing
+    cePreview.force=false; el.setAttribute('data-mode', key); el.classList.remove('side');
+    var vid=q.video||{}, vars=Array.isArray(vid.variants)?vid.variants:[], p=q.posting||{}, trials=Array.isArray(p.trials)?p.trials:[], win=q.winner||null;
+    var cur=cePreview.v || (win&&win.v) || ((vars.find(function(x){ return x.bet; })||{}).v) || (vars[0]&&vars[0].v) || null;
+    var curVer=vars.find(function(x){ return x.v===cur; })||{};
+    var cap=ceText(curVer.caption || q.caption), at=cePostAtMs(q);
+    var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+ceStatusChip(q.status,q)+cePlatformChips(q)+'</div><h2 style="margin-top:6px">'+esc(ceText(q.title)||'Untitled')+'</h2></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div><div class="ce-phone">';
+    if(vars.length>1) html+='<div class="ce-vtabs" role="tablist" aria-label="Versions">'+vars.map(function(x){ var t=trials.find(function(tt){ return tt.v===x.v; })||{}, m=t.metrics; return '<button type="button" role="tab" class="ce-vtab" data-ce-pv="'+esc(x.v)+'" aria-selected="'+(x.v===cur?'true':'false')+'"><b>'+esc(x.v)+(win&&win.v===x.v?' 🏆':'')+'</b><span>'+esc(ceText(x.diff)||'–')+'</span>'+(m&&HQ.isNum(m.views)?'<span class="n">'+num(m.views)+' views</span>':'')+'</button>'; }).join('')+'</div>';
+    var vtag=ceVideoTag(q, vars.length?cur:null, 'ce-phone-video');
+    html+='<div class="ce-phone-frame">'+(vtag||'<div class="ce-phone-empty">'+(['needs_script','to_film','filmed','editing'].indexOf(q.status)>=0?'Not edited yet · '+esc(ceStatusLabel(q.status)):'No preview uploaded')+'</div>')+'</div>';
+    html+='<div class="ce-phone-user"><span class="av" aria-hidden="true">J</span><b>jordantornatore</b></div>';
+    if(cap){ var ls=cap.split('\n'), long=ls.length>2||cap.length>140, short=ls.slice(0,2).join('\n'); if(short.length>140) short=short.slice(0,140); html+='<div class="ce-phone-cap">'+esc(cePreview.more||!long?cap:short)+(long&&!cePreview.more?'<button type="button" class="ce-more" data-ce-more>…more</button>':'')+'</div>'; }
+    else html+='<div class="ce-phone-cap muted">– caption not written yet</div>';
+    html+='<div class="ce-meta">'+esc(at?ceWhenFull(at):'– no time yet')+' · '+esc(cePlatforms(q).map(function(x){ return CE_PLATFORM_SHORT[x]||x; }).join(', '))+'</div>';
+    html+='<div class="ce-meta">♪ '+esc(ceSoundLine(q.sound))+'</div>';
+    var t=trials.find(function(tt){ return tt.v===cur; });
+    if(t) html+='<div class="ce-txt">Trial '+esc(t.v)+': '+(t.postedAt?'out '+esc(ceWhenFull(t.postedAt)):'goes out '+esc(ceWhenFull(t.scheduledFor)))+' · '+(t.metrics?esc(ceTrialNums(t.metrics)):'numbers –'+(t.postedAt?' (pulled every 12 h)':''))+(t.shortcode?' · <a class="ce-a" href="https://www.instagram.com/reel/'+esc(t.shortcode)+'/" target="_blank" rel="noopener">open ↗</a>':'')+'</div>';
+    if(win) html+='<div class="ce-win">🏆 '+esc(win.v)+' won: '+esc(ceText(win.why))+(q.winnerConfidence==='low'?' <span class="chip warn">low confidence</span>':(q.winnerConfidence==='none'?' <span class="chip grey">no trial numbers</span>':''))+'</div>';
+    if(isAdmin && q.status==='awaiting_approval') html+='<div class="ce-big"><button type="button" class="btn primary" data-ce-act="approve" data-id="'+esc(q.id)+'">✓ Approve</button><button type="button" class="btn" data-ce-open="'+esc(q.id)+'" data-ce-fb>Request changes</button></div>';
+    html+='<div class="ce-chips"><button type="button" class="btn small" data-ce-open="'+esc(q.id)+'">Open the post sheet</button></div></div>';
+    el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>'; el.hidden=false; ceAttachSources(el);
+    var cb=$('ceSheetClose'); if(cb) cb.focus();
+  }
+
+  /* --- Editing standards (gold reel per format + inspo reels) and ad candidates --- */
+  function ceStdPanel(rows, ap){
+    var formats=[]; rows.forEach(function(q){ var f=ceText(q.format); if(f && formats.indexOf(f)<0) formats.push(f); }); formats.sort();
+    var gold={}; rows.forEach(function(q){ if(q.goldStandard){ var f=ceText(q.format); if(!gold[f] || (HQ.parseTs(q.goldAt)||0)>(HQ.parseTs(gold[f].goldAt)||0)) gold[f]=q; } });
+    var insp=ap.formatInspo||{}, n=Object.keys(gold).length;
+    var html='<div class="panel ce-rules"><button type="button" class="ce-open" data-ce="std" aria-expanded="'+(ceStdOpen?'true':'false')+'"><span style="font-weight:700;font-size:var(--t-s)">'+(ceStdOpen?'▾':'▸')+' Editing standards · '+n+' gold reel'+(n===1?'':'s')+'</span></button>';
+    if(ceStdOpen){
+      html+='<p class="rule">The ⭐ gold reel for a format is the template every new edit of that format starts from. The pipeline copies it to templates/&lt;format&gt;/gold/ with a written spec and checks every edit against it.</p>';
+      html+= formats.length ? '<div class="ce-std">'+formats.map(function(f){ var g=gold[f], urls=Array.isArray(insp[f])?insp[f]:[];
+        return '<div class="ce-std-row"><div class="ce-chips">'+ceFormatChip(f)+(g?'<button type="button" class="btn small" data-ce-open="'+esc(g.id)+'">⭐ '+esc(ceText(g.title)||g.id)+'</button>'+(g.goldCopiedAt?'<span class="f-note">in templates since '+esc(relTime(g.goldCopiedAt)||'')+'</span>':'<span class="f-note">the pipeline copies it on its next run</span>'):'<span class="f-note">– no gold reel yet: tap ⭐ on an approved post</span>')+'</div>'+
+          (ceInspoEdit===f ? '<div class="ce-editor"><label>Inspo reels for '+esc(f)+' (one URL per line)<textarea class="input" data-ce-inspotext="'+esc(f)+'">'+esc(urls.join('\n'))+'</textarea></label><div class="acts"><button type="button" class="btn primary" data-ce-inspo-save="'+esc(f)+'">Save</button><button type="button" class="btn" data-ce-inspo-cancel>Cancel</button></div></div>'
+            : '<div class="ce-chips"><span class="f-note">'+(urls.length?urls.length+' inspo reel'+(urls.length===1?'':'s'):'No inspo reels')+'</span>'+(isAdmin?'<button type="button" class="btn small" data-ce-inspo="'+esc(f)+'">'+(urls.length?'Edit inspo reels':'Add inspo reels')+'</button>':'')+'</div>')+'</div>'; }).join('')+'</div>' : '<div class="empty-state">No formats in the queue yet.</div>';
+    }
+    return html+'</div>';
+  }
+  async function ceSaveInspo(f){
+    if(!isAdmin||!db) return;
+    var ta=document.querySelector('[data-ce-inspotext="'+CSS.escape(f)+'"]'); if(!ta) return;
+    var urls=ta.value.split(/\s+/).map(function(x){ return x.trim(); }).filter(function(x){ return /^https?:\/\//i.test(x); }).slice(0,20);
+    var ap=state.contentAutopost||{}, fi=Object.assign({}, ap.formatInspo||{}); fi[f]=urls;
+    state.contentAutopost=Object.assign({}, ap, {formatInspo:fi}); ceInspoEdit=null; renderNow('content');
+    try{ await db.doc('meta/autopost').update({formatInspo:fi, formatInspoAt:ceNowIso()}); }
+    catch(e){ console.error('formatInspo write failed', e); showBanner('Couldn\'t save the inspo reels. Try again.'); }
+  }
+  function ceAdPanel(){
+    var rows=(state.contentQueue||[]).filter(function(q){ return q.adCandidate===true; }).sort(function(a,b){ return (HQ.parseTs(b.adCheckedAt)||0)-(HQ.parseTs(a.adCheckedAt)||0); });
+    return '<div class="panel"><h2>Turn into an ad</h2><p class="rule">Reels that beat your 30-day median on their stage metric by 2× or more, 7 days after posting. Reels already running as ads are left out.</p>'+(rows.length?'<div class="ce-list">'+rows.map(function(q){ return ceLibCard(q, {extra:'<span class="ce-win">'+esc(ceText(q.adWhy)||'beat the median')+'</span>'}); }).join('')+'</div>':'<div class="empty-state">No ad candidates yet. A reel lands here when it doubles your 30-day median on its stage metric.</div>')+'</div>';
   }
 
   /* ---------- data layer ---------- */
