@@ -777,9 +777,10 @@ body{padding:0;}
 .ce-bulk .input{width:auto;min-width:150px;}
 .ce-tray{border:1px dashed var(--border-strong);margin-bottom:12px;padding:8px;}
 .ce-tray .dh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:700;}
+.ce-tray .dh .f-note{text-transform:none;letter-spacing:0;font-weight:400;}
 .ce-traylist,.ce-filmlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;}
-.ce-plangrid{display:grid;grid-template-columns:repeat(7,minmax(150px,1fr));gap:8px;overflow-x:auto;padding-bottom:4px;}
-.ce-plangrid.two{grid-template-columns:repeat(7,minmax(150px,1fr));}
+.ce-plangrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px;}
+@media (min-width:1400px){ .ce-plangrid{grid-template-columns:repeat(7,minmax(0,1fr));} }
 .ce-plangrid .ce-cal-day{border:1px solid var(--border);background:var(--surface);min-height:180px;}
 .ce-plangrid .ce-cal-day.today{border-color:var(--accent);}
 .ce-plangrid .ce-cal-day.past{opacity:.72;}
@@ -3585,7 +3586,7 @@ body{padding:0;}
     if(!ceWinnerPending(q)) return null; var p=q.posting||{}, n=Math.max(1,(q.video&&Array.isArray(q.video.variants)&&q.video.variants.length)||5), H=3600000;
     var t=Date.now()+20*60000, sp=HQ.sydParts(t); if(sp.h<6||sp.h>=23) t=HQ.sydMidnight(sp.h>=23?HQ.addDays(sp.key,1):sp.key)+7*H;
     var last=t+(n-1)*25*60000, mine=p.movedAt&&p.plannedFor?HQ.parseTs(p.plannedFor):null;
-    if(mine && mine>=last+24*H) return mine;
+    if(mine && mine>=last+H) return mine;
     var w=t+72*H, wp=HQ.sydParts(w); if(wp.h<7) w=HQ.sydMidnight(wp.key)+7.5*H; else if(wp.h>=22) w=HQ.sydMidnight(HQ.addDays(wp.key,1))+7.5*H;
     return w;
   }
@@ -4207,12 +4208,12 @@ body{padding:0;}
     var vs=trials.length?trials:vars, at=cePostAtMs(q), pending=ceWinnerPending(q), canEdit=isAdmin&&!cePosted(q);
     var stage=String(ceFunnel(q.funnel)||'TOF'), how=stage==='MOF'?'shares + saves per view':(stage==='BOF'?'comments per view':'views');
     var pls=Array.isArray(wp.platforms)&&wp.platforms.length?wp.platforms:cePlatforms(q);
-    var h='<div class="ce-block ce-winner"><span class="ce-k">🏆 Winner</span><div class="ce-txt">'+(at?'Posts to everyone '+esc(ceWhenFull(at)):'Time set when the trials start')+(pending?(p.movedAt&&HQ.parseTs(p.plannedFor)===at?' (your time)':' · 72 h after the trials start, which is the first pipeline run after you approve'):'')+'.</div>'+(pending&&p.movedAt&&p.plannedFor&&HQ.parseTs(p.plannedFor)!==at?'<div class="f-note">The time you picked ('+esc(ceWhenFull(p.plannedFor))+') is too soon after the trials, so the winner keeps the 72-hour time. Pick a time 24 h+ later to use your own.</div>':'');
+    var h='<div class="ce-block ce-winner"><span class="ce-k">🏆 Winner</span><div class="ce-txt">'+(at?'Posts to everyone '+esc(ceWhenFull(at)):'Time set when the trials start')+(pending?(p.movedAt&&HQ.parseTs(p.plannedFor)===at?' (your time)':' · 72 h after the trials start, which is the first pipeline run after you approve'):'')+'.</div>'+(pending&&p.movedAt&&p.plannedFor&&HQ.parseTs(p.plannedFor)!==at?'<div class="f-note">The time you picked ('+esc(ceWhenFull(p.plannedFor))+') is before the trials would finish, so the winner keeps the 72-hour time. Pick a later time to use your own.</div>':'')+(at&&(pending||p.trialStart)&&(at-(pending?Date.now()+20*60000:HQ.parseTs(p.trialStart)))<24*3600000?'<div class="ce-note">Only about '+Math.max(1,Math.round((at-(pending?Date.now()+20*60000:HQ.parseTs(p.trialStart)))/3600000))+' h of testing before the winner posts. Move it later for better numbers.</div>':'');
     if(canEdit){
       h+='<label class="ce-k" style="display:block;margin-top:8px">Which version<select class="input" data-ce-winpick="'+esc(q.id)+'"><option value=""'+(wp.pick?'':' selected')+'>Automatic · best '+esc(how)+' ('+esc(stage)+')</option>'+vs.map(function(x){ var m=x.metrics; return '<option value="'+esc(x.v)+'"'+(wp.pick===x.v?' selected':'')+'>'+esc(x.v)+(x.diff?' · '+esc(ceText(x.diff)).slice(0,60):'')+(m&&HQ.isNum(m.views)?' · '+num(m.views)+' views':'')+'</option>'; }).join('')+'</select></label>';
       h+='<div class="ce-k" style="margin-top:8px">Winner goes to</div><div class="ce-chips">'+['INSTAGRAM','YOUTUBE','LINKEDIN','TIKTOK'].map(function(pl){ return '<label class="chip grey" style="min-height:36px;cursor:pointer"><input type="checkbox" data-ce-winpl="'+pl+'" data-id="'+esc(q.id)+'"'+(pls.indexOf(pl)>=0?' checked':'')+'> '+esc(CE_PLATFORM_SHORT[pl])+'</label>'; }).join('')+'</div>';
       if(!pending && trials.some(function(t){ return t.postedAt; })) h+='<div class="acts" style="margin-top:8px">'+(wp.decideNow?'<span class="chip grey">Deciding now · posts within 25 minutes</span>':'<button type="button" class="btn small" data-ce-windecide="'+esc(q.id)+'">Decide now and post the winner</button>')+'</div>';
-      h+='<div class="f-note">Caption, LinkedIn text and title below go out with the winner: edit them any time before it posts. Move the winner’s day and time in Schedule'+(pending?' (keep it 24 h+ after the trials so they get numbers)':'')+'.</div>';
+      h+='<div class="f-note">Caption, LinkedIn text and title below go out with the winner: edit them any time before it posts. Move the winner’s day and time in Schedule'+(pending?' (72 h gives the best numbers; under 24 h is a quick test)':'')+'.</div>';
     }
     return h+'</div>';
   }
