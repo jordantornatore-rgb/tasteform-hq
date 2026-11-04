@@ -3078,7 +3078,7 @@ body{padding:0;}
     var trialBy={}; (p.trials||[]).forEach(function(t){ if(t.hook) trialBy[ceText(t.hook).toLowerCase()]=t; });
     html+=block('Caption'+(q.caption?' ('+String(q.caption).length+' / 2,200)':''), single(q.caption,'caption'), null, null, 'caption');
     html+=block('LinkedIn version', ceLinkedinRead(q.linkedin), null, null, 'linkedin');
-    html+=block('Sound', '<div class="ce-txt">♪ '+esc(ceSoundLabel(q.sound))+(q.sound&&q.sound.soundSwap?'<div class="f-note">'+esc(q.sound.soundSwap)+'</div>':'')+'</div>', null, null, 'sound');
+    html+=block('Sound', '<div class="ce-txt">♪ '+esc(ceSoundLabel(q.sound))+(q.reEditRequested&&!posted?'<div class="f-note">Being mixed in now; the preview above is the previous mix until the pipeline\u2019s next run (within 20 minutes).</div>':'')+(q.sound&&q.sound.soundSwap?'<div class="f-note">'+esc(q.sound.soundSwap)+'</div>':'')+'</div>', null, null, 'sound');
     html+=block('Hooks'+(Array.isArray(q.hooks)?' ('+q.hooks.length+')':''), lines(q.hooks,'hook', function(t){ var k=t.toLowerCase(), out=''; if(filmedSet.indexOf(k)>=0) out+='<span class="chip good">filmed</span>'; if(trialBy[k]) out+='<span class="chip grey">trial · '+esc(ceWhenFull(trialBy[k].scheduledFor))+'</span>'; return out; }), 'hooks', Array.isArray(q.hooks)?q.hooks.map(ceText).join('\n'):'', 'hooks');
     var wc=ceWords(q.script);
     html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Script'+(wc?' · '+wc+' words · ~'+esc(ceReadTime(wc)):'')+'</span><span class="ce-chips">'+(q.script?ceCopyBtn('script', q.script, 'Copy'):'')+(isAdmin&&!posted?'<button type="button" class="btn small" data-ce-script="'+esc(q.id)+'">'+(q.script?'Edit script':'Write script')+'</button>':'')+'</span></div>'+(q.script?'<div class="ce-script-read">'+esc(q.script)+'</div>':'<div class="ce-txt muted">– no script yet. Jordan writes it in the script editor.</div>')+'</div>';
@@ -3756,6 +3756,7 @@ body{padding:0;}
     else html+='<div class="ce-phone-cap muted">– caption not written yet</div>';
     html+='<div class="ce-meta">'+esc(at?ceWhenFull(at):'– no time yet')+' · '+esc(cePlatforms(q).map(function(x){ return CE_PLATFORM_SHORT[x]||x; }).join(', '))+'</div>';
     html+='<div class="ce-meta">♪ '+esc(ceSoundLine(q.sound))+'</div>';
+    if(q.reEditRequested && q.status!=='posted') html+='<div class="ce-note">This preview is the previous mix. The new sound is being mixed in; the preview updates within 20 minutes.</div>';
     var t=trials.find(function(tt){ return tt.v===cur; });
     if(t) html+='<div class="ce-txt">Trial '+esc(t.v)+': '+(t.postedAt?'out '+esc(ceWhenFull(t.postedAt)):'goes out '+esc(ceWhenFull(t.scheduledFor)))+' · '+(t.metrics?esc(ceTrialNums(t.metrics)):'numbers –'+(t.postedAt?' (pulled every 12 h)':''))+(t.shortcode?' · <a class="ce-a" href="https://www.instagram.com/reel/'+esc(t.shortcode)+'/" target="_blank" rel="noopener">open ↗</a>':'')+'</div>';
     if(win) html+='<div class="ce-win">🏆 '+esc(win.v)+' won: '+esc(ceText(win.why))+(q.winnerConfidence==='low'?' <span class="chip warn">low confidence</span>':(q.winnerConfidence==='none'?' <span class="chip grey">no trial numbers</span>':''))+'</div>';
