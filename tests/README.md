@@ -8,3 +8,5 @@ Fixtures are anonymised exports of the Supabase tables (`select jsonb_agg(...)` 
 Content Engine v2 rows are synthetic and committed inside `ui.test.js` (`contentFixtures`), so those checks run with any fixture folder. `HQ_ONLY_CONTENT=1` skips the big per-tab loop.
 
 Env: `PLAYWRIGHT_PATH` (path to a playwright install), `HQ_CHROME` (Chromium executable; otherwise Playwright's bundled browser), `HQ_NOW` (fixed "now", ISO; default 2026-10-21T04:00:00Z).
+
+- `node tests/analytics.test.js [--shots dir]` — Analytics tab on committed synthetic data (no fixtures needed).

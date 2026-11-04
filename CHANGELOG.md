@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.8.0 — 4 Nov 2026 (Analytics tab)
+
+- New **Analytics** tab (Growth group; phone → More), Metricool-style, for everyone signed in. Period 7 / 30 / 90 days (Instagram's own ranges), each compared with the window before it.
+  - **Overview**: posts, views, accounts reached, net followers, engagement per 1,000 views, typical (median) reel, watch time, saves · shares, each with ▲/▼ vs the previous window; a plain-English read (posting volume vs per-post views, flags when one post carries most of the views, days since last post); median views per post by type; top 5 posts.
+  - **Posts**: views (log) vs average watch time for every post in the last 90 days, median lines, outliers highlighted and listed as "Make more like these" (falls back to engagement per 1K views until watch time is collected); 13-week posting heatmap.
+  - **Audience**: followers, net followers, follows, unfollows with deltas; net followers per day; "who you gain and lose" is explained as not measurable rather than guessed.
+- Supabase: `ig_account_daily` (one row per Sydney day: profile follower count + Instagram's last 7/30/90-day reach, views, follows, unfollows), added to `hq_merge`. Migration in `supabase/migrations/20261104_ig_account_daily.sql`.
+- Content scan prompt **v7** (`scans/content-scan.md`): new step 2b writes `ig_account_daily`; reels now store `watchTimeSec`, `avgWatchSec`, `skipRatePct`; backfill of watch numbers for the last 90 days and of posts back to 90 days.
+- `HQ.igAnalytics` in `hq-core.js` (unit test in `tests/core.test.js`); `tests/analytics.test.js` (synthetic data, 54 checks: every view × period × layout, no NaN, no overflow, views KPI equals an independent sum, zero console errors).
+
 ## 2.7.0 — 4 Nov 2026 (Email tab)
 
 - **Email** tab (admin only): Up next (each email in the GHL sequence, subject + body, draft/live, who is due it), Sent (every send with opened / replied and tags), Performance (reply %, opens and unsubs per email, split by recipe, job and country tags). See `EMAIL.md`.

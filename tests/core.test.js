@@ -232,5 +232,35 @@ test('email stats count distinct contacts, only among people sent that email', (
   const e = HQ.emailStats([], [], NOW); assert.strictEqual(e.totals.replyRate, null); assert.ok(!/NaN|undefined/.test(JSON.stringify(e)));
 });
 
+test('Instagram analytics: windows, deltas, medians, account rows, scatter fallback, heatmap', () => {
+  const P = (id, day, type, views, inter, extra) => Object.assign({ id, postedAtDate: day + 'T19:00:00+11:00', postedAtExact: true, mediaType: type, views, interactions: inter }, extra || {});
+  const posts = [
+    P('a', '2026-11-03', 'reel', 1000, 50), P('b', '2026-10-25', 'reel', 3000, 90), P('c', '2026-10-10', 'carousel', 18000, 900, { saves: 40, shares: 10 }),
+    P('d', '2026-09-30', 'reel', 2000, 40), P('e', '2026-09-20', 'reel', 1000, 10),
+    { id: 'x', mediaType: 'reel', views: 5, postedAtDate: '2026-11-01T10:00:00+11:00', postedAtExact: false }];
+  const acc = [{ id: '2026-11-04', date: '2026-11-04', followers: 1300, p30: { reached: 9000, follows: 60, unfollows: 40 } },
+    { id: '2026-10-05', date: '2026-10-05', followers: 1250, p30: { reached: 6000, follows: 30, unfollows: 30 } }, { id: '2026-10-04', date: '2026-10-04', followers: 1240 }];
+  const a = HQ.igAnalytics(posts, acc, '2026-11-04', 30);
+  assert.strictEqual(a.curFrom, '2026-10-06'); assert.strictEqual(a.prevTo, '2026-10-05');
+  assert.strictEqual(a.cur.posts, 3); assert.strictEqual(a.prev.posts, 2); assert.strictEqual(a.undated, 1);
+  assert.strictEqual(a.cur.views, 22000); assert.strictEqual(a.prev.views, 3000); assert.strictEqual(a.change.posts, 50);
+  assert.strictEqual(a.cur.typicalReel, 2000); assert.strictEqual(a.cur.engPer1k, Math.round(1040 / 22000 * 10000) / 10);
+  assert.strictEqual(a.cur.saves, 40); assert.strictEqual(a.cur.watchTimeSec, null);
+  assert.deepStrictEqual(a.byType.map(t => t.type + ':' + t.typical), ['reel:2000', 'carousel:18000']);
+  assert.strictEqual(a.top[0].id, 'c');
+  assert.strictEqual(a.account.cur.reached, 9000); assert.strictEqual(a.account.change.reached, 50);
+  assert.strictEqual(a.account.netFollowers, 1300 - 1250); // follower count at end minus the day before the window
+  assert.strictEqual(a.scatter.yKey, 'engPer1k'); assert.strictEqual(a.scatter.points.length, 5);
+  assert.strictEqual(a.heat.length, 91); assert.strictEqual(a.heat.filter(h => h.count).length, 5);
+  assert.strictEqual(a.daysSincePost, 1);
+  // missing account data stays null, never 0
+  const b = HQ.igAnalytics(posts, [], '2026-11-04', 7);
+  assert.strictEqual(b.account.cur, null); assert.strictEqual(b.account.netFollowers, null); assert.ok(!/NaN|Infinity/.test(JSON.stringify(b)));
+  // with watch numbers on 3+ reels the scatter switches to retention
+  const w = posts.map(p => p.mediaType === 'reel' && p.postedAtExact ? Object.assign({}, p, { avgWatchSec: 4, watchTimeSec: 100 }) : p);
+  const c = HQ.igAnalytics(w, [], '2026-11-04', 30);
+  assert.strictEqual(c.scatter.yKey, 'avgWatchSec'); assert.strictEqual(c.cur.watchTimeSec, 200); assert.strictEqual(c.cur.watchHave, 2);
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

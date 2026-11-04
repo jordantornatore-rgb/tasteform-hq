@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '2.7.0';
+  HQ.VERSION = '2.8.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -683,6 +683,106 @@
     return { perStep: perStep, upNext: steps.map(function (st) { return upNext[st.id]; }), sentLog: sentLog,
       totals: { contacts: Object.keys(contacts).length, sent: totSent, opened: totOpen, replied: totReply, repliedContacts: repliedContacts,
         openRate: HQ.pct(totOpen, totSent), replyRate: HQ.pct(totReply, totSent) } };
+  };
+
+
+  /* ---------- Instagram analytics (Analytics tab) ----------
+     Posts are bucketed by their exact Sydney posting day (postedAtDate, decoded from the media id by the scan);
+     their numbers are lifetime totals as of the last scan, the same convention Instagram and Metricool use.
+     Account-level numbers (followers, reach, follows/unfollows) come from ig_account_daily: one row per Sydney day
+     with the profile follower count and Instagram's own "last 7 / 30 / 90 days" figures read that day, so the
+     previous window is simply the row from N days earlier. Nothing is summed across days that Instagram de-duplicates. */
+  HQ.IG_PERIODS = [7, 30, 90];
+  HQ.median = function (arr) {
+    var a = (arr || []).filter(HQ.isNum).slice().sort(function (x, y) { return x - y; });
+    if (!a.length) return null; var m = Math.floor(a.length / 2);
+    return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  };
+  HQ.pctChange = function (cur, prev) { return (HQ.isNum(cur) && HQ.isNum(prev) && prev > 0) ? Math.round(((cur - prev) / prev) * 100) : null; };
+  HQ.igPostDay = function (p) { return p && p.postedAtDate && p.postedAtExact !== false ? HQ.sydDay(p.postedAtDate) : null; };
+  HQ.igType = function (p) { var t = String(p && p.mediaType || '').toLowerCase(); return t === 'reel' || t === 'carousel' ? t : (t ? 'post' : null); };
+  HQ.igInteractions = function (p) {
+    if (HQ.isNum(p.interactions)) return p.interactions;
+    var parts = [p.likes, p.comments, p.saves, p.shares];
+    return parts.every(HQ.isNum) ? parts.reduce(function (a, b) { return a + b; }, 0) : null;
+  };
+  function sumField(list, f) {
+    var have = list.filter(function (p) { return HQ.isNum(typeof f === 'function' ? f(p) : p[f]); });
+    return { value: have.length ? have.reduce(function (a, p) { return a + (typeof f === 'function' ? f(p) : p[f]); }, 0) : null, have: have.length, of: list.length };
+  }
+  function postWindowStats(list) {
+    var views = sumField(list, 'views'), inter = sumField(list, HQ.igInteractions);
+    var reels = list.filter(function (p) { return HQ.igType(p) === 'reel'; });
+    var watch = sumField(reels, 'watchTimeSec');
+    // engagement per 1,000 views over the posts that have both numbers, so a missing field never dilutes it
+    var both = list.filter(function (p) { return HQ.isNum(p.views) && p.views > 0 && HQ.isNum(HQ.igInteractions(p)); });
+    var bv = both.reduce(function (a, p) { return a + p.views; }, 0), bi = both.reduce(function (a, p) { return a + HQ.igInteractions(p); }, 0);
+    var avgW = reels.filter(function (p) { return HQ.isNum(p.avgWatchSec); });
+    return {
+      posts: list.length, views: views.value, viewsHave: views.have,
+      interactions: inter.value, engPer1k: bv > 0 ? Math.round((bi / bv) * 10000) / 10 : null,
+      saves: sumField(list, 'saves').value, shares: sumField(list, 'shares').value, follows: sumField(list, 'follows').value,
+      reels: reels.length, typicalReel: HQ.median(reels.map(function (p) { return p.views; })),
+      watchTimeSec: watch.value, watchHave: watch.have,
+      avgWatchSec: avgW.length ? Math.round(avgW.reduce(function (a, p) { return a + p.avgWatchSec; }, 0) / avgW.length * 10) / 10 : null, avgWatchHave: avgW.length
+    };
+  }
+  // accountDaily rows: {id/date: 'YYYY-MM-DD', followers, p7:{reached,views,follows,unfollows,interactions}, p30:{...}, p90:{...}}
+  HQ.igAnalytics = function (posts, accountDaily, today, periodDays) {
+    var N = HQ.IG_PERIODS.indexOf(periodDays) >= 0 ? periodDays : 30;
+    var curFrom = HQ.addDays(today, -(N - 1)), prevTo = HQ.addDays(curFrom, -1), prevFrom = HQ.addDays(prevTo, -(N - 1));
+    var dated = [], undated = 0;
+    (posts || []).forEach(function (p) { var d = HQ.igPostDay(p); if (d) dated.push(Object.assign({}, p, { _day: d, _type: HQ.igType(p) })); else undated++; });
+    var inR = function (a, b) { return dated.filter(function (p) { return p._day >= a && p._day <= b; }); };
+    var cur = inR(curFrom, today), prev = inR(prevFrom, prevTo);
+    var cs = postWindowStats(cur), ps = postWindowStats(prev);
+    var keys = ['posts', 'views', 'interactions', 'engPer1k', 'saves', 'shares', 'follows', 'typicalReel', 'watchTimeSec', 'avgWatchSec'];
+    var change = {}; keys.forEach(function (k) { change[k] = HQ.pctChange(cs[k], ps[k]); });
+    // by type (current window)
+    var byType = ['reel', 'carousel', 'post'].map(function (t) {
+      var l = cur.filter(function (p) { return p._type === t; });
+      return { type: t, count: l.length, views: sumField(l, 'views').value, typical: HQ.median(l.map(function (p) { return p.views; })) };
+    }).filter(function (r) { return r.count > 0; });
+    var top = cur.filter(function (p) { return HQ.isNum(p.views); }).sort(function (a, b) { return b.views - a.views; }).slice(0, 5);
+    // account level: exact rows only
+    var byDay = {}; (accountDaily || []).forEach(function (r) { var k = r.date || r.id; if (HQ.isDayKey(k)) byDay[k] = r; });
+    var pk = 'p' + N, accNow = null, accNowDay = null;
+    for (var i = 0; i < 3 && !accNow; i++) { var dk = HQ.addDays(today, -i); if (byDay[dk] && byDay[dk][pk]) { accNow = byDay[dk][pk]; accNowDay = dk; } }
+    var accPrev = accNowDay && byDay[HQ.addDays(accNowDay, -N)] ? byDay[HQ.addDays(accNowDay, -N)][pk] || null : null;
+    var account = { day: accNowDay, cur: accNow, prev: accPrev, change: {} };
+    ['reached', 'views', 'follows', 'unfollows', 'interactions'].forEach(function (k) { account.change[k] = HQ.pctChange(accNow && accNow[k], accPrev && accPrev[k]); });
+    // net followers in the window from the profile follower count (exact when both ends were read)
+    var fEnd = null, fEndDay = null; for (var j = 0; j < 3 && fEnd == null; j++) { var ek = HQ.addDays(today, -j); if (byDay[ek] && HQ.isNum(byDay[ek].followers)) { fEnd = byDay[ek].followers; fEndDay = ek; } }
+    var startKey = HQ.addDays(curFrom, -1), fStart = byDay[startKey] && HQ.isNum(byDay[startKey].followers) ? byDay[startKey].followers : null;
+    account.followers = fEnd; account.followersDay = fEndDay;
+    account.netFollowers = fEnd != null && fStart != null ? fEnd - fStart : (accNow && HQ.isNum(accNow.follows) && HQ.isNum(accNow.unfollows) ? accNow.follows - accNow.unfollows : null);
+    // daily net change series (only days whose previous day was also read)
+    var netSeries = HQ.dayRange(curFrom, today).map(function (d) {
+      var a = byDay[HQ.addDays(d, -1)], b = byDay[d];
+      return { day: d, net: a && b && HQ.isNum(a.followers) && HQ.isNum(b.followers) ? b.followers - a.followers : null, followers: b && HQ.isNum(b.followers) ? b.followers : null };
+    });
+    // scatter (90 days, independent of the period, like the reference): views vs a retention measure
+    var from90 = HQ.addDays(today, -89), s90 = inR(from90, today).filter(function (p) { return HQ.isNum(p.views) && p.views > 0; });
+    var withWatch = s90.filter(function (p) { return HQ.isNum(p.avgWatchSec); });
+    var yKey = withWatch.length >= 3 ? 'avgWatchSec' : 'engPer1k';
+    var pts = (yKey === 'avgWatchSec' ? withWatch : s90.filter(function (p) { return HQ.isNum(HQ.igInteractions(p)); })).map(function (p) {
+      var y = yKey === 'avgWatchSec' ? p.avgWatchSec : Math.round(HQ.igInteractions(p) / p.views * 10000) / 10;
+      return { id: p.id, title: p.title || '', type: p._type, day: p._day, x: p.views, y: y, shortcode: p.shortcode || null };
+    });
+    var mx = HQ.median(pts.map(function (q) { return q.x; })), my = HQ.median(pts.map(function (q) { return q.y; }));
+    pts.forEach(function (q) { q.outlier = pts.length >= 4 && q.x >= 2 * mx && q.y >= my ? 'both' : (pts.length >= 4 && (q.x >= 3 * mx || q.y >= 1.5 * my) ? (q.x >= 3 * mx ? 'views' : 'retention') : null); });
+    // posting heatmap: 13 full weeks (Mon-Sun) ending this week
+    var hmStart = HQ.addDays(HQ.weekStart(today), -7 * 12), heat = [];
+    HQ.dayRange(hmStart, HQ.addDays(HQ.weekStart(today), 6)).forEach(function (d) {
+      heat.push({ day: d, future: d > today, count: dated.filter(function (p) { return p._day === d; }).length });
+    });
+    var hmPast = heat.filter(function (h) { return !h.future; }), daysPosted = hmPast.filter(function (h) { return h.count > 0; }).length;
+    var lastPostDay = dated.reduce(function (m, p) { return !m || p._day > m ? p._day : m; }, null);
+    return { period: N, curFrom: curFrom, prevFrom: prevFrom, prevTo: prevTo, cur: cs, prev: ps, change: change, byType: byType, top: top,
+      undated: undated, account: account, netSeries: netSeries,
+      scatter: { yKey: yKey, points: pts, medX: mx, medY: my, watchHave: withWatch.length, from: from90 },
+      heat: heat, daysPosted: daysPosted, heatDays: hmPast.length, lastPostDay: lastPostDay,
+      daysSincePost: lastPostDay ? HQ.daysBetween(lastPostDay, today) : null };
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = HQ;

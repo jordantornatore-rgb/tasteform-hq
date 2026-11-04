@@ -11,6 +11,9 @@ Four routines on claude.ai (Scheduled tasks), each bound to the Mac mini, permis
 
 No two Chrome jobs overlap: 3:15 likes → 4:32 content → 6:07 DM → 6:40 brief → 6:47 report … 22:07 DM (ends by 22:32) → 22:40 backlog (ends by 23:28).
 
+## v7 content scan (4 Nov)
+Adds the account numbers for the Analytics tab (`ig_account_daily`: follower count + last 7/30/90-day reach, follows, unfollows) and reel watch time. Only `content-scan.md` changed; paste it again into the Content Scan routine.
+
 ## v6.1 (26 Oct, afternoon)
 Placeholders are resolved from the inbox list, never the search box (search results do not open chats); day runs use idle minutes on the stale-lead queue; a thread that turned unread between the UNREAD snapshot and the URL open is recorded as waiting rather than skipped. Only `dm-scan.md` and `dm-backlog.md` changed; paste both again.
 

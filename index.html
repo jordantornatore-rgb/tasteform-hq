@@ -429,6 +429,44 @@ footer.hint{font-size:var(--t-s);color:var(--muted);text-align:center;padding-to
 .camp-status.on{background:var(--good-soft);color:var(--good);}
 .camp-status.off{background:var(--surface-2);border:1px solid var(--border);color:var(--muted);}
 
+/* ===== analytics ===== */
+.an-top-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.an-kpis{grid-template-columns:repeat(4,1fr);}
+.kpi .delta{font-size:var(--t-s);font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;}
+.kpi .delta.up{color:var(--good);} .kpi .delta.down{color:var(--crit);}
+.an-read{font-size:var(--t-m);color:var(--text-2);line-height:1.55;}
+.an-chart{position:relative;}
+.an-chart svg{display:block;width:100%;height:auto;overflow:visible;}
+.an-chart .axis{font-size:10px;fill:var(--muted);font-variant-numeric:tabular-nums;}
+.an-chart .grid{stroke:var(--border);stroke-width:1;}
+.an-chart .ref{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;}
+.an-chart [data-tip]{cursor:default;}
+.an-chart circle[data-tip]:hover,.an-chart circle[data-tip]:focus{stroke:var(--text);stroke-width:2;outline:none;}
+.an-hbars{display:flex;flex-direction:column;gap:10px;}
+.an-hbar{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:var(--t-s);}
+.an-hbar .lab{font-weight:600;color:var(--text-2);}
+.an-hbar .track{height:14px;background:var(--surface-2);border-radius:0 4px 4px 0;}
+.an-hbar .fill{height:100%;background:var(--series-2);border-radius:0 4px 4px 0;min-width:2px;}
+.an-hbar .val{font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap;}
+.an-hbar .val small{color:var(--muted);}
+.an-heat{display:grid;grid-template-columns:28px repeat(13,minmax(0,1fr));gap:3px;font-size:10px;color:var(--muted);}
+.an-heat .c{aspect-ratio:1;border-radius:3px;background:var(--surface-2);border:1px solid var(--border);max-height:26px;}
+.an-heat .c.l1{background:color-mix(in srgb,var(--accent) 45%,var(--surface-2));border-color:transparent;}
+.an-heat .c.l2{background:color-mix(in srgb,var(--accent) 75%,var(--surface-2));border-color:transparent;}
+.an-heat .c.l3{background:var(--accent);border-color:transparent;}
+.an-heat .c.fut{background:none;border-style:dashed;opacity:.4;}
+.an-heat .c.today{outline:2px solid var(--text);outline-offset:1px;}
+.an-heat .dl{display:flex;align-items:center;}
+.an-heat .wl{text-align:center;white-space:nowrap;overflow:hidden;}
+.legend .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;}
+.an-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:var(--t-s);color:var(--muted);align-items:center;}
+.an-outs{display:flex;flex-direction:column;gap:6px;}
+.an-out{display:flex;gap:10px;align-items:baseline;font-size:var(--t-s);flex-wrap:wrap;}
+.an-out b{color:var(--text);}
+.an-top td.t{max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.an-top td.n,.an-top th.n{text-align:right;font-variant-numeric:tabular-nums;}
+.an-tblwrap{overflow-x:auto;}
+@media (max-width:720px){ .an-kpis{grid-template-columns:repeat(2,1fr);} .an-hbar{grid-template-columns:70px minmax(0,1fr) auto;} .an-top td.t{max-width:150px;} .an-top .hide-sm{display:none;} }
 /* ===== email ===== */
 .em-list{display:flex;flex-direction:column;gap:var(--s3);}
 .em-card{border:1px solid var(--border);border-radius:var(--r-l);padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:var(--surface-2);min-width:0;}
@@ -929,6 +967,7 @@ body{padding:0;}
       <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg><span>Applications</span><span class="tab-badge" id="appsBadge" hidden></span><kbd>7</kbd></button>
       <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads"><svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M17 8a4 4 0 0 1 0 8"/></svg><span>Ads</span><kbd>8</kbd></button>
       <button class="tab" role="tab" id="tabContent" aria-selected="false" aria-controls="viewContent" data-view="content"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5l2 4M14 5l2 4M10 12l4 2.5-4 2.5z"/></svg><span>Content Engine</span></button>
+      <button class="tab" role="tab" id="tabAnalytics" aria-selected="false" aria-controls="viewAnalytics" data-view="analytics"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Analytics</span></button>
       <button class="tab" role="tab" id="tabEmail" aria-selected="false" aria-controls="viewEmail" data-view="email" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Email</span></button>
       <div class="sb-group" id="sbGroupBusiness" hidden>Business</div>
       <button class="tab" role="tab" id="tabStripe" aria-selected="false" aria-controls="viewStripe" data-view="stripe" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Revenue</span><kbd>9</kbd></button>
@@ -1368,6 +1407,26 @@ body{padding:0;}
     <div id="ceRoot" style="display:flex;flex-direction:column;gap:var(--s4);"><div class="panel"><div class="empty-state">Loading…</div></div></div>
   </section>
 
+  <!-- ===== ANALYTICS (Instagram performance, Metricool-style) ===== -->
+  <section id="viewAnalytics" role="tabpanel" aria-labelledby="tabAnalytics" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="top">
+      <div><h1>Analytics</h1><div class="sub" id="anSub">Loading…</div></div>
+      <div class="an-top-right">
+        <div class="seg-filter" role="group" aria-label="Period" id="anPeriodSeg">
+          <button type="button" data-anperiod="7" aria-pressed="false">7 days</button>
+          <button type="button" data-anperiod="30" aria-pressed="true">30 days</button>
+          <button type="button" data-anperiod="90" aria-pressed="false">90 days</button>
+        </div>
+      </div>
+    </div>
+    <div class="seg-filter" role="group" aria-label="Analytics view" id="anViewSeg">
+      <button type="button" data-anview="overview" aria-pressed="true">Overview</button>
+      <button type="button" data-anview="posts" aria-pressed="false">Posts</button>
+      <button type="button" data-anview="audience" aria-pressed="false">Audience</button>
+    </div>
+    <div id="anRoot" style="display:flex;flex-direction:column;gap:var(--s4);"><div class="panel"><div class="empty-state">Loading…</div></div></div>
+  </section>
+
   <!-- ===== EMAIL (GHL sequences; admin only, rows admin-only in the database) ===== -->
   <section id="viewEmail" role="tabpanel" aria-labelledby="tabEmail" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div class="top">
@@ -1452,6 +1511,7 @@ body{padding:0;}
     <div class="sheet-card">
       <h2>More</h2>
       <button class="sheet-btn" data-view="content">Content Engine</button>
+      <button class="sheet-btn" data-view="analytics">Analytics</button>
       <button class="sheet-btn" data-view="leads">Warm Leads</button>
       <button class="sheet-btn" data-view="magnets">Magnets <span class="tab-badge" id="magBadgeBb" hidden></span></button>
       <button class="sheet-btn" data-view="ads">Ads</button>
@@ -1604,7 +1664,7 @@ body{padding:0;}
     dms:[], dmMeta:null, dmLoaded:false, daily:[], reviews:[],
     adsDaily:[], adsCampaigns:[], adsMeta:null, adsLoaded:false,
     tfResponses:[], tfDaily:[], tfMeta:null, tfLoaded:false,
-    igPosts:[], igStories:[], igMeta:null, igLoaded:false,
+    igPosts:[], igStories:[], igMeta:null, igLoaded:false, igAccount:[],
     contentPlan:null, goal:null, ghlMeta:null, routineCalls:null, morningReport:null,
     contentIdeas:[], contentQueue:[], contentCreators:[], contentScan:null, contentReview:null, contentBatch:null, contentMetaLoaded:{},
     contentSounds:[], contentAutopost:null, contentPosting:null,
@@ -1622,7 +1682,7 @@ body{padding:0;}
     today:['dms','daily','contacts','tfResponses','tfDaily','igPosts','igStories','meta','stripe'],
     funnel:['tfResponses','tfDaily','igPosts','igStories','meta','dms','daily','ads'],
     leads:['contacts','meta','dms'], dms:['dms','daily','reviews','contacts','meta'], follow:['dms','meta'], magnets:['dms','meta'],
-    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], email:['email'], stripe:['stripe','meta'], challenge:[], routine:[]
+    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], analytics:['igPosts','igAccount','meta'], email:['email'], stripe:['stripe','meta'], challenge:[], routine:[]
   };
   var dirty = {global:true}, raf = null, currentView = 'today';
   window.__hqRenders = 0; // counted by the perf test
@@ -1640,14 +1700,14 @@ body{padding:0;}
   Object.keys(VIEW_DEPS).forEach(function(v){ dirty[v]=true; });
 
   /* ---------- views ---------- */
-  var VIEWS={today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', email:'viewEmail', stripe:'viewStripe', challenge:'viewChallenge', routine:'viewRoutine'};
+  var VIEWS={today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', challenge:'viewChallenge', routine:'viewRoutine'};
   var ADMIN_VIEWS={stripe:1, routine:1, challenge:1, email:1};
   function setView(view, push){
     if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='today';
     currentView = view;
     Object.keys(VIEWS).forEach(function(k){ var el=$(VIEWS[k]); if(el) el.hidden = k!==view; });
     document.querySelectorAll('[data-view]').forEach(function(b){ b.setAttribute('aria-selected', b.getAttribute('data-view')===view?'true':'false'); });
-    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['leads','magnets','ads','content','email','stripe','challenge','routine'].indexOf(view)>=0?'true':'false');
+    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['leads','magnets','ads','content','analytics','email','stripe','challenge','routine'].indexOf(view)>=0?'true':'false');
     document.querySelectorAll('#tabRow .tab').forEach(function(t){ t.setAttribute('tabindex', t.getAttribute('data-view')===view?'0':'-1'); });
     if(push!==false){ try{ history.replaceState(null,'','#'+view); }catch(e){} }
     closeSheet();
@@ -1688,7 +1748,7 @@ body{padding:0;}
   (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'today'; })();
 
   /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
-  var VIEW_LABEL={today:'Today', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', email:'Email', stripe:'Revenue', challenge:'Challenge', routine:'Routine'};
+  var VIEW_LABEL={today:'Today', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', challenge:'Challenge', routine:'Routine'};
   var VIEW_KEYS={'1':'today','2':'dms','3':'follow','4':'magnets','5':'leads','6':'funnel','7':'apps','8':'ads','9':'stripe','0':'routine'};
   var appEl=$('appRoot');
   function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
@@ -2502,6 +2562,183 @@ body{padding:0;}
   /* ---------- EMAIL (GHL sequences; admin only). Tables: email_steps (the emails), email_events
      (one row per contact + email + event, written by the ghl-email-event function from GHL webhooks).
      Every number is a count of real rows; rates are "–" until something is sent. ---------- */
+  /* ===================== ANALYTICS (Instagram performance; ig_posts + ig_account_daily) =====================
+     Posts are counted on their exact Sydney posting day and compared with the previous window of the same length.
+     Account numbers (reach, follows, unfollows, follower count) only ever come from ig_account_daily, written by
+     the content scan from Instagram's own "last 7/30/90 days" figures, so nothing de-duplicated is re-summed. */
+  var anView=(function(){ var v=read('hqAnView'); return ['overview','posts','audience'].indexOf(v)>=0 ? v : 'overview'; })();
+  var anPeriod=(function(){ var v=parseInt(read('hqAnPeriod'),10); return HQ.IG_PERIODS.indexOf(v)>=0 ? v : 30; })();
+  document.addEventListener('click', function(ev){
+    var b=ev.target.closest && ev.target.closest('#anViewSeg button[data-anview]');
+    if(b){ anView=b.getAttribute('data-anview'); store('hqAnView', anView); renderNow('analytics'); return; }
+    var p=ev.target.closest && ev.target.closest('#anPeriodSeg button[data-anperiod]');
+    if(p){ anPeriod=parseInt(p.getAttribute('data-anperiod'),10); store('hqAnPeriod', String(anPeriod)); renderNow('analytics'); }
+  });
+  // one tooltip for every [data-tip] mark inside an .an-chart (mouse and keyboard focus)
+  function anTip(ev, show){
+    var m=ev.target.closest && ev.target.closest('#viewAnalytics [data-tip]'); if(!m) return;
+    var wrap=m.closest('.an-chart'); if(!wrap) return;
+    var tip=wrap.querySelector('.tip'); if(!tip){ tip=document.createElement('div'); tip.className='tip'; tip.hidden=true; wrap.appendChild(tip); }
+    if(!show){ tip.hidden=true; return; }
+    tip.innerHTML=m.getAttribute('data-tip'); tip.hidden=false;
+    var wr=wrap.getBoundingClientRect(), mr=m.getBoundingClientRect();
+    var x=mr.left-wr.left+mr.width/2, y=mr.top-wr.top;
+    var tw=tip.offsetWidth, left=Math.max(0, Math.min(wr.width-tw, x-tw/2));
+    tip.style.left=left+'px'; tip.style.top=Math.max(0, y-tip.offsetHeight-8)+'px';
+  }
+  document.addEventListener('mouseover', function(ev){ anTip(ev, true); });
+  document.addEventListener('mouseout', function(ev){ anTip(ev, false); });
+  document.addEventListener('focusin', function(ev){ anTip(ev, true); });
+  document.addEventListener('focusout', function(ev){ anTip(ev, false); });
+
+  var AN_TYPE={reel:'Reels', carousel:'Carousels', post:'Photos'}, AN_TYPE1={reel:'Reel', carousel:'Carousel', post:'Photo'};
+  function anDur(sec){ if(!HQ.isNum(sec)) return '–'; if(sec<60) return (Math.round(sec*10)/10)+'s'; var h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60); return h? h+'h '+m+'m' : m+'m '+Math.round(sec%60)+'s'; }
+  function anShort(v){ if(!HQ.isNum(v)) return '–'; var a=Math.abs(v); return a>=1e6? (Math.round(v/1e5)/10)+'M' : (a>=1e4? Math.round(v/1e3)+'K' : (a>=1e3? (Math.round(v/100)/10)+'K' : String(Math.round(v)))); }
+  function anDelta(ch, label, invert){
+    if(ch==null) return '<div class="delta">'+esc(label)+'</div>';
+    var up=ch>0, cls=ch===0?'':((up!==!!invert)?'up':'down');
+    return '<div class="delta '+cls+'">'+(ch>0?'▲ ':ch<0?'▼ ':'')+Math.abs(ch)+'% '+esc(label)+'</div>';
+  }
+  function anKpi(label, value, ch, vsLabel, note, invert){
+    return '<div class="kpi"><div class="label">'+esc(label)+'</div><div class="value">'+value+'</div>'+anDelta(ch, vsLabel, invert)+(note?'<div class="note">'+note+'</div>':'')+'</div>';
+  }
+  function anW(){ var r=$('anRoot'); return Math.max(300, Math.min(1000, ((r&&r.clientWidth)||640)-34)); }
+  function anPostLink(p){ return p.shortcode ? 'https://www.instagram.com/p/'+encodeURIComponent(p.shortcode)+'/' : (p.id ? 'https://www.instagram.com/insights/media/'+encodeURIComponent(p.id)+'/' : null); }
+  function anReadLine(a){
+    var c=a.change, bits=[], P='the previous '+a.period+' days';
+    if(a.cur.posts===0 && a.prev.posts===0) return 'No posts in this window or '+P+'.';
+    if(c.posts!=null) bits.push('You posted '+(c.posts===0?'the same amount as':Math.abs(c.posts)+'% '+(c.posts<0?'less':'more')+' than')+' '+P+' ('+a.cur.posts+' vs '+a.prev.posts+')');
+    else bits.push('You posted '+a.cur.posts+' '+HQ.plural(a.cur.posts,'time')+' (none in '+P+')');
+    if(c.views!=null) bits.push('views '+(c.views<0?'fell':'rose')+' '+Math.abs(c.views)+'%');
+    var lead=bits.join(' and ')+'.';
+    var per=HQ.pctChange(a.cur.posts? a.cur.views/a.cur.posts : null, a.prev.posts? a.prev.views/a.prev.posts : null);
+    var viral=a.top.length && HQ.isNum(a.cur.views) && a.cur.views>0 && a.cur.posts>1 && a.top[0].views/a.cur.views>=0.5;
+    if(per!=null && c.views!=null && c.posts!=null && !viral) lead+=' Per post, views are '+(per===0?'flat':(per<0?'down ':'up ')+Math.abs(per)+'%')+(Math.abs(per)<10?', so the change is mostly how much you posted.':(per<0?', so each post is reaching fewer people, not just fewer posts.':', so the content itself is pulling harder.'));
+    if(viral) lead+=' But '+Math.round(a.top[0].views/a.cur.views*100)+'% of those views came from one post ("'+String(a.top[0].title||'untitled').slice(0,40)+'"), so check the typical reel number too.';
+    if(a.daysSincePost!=null && a.daysSincePost>=4) lead+=' Last post was '+a.daysSincePost+' days ago.';
+    return lead;
+  }
+  function anOverview(a){
+    var vs='vs prev '+a.period+'d', acc=a.account, ac=acc.cur||{}, h='';
+    var accNote=acc.cur?'':'from tonight\'s scan';
+    h+='<div class="kpis an-kpis">'+
+      anKpi('Posts', num(a.cur.posts), a.change.posts, vs)+
+      anKpi('Views', num(a.cur.views), a.change.views, vs, a.cur.posts && a.cur.viewsHave<a.cur.posts ? a.cur.viewsHave+' of '+a.cur.posts+' posts have views' : '')+
+      anKpi('Accounts reached', num(ac.reached), acc.change.reached, acc.cur?vs:accNote)+
+      anKpi('Net followers', acc.netFollowers==null?'–':(acc.netFollowers>0?'+':'')+num(acc.netFollowers), null, acc.netFollowers==null?accNote:(acc.followers!=null?num(acc.followers)+' followers now':''))+
+      anKpi('Engagement / 1K views', a.cur.engPer1k==null?'–':num(a.cur.engPer1k,1), a.change.engPer1k, vs, 'likes, comments, saves, shares')+
+      anKpi('Typical reel', num(a.cur.typicalReel), a.change.typicalReel, vs, a.cur.reels? 'median views of '+a.cur.reels+' '+HQ.plural(a.cur.reels,'reel') : 'no reels this window')+
+      anKpi('Watch time', anDur(a.cur.watchTimeSec), a.change.watchTimeSec, a.cur.watchHave?vs:'from tonight\'s scan', a.cur.watchHave && a.cur.watchHave<a.cur.reels ? a.cur.watchHave+' of '+a.cur.reels+' reels' : (a.cur.avgWatchSec!=null?'avg '+anDur(a.cur.avgWatchSec)+' per view':''))+
+      anKpi('Saves · Shares', num(a.cur.saves)+' <small>·</small> '+num(a.cur.shares), a.change.saves, a.change.saves==null?'':'saves '+vs)+
+      '</div>';
+    h+='<div class="panel"><h2>The read</h2><p class="an-read">'+esc(anReadLine(a))+'</p><p class="rule">Posts count on the day they went out (Sydney) with their lifetime numbers, so the newest posts are still growing. Windows: '+esc(HQ.fmtDay(a.curFrom,'short')||a.curFrom)+' – today vs '+esc(HQ.fmtDay(a.prevFrom,'short')||a.prevFrom)+' – '+esc(HQ.fmtDay(a.prevTo,'short')||a.prevTo)+'.</p></div>';
+    // views per typical post by type
+    var maxT=Math.max.apply(null, a.byType.map(function(t){ return t.typical||0; }).concat([1]));
+    h+='<div class="panel"><div class="chart-head"><div><h2>Views per typical post, by type</h2><p class="rule" style="margin-top:4px">Median views of each type in this window, so one viral post doesn\'t skew it.</p></div></div>';
+    h+= a.byType.length ? '<div class="an-hbars">'+a.byType.map(function(t){
+      return '<div class="an-hbar"><span class="lab">'+esc(AN_TYPE[t.type])+'</span><div class="track"><div class="fill" style="width:'+Math.max(1,Math.round((t.typical||0)/maxT*100))+'%"></div></div><span class="val"><b>'+num(t.typical)+'</b> <small>· '+t.count+' '+HQ.plural(t.count,'post')+', '+num(t.views)+' total</small></span></div>';
+    }).join('')+'</div>' : '<div class="empty-state">No posts in this window.</div>';
+    h+='</div>';
+    // top posts
+    h+='<div class="panel"><h2>Top posts by views</h2>';
+    if(!a.top.length) h+='<div class="empty-state">No posts in this window.</div>';
+    else h+='<div class="an-tblwrap"><table class="scores an-top"><thead><tr><th>#</th><th>Post</th><th class="hide-sm">Type</th><th class="hide-sm">Posted</th><th class="n">Views</th><th class="n">Eng / 1K</th><th class="n hide-sm">Saves</th><th class="n hide-sm">Shares</th></tr></thead><tbody>'+
+      a.top.map(function(p,i){ var it=HQ.igInteractions(p), e=it!=null&&p.views? Math.round(it/p.views*10000)/10 : null, link=anPostLink(p);
+        return '<tr><td>'+(i+1)+'</td><td class="t">'+(link?'<a href="'+esc(link)+'" target="_blank" rel="noopener">':'')+esc(p.title||'(no caption)')+(link?'</a>':'')+'</td><td class="hide-sm">'+esc(AN_TYPE1[p._type]||'–')+'</td><td class="hide-sm">'+esc(HQ.fmtDay(p._day,'short')||p._day)+'</td><td class="n">'+num(p.views)+'</td><td class="n">'+(e==null?'–':num(e,1))+'</td><td class="n hide-sm">'+num(p.saves)+'</td><td class="n hide-sm">'+num(p.shares)+'</td></tr>'; }).join('')+'</tbody></table></div>';
+    h+='</div>';
+    return h;
+  }
+  function anScatterSvg(s){
+    var W=anW(), H=W<500?260:300, L=46, R=12, T=12, B=34, pts=s.points;
+    var xmax=Math.max.apply(null, pts.map(function(p){ return p.x; }).concat([1])), ymax=Math.max.apply(null, pts.map(function(p){ return p.y; }).concat([1]));
+    // views on a log scale (one viral reel would flatten everything else), retention linear from 0
+    var lx=function(v){ return Math.log10(Math.max(v,1)); }, x0=Math.floor(lx(Math.min.apply(null, pts.map(function(p){ return p.x; })))), x1=Math.ceil(lx(xmax)); if(x1===x0) x1=x0+1;
+    var ytop=ymax*1.1, sx=function(v){ return L+(lx(v)-x0)/(x1-x0)*(W-L-R); }, sy=function(v){ return T+(1-v/ytop)*(H-T-B); };
+    var g='';
+    for(var e=x0;e<=x1;e++){ var xv=Math.pow(10,e), xp=sx(xv); g+='<line class="grid" x1="'+xp+'" x2="'+xp+'" y1="'+T+'" y2="'+(H-B)+'"/><text class="axis" x="'+xp+'" y="'+(H-B+14)+'" text-anchor="middle">'+anShort(xv)+'</text>'; }
+    for(var k=0;k<=4;k++){ var yv=ytop*k/4, yp=sy(yv); g+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+yp+'" y2="'+yp+'"/><text class="axis" x="'+(L-6)+'" y="'+(yp+3)+'" text-anchor="end">'+(s.yKey==='avgWatchSec'? (Math.round(yv*10)/10)+'s' : Math.round(yv))+'</text>'; }
+    g+='<text class="axis" x="'+((L+W-R)/2)+'" y="'+(H-4)+'" text-anchor="middle">Views (log scale)</text>';
+    if(s.medX!=null) g+='<line class="ref" x1="'+sx(s.medX)+'" x2="'+sx(s.medX)+'" y1="'+T+'" y2="'+(H-B)+'"/>';
+    if(s.medY!=null) g+='<line class="ref" x1="'+L+'" x2="'+(W-R)+'" y1="'+sy(s.medY)+'" y2="'+sy(s.medY)+'"/>';
+    var yl=s.yKey==='avgWatchSec'?'Avg watch':'Eng / 1K views';
+    pts.slice().sort(function(a,b){ return (a.outlier?1:0)-(b.outlier?1:0); }).forEach(function(p){
+      var fill=p.outlier?'var(--accent)':'var(--series-3)';
+      var tip='<b>'+esc((p.title||'(no caption)').slice(0,48))+'</b><br>'+esc(AN_TYPE1[p.type]||'')+' · '+esc(HQ.fmtDay(p.day,'short')||p.day)+'<br>'+num(p.x)+' views · '+yl+' '+(s.yKey==='avgWatchSec'?anDur(p.y):num(p.y,1))+(p.outlier?'<br>Outlier: '+(p.outlier==='both'?'reach and retention':p.outlier):'');
+      g+='<circle cx="'+sx(p.x).toFixed(1)+'" cy="'+sy(p.y).toFixed(1)+'" r="'+(p.outlier?7:5)+'" fill="'+fill+'" stroke="var(--surface)" stroke-width="2" tabindex="0" data-tip="'+esc(tip)+'"/>';
+    });
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Views against '+esc(yl)+' for each post in the last 90 days">'+g+'</svg>';
+  }
+  function anHeat(a, today){
+    var weeks=[]; for(var i=0;i<a.heat.length;i+=7) weeks.push(a.heat.slice(i,i+7));
+    var h='<div class="an-heat" role="img" aria-label="Posting days over the last 13 weeks"><span></span>';
+    weeks.forEach(function(w,i){ h+='<span class="wl">'+(i%2===0? esc(HQ.fmtDay(w[0].day,'short')||'') : '')+'</span>'; });
+    ['Mon','','Wed','','Fri','','Sun'].forEach(function(dl, d){
+      h+='<span class="dl">'+dl+'</span>';
+      weeks.forEach(function(w){ var c=w[d]; var lv=c.future?'fut':(c.count>=3?'l3':(c.count===2?'l2':(c.count===1?'l1':'')));
+        h+='<span class="c '+lv+(c.day===today?' today':'')+'"'+(c.future?'':' tabindex="0" data-tip="'+esc('<b>'+(HQ.fmtDay(c.day,'short')||c.day)+'</b><br>'+(c.count?c.count+' '+HQ.plural(c.count,'post'):'No post'))+'"')+'></span>'; });
+    });
+    return h+'</div>';
+  }
+  function anPosts(a, today){
+    var s=a.scatter, h='';
+    h+='<div class="panel"><div class="chart-head"><div><h2>Reach vs '+(s.yKey==='avgWatchSec'?'retention':'engagement')+' · last 90 days</h2><p class="rule" style="margin-top:4px">'+
+      (s.yKey==='avgWatchSec' ? 'Each dot is a post: how far it travelled against how long people watched. Dashed lines are your medians; top-right is what to make more of.'
+        : 'Watch time isn\'t in the data yet ('+s.watchHave+' '+HQ.plural(s.watchHave,'reel')+' have it; the scan adds it from tonight), so for now the height is engagement per 1,000 views. Dashed lines are your medians; top-right is what to make more of.')+
+      '</p></div><div class="an-legend"><span><i class="sw" style="background:var(--accent)"></i>Outlier</span><span><i class="sw" style="background:var(--series-3)"></i>Post</span></div></div>';
+    h+= s.points.length>=2 ? '<div class="an-chart">'+anScatterSvg(s)+'</div>' : '<div class="empty-state">Needs at least 2 posts from the last 90 days.</div>';
+    var outs=s.points.filter(function(p){ return p.outlier; }).sort(function(x,y){ return y.x-x.x; });
+    if(outs.length) h+='<h3 style="margin:4px 0 0;font-size:var(--t-m)">Make more like these</h3><div class="an-outs">'+outs.slice(0,5).map(function(p){
+      var why=p.outlier==='both'?'reach and '+(s.yKey==='avgWatchSec'?'retention':'engagement')+' above your median':(p.outlier==='views'?num(Math.round(p.x/s.medX*10)/10,1)+'× your median views':(s.yKey==='avgWatchSec'?'held attention':'engaged')+' well above your median');
+      var link=anPostLink(p);
+      return '<div class="an-out"><b>'+(link?'<a href="'+esc(link)+'" target="_blank" rel="noopener">':'')+esc((p.title||'(no caption)').slice(0,70))+(link?'</a>':'')+'</b><span class="f-note">'+esc(HQ.fmtDay(p.day,'short')||p.day)+' · '+num(p.x)+' views · '+esc(why)+'</span></div>'; }).join('')+'</div>';
+    h+='</div>';
+    h+='<div class="panel"><div class="chart-head"><div><h2>Posting rhythm</h2><p class="rule" style="margin-top:4px">Every day you posted in the last 13 weeks. '+a.daysPosted+' of '+a.heatDays+' days had a post'+(a.daysSincePost!=null?'; last post '+(a.daysSincePost===0?'today':a.daysSincePost+' '+HQ.plural(a.daysSincePost,'day')+' ago'):'')+'.</p></div>'+
+      '<div class="an-legend"><span><i class="sw" style="background:var(--surface-2);border:1px solid var(--border)"></i>0</span><span><i class="sw" style="background:color-mix(in srgb,var(--accent) 45%,var(--surface-2))"></i>1</span><span><i class="sw" style="background:color-mix(in srgb,var(--accent) 75%,var(--surface-2))"></i>2</span><span><i class="sw" style="background:var(--accent)"></i>3+</span></div></div>'+
+      '<div class="an-chart">'+anHeat(a, today)+'</div></div>';
+    return h;
+  }
+  function anNetSvg(series){
+    var W=anW(), H=200, L=40, R=8, T=10, B=24, n=series.length, vals=series.map(function(d){ return d.net; }).filter(HQ.isNum);
+    var m=Math.max.apply(null, vals.map(Math.abs).concat([1])), bw=(W-L-R)/n, y0=T+(H-T-B)/2, sc=(H-T-B)/2/m, g='';
+    [m,0,-m].forEach(function(v){ var y=y0-v*sc; g+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'"/><text class="axis" x="'+(L-6)+'" y="'+(y+3)+'" text-anchor="end">'+(v>0?'+':'')+v+'</text>'; });
+    series.forEach(function(d,i){
+      var x=L+i*bw+1, w=Math.max(1,bw-2);
+      if(i%Math.ceil(n/6)===0) g+='<text class="axis" x="'+(x+w/2)+'" y="'+(H-6)+'" text-anchor="middle">'+esc(HQ.fmtDay(d.day,'short')||'')+'</text>';
+      if(d.net==null) return;
+      var hgt=Math.max(1,Math.abs(d.net)*sc), y=d.net>=0? y0-hgt : y0;
+      g+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+hgt.toFixed(1)+'" rx="2" fill="'+(d.net>=0?'var(--series-2)':'var(--series-3)')+'" tabindex="0" data-tip="'+esc('<b>'+(HQ.fmtDay(d.day,'short')||d.day)+'</b><br>'+(d.net>0?'+':'')+d.net+' net'+(d.followers!=null?' · '+num(d.followers)+' followers':''))+'"/>';
+    });
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Net follower change per day">'+g+'</svg>';
+  }
+  function anAudience(a){
+    var acc=a.account, ac=acc.cur||{}, vs='vs prev '+a.period+'d', h='';
+    var none=!acc.cur && acc.followers==null;
+    h+='<div class="kpis an-kpis">'+
+      anKpi('Followers', num(acc.followers), null, acc.followersDay?'read '+(HQ.fmtDay(acc.followersDay,'short')||acc.followersDay):'from tonight\'s scan')+
+      anKpi('Net followers', acc.netFollowers==null?'–':(acc.netFollowers>0?'+':'')+num(acc.netFollowers), null, 'last '+a.period+' days')+
+      anKpi('Follows', num(ac.follows), acc.change.follows, acc.cur?vs:'from tonight\'s scan')+
+      anKpi('Unfollows', num(ac.unfollows), acc.change.unfollows, acc.cur?vs:'from tonight\'s scan', '', true)+
+      '</div>';
+    if(acc.cur && HQ.isNum(ac.follows) && HQ.isNum(ac.unfollows) && ac.follows>0){
+      var keep=Math.round((1-ac.unfollows/ac.follows)*100);
+      h+='<div class="panel"><h2>The read</h2><p class="an-read">'+esc('For every 10 people who followed in the last '+a.period+' days, '+Math.max(0,Math.round(ac.unfollows/ac.follows*10))+' unfollowed, so you kept '+keep+'% of the growth. Posts in this window brought '+num(a.cur.follows)+' follows directly.')+'</p></div>';
+    }
+    var hasNet=a.netSeries.some(function(d){ return d.net!=null; });
+    h+='<div class="panel"><div class="chart-head"><div><h2>Net followers per day</h2><p class="rule" style="margin-top:4px">From the follower count on your profile, read every morning. A day is blank when either end wasn\'t read.</p></div><div class="an-legend"><span><i class="sw" style="background:var(--series-2)"></i>Gained</span><span><i class="sw" style="background:var(--series-3)"></i>Lost</span></div></div>'+
+      (hasNet?'<div class="an-chart">'+anNetSvg(a.netSeries)+'</div>':'<div class="empty-state">'+(none?'The content scan starts recording your follower count, follows and unfollows from its next run (4:30am). This fills in after two mornings.':'Needs two mornings in a row of follower counts.')+'</div>')+'</div>';
+    h+='<div class="panel"><h2>Who you gain and lose</h2><p class="rule">Instagram doesn\'t say who unfollowed, so this would need a full copy of your follower list saved every day and compared. It\'s left out rather than guessed; the counts above are exact.</p></div>';
+    return h;
+  }
+  RENDER.analytics = function(){
+    document.querySelectorAll('#anViewSeg button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-anview')===anView?'true':'false'); });
+    document.querySelectorAll('#anPeriodSeg button').forEach(function(b){ b.setAttribute('aria-pressed', parseInt(b.getAttribute('data-anperiod'),10)===anPeriod?'true':'false'); });
+    var root=$('anRoot'); if(!root) return;
+    var today=HQ.sydDay(Date.now()), a=HQ.igAnalytics(state.igPosts, state.igAccount, today, anPeriod), m=state.igMeta;
+    setText('anSub', (m&&m.lastScanAt?'Instagram scanned '+(relTime(m.lastScanAt)||'')+' · ':'')+(state.igPosts.length)+' posts stored'+(a.undated?' ('+a.undated+' without an exact date, left out)':''));
+    if(!state.loaded.igPosts){ root.innerHTML='<div class="panel"><div class="empty-state">Loading…</div></div>'; return; }
+    root.innerHTML = anView==='posts' ? anPosts(a, today) : (anView==='audience' ? anAudience(a) : anOverview(a));
+  };
+
   var emView = 'next';
   try{ var _ev=localStorage.getItem('hqEmailView'); if(_ev==='next'||_ev==='sent'||_ev==='perf') emView=_ev; }catch(e){}
   function emSetView(v){ emView=v; try{ localStorage.setItem('hqEmailView', v); }catch(e){} renderNow('email'); }
@@ -3553,6 +3790,7 @@ body{padding:0;}
     sub(db.collection('ads_campaigns').limit(200), 'ads', 'adsCampaigns');
     sub(db.collection('ig_posts').orderBy('views','desc').limit(300), 'igPosts', 'igPosts');
     sub(db.collection('ig_stories').orderBy('views','desc').limit(300), 'igStories', 'igStories');
+    sub(db.collection('ig_account_daily').orderBy('date','desc').limit(400), 'igAccount', 'igAccount');
     doc('meta/typeformSync', 'meta', function(d){ state.tfMeta=d; state.tfLoaded=true; });
     doc('meta/scan', 'meta', function(d){ state.scanMeta=d; });
     doc('meta/dmScan', 'meta', function(d){ state.dmMeta=d; });
