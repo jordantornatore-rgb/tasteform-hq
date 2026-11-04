@@ -1067,7 +1067,7 @@ body{padding:0;}
           <div class="panel">
             <h2>Posts &amp; reels</h2>
             <p class="rule" id="postsRule">Saves, shares and follows from Instagram Insights. Stage and CTA are tags the content scan writes; untagged items say so.</p>
-            <div class="table-wrap"><table class="scores"><thead><tr><th>Post</th><th>Posted</th><th>Stage</th><th>CTA</th><th class="num">Views</th><th class="num">Saves</th><th class="num">Shares</th><th class="num">Follows</th></tr></thead><tbody id="postsBody"></tbody></table></div>
+            <div class="table-wrap"><table class="scores"><thead><tr><th>Reel / post</th><th>Posted</th><th>Stage</th><th>CTA</th><th class="num">Views</th><th class="num">Saves</th><th class="num">Shares</th><th class="num">Follows</th></tr></thead><tbody id="postsBody"></tbody></table></div>
             <div class="f-note" id="postsNote"></div>
           </div>
           <div class="panel">
@@ -1296,7 +1296,7 @@ body{padding:0;}
     <div class="panel">
       <h2>Where magnet leads come from</h2>
       <p class="rule">Every magnet lead by the post that triggered it, including recipe-comment (ManyChat) threads in your General inbox.</p>
-      <div class="table-wrap"><table class="scores"><thead><tr><th>Post</th><th class="num">Leads</th><th class="num">Last 7 days</th><th class="num">Replied</th><th class="num">Into sales convo</th></tr></thead><tbody id="magByPostBody"></tbody></table></div>
+      <div class="table-wrap"><table class="scores"><thead><tr><th>Reel / post</th><th class="num">Leads</th><th class="num">Last 7 days</th><th class="num">Replied</th><th class="num">Into sales convo</th></tr></thead><tbody id="magByPostBody"></tbody></table></div>
       <div class="f-note" id="magByPostNote"></div>
     </div>
     <div class="panel">
@@ -1421,7 +1421,7 @@ body{padding:0;}
     </div>
     <div class="seg-filter" role="group" aria-label="Analytics view" id="anViewSeg">
       <button type="button" data-anview="overview" aria-pressed="true">Overview</button>
-      <button type="button" data-anview="posts" aria-pressed="false">Posts</button>
+      <button type="button" data-anview="posts" aria-pressed="false">Reels &amp; posts</button>
       <button type="button" data-anview="audience" aria-pressed="false">Audience</button>
     </div>
     <div id="anRoot" style="display:flex;flex-direction:column;gap:var(--s4);"><div class="panel"><div class="empty-state">Loading…</div></div></div>
@@ -2622,7 +2622,7 @@ body{padding:0;}
     var vs='vs prev '+a.period+'d', acc=a.account, ac=acc.cur||{}, h='';
     var accNote=acc.cur?'':'from tonight\'s scan';
     h+='<div class="kpis an-kpis">'+
-      anKpi('Posts', num(a.cur.posts), a.change.posts, vs)+
+      anKpi('Reels + posts', num(a.cur.posts), a.change.posts, vs)+
       anKpi('Views', num(a.cur.views), a.change.views, vs, a.cur.posts && a.cur.viewsHave<a.cur.posts ? a.cur.viewsHave+' of '+a.cur.posts+' posts have views' : '')+
       anKpi('Accounts reached', num(ac.reached), acc.change.reached, acc.cur?vs:accNote)+
       anKpi('Net followers', acc.netFollowers==null?'–':(acc.netFollowers>0?'+':'')+num(acc.netFollowers), null, acc.netFollowers==null?accNote:(acc.followers!=null?num(acc.followers)+' followers now':''))+
@@ -2640,9 +2640,9 @@ body{padding:0;}
     }).join('')+'</div>' : '<div class="empty-state">No posts in this window.</div>';
     h+='</div>';
     // top posts
-    h+='<div class="panel"><h2>Top posts by views</h2>';
+    h+='<div class="panel"><h2>Top reels &amp; posts by views</h2>';
     if(!a.top.length) h+='<div class="empty-state">No posts in this window.</div>';
-    else h+='<div class="an-tblwrap"><table class="scores an-top"><thead><tr><th>#</th><th>Post</th><th class="hide-sm">Type</th><th class="hide-sm">Posted</th><th class="n">Views</th><th class="n">Eng / 1K</th><th class="n hide-sm">Saves</th><th class="n hide-sm">Shares</th></tr></thead><tbody>'+
+    else h+='<div class="an-tblwrap"><table class="scores an-top"><thead><tr><th>#</th><th>Reel / post</th><th class="hide-sm">Type</th><th class="hide-sm">Posted</th><th class="n">Views</th><th class="n">Eng / 1K</th><th class="n hide-sm">Saves</th><th class="n hide-sm">Shares</th></tr></thead><tbody>'+
       a.top.map(function(p,i){ var it=HQ.igInteractions(p), e=it!=null&&p.views? Math.round(it/p.views*10000)/10 : null, link=anPostLink(p);
         return '<tr><td>'+(i+1)+'</td><td class="t">'+(link?'<a href="'+esc(link)+'" target="_blank" rel="noopener">':'')+esc(p.title||'(no caption)')+(link?'</a>':'')+'</td><td class="hide-sm">'+esc(AN_TYPE1[p._type]||'–')+'</td><td class="hide-sm">'+esc(HQ.fmtDay(p._day,'short')||p._day)+'</td><td class="n">'+num(p.views)+'</td><td class="n">'+(e==null?'–':num(e,1))+'</td><td class="n hide-sm">'+num(p.saves)+'</td><td class="n hide-sm">'+num(p.shares)+'</td></tr>'; }).join('')+'</tbody></table></div>';
     h+='</div>';
@@ -2682,7 +2682,7 @@ body{padding:0;}
   function anPosts(a, today){
     var s=a.scatter, h='';
     h+='<div class="panel"><div class="chart-head"><div><h2>Reach vs '+(s.yKey==='avgWatchSec'?'retention':'engagement')+' · last 90 days</h2><p class="rule" style="margin-top:4px">'+
-      (s.yKey==='avgWatchSec' ? 'Each dot is a post: how far it travelled against how long people watched. Dashed lines are your medians; top-right is what to make more of.'
+      (s.yKey==='avgWatchSec' ? 'Each dot is a reel, carousel or photo: how far it travelled against how long people watched. Dashed lines are your medians; top-right is what to make more of.'
         : 'Watch time isn\'t in the data yet ('+s.watchHave+' '+HQ.plural(s.watchHave,'reel')+' have it; the scan adds it from tonight), so for now the height is engagement per 1,000 views. Dashed lines are your medians; top-right is what to make more of.')+
       '</p></div><div class="an-legend"><span><i class="sw" style="background:var(--accent)"></i>Outlier</span><span><i class="sw" style="background:var(--series-3)"></i>Post</span></div></div>';
     h+= s.points.length>=2 ? '<div class="an-chart">'+anScatterSvg(s)+'</div>' : '<div class="empty-state">Needs at least 2 posts from the last 90 days.</div>';
