@@ -22,14 +22,14 @@ function pick(o: any, ...keys: string[]): string {
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json(405, { error: "POST only" });
-  const want = Deno.env.get("GHL_WEBHOOK_KEY");
+  const want = (Deno.env.get("GHL_WEBHOOK_KEY") || "").trim().replace(/^["'`]+|["'`]+$/g, "");
   if (!want) return json(503, { error: "GHL_WEBHOOK_KEY is not set" });
   const url = new URL(req.url);
   // deno-lint-ignore no-explicit-any
   let body: any = {};
   try { body = await req.json(); } catch { return json(400, { error: "JSON body required" }); }
   const cd = body.customData || body.custom_data || {};
-  const key = url.searchParams.get("key") || cd.key || "";
+  const key = String(url.searchParams.get("key") || cd.key || "").trim();
   if (key !== want) return json(401, { error: "bad key" });
 
   const event = (cd.event || url.searchParams.get("event") || "").toLowerCase();
