@@ -31,6 +31,9 @@ A 9:16 frame playing the final file (`<video controls playsinline preload="metad
 ### Post sheet
 Preview + Phone preview, Needs-you reason and Mark fixed, posting error, "The video was cut from the old script" + Re-edit, ⭐ gold standard (approved, trialing, scheduled or posted), YouTube claim-risk note, status stepper and side state, timeline, schedule (day + time through `content-reschedule`, post IDs and permalinks, trial reels with each version's diff, time, numbers and link, the winner), feedback thread + box, caption (count / 2,200), LinkedIn (the word TasteForm shows as a blue @TasteForm tag; the editor warns when it's missing), sound (bank dropdown + "No music", volume 0–30; a change re-renders), hooks (marked filmed), Jordan's script / visual hook / editing notes / CTA (Edit script opens the editor), the old AI beats read-only, slides, format/funnel/angle/hook style/location/effort, platforms (before scheduling), source idea, footage, results.
 
+### Trial reel? (add-reel sheet and post sheet, before trials start)
+`trialChoice`: `on` = trial every version as soon as it's approved, the winner posts to everyone 72 h after the first trial; `off` = post at the slot, no trial; unset = automatic (2+ versions and the slot 3+ days away). Written straight to the row (`trialChoice`, `trialChoiceAt`).
+
 ### Statuses
 Main: `needs_script → to_film → filmed → editing → edited → awaiting_approval → approved → trialing → scheduled → posted`. Side: `changes_requested` (purple), `needs_jordan` and `error` (red), `skipped`, `cancelled` ("Pulled"). `posting.status`: `trialing | scheduled | posted | error | cancelled`.
 

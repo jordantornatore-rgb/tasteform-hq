@@ -280,6 +280,11 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.keyboard.press('Escape');
       // sound section: pick the part of the song
       await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-await"]').click()); await page.waitForTimeout(150);
+      const trialSel = await page.evaluate(() => { const s = document.querySelector('#ceSheet [data-ce-trial]'); return s ? Array.from(s.options).map(o => o.value) : null; });
+      check(`${lbl}: post sheet has the Trial reel dropdown`, () => assert.ok(trialSel && trialSel.includes('on') && trialSel.includes('off'), JSON.stringify(trialSel)));
+      await page.selectOption('#ceSheet [data-ce-trial]', 'on'); await page.waitForTimeout(150);
+      const trialSaved = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await'); return r && r.data.trialChoice; });
+      check(`${lbl}: choosing Yes saves trialChoice "on"`, () => assert.strictEqual(trialSaved, 'on'));
       await page.click('#ceSheet [data-ce-edit="sound"]'); await page.waitForTimeout(100);
       const sndUi = await page.evaluate(() => ({ start: !!document.querySelector('#ceSheet [data-ce-f="start"]'), play: !!document.querySelector('#ceSheet [data-ce-snd="track"]'), mix: !!document.querySelector('#ceSheet [data-ce-snd="mix"]') }));
       check(`${lbl}: sound editor has the start slider and play button`, () => assert.ok(sndUi.start && sndUi.play && !sndUi.mix, JSON.stringify(sndUi)));
@@ -302,6 +307,7 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       const libAdd = await visibleText(page); check(`${lbl}: uploaded footage shows its chip`, () => assert.ok(/Footage uploaded/i.test(libAdd), libAdd.slice(0, 300)));
       await page.click('#ceRoot [data-ce-addreel=""]'); await page.waitForTimeout(150);
       const add = await sheetText(); noBad('add filmed reel', add);
+      check(`${lbl}: add-reel sheet asks Trial reel?`, () => assert.ok(/trial reel\?/i.test(add), add.slice(0, 600)));
       const fmtOpt = await page.$$eval('#ceSheet [data-ca-f="format"] option', els => els.map(e => e.textContent)); check(`${lbl}: format list names each format`, () => assert.ok(fmtOpt.includes('F7 · Diagnosis talking head') && fmtOpt.includes('C3 · Food list carousel'), JSON.stringify(fmtOpt.slice(0, 4))));
       check(`${lbl}: add-reel sheet offers slots, raw/final and upload/Mac`, () => assert.ok(/Add a filmed reel/i.test(add) && /Raw footage/.test(add) && /Finished edit/.test(add) && /Upload from this device/.test(add) && /Already on the Mac/.test(add) && /New reel on a day/.test(add), add.slice(0, 600)));
       await page.click('#ceSheet input[value="mac"]'); await page.waitForTimeout(80);

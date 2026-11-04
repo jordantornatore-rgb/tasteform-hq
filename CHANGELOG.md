@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.4 — 4 Nov 2026 (Trial reel? dropdown)
+
+- Add a filmed reel and every reel's post sheet: "Trial reel?" Yes = every version (one is fine, finished edits included) goes out as an Instagram trial reel once approved, and the winner posts to everyone 72 h later. No = posts as it is at its slot. Saved as `trialChoice` (on/off); reels without a choice keep the automatic rule.
+
 ## 2.6.3 — 4 Nov 2026 (whole songs, Instagram-style picker, trial versions of your own edits)
 
 - Sound section: the whole song is drawn as a waveform with a box as long as your video. Drag the box (or tap where you want it, or use the arrow keys) to pick the part, like Instagram; the bars inside light up and the time shows above. A dashed line marks the chorus (or Instagram's part of the song), with a button to jump back to it. The fine-tune slider stays underneath.
