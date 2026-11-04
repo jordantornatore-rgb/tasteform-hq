@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.5 — 4 Nov 2026 (sounds grouped by video type)
+
+- The Sound list is grouped the way @martinwang.mp4's "Background music for short form" reel groups it: Emotional, Tactical / educational, A challenge, Storytelling, Deep (3 songs each, all full tracks), then everything else under (Other). Picking a grouped song says when to use it.
+- "Group by video type" toggle above the list switches to one A–Z list (remembered on this device).
+
 ## 2.6.4 — 4 Nov 2026 (Trial reel? dropdown)
 
 - Add a filmed reel and every reel's post sheet: "Trial reel?" Yes = every version (one is fine, finished edits included) goes out as an Instagram trial reel once approved, and the winner posts to everyone 72 h later. No = posts as it is at its slot. Saved as `trialChoice` (on/off); reels without a choice keep the automatic rule.

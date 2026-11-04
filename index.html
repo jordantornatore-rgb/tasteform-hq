@@ -768,6 +768,9 @@ body{padding:0;}
 .ce-editor .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .ce-editor input[type=range]{width:100%;}
 .ce-note{font-size:var(--t-s);color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px;}
+.ce-sndhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+.ce-toggle{display:inline-flex;align-items:center;gap:6px;font-size:var(--t-s);color:var(--text-2);cursor:pointer;min-height:32px;}
+.ce-toggle input{width:18px;height:18px;accent-color:var(--accent);}
 .ce-wave-wrap{display:grid;gap:6px;margin:4px 0 8px;}
 .ce-wave-top,.ce-wave-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:var(--t-s);color:var(--muted);}
 .ce-wave-top output{color:var(--text);font-variant-numeric:tabular-nums;font-weight:600;}
@@ -3140,7 +3143,7 @@ body{padding:0;}
     else if(section==='sound'){
       var bank=(state.contentSounds||[]).filter(function(x){ return x && !String(x.id).startsWith('_'); });
       var cur=q.sound&&q.sound.bankId?String(q.sound.bankId):'', vol=q.sound&&HQ.isNum(q.sound.musicVolume)?Math.min(30,q.sound.musicVolume):(q.sound&&HQ.isNum(q.sound.musicSoundVolume)?Math.min(30,q.sound.musicSoundVolume):10);
-      body='<label>Sound<select class="input" data-ce-f="soundId"><option value=""'+(cur?'':' selected')+'>No music</option>'+bank.map(function(x){ return '<option value="'+E(x.id)+'" data-title="'+E(x.igAudioTitle||((x.artist?x.artist+' – ':'')+(x.title||x.id)))+'"'+(String(x.id)===cur?' selected':'')+' data-path="'+E(x.previewPath||'')+'" data-dur="'+E(HQ.isNum(x.durationS)?x.durationS:(x.localAudio&&HQ.isNum(x.localAudio.durationS)?x.localAudio.durationS:30))+'">'+E((x.artist?x.artist+' – ':'')+(x.title||x.id))+(x.vibe?' · '+E(x.vibe):'')+'</option>'; }).join('')+'</select></label><label>Music volume <output data-ce-volout>'+vol+'</output><input type="range" min="0" max="30" step="1" value="'+vol+'" data-ce-f="volume" aria-label="Music volume"></label>'+
+      body='<div class="ce-sndhead"><span class="ce-k" style="margin:0">Sound</span><label class="ce-toggle"><input type="checkbox" data-ce-sndgroup'+(ceSndGrouped()?' checked':'')+'> Group by video type</label></div><select class="input" data-ce-f="soundId" aria-label="Sound">'+ceSoundOptions(cur, ceSndGrouped())+'</select><div class="f-note" data-ce-sndwhen>'+esc(ceSoundWhen(cur))+'</div><label>Music volume <output data-ce-volout>'+vol+'</output><input type="range" min="0" max="30" step="1" value="'+vol+'" data-ce-f="volume" aria-label="Music volume"></label>'+
         (function(){ var curS=bank.find(function(x){ return String(x.id)===cur; }), st=q.sound&&HQ.isNum(q.sound.startS)?q.sound.startS:(curS&&HQ.isNum(curS.partS)?curS.partS:0); return ceWaveHtml(curS, st, ceVideoLen(q)); })()+
         '<div class="acts"><button type="button" class="btn small" data-ce-snd="track">▶ Play this part</button>'+(q.video&&(q.video.originalPreviewUrl)?'<button type="button" class="btn small" data-ce-snd="mix">▶ Preview with my video</button>':'')+'<button type="button" class="btn small" data-ce-snd="stop">■ Stop</button></div><div data-ce-sndplay></div>'+
         '<div class="f-note">Mixed into the video file; your voice stays at 100. Talking heads: 8–12. Drag the box along the song to pick the part (like Instagram), listen, then Save: the video re-renders with it. The dashed line marks the chorus (or Instagram’s part of the song).'+(q.video&&q.video.originalPreviewUrl?'':' "Preview with my video" appears on finished edits you add yourself.')+'</div>';
@@ -3460,7 +3463,8 @@ body{padding:0;}
     function onChange(ev){
       var s=ev.target.closest('select[data-cef]'); if(s){ ceFilters[s.getAttribute('data-cef')]=s.value; renderNow('content'); return; }
       var lf=ev.target.closest('[data-celib]'); if(lf){ ceLib[lf.getAttribute('data-celib')]=lf.value; renderNow('content'); return; }
-      var sid=ev.target.closest('[data-ce-f="soundId"]'); if(sid){ ceSndStop(); var wr=sid.closest('[data-ce-editor]').querySelector('.ce-wave-wrap'), ns=(state.contentSounds||[]).find(function(x){ return String(x.id)===sid.value; }); if(wr){ wr.outerHTML=ceWaveHtml(ns, ns&&HQ.isNum(ns.partS)?ns.partS:0, parseFloat(wr.getAttribute('data-win'))||30); } return; }
+      var sg=ev.target.closest('[data-ce-sndgroup]'); if(sg){ try{ localStorage.setItem('hq.sndGrouped', sg.checked?'1':'0'); }catch(e){} var ss=sg.closest('[data-ce-editor]').querySelector('[data-ce-f="soundId"]'); if(ss){ var keep=ss.value; ss.innerHTML=ceSoundOptions(keep, sg.checked); ss.value=keep; } return; }
+      var sid=ev.target.closest('[data-ce-f="soundId"]'); if(sid){ var sw=sid.closest('[data-ce-editor]').querySelector('[data-ce-sndwhen]'); if(sw) sw.textContent=ceSoundWhen(sid.value); ceSndStop(); var wr=sid.closest('[data-ce-editor]').querySelector('.ce-wave-wrap'), ns=(state.contentSounds||[]).find(function(x){ return String(x.id)===sid.value; }); if(wr){ wr.outerHTML=ceWaveHtml(ns, ns&&HQ.isNum(ns.partS)?ns.partS:0, parseFloat(wr.getAttribute('data-win'))||30); } return; }
       var cax=ev.target.closest('[data-ca]'); if(cax&&ceAdd){ ceAddToggle(); return; }
       var sp=ev.target.closest('[data-cs="slotpick"]'); if(sp){ var ns=sp.closest('.ce-script').querySelector('.ce-newslot'); if(ns) ns.hidden=sp.value!=='__new'; return; }
       var tm=ev.target.closest('select[data-ce-time]'); if(tm){ var id=tm.getAttribute('data-ce-time'), q=ceFindSlot(id); if(!q) return; var at=cePostAtMs(q), day=HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):HQ.sydNow().key); ceMove(id, day, tm.value); return; }
@@ -4008,6 +4012,21 @@ body{padding:0;}
     catch(e){ ceSetSheetMsg(id, 'Couldn’t save: '+(e.message||e), true); }
     renderNow('content'); ceRenderSheet();
   });
+  // Sound list: grouped the way the "Background music for short form" reel groups them (content_sounds._groups), the rest under (Other).
+  function ceSndGrouped(){ try{ return localStorage.getItem('hq.sndGrouped')!=='0'; }catch(e){ return true; } }
+  function ceSoundOptions(cur, grouped){
+    var E=esc, all=(state.contentSounds||[]), bank=all.filter(function(x){ return x && !String(x.id).startsWith('_'); }), meta=all.find(function(x){ return x && x.id==='_groups'; })||{}, groups=Array.isArray(meta.groups)?meta.groups.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); }):[];
+    var label=function(x){ return (x.artist?x.artist+' – ':'')+(x.title||x.id); };
+    var opt=function(x){ return '<option value="'+E(x.id)+'" data-title="'+E(x.igAudioTitle||label(x))+'"'+(String(x.id)===cur?' selected':'')+' data-path="'+E(x.previewPath||'')+'" data-dur="'+E(HQ.isNum(x.durationS)?x.durationS:(x.localAudio&&HQ.isNum(x.localAudio.durationS)?x.localAudio.durationS:30))+'">'+E(label(x))+(x.vibe&&!grouped?' · '+E(x.vibe):'')+(x.group&&!grouped?' · '+E(x.group):'')+'</option>'; };
+    var html='<option value=""'+(cur?'':' selected')+'>No music</option>';
+    if(!grouped) return html+bank.slice().sort(function(a,b){ return label(a).localeCompare(label(b)); }).map(opt).join('');
+    var named=groups.map(function(g){ return g.name; });
+    groups.forEach(function(g){ var xs=bank.filter(function(x){ return x.group===g.name; }); if(xs.length) html+='<optgroup label="'+E(g.name+(g.when?' · '+g.when:''))+'">'+xs.map(opt).join('')+'</optgroup>'; });
+    var rest=bank.filter(function(x){ return named.indexOf(x.group)<0; }).sort(function(a,b){ return label(a).localeCompare(label(b)); });
+    if(rest.length) html+='<optgroup label="'+E(meta.other||'(Other)')+'">'+rest.map(opt).join('')+'</optgroup>';
+    return html;
+  }
+  function ceSoundWhen(id){ var x=(state.contentSounds||[]).find(function(s){ return String(s.id)===String(id); }); return x&&x.group?x.group+(x.groupWhen?': use it '+x.groupWhen+'.':''):''; }
   function ceVideoLen(q){ var v=q&&q.video||{}, f=q&&q.footage||{}; return HQ.isNum(v.durationS)&&v.durationS>0?v.durationS:(HQ.isNum(f.durationS)&&f.durationS>0?f.durationS:30); }
   // Instagram-style picker: the whole song as bars, a box as long as the video that you drag to choose the part.
   function ceWaveHtml(s, st, win){

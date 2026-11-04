@@ -66,7 +66,7 @@ function contentFixtures(today) {
     ev('b', 'test-e1', 'enrolled', -72, ['recipe: hsp', 'country: uk', 'job: corporate']), ev('b', 'test-e1', 'sent', -72, ['recipe: hsp', 'country: uk', 'job: corporate']), ev('b', 'test-e1', 'replied', -60),
     ev('c', 'test-e1', 'enrolled', -1)]); }
 { const cf = contentFixtures(TODAY); fixtures.content_queue = fixtures.content_queue.concat(cf.queue); fixtures.content_ideas = fixtures.content_ideas.concat(cf.ideas); }
-fixtures.content_sounds = (fixtures.content_sounds || []).concat([{ id: 'test-fullsong', data: { artist: 'Test Artist', title: 'Whole Song', vibe: 'calm', durationS: 200, partS: 60, partKind: 'chorus', fullSong: true, previewPath: 'sounds/test-fullsong.mp4', waveform: Array.from({ length: 240 }, (_, i) => 20 + (i * 13) % 80) } }]);
+fixtures.content_sounds = (fixtures.content_sounds || []).concat([{ id: 'test-fullsong', data: { artist: 'Test Artist', title: 'Whole Song', vibe: 'calm', durationS: 200, partS: 60, partKind: 'chorus', fullSong: true, previewPath: 'sounds/test-fullsong.mp4', waveform: Array.from({ length: 240 }, (_, i) => 20 + (i * 13) % 80) } }, { id: 'test-emo', data: { artist: 'FKJ', title: 'Ylang Ylang', group: 'Emotional', groupWhen: 'if your video is emotional', durationS: 213, partS: 61, previewPath: 'sounds/test-emo.mp4' } }, { id: '_groups', data: { groups: [{ name: 'Emotional', when: 'if your video is emotional', order: 0 }, { name: 'Deep', when: 'if your video is deep', order: 4 }], other: '(Other)' } }]);
 const dms = docs('dm_threads'), tfDaily = docs('tf_daily'), tfResponses = docs('tf_responses'), contacts = docs('contacts');
 const leads = dms.filter(d => d.category === 'lead' && !d.notApplicable);
 const exp = {};
@@ -288,6 +288,14 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.click('#ceSheet [data-ce-edit="sound"]'); await page.waitForTimeout(100);
       const sndUi = await page.evaluate(() => ({ start: !!document.querySelector('#ceSheet [data-ce-f="start"]'), play: !!document.querySelector('#ceSheet [data-ce-snd="track"]'), mix: !!document.querySelector('#ceSheet [data-ce-snd="mix"]') }));
       check(`${lbl}: sound editor has the start slider and play button`, () => assert.ok(sndUi.start && sndUi.play && !sndUi.mix, JSON.stringify(sndUi)));
+      const grp = await page.evaluate(() => Array.from(document.querySelectorAll('#ceSheet [data-ce-f="soundId"] optgroup')).map(g => g.label));
+      check(`${lbl}: sounds are grouped by video type with the rest under (Other)`, () => assert.ok(grp.length >= 2 && /^Emotional/.test(grp[0]) && grp[grp.length - 1] === '(Other)' && !grp.some(g => /^Deep/.test(g)), JSON.stringify(grp)));
+      await page.click('#ceSheet [data-ce-sndgroup]'); await page.waitForTimeout(50);
+      const flat = await page.evaluate(() => ({ groups: document.querySelectorAll('#ceSheet [data-ce-f="soundId"] optgroup').length, opts: document.querySelectorAll('#ceSheet [data-ce-f="soundId"] option').length }));
+      check(`${lbl}: the toggle switches to one A–Z list`, () => assert.ok(flat.groups === 0 && flat.opts > 2, JSON.stringify(flat)));
+      await page.click('#ceSheet [data-ce-sndgroup]'); await page.waitForTimeout(50);
+      await page.selectOption('#ceSheet [data-ce-f="soundId"]', 'test-emo'); await page.waitForTimeout(50);
+      const when = await page.$eval('#ceSheet [data-ce-sndwhen]', e => e.textContent); check(`${lbl}: a grouped song says when to use it`, () => assert.ok(/emotional/.test(when), when));
       // Instagram-style picker: choosing a full song puts the box on Instagram's part; dragging moves it
       await page.selectOption('#ceSheet [data-ce-f="soundId"]', 'test-fullsong'); await page.waitForTimeout(80);
       const wv1 = await page.evaluate(() => ({ st: document.querySelector('#ceSheet [data-ce-f="start"]').value, out: document.querySelector('#ceSheet [data-ce-startout]').textContent, bars: document.querySelectorAll('#ceSheet .ce-wave .bars i').length, lit: document.querySelectorAll('#ceSheet .ce-wave .bars i.in').length, ig: !!document.querySelector('#ceSheet .ce-wave .ig'), left: document.querySelector('#ceSheet .ce-wave .win').style.left }));
