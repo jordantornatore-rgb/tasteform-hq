@@ -3997,7 +3997,7 @@ body{padding:0;}
   // "Trial reel?" dropdown: Yes = trial every version as soon as it's approved, the best one posts to everyone 72 h later.
   function ceTrialPicker(q){
     var c=q.trialChoice==='on'||q.trialChoice==='off'?q.trialChoice:'', vs=(q.video&&Array.isArray(q.video.variants))?q.video.variants.length:0;
-    var note=c==='on'?'Every version'+(vs>1?' ('+vs+')':'')+' goes out as an Instagram trial reel (non-followers only) once you approve it. 72 hours later the best one posts to everyone on Instagram, YouTube and LinkedIn.':(c==='off'?'Posts as it is at its slot.':'Automatic: trialled when there are 2+ versions and the slot is 3+ days away.')+(q.noTrial&&c!=='on'?' Now: no trial ('+ceText(q.noTrial)+').':'');
+    var note=c==='on'?'Every version'+(vs>1?' ('+vs+')':'')+' goes out as an Instagram trial reel (non-followers only) once you approve it. 72 hours later the best one posts to everyone on Instagram, YouTube and LinkedIn.':(c==='off'?'Posts as it is at its slot.':(vs<2?'Automatic: one version, so it posts at its slot with no trial. Pick Yes to trial it first.':'Automatic: trialled when the slot is 3+ days away.'));
     return '<div class="ce-block"><label class="ce-k" style="display:block">Trial reel?<select class="input" data-ce-trial="'+esc(q.id)+'" aria-label="Trial reel">'+(c?'':'<option value="" selected>Automatic</option>')+'<option value="on"'+(c==='on'?' selected':'')+'>Yes · trial it, post the winner 72 h later</option><option value="off"'+(c==='off'?' selected':'')+'>No · post it at its slot</option></select></label><div class="f-note" data-ce-trialnote>'+esc(note)+'</div></div>';
   }
   document.addEventListener('change', async function(ev){
