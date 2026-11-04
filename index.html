@@ -4079,10 +4079,10 @@ body{padding:0;}
     var len=Math.min(win,dur), pk=(w||Array.apply(null,Array(120)).map(function(_,i){ return 30+((i*37)%40); })), n=pk.length;
     var bars=pk.map(function(v,i){ var t=(i+0.5)/n*dur; return '<i'+(t>=st&&t<=st+len?' class="in"':'')+' style="height:'+Math.max(6,Math.min(100,+v||0))+'%"></i>'; }).join('');
     var txt=ceClock(st)+' – '+ceClock(Math.min(dur,st+len))+(win>dur?' (loops)':'');
-    var ig=s&&HQ.isNum(s.partS)&&s.partS<dur?s.partS:null;
+    var ig=s&&s.partKind!=='loop'&&HQ.isNum(s.partS)&&s.partS<dur?s.partS:null;
     return '<div class="ce-wave-wrap" data-dur="'+dur+'" data-win="'+win+'"><div class="ce-wave-top"><span>'+(s?'Your '+E(ceClock(win))+' video uses':'Pick a song first')+'</span><output data-ce-startout>'+(s?E(txt):'')+'</output></div>'+
       '<div class="ce-wave'+(w?'':' flat')+'" data-ce-wave role="slider" tabindex="0" aria-label="Part of the song" aria-valuemin="0" aria-valuemax="'+max+'" aria-valuenow="'+st+'" aria-valuetext="from '+E(txt)+'"><div class="bars">'+bars+'</div>'+(ig!=null?'<span class="ig" style="left:'+(ig/dur*100).toFixed(2)+'%"></span>':'')+'<div class="win" style="left:'+(st/dur*100).toFixed(3)+'%;width:'+Math.min(100-st/dur*100,len/dur*100).toFixed(3)+'%"><span class="head"></span></div></div>'+
-      '<div class="ce-wave-foot"><span>0:00</span>'+(ig!=null?'<button type="button" class="linklike" data-ce-igpart="'+ig+'">'+(s.partKind==='trend'?'Trending part':(s.partKind==='ig'?'Instagram’s part':'Chorus'))+' ('+E(ceClock(ig))+')</button>':'')+'<span>'+E(ceClock(dur))+(s&&s.fullSong?' · full song':'')+'</span></div>'+
+      '<div class="ce-wave-foot"><span>0:00</span>'+(ig!=null?'<button type="button" class="linklike" data-ce-igpart="'+ig+'">'+(s.partKind==='trend'?'Trending part':(s.partKind==='ig'?'Instagram’s part':'Chorus'))+' ('+E(ceClock(ig))+')</button>':'')+'<span>'+E(ceClock(dur))+(s&&s.fullSong?' · full song':(s&&s.partKind==='loop'?' · Instagram loop, repeats under longer videos':''))+'</span></div>'+
       '<label class="ce-wave-fine">Fine-tune <input type="range" min="0" max="'+max+'" step="0.5" value="'+st+'" data-ce-f="start" aria-label="Start the song at"></label></div>';
   }
   function ceWaveSync(wr){
