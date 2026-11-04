@@ -277,6 +277,14 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       const ss = await sheetText(); noBad('post sheet (scheduled)', ss);
       check(`${lbl}: scheduled sheet shows the winner, low confidence and the YouTube claim note`, () => assert.ok(/🏆/.test(ss) && /low confidence/.test(ss) && /YouTube may claim/.test(ss) && /Gold standard|gold standard/.test(ss), JSON.stringify(ss.slice(0, 1500))));
       await page.keyboard.press('Escape');
+      // sound section: pick the part of the song
+      await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-await"]').click()); await page.waitForTimeout(150);
+      await page.click('#ceSheet [data-ce-edit="sound"]'); await page.waitForTimeout(100);
+      const sndUi = await page.evaluate(() => ({ start: !!document.querySelector('#ceSheet [data-ce-f="start"]'), play: !!document.querySelector('#ceSheet [data-ce-snd="track"]'), mix: !!document.querySelector('#ceSheet [data-ce-snd="mix"]') }));
+      check(`${lbl}: sound editor has the start slider and play button`, () => assert.ok(sndUi.start && sndUi.play && !sndUi.mix, JSON.stringify(sndUi)));
+      await page.click('#ceSheet [data-ce-snd="track"]'); await page.waitForTimeout(100);
+      const sndMsg = await page.$eval('#ceSheet [data-ce-sndplay]', e => e.textContent); check(`${lbl}: playing with no song picked explains itself`, () => assert.ok(/Pick a song|preview shelf/.test(sndMsg), sndMsg));
+      await page.keyboard.press('Escape'); await page.keyboard.press('Escape'); await page.waitForTimeout(80);
       // add a filmed reel
       await page.click('#ceViewSeg [data-ceview="library"]'); await page.waitForTimeout(150);
       const libAdd = await visibleText(page); check(`${lbl}: uploaded footage shows its chip`, () => assert.ok(/Footage uploaded/i.test(libAdd), libAdd.slice(0, 300)));

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.2 — 4 Nov 2026 (pick the part of the song)
+
+- Sound section: "Start the song at" slider (`sound.startS`), "▶ Play the song from here" (20 s at full volume) and, on finished edits you added, "▶ Preview with my video": your original video with the song underneath at the chosen point and volume, live, with the sliders working while it plays. Saving re-renders the video from that point. Bank tracks are on private Storage (`content-previews/sounds/<id>.mp4`, `content_sounds.previewPath`).
+- A preview shows "This preview is the previous mix" while a new sound is being mixed in.
+
 ## 2.6.1 — 4 Nov 2026 (add reels you've already filmed)
 
 - Fix: uploads sent the sign-in token twice in one header ("Invalid Compact JWS"); it's now set once per request. A failed upload is saved as `footageUpload.status: failed`, shows "Upload failed · add the footage again", and retrying in the same sheet reuses the reel instead of creating another.

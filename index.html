@@ -2930,14 +2930,14 @@ body{padding:0;}
     var title=snd.title||snd.bankId||snd.id||'';
     if(!title || title==='No music' || (!snd.bankId && !snd.id && !snd.file)) return title||'No music';
     var vol=HQ.isNum(snd.musicVolume)?snd.musicVolume:(HQ.isNum(snd.musicSoundVolume)?snd.musicSoundVolume:null);
-    return title+(vol==null?'':(vol>=60?' · full mix':' · '+vol+'% under voice'));
+    return title+(vol==null?'':(vol>=60?' · full mix':' · '+vol+'% under voice'))+(HQ.isNum(snd.startS)&&snd.startS>0?' · from '+ceClock(snd.startS):'');
   }
   function ceWords(s){ s=ceText(s); return s?s.split(/\s+/).filter(Boolean).length:0; }
   function ceReadTime(w){ var sec=Math.round(w/2.5); return sec<60?sec+'s read':Math.floor(sec/60)+'m '+HQ.pad(sec%60)+'s read'; }
   function ceTrialNums(m){ return [['views','views'],['likes','likes'],['comments','comments'],['shares','shares'],['saves','saves'],['follows','follows']].filter(function(k){ return HQ.isNum(m[k[0]]); }).map(function(k){ return num(m[k[0]])+' '+k[1]; }).join(' · ')||'numbers –'; }
   function ceIdeaById(id){ return id?(state.contentIdeas||[]).find(function(i){ return i.id===id||i.shortcode===id; })||null:null; }
   function ceLinkedinRead(t){ t=ceText(t); if(!t) return '<div class="ce-txt muted">– not written yet</div>'; return '<div class="ce-line"><div class="t">'+esc(t).replace(/@?\[?TasteForm\]?(\(urn:li:organization:\d+\))?/g, '<span class="chip ce-li">@TasteForm</span>')+'</div>'+ceCopyBtn('linkedin', t)+'</div>'; }
-  function ceCloseOverlays(){ if(ceScript){ ceSaveDraft(); } if(ceScriptTimer){ clearInterval(ceScriptTimer); ceScriptTimer=null; } ceScript=null; ceFilm=false; cePreview=null; ceAdd=null; }
+  function ceCloseOverlays(){ ceSndStop(); if(ceScript){ ceSaveDraft(); } if(ceScriptTimer){ clearInterval(ceScriptTimer); ceScriptTimer=null; } ceScript=null; ceFilm=false; cePreview=null; ceAdd=null; }
   function ceCloseAll(){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceRenderSheet(); }
 
   RENDER.content = function(){
@@ -3123,7 +3123,10 @@ body{padding:0;}
     else if(section==='sound'){
       var bank=(state.contentSounds||[]).filter(function(x){ return x && !String(x.id).startsWith('_'); });
       var cur=q.sound&&q.sound.bankId?String(q.sound.bankId):'', vol=q.sound&&HQ.isNum(q.sound.musicVolume)?Math.min(30,q.sound.musicVolume):(q.sound&&HQ.isNum(q.sound.musicSoundVolume)?Math.min(30,q.sound.musicSoundVolume):10);
-      body='<label>Sound<select class="input" data-ce-f="soundId"><option value=""'+(cur?'':' selected')+'>No music</option>'+bank.map(function(x){ return '<option value="'+E(x.id)+'" data-title="'+E(x.igAudioTitle||((x.artist?x.artist+' – ':'')+(x.title||x.id)))+'"'+(String(x.id)===cur?' selected':'')+'>'+E((x.artist?x.artist+' – ':'')+(x.title||x.id))+(x.vibe?' · '+E(x.vibe):'')+'</option>'; }).join('')+'</select></label><label>Music volume <output data-ce-volout>'+vol+'</output><input type="range" min="0" max="30" step="1" value="'+vol+'" data-ce-f="volume" aria-label="Music volume"></label><div class="f-note">Mixed into the video file; your voice stays at 100. Talking heads: 8–12. Changing it re-renders the video.</div>';
+      body='<label>Sound<select class="input" data-ce-f="soundId"><option value=""'+(cur?'':' selected')+'>No music</option>'+bank.map(function(x){ return '<option value="'+E(x.id)+'" data-title="'+E(x.igAudioTitle||((x.artist?x.artist+' – ':'')+(x.title||x.id)))+'"'+(String(x.id)===cur?' selected':'')+' data-path="'+E(x.previewPath||'')+'" data-dur="'+E(HQ.isNum(x.durationS)?x.durationS:(x.localAudio&&HQ.isNum(x.localAudio.durationS)?x.localAudio.durationS:30))+'">'+E((x.artist?x.artist+' – ':'')+(x.title||x.id))+(x.vibe?' · '+E(x.vibe):'')+'</option>'; }).join('')+'</select></label><label>Music volume <output data-ce-volout>'+vol+'</output><input type="range" min="0" max="30" step="1" value="'+vol+'" data-ce-f="volume" aria-label="Music volume"></label>'+
+        (function(){ var curS=bank.find(function(x){ return String(x.id)===cur; }), dur=curS&&HQ.isNum(curS.durationS)?curS.durationS:30, st=q.sound&&HQ.isNum(q.sound.startS)?Math.min(q.sound.startS,dur):0; return '<label>Start the song at <output data-ce-startout>'+ceClock(st)+'</output><input type="range" min="0" max="'+dur+'" step="0.5" value="'+st+'" data-ce-f="start" aria-label="Start the song at"></label>'; })()+
+        '<div class="acts"><button type="button" class="btn small" data-ce-snd="track">▶ Play the song from here</button>'+(q.video&&(q.video.originalPreviewUrl)?'<button type="button" class="btn small" data-ce-snd="mix">▶ Preview with my video</button>':'')+'<button type="button" class="btn small" data-ce-snd="stop">■ Stop</button></div><div data-ce-sndplay></div>'+
+        '<div class="f-note">Mixed into the video file; your voice stays at 100. Talking heads: 8–12. Pick the part of the song with the slider, listen, then Save: the video re-renders with it.'+(q.video&&q.video.originalPreviewUrl?'':' "Preview with my video" appears on finished edits you add yourself.')+'</div>';
     }
     else if(section==='platforms'){ var have=cePlatforms(q); body='<div class="ce-chips">'+['INSTAGRAM','TIKTOK','YOUTUBE','LINKEDIN'].map(function(pl){ return '<label class="chip grey" style="min-height:36px;cursor:pointer"><input type="checkbox" data-ce-pl="'+pl+'"'+(have.indexOf(pl)>=0?' checked':'')+'> '+esc(CE_PLATFORM_SHORT[pl])+'</label>'; }).join('')+'</div><div class="f-note">TikTok posts once it is connected in Outstand.</div>'; }
     return '<div class="ce-editor" data-ce-editor="'+section+'">'+body+acts+'</div>';
@@ -3139,7 +3142,7 @@ body{padding:0;}
     if(section==='linkedin') return {linkedin:f('linkedin')};
     if(section==='caption') return {caption:f('caption')};
     if(section==='meta') return {format:f('format'), funnel:f('funnel'), angle:f('angle'), hookStyle:f('hookStyle'), location:f('location'), effort:f('effort')};
-    if(section==='sound'){ var selEl=root.querySelector('[data-ce-f="soundId"]'), opt=selEl&&selEl.options[selEl.selectedIndex]; var id=selEl?selEl.value:''; var vol=parseInt(f('volume'),10); if(!id) return {sound:{bankId:null, title:'No music', musicVolume:0, voiceVolume:100, mixedIntoFile:true, setBy:'jordan'}}; return {sound:{bankId:id, title:opt.getAttribute('data-title'), musicVolume:isNaN(vol)?10:vol, voiceVolume:100, mixedIntoFile:true, setBy:'jordan'}}; }
+    if(section==='sound'){ var selEl=root.querySelector('[data-ce-f="soundId"]'), opt=selEl&&selEl.options[selEl.selectedIndex]; var id=selEl?selEl.value:''; var vol=parseInt(f('volume'),10); if(!id) return {sound:{bankId:null, title:'No music', musicVolume:0, voiceVolume:100, mixedIntoFile:true, setBy:'jordan'}}; var st=parseFloat(f('start')); return {sound:{bankId:id, title:opt.getAttribute('data-title'), musicVolume:isNaN(vol)?10:vol, voiceVolume:100, startS:isNaN(st)?0:Math.round(st*2)/2, mixedIntoFile:true, setBy:'jordan'}}; }
     if(section==='platforms') return {platforms:Array.prototype.filter.call(root.querySelectorAll('[data-ce-pl]'), function(c){ return c.checked; }).map(function(c){ return c.getAttribute('data-ce-pl'); })};
     return {};
   }
@@ -3406,6 +3409,7 @@ body{padding:0;}
       var pl=t.closest('[data-ce-play]'); if(pl){ if(ceDrag.moved) return; ceStopHover(); ceCloseOverlays(); ceOpenId=null; ceEdit=null; cePreview={id:pl.getAttribute('data-ce-play'), v:null, force:true}; ceRenderSheet(); return; }
       var pv=t.closest('[data-ce-pv]'); if(pv&&cePreview){ cePreview.v=pv.getAttribute('data-ce-pv'); cePreview.force=true; ceRenderSheet(); return; }
       var mo=t.closest('[data-ce-more]'); if(mo&&cePreview){ cePreview.more=true; cePreview.force=true; ceRenderSheet(); return; }
+      var snb=t.closest('[data-ce-snd]'); if(snb){ ceSndPlay(snb.getAttribute('data-ce-snd'), snb); return; }
       var adr=t.closest('[data-ce-addreel]'); if(adr){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceAdd={id:adr.getAttribute('data-ce-addreel')||null, force:true}; ceRenderSheet(); return; }
       var ads=t.closest('[data-ca-submit]'); if(ads){ ceSubmitAddReel(ads); return; }
       var sct=t.closest('[data-ce-script]'); if(sct){ ceOpenScript({id:sct.getAttribute('data-ce-script')}); return; }
@@ -3426,8 +3430,8 @@ body{padding:0;}
       var off=t.closest('[data-cef-office]'); if(off){ ceFilters.office=!ceFilters.office; renderNow('content'); return; }
       var st=t.closest('[data-celf]'); if(st){ var v=st.getAttribute('data-celf'); ceLib.status = ceLib.status===v ? '' : v; renderNow('content'); var lists=$('ceLibLists'); if(lists&&ceLib.status) lists.scrollIntoView({behavior:'smooth', block:'start'}); return; }
       var ed=t.closest('[data-ce-edit]'); if(ed){ ceEdit={id:ceOpenId, section:ed.getAttribute('data-ce-edit'), force:true}; ceRenderSheet(); return; }
-      var sv=t.closest('[data-ce-save]'); if(sv){ ceSaveSection(ceOpenId, sv.getAttribute('data-ce-save')); return; }
-      var cn=t.closest('[data-ce-cancel]'); if(cn){ ceEdit=null; ceRenderSheet(); return; }
+      var sv=t.closest('[data-ce-save]'); if(sv){ ceSndStop(); ceSaveSection(ceOpenId, sv.getAttribute('data-ce-save')); return; }
+      var cn=t.closest('[data-ce-cancel]'); if(cn){ ceSndStop(); ceEdit=null; ceRenderSheet(); return; }
       var li=t.closest('[data-ce-li]'); if(li){ var kind=li.getAttribute('data-ce-li'), box=li.closest('[data-ce-editor]'), listEl=box&&box.querySelector('[data-ce-list]'); if(!listEl) return; if(kind==='add'){ var tmpl=listEl.querySelector('.li'); var n=tmpl.cloneNode(true); n.querySelector('input').value=''; listEl.appendChild(n); n.querySelector('input').focus(); } else { var row=li.closest('.li'); if(kind==='del'){ if(listEl.querySelectorAll('.li').length>1) row.remove(); else row.querySelector('input').value=''; } else if(kind==='up'&&row.previousElementSibling) listEl.insertBefore(row, row.previousElementSibling); else if(kind==='down'&&row.nextElementSibling) listEl.insertBefore(row.nextElementSibling, row); } return; }
       var ac=t.closest('[data-ce-act]'); if(ac){ ceAdminAct(ac.getAttribute('data-ce-act'), ac.getAttribute('data-id'), ac); return; }
       var aa=t.closest('[data-ce-approveall]'); if(aa){ ceApproveAll(); return; }
@@ -3438,6 +3442,7 @@ body{padding:0;}
     function onChange(ev){
       var s=ev.target.closest('select[data-cef]'); if(s){ ceFilters[s.getAttribute('data-cef')]=s.value; renderNow('content'); return; }
       var lf=ev.target.closest('[data-celib]'); if(lf){ ceLib[lf.getAttribute('data-celib')]=lf.value; renderNow('content'); return; }
+      var sid=ev.target.closest('[data-ce-f="soundId"]'); if(sid){ ceSndStop(); var op=sid.options[sid.selectedIndex], d=parseFloat(op&&op.getAttribute('data-dur'))||30, rg=sid.closest('[data-ce-editor]').querySelector('[data-ce-f="start"]'); if(rg){ rg.max=d; if(parseFloat(rg.value)>d){ rg.value=0; } var so2=rg.parentElement.querySelector('[data-ce-startout]'); if(so2) so2.textContent=ceClock(rg.value); } return; }
       var cax=ev.target.closest('[data-ca]'); if(cax&&ceAdd){ ceAddToggle(); return; }
       var sp=ev.target.closest('[data-cs="slotpick"]'); if(sp){ var ns=sp.closest('.ce-script').querySelector('.ce-newslot'); if(ns) ns.hidden=sp.value!=='__new'; return; }
       var tm=ev.target.closest('select[data-ce-time]'); if(tm){ var id=tm.getAttribute('data-ce-time'), q=ceFindSlot(id); if(!q) return; var at=cePostAtMs(q), day=HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):HQ.sydNow().key); ceMove(id, day, tm.value); return; }
@@ -3448,6 +3453,7 @@ body{padding:0;}
       var csx=ev.target.closest('[data-cs],[data-cs-hook]'); if(csx){ if(csx.hasAttribute('data-cs-grow')) ceGrow(csx); if(csx.getAttribute('data-cs')==='script') ceWordCount(csx); return; }
       var lit=ev.target.closest('[data-ce-f="linkedin"]'); if(lit){ var lw=lit.parentElement.querySelector('[data-ce-liwarn]'); if(lw) lw.hidden=/TasteForm/.test(lit.value); return; }
       var vol=ev.target.closest('[data-ce-f="volume"]'); if(vol){ var o=vol.parentElement.querySelector('[data-ce-volout]'); if(o) o.textContent=vol.value; return; }
+      var stv=ev.target.closest('[data-ce-f="start"]'); if(stv){ var so=stv.parentElement.querySelector('[data-ce-startout]'); if(so) so.textContent=ceClock(stv.value); return; }
       var qq=ev.target.closest('#ceLibQ'); if(qq){ clearTimeout(ceLib._t); ceLib._t=setTimeout(function(){ ceLib.q=qq.value; ceLib.focusQ=true; renderNow('content'); }, 250); }
     }
     if(view){ view.addEventListener('click', onClick); view.addEventListener('change', onChange); view.addEventListener('input', onInput); }
@@ -3455,7 +3461,7 @@ body{padding:0;}
       document.addEventListener('keydown', function(ev){ if(ev.key!=='Escape') return; if(ceEdit&&ceOpenId){ ceEdit=null; ceRenderSheet(); } else if(ceOpenId||ceScript||ceFilm||cePreview||ceAdd){ ceCloseAll(); } }); }
     // previews: a broken video flags itself; only one video plays at a time; desktop hover plays a card thumbnail muted
     document.addEventListener('error', function(ev){ var tg=ev.target; if(tg && tg.tagName==='VIDEO' && tg.hasAttribute('data-ce-vid') && tg.getAttribute('src')) ceVideoFailed(tg); }, true);
-    document.addEventListener('play', function(ev){ document.querySelectorAll('video').forEach(function(v){ if(v!==ev.target && !v.paused) v.pause(); }); }, true);
+    document.addEventListener('play', function(ev){ if(ev.target&&ev.target.hasAttribute&&ev.target.hasAttribute('data-ce-sndaudio')) return; document.querySelectorAll('video').forEach(function(v){ if(v!==ev.target && !v.paused) v.pause(); }); }, true);
     if(view){
       view.addEventListener('mouseover', function(ev){ var b=ev.target.closest&&ev.target.closest('.ce-play[data-ce-hover]'); if(!b||b===ceHoverEl) return; if(!(window.matchMedia&&window.matchMedia('(hover:hover)').matches)) return; ceStopHover(); var img=b.querySelector('.ce-thumb'); var vv=document.createElement('video'); vv.className=img?img.className:'ce-thumb'; vv.muted=true; vv.loop=true; vv.setAttribute('playsinline',''); vv.setAttribute('aria-hidden','true'); vv.src=b.getAttribute('data-ce-hover'); if(img) img.style.display='none'; b.insertBefore(vv, b.firstChild); var pr=vv.play(); if(pr&&pr.catch) pr.catch(function(){}); ceHoverEl=b; });
       view.addEventListener('mouseout', function(ev){ if(ceHoverEl && !ceHoverEl.contains(ev.relatedTarget)) ceStopHover(); });
@@ -3964,6 +3970,30 @@ body{padding:0;}
     }
   }
   window.addEventListener('beforeunload', function(ev){ if(Object.keys(ceUploads).some(function(k){ return ceUploads[k].status==='uploading'; })){ ev.preventDefault(); ev.returnValue=''; } });
+
+
+  /* --- Sound picker: hear the song from the chosen point, or your video with the song underneath (live, before saving) --- */
+  var ceSnd={audio:null, video:null, timer:null, mode:null};
+  function ceClock(t){ t=Math.max(0,+t||0); var m=Math.floor(t/60), s=t-m*60; return m+':'+(s<10?'0':'')+(Math.round(s*10)/10).toString().replace(/\.0$/,''); }
+  function ceSndStop(){ if(ceSnd.timer) clearInterval(ceSnd.timer); ceSnd.timer=null; ['audio','video'].forEach(function(k){ var el=ceSnd[k]; if(el){ try{ el.pause(); }catch(e){} el.remove(); ceSnd[k]=null; } }); ceSnd.mode=null; }
+  async function ceSignedPreview(path){ var c=ceSigned[path]; if(c&&Date.now()-c.at<50*60000) return c.url; var r=await supaClient.storage.from('content-previews').createSignedUrl(path, 3600); if(r.error||!r.data) throw (r.error||new Error('no url')); ceSigned[path]={url:r.data.signedUrl, at:Date.now()}; return r.data.signedUrl; }
+  async function ceSndPlay(mode, btn){
+    var root=btn.closest('[data-ce-editor]'); if(!root) return; ceSndStop(); if(mode==='stop') return;
+    var sel=root.querySelector('[data-ce-f="soundId"]'), opt=sel&&sel.options[sel.selectedIndex], pth=opt&&opt.getAttribute('data-path');
+    var st=parseFloat((root.querySelector('[data-ce-f="start"]')||{}).value)||0, vol=(parseInt((root.querySelector('[data-ce-f="volume"]')||{}).value,10)||0)/100, dur=parseFloat(opt&&opt.getAttribute('data-dur'))||30;
+    var box=root.querySelector('[data-ce-sndplay]');
+    if(!pth){ box.innerHTML='<div class="f-note">'+(sel&&sel.value?'This song isn’t on the preview shelf yet; it’s added on the pipeline’s next run.':'Pick a song first.')+'</div>'; return; }
+    try{
+      var url=await ceSignedPreview(pth), a=document.createElement('audio'); a.setAttribute('data-ce-sndaudio',''); a.preload='auto'; a.src=url; ceSnd.audio=a; document.body.appendChild(a); ceSnd.mode=mode;
+      if(mode==='track'){ a.volume=1; a.currentTime=st; await a.play(); box.innerHTML='<div class="f-note">Playing the song from '+esc(ceClock(st))+' (full volume, so you can hear the part). Stops after 20 seconds.</div>'; ceSnd.timer=setInterval(function(){ if(a.currentTime>=st+20||a.ended) ceSndStop(); }, 250); return; }
+      var q=ceFindSlot(ceOpenId), v=document.createElement('video'); v.className='ce-video'; v.controls=true; v.setAttribute('playsinline',''); v.setAttribute('data-ce-sndvideo',''); v.src=q.video.originalPreviewUrl; box.innerHTML=''; box.appendChild(v); ceSnd.video=v; a.volume=Math.min(1,vol);
+      var sync=function(force){ var want=(st+v.currentTime)%dur; if(force||Math.abs(a.currentTime-want)>0.25) a.currentTime=want; };
+      v.addEventListener('play', function(){ sync(true); a.play().catch(function(){}); }); v.addEventListener('pause', function(){ a.pause(); }); v.addEventListener('seeked', function(){ sync(true); }); v.addEventListener('ended', function(){ a.pause(); });
+      ceSnd.timer=setInterval(function(){ if(!v.paused) sync(false); var vr=root.querySelector('[data-ce-f="volume"]'), sr=root.querySelector('[data-ce-f="start"]'); if(vr) a.volume=Math.min(1,(parseInt(vr.value,10)||0)/100); if(sr && parseFloat(sr.value)!==st){ st=parseFloat(sr.value)||0; sync(true); } }, 250);
+      await v.play().catch(function(){});
+      var note=document.createElement('div'); note.className='f-note'; note.textContent='Your video with the song underneath, as it will be mixed. Move the sliders while it plays.'; box.appendChild(note);
+    }catch(e){ box.innerHTML='<div class="ce-note">Couldn’t play it: '+esc(e.message||String(e))+'</div>'; ceSndStop(); }
+  }
 
   /* ---------- data layer ---------- */
   function subscribe(){
