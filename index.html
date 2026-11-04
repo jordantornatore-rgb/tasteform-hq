@@ -2638,11 +2638,11 @@ body{padding:0;}
     h+='<div class="kpis an-kpis">'+
       anKpi('Reels + posts', num(a.cur.posts), a.change.posts, vs)+
       anKpi('Views', num(a.cur.views), a.change.views, vs, a.cur.posts && a.cur.viewsHave<a.cur.posts ? a.cur.viewsHave+' of '+a.cur.posts+' posts have views' : '')+
-      anKpi('Accounts reached', num(ac.reached), acc.change.reached, acc.cur?vs:accNote)+
-      anKpi('Net followers', acc.netFollowers==null?'–':(acc.netFollowers>0?'+':'')+num(acc.netFollowers), null, acc.netFollowers==null?accNote:(acc.followers!=null?num(acc.followers)+' followers now':''))+
+      anKpi('Accounts reached', num(ac.reached), acc.change.reached, acc.cur?(acc.prev?vs:'comparison builds from 4 Nov'):accNote, acc.cur?'Instagram\'s count, last '+a.period+' days':'')+
+      anKpi('Net followers', acc.netFollowers==null?'–':(acc.netFollowers>0?'+':'')+num(acc.netFollowers), null, acc.netFollowers==null?(acc.followers!=null?'counting daily from 4 Nov':accNote):(acc.followers!=null?num(acc.followers)+' followers now':''))+
       anKpi('Engagement / 1K views', a.cur.engPer1k==null?'–':num(a.cur.engPer1k,1), a.change.engPer1k, vs, 'likes, comments, saves, shares')+
       anKpi('Typical reel', num(a.cur.typicalReel), a.change.typicalReel, vs, a.cur.reels? 'median views of '+a.cur.reels+' '+HQ.plural(a.cur.reels,'reel') : 'no reels this window')+
-      anKpi('Watch time', anDur(a.cur.watchTimeSec), a.change.watchTimeSec, a.cur.watchHave?vs:'from tonight\'s scan', a.cur.watchHave && a.cur.watchHave<a.cur.reels ? a.cur.watchHave+' of '+a.cur.reels+' reels' : (a.cur.avgWatchSec!=null?'avg '+anDur(a.cur.avgWatchSec)+' per view':''))+
+      anKpi('Watch time', anDur(a.cur.watchTimeSec), a.change.watchTimeSec, a.cur.watchHave?vs:'not shown on Instagram web', a.cur.watchHave && a.cur.watchHave<a.cur.reels ? a.cur.watchHave+' of '+a.cur.reels+' reels' : (a.cur.avgWatchSec!=null?'avg '+anDur(a.cur.avgWatchSec)+' per view':''))+
       anKpi('Saves · Shares', num(a.cur.saves)+' <small>·</small> '+num(a.cur.shares), a.change.saves, a.change.saves==null?'':'saves '+vs)+
       '</div>';
     h+='<div class="panel"><h2>The read</h2><p class="an-read">'+esc(anReadLine(a))+'</p><p class="rule">Posts count on the day they went out (Sydney) with their lifetime numbers, so the newest posts are still growing. Windows: '+esc(HQ.fmtDay(a.curFrom,'short')||a.curFrom)+' – today vs '+esc(HQ.fmtDay(a.prevFrom,'short')||a.prevFrom)+' – '+esc(HQ.fmtDay(a.prevTo,'short')||a.prevTo)+'.</p></div>';
@@ -2697,7 +2697,7 @@ body{padding:0;}
     var s=a.scatter, h='';
     h+='<div class="panel"><div class="chart-head"><div><h2>Reach vs '+(s.yKey==='avgWatchSec'?'retention':'engagement')+' · last 90 days</h2><p class="rule" style="margin-top:4px">'+
       (s.yKey==='avgWatchSec' ? 'Each dot is a reel, carousel or photo: how far it travelled against how long people watched. Dashed lines are your medians; top-right is what to make more of.'
-        : 'Watch time isn\'t in the data yet ('+s.watchHave+' '+HQ.plural(s.watchHave,'reel')+' have it; the scan adds it from tonight), so for now the height is engagement per 1,000 views. Dashed lines are your medians; top-right is what to make more of.')+
+        : 'Instagram\'s web Insights don\'t show watch time, so the height is engagement per 1,000 views (likes, comments, saves and shares) instead. Dashed lines are your medians; top-right is what to make more of.')+
       '</p></div><div class="an-legend"><span><i class="sw" style="background:var(--accent)"></i>Outlier</span><span><i class="sw" style="background:var(--series-3)"></i>Post</span></div></div>';
     h+= s.points.length>=2 ? '<div class="an-chart">'+anScatterSvg(s)+'</div>' : '<div class="empty-state">Needs at least 2 posts from the last 90 days.</div>';
     var outs=s.points.filter(function(p){ return p.outlier; }).sort(function(x,y){ return y.x-x.x; });
@@ -2730,8 +2730,8 @@ body{padding:0;}
     h+='<div class="kpis an-kpis">'+
       anKpi('Followers', num(acc.followers), null, acc.followersDay?'read '+(HQ.fmtDay(acc.followersDay,'short')||acc.followersDay):'from tonight\'s scan')+
       anKpi('Net followers', acc.netFollowers==null?'–':(acc.netFollowers>0?'+':'')+num(acc.netFollowers), null, 'last '+a.period+' days')+
-      anKpi('Follows', num(ac.follows), acc.change.follows, acc.cur?vs:'from tonight\'s scan')+
-      anKpi('Unfollows', num(ac.unfollows), acc.change.unfollows, acc.cur?vs:'from tonight\'s scan', '', true)+
+      anKpi('Follows', num(ac.follows), acc.change.follows, acc.cur&&ac.follows==null?'not shown on Instagram web':(acc.cur?vs:'from tonight\'s scan'))+
+      anKpi('Unfollows', num(ac.unfollows), acc.change.unfollows, acc.cur&&ac.unfollows==null?'not shown on Instagram web':(acc.cur?vs:'from tonight\'s scan'), '', true)+
       '</div>';
     if(acc.cur && HQ.isNum(ac.follows) && HQ.isNum(ac.unfollows) && ac.follows>0){
       var keep=Math.round((1-ac.unfollows/ac.follows)*100);
