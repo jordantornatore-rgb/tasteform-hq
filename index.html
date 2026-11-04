@@ -738,7 +738,10 @@ body{padding:0;}
 .ce-cal-day{display:flex;flex-direction:column;gap:6px;min-width:0;border-radius:var(--r-m);padding:4px;border:1px dashed transparent;min-height:60px;}
 .ce-cal-day.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);}
 .ce-cal-card{border:1px solid var(--border);border-radius:var(--r-m);background:var(--bg);padding:8px;display:flex;flex-direction:column;gap:5px;min-width:0;position:relative;touch-action:pan-y;}
-.ce-cal-card.drag{cursor:grab;}
+.ce-cal-card.drag{cursor:grab;outline:2px dashed var(--accent);}
+.ce-cal-card[data-ce-drag]{cursor:grab;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+.ce-cal-card[data-ce-drag] img{-webkit-user-drag:none;pointer-events:none;}
+body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;}
 .ce-cal-card.moving{opacity:.55;}
 .ce-cal-card .t{font-family:'Anton',Impact,sans-serif;font-size:22px;line-height:1;letter-spacing:.02em;}
 .ce-cal-card .lock{font-size:var(--t-xs);color:var(--muted);font-weight:600;}
@@ -3542,33 +3545,36 @@ body{padding:0;}
       view.addEventListener('mouseover', function(ev){ var b=ev.target.closest&&ev.target.closest('.ce-play[data-ce-hover]'); if(!b||b===ceHoverEl) return; if(!(window.matchMedia&&window.matchMedia('(hover:hover)').matches)) return; ceStopHover(); var img=b.querySelector('.ce-thumb'); var vv=document.createElement('video'); vv.className=img?img.className:'ce-thumb'; vv.muted=true; vv.loop=true; vv.setAttribute('playsinline',''); vv.setAttribute('aria-hidden','true'); vv.src=b.getAttribute('data-ce-hover'); if(img) img.style.display='none'; b.insertBefore(vv, b.firstChild); var pr=vv.play(); if(pr&&pr.catch) pr.catch(function(){}); ceHoverEl=b; });
       view.addEventListener('mouseout', function(ev){ if(ceHoverEl && !ceHoverEl.contains(ev.relatedTarget)) ceStopHover(); });
     }
-    // drag to another day: mouse drags after 6 px; touch needs a 350 ms long-press first so the page still scrolls
+    // drag and drop between days (and the Pending scheduling tray).
+    // Mouse: drags after 6 px. Touch: press and hold 300 ms, then drag; the page stops scrolling while you drag and
+    // scrolls by itself near the top/bottom edge. Touch uses touch events so the browser can't cancel the drag to scroll.
     if(view){
-      view.addEventListener('pointerdown', function(ev){
-        var card=ev.target.closest('.ce-cal-card[data-ce-drag]'); if(!card || !isAdmin) return; var hit=ev.target.closest('select,button,a,input,label'); if(hit && !(card.classList.contains('ce-bub') && hit.classList.contains('ce-open'))) return;
-        ceDrag={id:card.getAttribute('data-ce-drag'), card:card, x0:ev.clientX, y0:ev.clientY, pointerId:ev.pointerId, touch:ev.pointerType!=='mouse', armed:ev.pointerType==='mouse', moved:false, ghost:null, over:null};
-        if(ceDrag.touch) ceDrag.timer=setTimeout(function(){ if(ceDrag.card===card){ ceDrag.armed=true; try{ card.setPointerCapture(ev.pointerId); }catch(e){} card.classList.add('drag'); if(navigator.vibrate) navigator.vibrate(10); } }, 350);
-      });
-      view.addEventListener('pointermove', function(ev){
-        if(!ceDrag.card || ev.pointerId!==ceDrag.pointerId) return;
-        var dx=ev.clientX-ceDrag.x0, dy=ev.clientY-ceDrag.y0;
-        if(!ceDrag.armed){ if(Math.hypot(dx,dy)>10) ceDragEnd(false); return; }
-        if(!ceDrag.moved && Math.hypot(dx,dy)<6) return;
-        if(!ceDrag.moved){ ceDrag.moved=true; try{ ceDrag.card.setPointerCapture(ev.pointerId); }catch(e){} var g=ceDrag.card.cloneNode(true); g.classList.add('ce-ghost'); g.removeAttribute('data-ce-drag'); document.body.appendChild(g); ceDrag.ghost=g; ceDrag.card.classList.add('moving'); }
-        if(ceDrag.ghost){ ceDrag.ghost.style.left=(ev.clientX-80)+'px'; ceDrag.ghost.style.top=(ev.clientY-20)+'px'; }
-        ev.preventDefault();
-        var under=document.elementFromPoint(ev.clientX, ev.clientY), day=under&&under.closest('.ce-cal-day[data-day]');
-        if(ceDrag.over&&ceDrag.over!==day) ceDrag.over.classList.remove('over');
-        if(day){ day.classList.add('over'); } ceDrag.over=day||null;
-      }, {passive:false});
-      var up=function(ev){ if(!ceDrag.card || (ev.pointerId!=null && ev.pointerId!==ceDrag.pointerId)) return; ceDragEnd(true, ev); };
-      view.addEventListener('pointerup', up); view.addEventListener('pointercancel', function(){ ceDragEnd(false); });
+      var canStart=function(t){ var card=t.closest&&t.closest('.ce-cal-card[data-ce-drag]'); if(!card || !isAdmin) return null; var hit=t.closest('select,button,a,input,label'); if(hit && !(card.classList.contains('ce-bub') && (hit.classList.contains('ce-open')||hit.hasAttribute('data-ce-play')))) return null; return card; };
+      var start=function(card, x, y, touch){ ceDrag={id:card.getAttribute('data-ce-drag'), card:card, x0:x, y0:y, x:x, y:y, touch:touch, armed:!touch, moved:false, ghost:null, over:null}; if(touch) ceDrag.timer=setTimeout(function(){ if(ceDrag.card===card){ ceDrag.armed=true; card.classList.add('drag'); if(navigator.vibrate) navigator.vibrate(10); } }, 300); };
+      var scrollLoop=function(){ if(!ceDrag.card||!ceDrag.moved) return; var y=ceDrag.y, edge=70, v=y<edge?-(edge-y)/3:(y>innerHeight-edge?(y-(innerHeight-edge))/3:0); if(v){ window.scrollBy(0, Math.max(-24, Math.min(24, v))); hover(ceDrag.x, ceDrag.y); } ceDrag.raf=requestAnimationFrame(scrollLoop); };
+      var hover=function(x, y){ if(ceDrag.ghost) ceDrag.ghost.style.visibility='hidden'; var under=document.elementFromPoint(x, y), day=under&&under.closest('.ce-cal-day[data-day]'); if(ceDrag.ghost) ceDrag.ghost.style.visibility=''; if(ceDrag.over&&ceDrag.over!==day) ceDrag.over.classList.remove('over'); if(day) day.classList.add('over'); ceDrag.over=day||null; };
+      var move=function(x, y){
+        var dx=x-ceDrag.x0, dy=y-ceDrag.y0; ceDrag.x=x; ceDrag.y=y;
+        if(!ceDrag.armed){ if(Math.hypot(dx,dy)>10) ceDragEnd(false); return false; }
+        if(!ceDrag.moved && Math.hypot(dx,dy)<6) return true;
+        if(!ceDrag.moved){ ceDrag.moved=true; var g=ceDrag.card.cloneNode(true); g.classList.add('ce-ghost'); g.removeAttribute('data-ce-drag'); document.body.appendChild(g); ceDrag.ghost=g; ceDrag.card.classList.add('moving'); document.body.classList.add('ce-dragging'); ceDrag.raf=requestAnimationFrame(scrollLoop); }
+        ceDrag.ghost.style.left=(x-80)+'px'; ceDrag.ghost.style.top=(y-24)+'px'; hover(x, y); return true;
+      };
+      view.addEventListener('pointerdown', function(ev){ if(ev.pointerType!=='mouse' || ev.button!==0) return; var card=canStart(ev.target); if(!card) return; start(card, ev.clientX, ev.clientY, false); ceDrag.pointerId=ev.pointerId; });
+      document.addEventListener('pointermove', function(ev){ if(!ceDrag.card || ceDrag.touch || ev.pointerId!==ceDrag.pointerId) return; if(move(ev.clientX, ev.clientY) && ceDrag.moved) ev.preventDefault(); }, {passive:false});
+      document.addEventListener('pointerup', function(ev){ if(!ceDrag.card || ceDrag.touch || ev.pointerId!==ceDrag.pointerId) return; ceDragEnd(true, ev); });
+      view.addEventListener('touchstart', function(ev){ if(ev.touches.length!==1) return; var card=canStart(ev.target); if(!card) return; var t=ev.touches[0]; start(card, t.clientX, t.clientY, true); }, {passive:true});
+      view.addEventListener('touchmove', function(ev){ if(!ceDrag.card || !ceDrag.touch) return; var t=ev.touches[0]; if(move(t.clientX, t.clientY) && ceDrag.armed) ev.preventDefault(); }, {passive:false});
+      view.addEventListener('touchend', function(ev){ if(!ceDrag.card || !ceDrag.touch) return; if(ceDrag.moved) ev.preventDefault(); ceDragEnd(true); });
+      view.addEventListener('touchcancel', function(){ if(ceDrag.card) ceDragEnd(false); });
+      view.addEventListener('contextmenu', function(ev){ if(ev.target.closest && ev.target.closest('.ce-cal-card[data-ce-drag]')) ev.preventDefault(); });
+      view.addEventListener('dragstart', function(ev){ if(ev.target.closest && ev.target.closest('.ce-cal-card[data-ce-drag]')) ev.preventDefault(); });
     }
   })();
   var ceDrag={};
   function ceDragEnd(drop, ev){
     var d=ceDrag; ceDrag={moved:d.moved}; setTimeout(function(){ ceDrag.moved=false; }, 50);
-    if(d.timer) clearTimeout(d.timer);
+    if(d.timer) clearTimeout(d.timer); if(d.raf) cancelAnimationFrame(d.raf); document.body.classList.remove('ce-dragging');
     if(d.ghost) d.ghost.remove(); if(d.over) d.over.classList.remove('over');
     if(d.card){ d.card.classList.remove('drag'); d.card.classList.remove('moving'); }
     if(drop && d.moved && d.over && d.over.getAttribute('data-day')==='__tray'){ ceUnschedule(d.id); return; }
@@ -3712,7 +3718,7 @@ body{padding:0;}
   }
   function ceDayPick(attr, val, cur, label){ var today=HQ.sydNow().key, o='<option value="">'+esc(label)+'</option>'; for(var i=-1;i<28;i++){ var k=HQ.addDays(today,i); o+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':(i===-1?'Yesterday':HQ.fmtDay(k,'wd'))))+'</option>'; } return '<select class="input" '+attr+'="'+esc(val)+'" aria-label="'+esc(label)+'">'+o+'<option value="__none">No film day</option></select>'; }
   function ceRenderPlanner(){
-    var head='<div class="chart-head"><div><h2>Calendar</h2><p class="rule" style="margin-top:4px">Every video from script to posted, one bubble each, on the day it posts. Drag a bubble to another day or into Pending scheduling; tap it for everything else. Tick bubbles to change several at once.</p></div></div>';
+    var head='<div class="chart-head"><div><h2>Calendar</h2><p class="rule" style="margin-top:4px">Every video from script to posted, one bubble each, on the day it posts. Drag a bubble to another day or into Pending scheduling (on a phone: press and hold it, then drag). Tap it for everything else; tick bubbles to change several at once.</p></div></div>';
     var st=ceLoadState('contentQueue'); if(st!=='ok'){ setText('ceSub', st==='loading'?'Loading…':'Sync error'); return '<div class="panel">'+head+ceStateBox(st,'the calendar')+'</div>'; }
     var all=(state.contentQueue||[]).filter(function(q){ return q && q.status!=='skipped'; });
     var today=HQ.sydNow().key, ws=HQ.addDays(HQ.weekStart(today), cePlan.offset*7), we=HQ.addDays(ws, cePlan.span-1), days=HQ.dayRange(ws,we);

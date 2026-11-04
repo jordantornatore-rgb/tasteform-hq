@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.1 — 4 Nov 2026 (drag and drop that works on a phone)
+
+- Calendar drag and drop rebuilt: grab a bubble anywhere (title, time, thumbnail) and drop it on a day or in Pending scheduling. On a phone, press and hold for a moment, then drag: the page no longer scrolls away and cancels the drag, and it scrolls by itself when you drag near the top or bottom edge. Thumbnails no longer start the browser's own image drag; long-press doesn't open the copy menu.
+
 ## 2.7.0 — 4 Nov 2026 (Calendar tab: every video from script to posted)
 
 - New **Calendar** tab (first tab; opens there once): one or two weeks, full width, one bubble per video on the day it posts, with its time, title, stage (Needs script, Scripted · to film, Filmed · to upload, Editing, To review, Approved, Trialing, Scheduled, Posted, Needs you), the 🏆 winner chip, format and location, and a thumbnail to play finished edits. 🧪 trial reels and 🎥 film days show on their days.

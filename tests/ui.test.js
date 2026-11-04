@@ -230,6 +230,40 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.click('#ceViewSeg [data-ceview="calendar"]'); await page.waitForTimeout(250);
       const cal = await page.evaluate(() => ({ tray: !!document.querySelector('.ce-tray[data-day="__tray"]'), bubbles: document.querySelectorAll('.ce-plangrid .ce-bub').length, stages: Array.from(document.querySelectorAll('[data-cep-stage]')).map(b => b.textContent), awaitIn: !!document.querySelector('.ce-plangrid [data-ce-open="test-await"]') }));
       check(`${lbl}: Calendar tab shows bubbles, stages and Pending scheduling`, () => assert.ok(cal.tray && cal.bubbles > 2 && cal.awaitIn && cal.stages.some(x => /^To review/.test(x)) && cal.stages.some(x => /^Scripted · to film/.test(x)), JSON.stringify(cal)));
+      // drag and drop: a bubble onto another day moves it; onto Pending scheduling takes it off its day
+      const dragTo = async (fromSel, toSel) => { // mouse drag that relies on the page scrolling itself near the edges
+        const f = await page.$eval(fromSel, e => { e.scrollIntoView({ block: 'center' }); const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + 20 }; });
+        await page.mouse.move(f.x, f.y); await page.mouse.down(); await page.mouse.move(f.x + 8, f.y + 8, { steps: 3 });
+        const vh = await page.evaluate(() => innerHeight);
+        for (let i = 0; i < 80; i++) { const r = await page.$eval(toSel, e => { const b = e.getBoundingClientRect(); return { top: b.top, bottom: b.bottom }; }); if (r.top > vh - 120) { await page.mouse.move(f.x, vh - 6 - (i % 2)); } else if (r.top < 70) { await page.mouse.move(f.x, 8 + (i % 2)); } else break; await page.waitForTimeout(50); }
+        const to = await page.$eval(toSel, e => { const r = e.getBoundingClientRect(); const top = Math.max(r.top, 0), bot = Math.min(r.bottom, innerHeight); return { x: r.left + r.width / 2, y: Math.min(top + 30, (top + bot) / 2) }; });
+        await page.mouse.move(to.x, to.y, { steps: 6 }); await page.mouse.up(); await page.waitForTimeout(250); };
+      const awaitDay = await page.$eval('.ce-plangrid [data-ce-drag="test-await"]', e => e.closest('[data-day]').getAttribute('data-day'));
+      const otherDay = await page.$$eval('.ce-plangrid .ce-cal-day[data-day]', (els, d) => { const ks = els.map(e => e.getAttribute('data-day')); const i = ks.indexOf(d); return ks[i + 1] || ks[i - 1]; }, awaitDay);
+      await dragTo('.ce-plangrid [data-ce-drag="test-await"]', `.ce-plangrid .ce-cal-day[data-day="${otherDay}"]`);
+      const moved = await page.evaluate(() => window.__HQ_TEST.client.__calls.filter(c => c.name === 'content-reschedule').map(c => c.body.id));
+      check(`${lbl}: dragging a bubble to another day moves it`, () => assert.ok(moved.includes('test-await'), JSON.stringify({ moved, awaitDay, otherDay })));
+      const nowIn = await page.$eval('.ce-plangrid [data-ce-drag="test-await"]', e => e.closest('[data-day]').getAttribute('data-day')).catch(() => null);
+      check(`${lbl}: the bubble now sits on the new day`, () => assert.strictEqual(nowIn, otherDay));
+      await dragTo('.ce-plangrid [data-ce-drag="test-await"]', '.ce-tray');
+      const un = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await'); return { flag: r && r.data.unscheduled, inTray: !!document.querySelector('.ce-tray [data-ce-drag="test-await"]') }; });
+      check(`${lbl}: dragging into Pending scheduling takes it off its day`, () => assert.ok(un.flag === true && un.inTray, JSON.stringify(un)));
+      await dragTo('.ce-tray [data-ce-drag="test-await"]', `.ce-plangrid .ce-cal-day[data-day="${otherDay}"]`);
+      const back = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await'); return { flag: r && r.data.unscheduled, inGrid: !!document.querySelector('.ce-plangrid [data-ce-drag="test-await"]') }; });
+      check(`${lbl}: dragging it from the tray onto a day schedules it again`, () => assert.ok(back.flag === false && back.inGrid, JSON.stringify(back)));
+      if (width === 390) { // a finger: press and hold, then drag (touch events, the page must not scroll away)
+        const res = await page.evaluate(async (target) => {
+          const el = document.querySelector('.ce-plangrid [data-ce-drag="test-await"]'); el.scrollIntoView({ block: 'start' }); window.scrollBy(0, -60);
+          const r = el.getBoundingClientRect(), dst = document.querySelector(`.ce-plangrid .ce-cal-day[data-day="${target}"]`).getBoundingClientRect();
+          const mk = (x, y) => new Touch({ identifier: 1, target: el, clientX: x, clientY: y });
+          const fire = (type, x, y) => { const tt = type === 'touchend' ? [] : [mk(x, y)]; const e = new TouchEvent(type, { bubbles: true, cancelable: true, touches: tt, targetTouches: tt, changedTouches: [mk(x, y)] }); el.dispatchEvent(e); return e.defaultPrevented; };
+          const x0 = r.left + r.width / 2, y0 = r.top + 20; fire('touchstart', x0, y0); await new Promise(z => setTimeout(z, 380));
+          let prevented = false; for (let i = 1; i <= 8; i++) prevented = fire('touchmove', x0 + (dst.left + 40 - x0) * i / 8, y0 + (dst.top + 30 - y0) * i / 8) || prevented;
+          fire('touchend', dst.left + 40, dst.top + 30); await new Promise(z => setTimeout(z, 250));
+          return { prevented, calls: window.__HQ_TEST.client.__calls.filter(c => c.name === 'content-reschedule').length };
+        }, awaitDay);
+        check(`${lbl}: press-and-hold drag with a finger moves it and stops the page scrolling`, () => assert.ok(res.prevented && res.calls >= 3, JSON.stringify(res)));
+      }
       await page.click('[data-cep-stage="film"]'); await page.waitForTimeout(150);
       const fb = await page.evaluate(() => ({ board: !!document.querySelector('.ce-filmboard'), groups: Array.from(document.querySelectorAll('.ce-filmgroup .ce-filmhead strong')).map(x => x.textContent), shown: Array.from(document.querySelectorAll('.ce-plangrid .ce-bub .ce-stg')).map(x => x.textContent) }));
       check(`${lbl}: "To film" shows only to-film videos, grouped by location`, () => assert.ok(fb.board && fb.groups.length >= 1 && fb.shown.every(x => /to film/.test(x)), JSON.stringify(fb)));
