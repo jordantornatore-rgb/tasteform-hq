@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.7.0 — 4 Nov 2026 (Calendar tab: every video from script to posted)
+
+- New **Calendar** tab (first tab; opens there once): one or two weeks, full width, one bubble per video on the day it posts, with its time, title, stage (Needs script, Scripted · to film, Filmed · to upload, Editing, To review, Approved, Trialing, Scheduled, Posted, Needs you), the 🏆 winner chip, format and location, and a thumbnail to play finished edits. 🧪 trial reels and 🎥 film days show on their days.
+- **Pending scheduling** tray on top: scripts saved with "Not scheduled yet" (new option in the script editor) and anything without a day. Drag a bubble onto a day (or pick a day) to schedule it; drag one into the tray to take it off its day. The pipeline holds an approved reel that's pending scheduling until it has a day.
+- **Stage chips** filter the calendar. "Scripted · to film" opens the filming board, grouped by location, with "Film on…" per location (sets `filmDate`) and Select all.
+- **Tick bubbles** to change several at once: stage (Needs script, Scripted · to film, Filmed · to upload, To review, Approved, Skip) or film day. Trialing, scheduled and posted reels aren't changed this way.
+- Reel sheet for scripted reels: "📱 Filmed it (not uploaded yet)" (`shotAt`) and a film day.
+- The Library links to the Calendar instead of showing the small calendar. Fix: ticking a checkbox no longer blocks the page from redrawing.
+
 ## 2.6.6 — 4 Nov 2026 (the winner in the schedule)
 
 - A trial reel now sits in the calendar and Up next at the time its winner posts, with a 🏆 Winner chip. Before the trials start (Trial reel: Yes) that time is projected: 72 h after the first pipeline run after you approve, or the time you moved it to if that leaves 24 h+ after the trials. The days the trial reels go out show 🧪 markers.

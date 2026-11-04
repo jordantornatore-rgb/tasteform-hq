@@ -226,6 +226,19 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       check(`${lbl}: up next includes the trialing reel`, () => assert.ok(/Trialing reel/.test(lib)));
       noBad('library', lib);
       // phone preview with 5 versions
+      // the Calendar tab: every video as a bubble, pending scheduling on top, stage filter, filming board
+      await page.click('#ceViewSeg [data-ceview="calendar"]'); await page.waitForTimeout(250);
+      const cal = await page.evaluate(() => ({ tray: !!document.querySelector('.ce-tray[data-day="__tray"]'), bubbles: document.querySelectorAll('.ce-plangrid .ce-bub').length, stages: Array.from(document.querySelectorAll('[data-cep-stage]')).map(b => b.textContent), awaitIn: !!document.querySelector('.ce-plangrid [data-ce-open="test-await"]') }));
+      check(`${lbl}: Calendar tab shows bubbles, stages and Pending scheduling`, () => assert.ok(cal.tray && cal.bubbles > 2 && cal.awaitIn && cal.stages.some(x => /^To review/.test(x)) && cal.stages.some(x => /^Scripted · to film/.test(x)), JSON.stringify(cal)));
+      await page.click('[data-cep-stage="film"]'); await page.waitForTimeout(150);
+      const fb = await page.evaluate(() => ({ board: !!document.querySelector('.ce-filmboard'), groups: Array.from(document.querySelectorAll('.ce-filmgroup .ce-filmhead strong')).map(x => x.textContent), shown: Array.from(document.querySelectorAll('.ce-plangrid .ce-bub .ce-stg')).map(x => x.textContent) }));
+      check(`${lbl}: "To film" shows only to-film videos, grouped by location`, () => assert.ok(fb.board && fb.groups.length >= 1 && fb.shown.every(x => /to film/.test(x)), JSON.stringify(fb)));
+      const firstFilm = await page.$eval('.ce-filmboard [data-cep-sel]', e => e.getAttribute('data-cep-sel'));
+      await page.click('.ce-filmboard [data-cep-sel]'); await page.waitForTimeout(80);
+      await page.selectOption('[data-cep-bulkto]', 'upload'); await page.click('[data-cep-apply]'); await page.waitForTimeout(200);
+      const shot = await page.evaluate((id) => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === id); return r && r.data; }, firstFilm);
+      check(`${lbl}: bulk "Filmed · to upload" marks it shot, still to_film for the pipeline`, () => assert.ok(shot && shot.shotAt && shot.status === 'to_film', JSON.stringify(shot && { s: shot.status, shot: shot.shotAt })));
+      await page.click('[data-cep-stage="all"]'); await page.waitForTimeout(100);
       await page.click('[data-ce-play="test-await"]'); await page.waitForTimeout(200);
       check(`${lbl}: preview opens`, () => assert.ok(true));
       const tabs = await page.$$eval('#ceSheet .ce-vtab', els => els.map(e => e.textContent));
@@ -238,6 +251,7 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       check(`${lbl}: version tab switches`, () => assert.strictEqual(sel, 'v3'));
       await page.keyboard.press('Escape'); await page.waitForTimeout(80);
       // filming sheet
+      await page.click('#ceViewSeg [data-ceview="library"]'); await page.waitForTimeout(200);
       await page.click('#ceRoot [data-ce="filmsheet"]'); await page.waitForTimeout(150);
       const film = await sheetText(); noBad('filming sheet', film);
       check(`${lbl}: filming sheet shows the script, hooks and visual hook`, () => assert.ok(/Desk lunch/i.test(film) && /Line two of the script/.test(film) && /Hook A/.test(film) && /Lunchbox slam/.test(film) && /Desk/i.test(film), JSON.stringify(film.slice(0, 900))));

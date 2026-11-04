@@ -768,6 +768,50 @@ body{padding:0;}
 .ce-editor .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .ce-editor input[type=range]{width:100%;}
 .ce-note{font-size:var(--t-s);color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px;}
+.ce-plan .ce-plan-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:6px 0 10px;}
+.ce-plan-range{font-size:var(--t-m);}
+.ce-stagebar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.ce-stagebtn{border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);border-radius:999px;padding:6px 12px;font:inherit;font-size:var(--t-s);cursor:pointer;min-height:36px;}
+.ce-stagebtn[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
+.ce-bulk{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--accent);border-radius:var(--r-m);margin-bottom:10px;background:color-mix(in srgb,var(--accent) 8%,transparent);}
+.ce-bulk .input{width:auto;min-width:150px;}
+.ce-tray{border:1px dashed var(--border-strong);margin-bottom:12px;padding:8px;}
+.ce-tray .dh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:700;}
+.ce-traylist,.ce-filmlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;}
+.ce-plangrid{display:grid;grid-template-columns:repeat(7,minmax(150px,1fr));gap:8px;overflow-x:auto;padding-bottom:4px;}
+.ce-plangrid.two{grid-template-columns:repeat(7,minmax(150px,1fr));}
+.ce-plangrid .ce-cal-day{border:1px solid var(--border);background:var(--surface);min-height:180px;}
+.ce-plangrid .ce-cal-day.today{border-color:var(--accent);}
+.ce-plangrid .ce-cal-day.past{opacity:.72;}
+.ce-plangrid .dh{display:flex;justify-content:space-between;font-size:var(--t-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:2px 4px;}
+.ce-bub{padding:8px 8px 8px 30px;border-left:4px solid var(--border-strong);}
+.ce-bub .t{font-family:inherit;font-size:var(--t-xs);font-weight:700;color:var(--text-2);letter-spacing:0;}
+.ce-bub .ttl{font-size:var(--t-s);-webkit-line-clamp:3;}
+.ce-bub .row .ce-open{flex:1;min-width:0;text-align:left;}
+.ce-bub .ce-thumb{width:36px;height:64px;}
+.ce-bub.sel{outline:2px solid var(--accent);}
+.ce-bubsel{position:absolute;left:6px;top:8px;}
+.ce-bubsel input{width:18px;height:18px;accent-color:var(--accent);}
+.ce-stg{font-weight:700;}
+.st-script{border-left-color:var(--border-strong);} .ce-stg.st-script{background:var(--surface-2);color:var(--text-2);}
+.st-film{border-left-color:var(--ce-purple);} .ce-stg.st-film{background:var(--ce-purple-soft);color:var(--ce-purple);}
+.st-upload{border-left-color:var(--series-3);} .ce-stg.st-upload{background:var(--info-soft);color:var(--text);}
+.st-editing{border-left-color:var(--series-2);} .ce-stg.st-editing{background:var(--info-soft);color:var(--text);}
+.st-review{border-left-color:var(--warn);} .ce-stg.st-review{background:var(--warn-soft);color:var(--warn);}
+.st-approved{border-left-color:var(--good);} .ce-stg.st-approved{background:var(--good-soft);color:var(--good);}
+.st-trialing{border-left-color:var(--ce-tof);} .ce-stg.st-trialing{background:var(--ce-tof-soft);color:var(--ce-tof);}
+.st-scheduled{border-left-color:var(--accent);} .ce-stg.st-scheduled{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--text);}
+.st-posted{border-left-color:var(--muted);} .ce-stg.st-posted{background:var(--surface-2);color:var(--muted);}
+.st-needs_you{border-left-color:var(--crit);} .ce-stg.st-needs_you{background:var(--crit-soft);color:var(--crit);}
+.ce-stagebtn.st-film[aria-pressed="false"]{border-color:var(--ce-purple);} .ce-stagebtn.st-review[aria-pressed="false"]{border-color:var(--warn);}
+.ce-filmboard{border:1px solid var(--border);border-radius:var(--r-m);padding:10px;margin-bottom:12px;}
+.ce-filmboard h3{margin:0 0 8px;}
+.ce-filmgroup{margin-bottom:12px;}
+.ce-filmhead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px;}
+.ce-filmhead .input{width:auto;min-width:150px;}
+.ce-filmbub{display:block;width:100%;text-align:left;font-size:var(--t-xs);font-weight:600;color:var(--ce-purple);background:var(--ce-purple-soft);border:0;border-radius:8px;padding:5px 7px;cursor:pointer;}
+.ce-calhint{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+@media (max-width:760px){ .ce-plangrid,.ce-plangrid.two{grid-template-columns:1fr;overflow:visible;} .ce-plangrid .ce-cal-day{min-height:0;} .ce-bulk .input,.ce-filmhead .input{width:100%;} }
 .ce-winchip{background:var(--good-soft);color:var(--good);}
 .ce-winner{border:1px solid var(--border-strong);border-radius:var(--r-m);padding:10px 12px;}
 .ce-trialmark{display:block;width:100%;text-align:left;font-size:var(--t-xs);color:var(--text-2);background:var(--surface-2);border:1px dashed var(--border-strong);border-radius:8px;padding:4px 6px;margin-bottom:4px;cursor:pointer;}
@@ -1433,6 +1477,7 @@ body{padding:0;}
     <div class="top">
       <div><h1>Content Engine</h1><div class="sub" id="ceSub">Loading…</div></div>
       <div class="seg-filter" role="group" aria-label="Content Engine view" id="ceViewSeg">
+        <button type="button" data-ceview="calendar" aria-pressed="false">Calendar</button>
         <button type="button" data-ceview="library" aria-pressed="true">Library</button>
         <button type="button" data-ceview="week" aria-pressed="false">This week</button>
         <button type="button" data-ceview="ideas" aria-pressed="false">Idea Bank</button>
@@ -2876,7 +2921,7 @@ body{padding:0;}
   var CE_TEST_MONTH={start:'2026-11-03', end:'2026-12-03'};
   var CE_SCHEDULE='Scanner Mon/Wed/Fri 4:47am · Review + batch Sun 4:13pm';
   var CE_METRICS=[['n','Posts'],['posts','Posts'],['count','Posts'],['medianViews','Median views'],['avgViews','Avg views'],['views','Views'],['likes','Likes'],['comments','Comments'],['saves','Saves'],['shares','Shares'],['follows','Follows'],['dms','DMs'],['keywordComments','Keyword comments'],['applications','Applications'],['score','Score'],['value','Value']];
-  var ceView=(function(){ var v=read('hqCeView'); return ['library','week','ideas','perf','scan'].indexOf(v)>=0 ? v : 'library'; })();
+  var ceView=(function(){ var v=read('hqCeView'); if(!read('hqPlannerSeen')){ store('hqPlannerSeen','1'); return 'calendar'; } return ['calendar','library','week','ideas','perf','scan'].indexOf(v)>=0 ? v : 'calendar'; })();
   var ceWeekOffset=0, ceShowFilming=false, ceOpenId=null, ceCopyTexts={}, ceBusy={};
   var ceFilters={status:'', funnel:'', format:'', type:'', office:false, lane:'', sort:'new'};
   var CE_LANES=[['niche','Niche'],['fitness','Fitness'],['format','Format'],['audience','Audience']];
@@ -2966,9 +3011,9 @@ body{padding:0;}
     var root=$('ceRoot'); if(!root) return;
     document.querySelectorAll('#ceViewSeg button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-ceview')===ceView?'true':'false'); });
     ceCopyTexts={};
-    var typing=document.activeElement && root.contains(document.activeElement) && /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName) && document.activeElement.value;
+    var typing=document.activeElement && root.contains(document.activeElement) && /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName) && !/^(checkbox|radio|range|button)$/.test(document.activeElement.type||'') && document.activeElement.value;
     if(typing){ ceRenderSheet(); return; } // never wipe text Jordan is typing in a card; the next change re-renders
-    root.innerHTML = ceView==='ideas' ? ceRenderIdeas() : (ceView==='perf' ? ceRenderPerf() : (ceView==='scan' ? ceRenderScan() : (ceView==='week' ? ceRenderWeek() : ceRenderLibrary())));
+    root.innerHTML = ceView==='ideas' ? ceRenderIdeas() : (ceView==='perf' ? ceRenderPerf() : (ceView==='scan' ? ceRenderScan() : (ceView==='week' ? ceRenderWeek() : (ceView==='calendar' ? ceRenderPlanner() : ceRenderLibrary()))));
     if(ceView==='ideas' && ceIdeaFocus){ var fe=root.querySelector('[data-idea-id="'+CSS.escape(ceIdeaFocus)+'"]'); if(fe){ fe.classList.add('focus'); try{ fe.scrollIntoView({block:'center'}); }catch(e){} } ceIdeaFocus=null; }
     if(ceView==='library' && ceLib.focusQ){ var qi=$('ceLibQ'); if(qi){ qi.focus(); try{ qi.setSelectionRange(qi.value.length, qi.value.length); }catch(e){} } ceLib.focusQ=false; }
     ceRenderSheet();
@@ -3067,6 +3112,7 @@ body{padding:0;}
     if(['approved','trialing','scheduled','posted'].indexOf(q.status)>=0 && q.format) html+= q.goldStandard ? '<div class="f-note">⭐ Gold standard for '+esc(ceText(q.format))+(q.goldCopiedAt?' · copied to templates/'+esc(ceText(q.format))+'/gold/':' · the pipeline copies it on its next run')+'</div>' : (isAdmin?'<div><button type="button" class="btn" data-ce-act="gold" data-id="'+esc(q.id)+'">⭐ Make this the gold standard for '+esc(ceText(q.format))+'</button></div>':'');
     if(p.ytClaimRisk && !posted) html+='<div class="f-note">YouTube may claim or mute the music on this one (no licensed track fitted).</div>';
     // status stepper (main states only) + side state
+    if(isAdmin && q.status==='to_film') html+='<div class="ce-block"><span class="ce-k">Filming</span><div class="ce-fbrow">'+(q.shotAt?'<span class="chip ce-stg st-upload">Filmed '+esc(relTime(q.shotAt)||'')+' · to upload</span><button type="button" class="btn small" data-cep-shot="'+esc(q.id)+'" data-v="0">Not filmed yet</button>':'<button type="button" class="btn small primary" data-cep-shot="'+esc(q.id)+'" data-v="1">📱 Filmed it (not uploaded yet)</button>')+ceDayPick('data-cep-filmone', q.id, HQ.isDayKey(q.filmDate)?q.filmDate:null, 'Film on…')+'</div>'+(cePending(q)?'<div class="f-note">Pending scheduling: pick a post day in Schedule, or drag it onto a day in the Calendar.</div>':'')+'</div>';
     html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Status</span>'+(isAdmin?'':'<span class="f-note">View only: your role can\'t change the status.</span>')+'</div><div class="ce-steps">'+CE_STATUS.map(function(st,i){ var cls=i===idx?' cur':(i<idx?' done':''); return '<button type="button" class="ce-step'+cls+'" data-ce-status="'+st+'"'+(isAdmin&&!posted?'':' disabled')+' aria-pressed="'+(i===idx?'true':'false')+'">'+(i<idx?'✓ ':'')+esc(CE_STATUS_LABEL[st])+'</button>'; }).join('')+'</div>'+
       '<div class="ce-chips">'+(idx<0?'<span class="f-note">Side state: '+esc(ceStatusLabel(q.status))+'.</span>':'')+(q.statusAt?'<span class="f-note">Set '+esc(relTime(q.statusAt)||'')+'.</span>':'')+(isAdmin&&!posted?(q.status==='skipped'?'<button type="button" class="btn small" data-ce-status="to_film">Un-skip</button>':'<button type="button" class="btn small" data-ce-status="skipped">Skip this slot</button>'):'')+'</div></div>';
     // timeline
@@ -3377,9 +3423,11 @@ body{padding:0;}
   async function ceMove(id, dayKey, hm){
     if(!isAdmin) return; var q=ceFindSlot(id); if(!q) return;
     var lock=ceLocked(q); if(lock.locked){ showBanner(lock.why+': this post can\'t be moved.'); return; }
-    var parts=String(hm).split(':').map(Number); var at=new Date(HQ.sydMidnight(dayKey)+(parts[0]*60+parts[1])*60000).toISOString();
+    var parts=String(hm).split(':').map(Number), atMs=HQ.sydMidnight(dayKey)+(parts[0]*60+parts[1])*60000;
+    if(atMs<Date.now()+10*60000){ var nx=Date.now()+40*60000; atMs=Math.ceil(nx/(15*60000))*15*60000; }
+    var at=new Date(atMs).toISOString();
     ceMoving[id]=true; renderNow('content'); ceRenderSheet();
-    try{ var data=await ceInvoke('content-reschedule', {id:id, postDate:at}); Object.assign(q, {date:data.date, day:data.day, weekStart:data.weekStart, posting:data.posting||q.posting}); ceSetSheetMsg(id, 'Moved to '+ceWhenFull(at)+(data.movedInProvider?' (Outstand updated)':'')); }
+    try{ var data=await ceInvoke('content-reschedule', {id:id, postDate:at}); Object.assign(q, {date:data.date, day:data.day, weekStart:data.weekStart, posting:data.posting||q.posting}); if(q.unscheduled){ q.unscheduled=false; try{ await db.collection('content_queue').doc(id).update({unscheduled:false, scheduledByJordanAt:ceNowIso()}); }catch(e){} } ceSetSheetMsg(id, 'Moved to '+ceWhenFull(at)+(data.movedInProvider?' (Outstand updated)':'')); }
     catch(e){ console.error('content-reschedule failed', e); showBanner('Couldn\'t move "'+(ceText(q.title)||id)+'": '+e.message); ceSetSheetMsg(id, e.message, true); }
     ceMoving[id]=false; renderNow('content'); ceRenderSheet();
   }
@@ -3495,7 +3543,7 @@ body{padding:0;}
     // drag to another day: mouse drags after 6 px; touch needs a 350 ms long-press first so the page still scrolls
     if(view){
       view.addEventListener('pointerdown', function(ev){
-        var card=ev.target.closest('.ce-cal-card[data-ce-drag]'); if(!card || !isAdmin) return; if(ev.target.closest('select,button,a,input')) return;
+        var card=ev.target.closest('.ce-cal-card[data-ce-drag]'); if(!card || !isAdmin) return; var hit=ev.target.closest('select,button,a,input,label'); if(hit && !(card.classList.contains('ce-bub') && hit.classList.contains('ce-open'))) return;
         ceDrag={id:card.getAttribute('data-ce-drag'), card:card, x0:ev.clientX, y0:ev.clientY, pointerId:ev.pointerId, touch:ev.pointerType!=='mouse', armed:ev.pointerType==='mouse', moved:false, ghost:null, over:null};
         if(ceDrag.touch) ceDrag.timer=setTimeout(function(){ if(ceDrag.card===card){ ceDrag.armed=true; try{ card.setPointerCapture(ev.pointerId); }catch(e){} card.classList.add('drag'); if(navigator.vibrate) navigator.vibrate(10); } }, 350);
       });
@@ -3521,7 +3569,8 @@ body{padding:0;}
     if(d.timer) clearTimeout(d.timer);
     if(d.ghost) d.ghost.remove(); if(d.over) d.over.classList.remove('over');
     if(d.card){ d.card.classList.remove('drag'); d.card.classList.remove('moving'); }
-    if(drop && d.moved && d.over){ var day=d.over.getAttribute('data-day'), q=ceFindSlot(d.id); if(q && day && day!==(HQ.isDayKey(q.date)?q.date:null)){ var at=cePostAtMs(q), hm=at?HQ.pad(HQ.sydParts(at).h)+':'+HQ.pad(HQ.sydParts(at).min):(ceSlotTimes()[ceSlotKey(q)]||'19:00'); ceMove(d.id, day, hm); } }
+    if(drop && d.moved && d.over && d.over.getAttribute('data-day')==='__tray'){ ceUnschedule(d.id); return; }
+    if(drop && d.moved && d.over){ var day=d.over.getAttribute('data-day'), q=ceFindSlot(d.id); if(q && day && (q.unscheduled || day!==(HQ.isDayKey(q.date)?q.date:null))){ var at=cePostAtMs(q), hm=at?HQ.pad(HQ.sydParts(at).h)+':'+HQ.pad(HQ.sydParts(at).min):(ceSlotTimes()[ceSlotKey(q)]||'19:00'); ceMove(d.id, day, hm); } }
   }
 
   /* --- Library: pipeline strip, auto post, waiting for you, calendar, up next, posted, the rest --- */
@@ -3593,7 +3642,7 @@ body{padding:0;}
           (isAdmin?'<div class="ce-big"><button type="button" class="btn primary" data-ce-act="approve" data-id="'+esc(q.id)+'">✓ Approve</button><button type="button" class="btn" data-ce-open="'+esc(q.id)+'" data-ce-fb>Request changes</button></div>'+ceFeedbackBox(q.id):'')+'</div></div>';
       }).join('')+'</div></div>';
     }
-    html+=ceRenderCalendar(rows);
+    html+='<div class="panel ce-calhint"><span>The calendar has its own tab now: every video from script to posted, by day.</span><button type="button" class="btn small" data-ceview-go="calendar">Open the calendar</button></div>';
     // filters
     var formats=[]; rows.forEach(function(q){ var f=ceText(q.format); if(f&&formats.indexOf(f)<0) formats.push(f); }); formats.sort();
     var sel=function(name, opts, cur, label){ return '<select class="input" data-celib="'+name+'" aria-label="'+esc(label)+'">'+opts.map(function(o){ return '<option value="'+esc(o[0])+'"'+(o[0]===cur?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('')+'</select>'; };
@@ -3634,6 +3683,111 @@ body{padding:0;}
     html+='<div class="panel ce-rules"><button type="button" class="ce-open" data-ce-rules aria-expanded="'+(ceRulesOpen?'true':'false')+'"><span style="font-weight:700;font-size:var(--t-s)">'+(ceRulesOpen?'▾':'▸')+' Rules the editor has learned · '+learn.length+'</span></button>'+(ceRulesOpen?(learn.length?'<ul>'+learn.map(function(l){ return '<li>'+esc(ceText(l.rule))+' <span class="muted">· '+esc(relTime(l.at)||'')+(l.fromRowId?' · from '+esc(l.fromRowId):'')+'</span></li>'; }).join('')+'</ul>':'<div class="empty-state">No rules yet. Feedback that reads as a general rule lands here and in PREFERENCES.md.</div>'):'')+'</div>';
     return html;
   }
+  /* --- Calendar tab: every video as a bubble on its day, from script to posted; pending scheduling on top --- */
+  var cePlan=(function(){ var sp=parseInt(read('hqPlanSpan'),10); return {offset:0, span:sp===14?14:7, stage:'all', sel:{}, msg:''}; })();
+  var CE_STAGES=[['script','Needs script'],['film','Scripted · to film'],['upload','Filmed · to upload'],['editing','Editing'],['review','To review'],['approved','Approved'],['trialing','Trialing'],['scheduled','Scheduled'],['posted','Posted'],['needs_you','Needs you']];
+  var CE_STAGE_LABEL={}; CE_STAGES.forEach(function(x){ CE_STAGE_LABEL[x[0]]=x[1]; });
+  function ceStage(q){
+    var st=q.status||'needs_script', ps=(q.posting||{}).status;
+    if(cePosted(q)) return 'posted'; if(st==='skipped') return 'skipped'; if(st==='needs_jordan'||st==='error') return 'needs_you';
+    if(ps==='scheduled'||st==='scheduled') return 'scheduled'; if(ps==='trialing'||st==='trialing') return 'trialing';
+    if(st==='approved') return 'approved'; if(['edited','awaiting_approval','changes_requested'].indexOf(st)>=0) return 'review';
+    if(st==='filmed'||st==='editing') return 'editing';
+    if(st==='to_film'){ var fu=q.footageUpload; if(fu&&(fu.status==='uploaded'||fu.status==='linked'||fu.status==='uploading')) return 'editing'; return q.shotAt?'upload':'film'; }
+    return 'script';
+  }
+  function ceStageChip(q){ var k=ceStage(q); return '<span class="chip ce-stg st-'+k+'">'+esc(k==='editing'&&q.status==='to_film'?'Footage in · editing next':(CE_STAGE_LABEL[k]||k))+'</span>'; }
+  function cePending(q){ return !cePosted(q) && q.status!=='skipped' && (q.unscheduled || !HQ.isDayKey(q.date)) && ['trialing','scheduled'].indexOf((q.posting||{}).status)<0; }
+  function ceBubbleDay(q){ if(cePending(q)) return null; var at=cePostAtMs(q); return (ceIsWinner(q)||(q.posting&&q.posting.scheduledFor))&&at?HQ.sydDay(at):(HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):null)); }
+  function ceBubble(q, opts){
+    opts=opts||{}; var at=cePostAtMs(q), lock=ceLocked(q), drag=isAdmin&&!lock.locked, sel=!!cePlan.sel[q.id], k=ceStage(q);
+    var time=opts.tray?'Pending scheduling':(at&&(ceHasTime(q)||cePosted(q))?HQ.fmtTime(at):(CE_SLOT_LABEL[ceSlotKey(q)]||'slot')+' · '+HQ.fmtTime(at||Date.now()));
+    var meta=[ceFmtLabel?ceText(q.format):'', ceText(q.location)].filter(Boolean).join(' · ');
+    return '<div class="ce-cal-card ce-bub st-'+k+(sel?' sel':'')+(ceMoving[q.id]?' moving':'')+'"'+(drag?' data-ce-drag="'+esc(q.id)+'"':'')+'>'+
+      (isAdmin?'<label class="ce-bubsel" title="Select"><input type="checkbox" data-cep-sel="'+esc(q.id)+'"'+(sel?' checked':'')+' aria-label="Select '+esc(ceText(q.title)||'video')+'"></label>':'')+
+      '<div class="row">'+(ceHasVideo(q)?ceThumb(q):'')+'<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="t">'+esc(time)+(ceMoving[q.id]?' <span class="ce-spin"></span>':'')+'</span><span class="ttl">'+esc(ceText(q.title)&&q.title!=='Open slot'?ceText(q.title):(q.status==='needs_script'?'Open slot · write a script':'Untitled'))+'</span><span class="ce-chips">'+ceStageChip(q)+ceWinnerChip(q)+'</span>'+(meta?'<span class="ce-meta">'+esc(meta)+'</span>':'')+(q.filmDate&&HQ.isDayKey(q.filmDate)&&['script','film','upload'].indexOf(k)>=0?'<span class="ce-meta">🎥 film '+esc(HQ.fmtDay(q.filmDate,'wd'))+'</span>':'')+'</button></div>'+
+      (opts.tray&&isAdmin?'<select class="input" data-ce-moveday="'+esc(q.id)+'" aria-label="Schedule on">'+ceDayOptions(null).replace('Move to…','Schedule on…')+'</select>':'')+'</div>';
+  }
+  function ceDayPick(attr, val, cur, label){ var today=HQ.sydNow().key, o='<option value="">'+esc(label)+'</option>'; for(var i=-1;i<28;i++){ var k=HQ.addDays(today,i); o+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':(i===-1?'Yesterday':HQ.fmtDay(k,'wd'))))+'</option>'; } return '<select class="input" '+attr+'="'+esc(val)+'" aria-label="'+esc(label)+'">'+o+'<option value="__none">No film day</option></select>'; }
+  function ceRenderPlanner(){
+    var head='<div class="chart-head"><div><h2>Calendar</h2><p class="rule" style="margin-top:4px">Every video from script to posted, one bubble each, on the day it posts. Drag a bubble to another day or into Pending scheduling; tap it for everything else. Tick bubbles to change several at once.</p></div></div>';
+    var st=ceLoadState('contentQueue'); if(st!=='ok'){ setText('ceSub', st==='loading'?'Loading…':'Sync error'); return '<div class="panel">'+head+ceStateBox(st,'the calendar')+'</div>'; }
+    var all=(state.contentQueue||[]).filter(function(q){ return q && q.status!=='skipped'; });
+    var today=HQ.sydNow().key, ws=HQ.addDays(HQ.weekStart(today), cePlan.offset*7), we=HQ.addDays(ws, cePlan.span-1), days=HQ.dayRange(ws,we);
+    var inView=all.filter(function(q){ var d=ceBubbleDay(q); return d && d>=ws && d<=we; }), tray=all.filter(cePending);
+    var match=function(q){ return cePlan.stage==='all' || ceStage(q)===cePlan.stage; };
+    var counts={}; inView.concat(tray).forEach(function(q){ var k=ceStage(q); counts[k]=(counts[k]||0)+1; });
+    var html='<div class="panel ce-plan">'+head;
+    html+='<div class="ce-plan-bar"><div class="range" role="group" aria-label="Weeks"><button type="button" data-cep-nav="-1">← Prev</button><button type="button" data-cep-nav="0" aria-pressed="'+(cePlan.offset===0?'true':'false')+'">This week</button><button type="button" data-cep-nav="1">Next →</button></div><strong class="ce-plan-range">'+esc(HQ.fmtDay(ws,'short'))+' – '+esc(HQ.fmtDay(we,'short'))+'</strong><div class="range" role="group" aria-label="Span"><button type="button" data-cep-span="7" aria-pressed="'+(cePlan.span===7?'true':'false')+'">1 week</button><button type="button" data-cep-span="14" aria-pressed="'+(cePlan.span===14?'true':'false')+'">2 weeks</button></div></div>';
+    html+='<div class="ce-stagebar" role="group" aria-label="Show stage"><button type="button" class="ce-stagebtn" data-cep-stage="all" aria-pressed="'+(cePlan.stage==='all'?'true':'false')+'">All · '+(inView.length+tray.length)+'</button>'+CE_STAGES.filter(function(x){ return counts[x[0]] || x[0]===cePlan.stage || ['film','upload','review'].indexOf(x[0])>=0; }).map(function(x){ return '<button type="button" class="ce-stagebtn st-'+x[0]+'" data-cep-stage="'+x[0]+'" aria-pressed="'+(cePlan.stage===x[0]?'true':'false')+'">'+esc(x[1])+' · '+(counts[x[0]]||0)+'</button>'; }).join('')+'</div>';
+    var nsel=Object.keys(cePlan.sel).filter(function(id){ return ceFindSlot(id); }).length;
+    if(isAdmin && nsel) html+='<div class="ce-bulk" role="region" aria-label="Selected videos"><strong>'+nsel+' selected</strong><select class="input" data-cep-bulkto aria-label="Change stage to"><option value="">Change stage to…</option><option value="script">Needs script</option><option value="film">Scripted · to film</option><option value="upload">Filmed · to upload</option><option value="review">To review</option><option value="approved">Approved</option><option value="skip">Skip</option></select><button type="button" class="btn small primary" data-cep-apply>Apply</button>'+ceDayPick('data-cep-bulkfilm','sel',null,'Film on…')+'<button type="button" class="btn small" data-cep-clear>Clear</button></div>';
+    if(cePlan.msg) html+='<div class="f-note" role="status">'+esc(cePlan.msg)+'</div>';
+    // filming board: what's left to film / upload, grouped by where it's filmed
+    if(cePlan.stage==='film' || cePlan.stage==='upload'){
+      var pool=all.filter(function(q){ return ceStage(q)===cePlan.stage; }), groups={}, order=[];
+      pool.forEach(function(q){ var l=ceText(q.location)||'No location set'; if(!groups[l]){ groups[l]=[]; order.push(l); } groups[l].push(q); });
+      order.sort(function(a,b){ return groups[b].length-groups[a].length; });
+      html+='<div class="ce-filmboard"><div class="ce-filmhead"><h3 style="margin:0">'+(cePlan.stage==='film'?'To film':'Filmed, to upload')+' · '+pool.length+', by location</h3>'+(cePlan.stage==='film'?'<button type="button" class="btn small" data-ce="filmsheet">Filming sheet (2 weeks)</button>':'')+'</div>'+(pool.length?order.map(function(l){ var g=groups[l].sort(function(a,b){ return String(a.date||'9').localeCompare(String(b.date||'9')); }); var fd=g.every(function(q){ return q.filmDate===g[0].filmDate; })?g[0].filmDate:null;
+        return '<div class="ce-filmgroup"><div class="ce-filmhead"><strong>'+esc(ceCap(l))+' · '+g.length+'</strong>'+(isAdmin?ceDayPick('data-cep-filmday', l, fd, 'Film on…')+'<button type="button" class="btn small" data-cep-selgroup="'+esc(l)+'">Select all</button>':'')+'</div><div class="ce-filmlist">'+g.map(function(q){ return ceBubble(q, {tray:cePending(q)}); }).join('')+'</div></div>'; }).join(''):'<div class="empty-state">Nothing '+(cePlan.stage==='film'?'to film':'waiting to upload')+'.</div>')+'</div>';
+    }
+    // pending scheduling
+    var trayShown=tray.filter(match);
+    html+='<div class="ce-tray ce-cal-day" data-day="__tray"><div class="dh"><span>Pending scheduling · '+tray.length+'</span><span class="f-note">Scripted or planned, no day yet. Drag onto a day or pick one.</span></div><div class="ce-traylist">'+(trayShown.length?trayShown.map(function(q){ return ceBubble(q,{tray:true}); }).join(''):'<div class="ce-empty">'+(tray.length?'None at this stage.':'Nothing waiting. Drag a bubble here to take it off its day.')+'</div>')+'</div></div>';
+    // the grid
+    var films={}; all.forEach(function(q){ if(HQ.isDayKey(q.filmDate) && ['script','film','upload'].indexOf(ceStage(q))>=0 && match(q)){ (films[q.filmDate]=films[q.filmDate]||[]).push(q); } });
+    html+='<div class="ce-plangrid'+(cePlan.span===14?' two':'')+'">'+days.map(function(d){
+      var mine=inView.filter(function(q){ return ceBubbleDay(q)===d && match(q); }).sort(function(a,b){ return (cePostAtMs(a)||0)-(cePostAtMs(b)||0); });
+      var fl=(films[d]||[]).map(function(q){ return '<button type="button" class="ce-filmbub" data-ce-open="'+esc(q.id)+'">🎥 Film · '+esc(ceText(q.title)||'video')+(q.location?' · '+esc(ceText(q.location)):'')+'</button>'; }).join('');
+      var marks=(cePlan.stage==='all'||cePlan.stage==='trialing')?all.filter(function(q){ return (q.posting||{}).status==='trialing'; }).map(function(q){ var vs=(q.posting.trials||[]).filter(function(t){ return !t.cancelled && HQ.sydDay(t.postedAt||t.scheduledFor)===d; }).map(function(t){ return t.v; }); return vs.length?'<button type="button" class="ce-trialmark" data-ce-open="'+esc(q.id)+'">🧪 Trial reels '+esc(vs.join(', '))+' · '+esc(ceText(q.title)||'reel')+'</button>':''; }).join(''):'';
+      return '<div class="ce-cal-day'+(d===today?' today':'')+(d<today?' past':'')+'" data-day="'+d+'"><div class="dh"><span>'+esc(HQ.DAYN[HQ.dowOf(d)].slice(0,3))+(d===today?' · today':'')+'</span><span>'+esc(HQ.fmtDay(d,'short'))+'</span></div>'+fl+marks+(mine.length?mine.map(function(q){ return ceBubble(q); }).join(''):(fl||marks?'':'<div class="ce-empty">–</div>'))+(isAdmin&&d>=today?'<button type="button" class="ce-addday" data-ce-newreel="'+d+'" aria-label="New reel on '+esc(HQ.fmtDay(d,'wd'))+'">+ New reel</button>':'')+'</div>';
+    }).join('')+'</div>';
+    setText('ceSub', (inView.length+tray.length)+' videos · '+(counts.film||0)+' to film · '+(counts.review||0)+' to review · '+tray.length+' pending scheduling');
+    return html+'</div>';
+  }
+  document.addEventListener('click', function(ev){ var b=ev.target.closest&&ev.target.closest('[data-cep-shot]'); if(!b) return; var id=b.getAttribute('data-cep-shot'); ceApplyStage([id], b.getAttribute('data-v')==='1'?'upload':'film').then(function(){ ceRenderSheet(); }); });
+  document.addEventListener('change', function(ev){ var s1=ev.target.closest&&ev.target.closest('[data-cep-filmone]'); if(!s1||!s1.value) return; ceSetFilmDay([s1.getAttribute('data-cep-filmone')], s1.value).then(function(){ ceRenderSheet(); }); });
+  async function ceApplyStage(ids, to){
+    if(!isAdmin||!db) return; var now=ceNowIso(), done=0, skipped=[];
+    for(var i=0;i<ids.length;i++){ var q=ceFindSlot(ids[i]); if(!q) continue; var ps=(q.posting||{}).status;
+      if(cePosted(q)||ps==='trialing'||ps==='scheduled'){ skipped.push((ceText(q.title)||q.id)+' (already '+(cePosted(q)?'posted':ps)+')'); continue; }
+      var hasVideo=!!(q.video&&(q.video.file||q.video.previewUrl)), patch=null;
+      if(to==='script') patch={status:'needs_script'}; else if(to==='film') patch={status:'to_film', shotAt:null}; else if(to==='upload') patch={status:'to_film', shotAt:now};
+      else if(to==='review'){ if(!hasVideo){ skipped.push((ceText(q.title)||q.id)+' (no edit yet)'); continue; } patch={status:'awaiting_approval'}; }
+      else if(to==='approved'){ if(!hasVideo){ skipped.push((ceText(q.title)||q.id)+' (no edit yet)'); continue; } patch={status:'approved', approval:{approvedAt:now, by:currentUser&&currentUser.email||'admin'}}; }
+      else if(to==='skip') patch={status:'skipped'}; else continue;
+      patch.statusAt=now;
+      try{ await db.collection('content_queue').doc(q.id).update(patch); Object.assign(q, patch); done++; delete cePlan.sel[q.id]; }catch(e){ skipped.push((ceText(q.title)||q.id)+' ('+(e.message||e)+')'); }
+    }
+    cePlan.msg=done+' moved to '+(CE_STAGE_LABEL[to]||(to==='skip'?'Skipped':to))+'.'+(skipped.length?' Not changed: '+skipped.join(', ')+'.':''); renderNow('content');
+  }
+  async function ceSetFilmDay(ids, day){
+    if(!isAdmin||!db) return; var v=day==='__none'?null:day, n=0;
+    for(var i=0;i<ids.length;i++){ var q=ceFindSlot(ids[i]); if(!q) continue; try{ await db.collection('content_queue').doc(q.id).update({filmDate:v}); q.filmDate=v; n++; }catch(e){} }
+    cePlan.msg=v?n+' to film '+HQ.fmtDay(v,'wd')+'.':'Film day cleared on '+n+'.'; renderNow('content');
+  }
+  async function ceUnschedule(id){
+    var q=ceFindSlot(id); if(!q||!isAdmin||!db) return; var ps=(q.posting||{}).status;
+    if(cePosted(q)||ps==='trialing'||ps==='scheduled'){ showBanner('"'+(ceText(q.title)||id)+'" is already '+(cePosted(q)?'posted':ps)+'. Pull it from the schedule first.'); return; }
+    try{ await db.collection('content_queue').doc(id).update({unscheduled:true, unscheduledAt:ceNowIso()}); q.unscheduled=true; cePlan.msg='"'+(ceText(q.title)||id)+'" is pending scheduling.'; }catch(e){ showBanner('Couldn’t unschedule: '+(e.message||e)); }
+    renderNow('content');
+  }
+  document.addEventListener('click', function(ev){
+    var t=ev.target; if(!t.closest) return;
+    var g=t.closest('[data-ceview-go]'); if(g){ ceSetView(g.getAttribute('data-ceview-go')); return; }
+    var n=t.closest('[data-cep-nav]'); if(n){ var d=parseInt(n.getAttribute('data-cep-nav'),10); cePlan.offset=d===0?0:cePlan.offset+d; renderNow('content'); return; }
+    var sp=t.closest('[data-cep-span]'); if(sp){ cePlan.span=parseInt(sp.getAttribute('data-cep-span'),10)===14?14:7; store('hqPlanSpan', String(cePlan.span)); renderNow('content'); return; }
+    var sb=t.closest('[data-cep-stage]'); if(sb){ cePlan.stage=sb.getAttribute('data-cep-stage'); cePlan.msg=''; renderNow('content'); return; }
+    var ap=t.closest('[data-cep-apply]'); if(ap){ var to=(document.querySelector('[data-cep-bulkto]')||{}).value; if(!to){ cePlan.msg='Pick a stage first.'; renderNow('content'); return; } ceApplyStage(Object.keys(cePlan.sel), to); return; }
+    var cl=t.closest('[data-cep-clear]'); if(cl){ cePlan.sel={}; cePlan.msg=''; renderNow('content'); return; }
+    var sg=t.closest('[data-cep-selgroup]'); if(sg){ var l=sg.getAttribute('data-cep-selgroup'); (state.contentQueue||[]).forEach(function(q){ if(ceStage(q)===cePlan.stage && (ceText(q.location)||'No location set')===l) cePlan.sel[q.id]=true; }); renderNow('content'); return; }
+  });
+  document.addEventListener('change', function(ev){
+    var t=ev.target; if(!t.closest) return;
+    var c=t.closest('[data-cep-sel]'); if(c){ var id=c.getAttribute('data-cep-sel'); if(c.checked) cePlan.sel[id]=true; else delete cePlan.sel[id]; renderNow('content'); return; }
+    var bf=t.closest('[data-cep-bulkfilm]'); if(bf&&bf.value){ ceSetFilmDay(Object.keys(cePlan.sel), bf.value); return; }
+    var fg=t.closest('[data-cep-filmday]'); if(fg&&fg.value){ var l=fg.getAttribute('data-cep-filmday'); ceSetFilmDay((state.contentQueue||[]).filter(function(q){ return ceStage(q)===cePlan.stage && (ceText(q.location)||'No location set')===l; }).map(function(q){ return q.id; }), fg.value); return; }
+  });
   function ceRenderCalendar(rows){
     var today=HQ.sydNow().key, ws=HQ.addDays(HQ.weekStart(today), ceCalOffset*7), we=HQ.addDays(ws,6), days=HQ.dayRange(ws,we);
     var inWeek=rows.filter(function(q){ var at=cePostAtMs(q); var k=(ceIsWinner(q)&&at)?HQ.sydDay(at):(HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):null)); return k && k>=ws && k<=we; });
@@ -3717,7 +3871,7 @@ body{padding:0;}
     else {
       var opens=ceOpenSlots(), pick=ceScript.date?'__new':(opens[0]?opens[0].id:'__new'), today=HQ.sydNow().key, dayOpts='';
       for(var i=0;i<28;i++){ var k=HQ.addDays(today,i); dayOpts+='<option value="'+k+'"'+(k===(ceScript.date||today)?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':HQ.fmtDay(k,'wd')))+'</option>'; }
-      html+='<div><span class="ce-k">Day and slot</span><div class="grid"><label>Slot<select class="input" data-cs="slotpick">'+opens.map(function(o){ return '<option value="'+E(o.id)+'"'+(o.id===pick?' selected':'')+'>'+E(HQ.fmtDay(o.date,'wd')+' · '+(CE_SLOT_LABEL[ceSlotKey(o)]||'slot')+(o.format?' · '+o.format:''))+'</option>'; }).join('')+'<option value="__new"'+(pick==='__new'?' selected':'')+'>New slot on a day…</option></select></label></div><div class="grid ce-newslot"'+(pick==='__new'?'':' hidden')+'><label>Day<select class="input" data-cs="date">'+dayOpts+'</select></label><label>Slot type<select class="input" data-cs="slot">'+['high','low','carousel'].map(function(x){ return '<option value="'+x+'"'+(x===(ceScript.slot||'high')?' selected':'')+'>'+esc(CE_SLOT_LABEL[x])+'</option>'; }).join('')+'</select></label></div><div class="f-note">'+(opens.length?opens.length+' open slot'+(opens.length===1?'':'s')+' in the next 3 weeks.':'No open slots in the next 3 weeks; pick a day.')+'</div></div>';
+      html+='<div><span class="ce-k">Day and slot</span><div class="grid"><label>Slot<select class="input" data-cs="slotpick">'+opens.map(function(o){ return '<option value="'+E(o.id)+'"'+(o.id===pick?' selected':'')+'>'+E(HQ.fmtDay(o.date,'wd')+' · '+(CE_SLOT_LABEL[ceSlotKey(o)]||'slot')+(o.format?' · '+o.format:''))+'</option>'; }).join('')+'<option value="__new"'+(pick==='__new'?' selected':'')+'>New slot on a day…</option><option value="__later">Not scheduled yet (pending scheduling)</option></select></label></div><div class="grid ce-newslot"'+(pick==='__new'?'':' hidden')+'><label>Day<select class="input" data-cs="date">'+dayOpts+'</select></label><label>Slot type<select class="input" data-cs="slot">'+['high','low','carousel'].map(function(x){ return '<option value="'+x+'"'+(x===(ceScript.slot||'high')?' selected':'')+'>'+esc(CE_SLOT_LABEL[x])+'</option>'; }).join('')+'</select></label></div><div class="f-note">'+(opens.length?opens.length+' open slot'+(opens.length===1?'':'s')+' in the next 3 weeks.':'No open slots in the next 3 weeks; pick a day.')+'</div></div>';
     }
     if(idea) html+='<details class="ce-idea-panel"'+(q?'':' open')+'><summary>Source idea · @'+esc(String(idea.creator||'creator').replace(/^@/,''))+'</summary>'+ceIdeaDetail(idea)+'</details>';
     else if(ceScript.ideaId) html+='<div class="f-note">Source idea '+esc(ceScript.ideaId)+' isn\'t in the Idea Bank any more.</div>';
@@ -3736,7 +3890,8 @@ body{padding:0;}
     if(!f.title && !f.script.trim()){ say('Add a title or the script first.', true); return; }
     var id=ceScript.id, create=null;
     if(!id){
-      if(f.slotpick && f.slotpick!=='__new') id=f.slotpick;
+      if(f.slotpick && f.slotpick!=='__new' && f.slotpick!=='__later') id=f.slotpick;
+      else if(f.slotpick==='__later'){ var tk=HQ.sydNow().key, dn0=['sun','mon','tue','wed','thu','fri','sat'][HQ.dowOf(tk)]; id=HQ.weekStart(tk)+'-'+dn0+'-hi-'+Math.random().toString(36).slice(2,6); create={date:tk, slot:'high'}; var later=true; }
       else {
         if(!HQ.isDayKey(f.date)){ say('Pick a day.', true); return; }
         var dn=['sun','mon','tue','wed','thu','fri','sat'][HQ.dowOf(f.date)], code={high:'hi',low:'lo',carousel:'car'}[f.slot]||'hi';
@@ -3750,6 +3905,7 @@ body{padding:0;}
     try{
       var data=await ceInvoke('content-update', create?{id:id, create:create, fields:fields}:{id:id, fields:fields});
       var saved=data.saved||fields, q=ceFindSlot(id);
+      if(later){ try{ await db.collection('content_queue').doc(id).update({unscheduled:true, unscheduledAt:ceNowIso()}); saved=Object.assign({}, saved, {unscheduled:true}); }catch(e){} }
       if(q) Object.assign(q, saved); else state.contentQueue=(state.contentQueue||[]).concat([Object.assign({id:id}, saved)]);
       try{ localStorage.removeItem(oldKey); }catch(e){}
       var idea=ceIdeaById(ceScript.ideaId); if(idea){ idea.status='planned'; idea.plannedFor=id; }

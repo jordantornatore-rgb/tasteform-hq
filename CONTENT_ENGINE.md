@@ -6,7 +6,10 @@ The **Content Engine** tab (sidebar → Growth, phone → More → Content Engin
 
 All dates are Sydney days (`HQ.sydNow`, `HQ.weekStart`, `HQ.fmtDay` from `hq-core.js`). Numbers are exact or `–` with the reason next to them; nothing is estimated.
 
-## Views (segmented control at the top; Library is the default)
+## Views (segmented control at the top; Calendar is first)
+
+### Calendar
+One bubble per `content_queue` row on its post day (`cePostAtMs`; trial reels on the winner's day), stage from `ceStage` (status + `shotAt` + footage upload + posting status). Pending scheduling = `unscheduled: true` or no date (not posted / trialing / scheduled). Moves go through `content-reschedule` (and clear `unscheduled`); dropping into the tray sets `unscheduled: true`. Stage chips filter; the filming board groups to-film rows by `location` and sets `filmDate`. Bulk stage changes write `status` (+ `shotAt`, `approval`) straight to the rows.
 
 | View | Reads | Writes (admin only) |
 | --- | --- | --- |
