@@ -282,6 +282,7 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       const libAdd = await visibleText(page); check(`${lbl}: uploaded footage shows its chip`, () => assert.ok(/Footage uploaded/i.test(libAdd), libAdd.slice(0, 300)));
       await page.click('#ceRoot [data-ce-addreel=""]'); await page.waitForTimeout(150);
       const add = await sheetText(); noBad('add filmed reel', add);
+      const fmtOpt = await page.$$eval('#ceSheet [data-ca-f="format"] option', els => els.map(e => e.textContent)); check(`${lbl}: format list names each format`, () => assert.ok(fmtOpt.includes('F7 · Diagnosis talking head') && fmtOpt.includes('C3 · Food list carousel'), JSON.stringify(fmtOpt.slice(0, 4))));
       check(`${lbl}: add-reel sheet offers slots, raw/final and upload/Mac`, () => assert.ok(/Add a filmed reel/i.test(add) && /Raw footage/.test(add) && /Finished edit/.test(add) && /Upload from this device/.test(add) && /Already on the Mac/.test(add) && /New reel on a day/.test(add), add.slice(0, 600)));
       await page.click('#ceSheet input[value="mac"]'); await page.waitForTimeout(80);
       const macShown = await page.$eval('#ceSheet [data-ca-mac]', e => !e.hidden); check(`${lbl}: choosing the Mac shows the folder picker`, () => assert.ok(macShown));

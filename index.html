@@ -2844,6 +2844,8 @@ body{padding:0;}
   var CE_STATUS_LABEL={needs_script:'Needs script', trialing:'Trialing', to_film:'To film', filmed:'Filmed', editing:'Editing', edited:'Edited', awaiting_approval:'Needs your OK', approved:'Approved', scheduled:'Scheduled', posted:'Posted', skipped:'Skipped', changes_requested:'Changes requested', needs_jordan:'Needs Jordan', error:'Error', cancelled:'Pulled'};
   var CE_PLATFORM_SHORT={INSTAGRAM:'IG', TIKTOK:'TikTok', YOUTUBE:'YT', LINKEDIN:'LinkedIn'};
   var CE_FORMATS=['F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','F13','F14','F15','F16','F17','C1','C2','C3','C4','C5','C6','C7'];
+  var CE_FORMAT_NAMES={F1:'Recipe ASMR B-roll', F2:'Cutout over images', F3:'Corporate POV / meme', F4:'Physique + one line', F5:'Tier list', F6:'List-builder (icons)', F7:'Diagnosis talking head', F8:'Myth vs reality', F9:'Day in the life', F10:'Notes-app plan', F11:'My Story chapter', F12:'Client proof', F13:'Coaching-call clip', F14:'Coach-told case study', F15:'Before/after + hard truth', F16:'Vulnerable talking head', F17:'Corporate authority', C1:'Habit list carousel', C2:'Editorial essay carousel', C3:'Food list carousel', C4:'How-to / plan carousel', C5:'Two-photo chain carousel', C6:'Stats / story carousel', C7:'Text guide carousel'};
+  function ceFmtLabel(v){ var s=String(v==null?'':v).trim(), k=s.toUpperCase(); return CE_FORMAT_NAMES[k] ? k+' · '+CE_FORMAT_NAMES[k] : s; }
   var CE_ANGLES=['corporate pain','how we fix it','client proof',"Jordan's story"], CE_HOOKSTYLES=['call-out','contrarian','story','proof'], CE_LOCS=['desk','car','mirror','kitchen','gym','outside'], CE_EFFORTS=['high','med','low'];
   var CE_QUICK=['07:30','12:00','17:30','19:00','20:30'];
   var CE_SLOT_ORDER={high:0, low:1, carousel:2}, CE_SLOT_LABEL={high:'High-effort reel', low:'Low-effort reel', carousel:'Carousel'};
@@ -2863,7 +2865,7 @@ body{padding:0;}
   function ceStatusLabel(s){ return CE_STATUS_LABEL[s] || (s ? String(s) : 'no status'); }
   function ceFunnel(v){ var s=String(v==null?'':v).trim().toUpperCase(); if(s==='TOP'||s==='TOF') return 'TOF'; if(s==='MID'||s==='MOF') return 'MOF'; if(s==='BOTTOM'||s==='BOF'||s==='PROOF') return 'BOF'; return null; }
   function ceFunnelChip(v){ var f=ceFunnel(v); return f ? '<span class="chip ce-'+f.toLowerCase()+'">'+f+'</span>' : '<span class="chip grey">no funnel</span>'; }
-  function ceFormatChip(v){ var s=String(v==null?'':v).trim(); return s ? '<span class="chip stage ce-fmt">'+esc(s.length<=4?s.toUpperCase():s)+'</span>' : '<span class="chip grey">no format</span>'; }
+  function ceFormatChip(v){ var s=String(v==null?'':v).trim(); return s ? '<span class="chip stage ce-fmt" title="'+esc(ceFmtLabel(s))+'">'+esc(s.length<=4?ceFmtLabel(s):s)+'</span>' : '<span class="chip grey">no format</span>'; }
   function ceStatusChip(s, q){
     s=s||'to_film'; var pst=q&&q.posting&&q.posting.status;
     var cls = s==='posted'?'good':(s==='awaiting_approval'?'warn':(s==='changes_requested'?'ce-purple':(s==='needs_jordan'||s==='error'?'crit':(s==='skipped'||s==='cancelled'?'grey':(ceIdx(s)>=ceIdx('filmed')?'warn':'stage')))));
@@ -3037,7 +3039,7 @@ body{padding:0;}
     else if(['needs_script','to_film','filmed','editing'].indexOf(q.status)>=0) html+='<div class="ce-block" style="border-top:none;padding-top:0"><div class="f-note">Not edited yet ('+esc(ceStatusLabel(q.status))+'). The pipeline uploads the edit as soon as it is rendered.</div></div>';
     if(q.needsJordan && q.status==='needs_jordan') html+='<div class="ce-note"><b>Needs you:</b> '+esc(ceText(q.needsJordan.reason))+(isAdmin?' <button type="button" class="btn small" data-ce-act="fixed" data-id="'+esc(q.id)+'">Mark fixed</button>':'')+'</div>';
     if(p.status==='error' && p.error) html+='<div class="ce-note"><b>Posting error:</b> '+esc(ceText(p.error))+'</div>';
-    if(isAdmin && !posted && ['needs_script','to_film'].indexOf(q.status)>=0 && !(q.footageUpload&&!q.footageUpload.error)) html+='<div><button type="button" class="btn primary" data-ce-addreel="'+esc(q.id)+'">Filmed this? Add the footage</button></div>';
+    if(isAdmin && !posted && ['needs_script','to_film'].indexOf(q.status)>=0 && ceNeedsFootage(q)) html+='<div><button type="button" class="btn primary" data-ce-addreel="'+esc(q.id)+'">'+(q.footageUpload?'Add the footage again':'Filmed this? Add the footage')+'</button></div>';
     if(q.footageUpload) html+=ceFootageNote(q);
     if(q.scriptChangedAfterEdit && !posted) html+='<div class="ce-note">The video was cut from the old script.'+(isAdmin&&!q.reEditRequested?' <button type="button" class="btn small" data-ce-act="reedit" data-id="'+esc(q.id)+'">Re-edit video</button>':(q.reEditRequested?' Re-edit queued; the pipeline picks it up within 20 minutes.':''))+'</div>';
     if(['approved','trialing','scheduled','posted'].indexOf(q.status)>=0 && q.format) html+= q.goldStandard ? '<div class="f-note">⭐ Gold standard for '+esc(ceText(q.format))+(q.goldCopiedAt?' · copied to templates/'+esc(ceText(q.format))+'/gold/':' · the pipeline copies it on its next run')+'</div>' : (isAdmin?'<div><button type="button" class="btn" data-ce-act="gold" data-id="'+esc(q.id)+'">⭐ Make this the gold standard for '+esc(ceText(q.format))+'</button></div>':'');
@@ -3108,7 +3110,7 @@ body{padding:0;}
     var E=function(v){ return esc(v==null?'':String(v)); };
     var acts='<div class="acts"><button type="button" class="btn primary" data-ce-save="'+section+'">Save</button><button type="button" class="btn" data-ce-cancel>Cancel</button><span class="f-note">Esc cancels.</span></div>';
     var list=function(arr, name, label){ arr=Array.isArray(arr)?arr:[]; if(!arr.length) arr=['']; return '<div data-ce-list="'+name+'">'+arr.map(function(x,i){ return '<div class="li"><input class="input" type="text" value="'+E(ceText(x))+'" aria-label="'+esc(label)+' '+(i+1)+'"><button type="button" class="icon-btn sm" data-ce-li="up" aria-label="Move up">↑</button><button type="button" class="icon-btn sm" data-ce-li="down" aria-label="Move down">↓</button><button type="button" class="icon-btn sm" data-ce-li="del" aria-label="Remove">✕</button></div>'; }).join('')+'</div><div class="acts"><button type="button" class="btn small" data-ce-li="add">Add '+esc(label.toLowerCase())+'</button></div>'; };
-    var sel=function(name, opts, cur, label, allowBlank){ var list=opts.slice(); if(cur && list.indexOf(cur)<0) list.unshift(cur); return '<label>'+esc(label)+'<select class="input" data-ce-f="'+name+'">'+(allowBlank?'<option value="">–</option>':'')+list.map(function(o){ return '<option value="'+E(o)+'"'+(o===cur?' selected':'')+'>'+E(o)+'</option>'; }).join('')+'</select></label>'; };
+    var sel=function(name, opts, cur, label, allowBlank){ var list=opts.slice(); if(cur && list.indexOf(cur)<0) list.unshift(cur); return '<label>'+esc(label)+'<select class="input" data-ce-f="'+name+'">'+(allowBlank?'<option value="">–</option>':'')+list.map(function(o){ return '<option value="'+E(o)+'"'+(o===cur?' selected':'')+'>'+E(name==='format'?ceFmtLabel(o):o)+'</option>'; }).join('')+'</select></label>'; };
     var body='';
     if(section==='title') body='<input class="input" type="text" data-ce-f="title" value="'+E(q.title)+'" maxlength="140" aria-label="Title">';
     else if(section==='hooks') body=list(q.hooks,'hooks','Hook');
@@ -3167,7 +3169,7 @@ body{padding:0;}
     setText('ceSub', all.length+' idea'+(all.length===1?'':'s')+' · '+pinned+' pinned');
     function sel(name, opts, cur, label){ return '<select class="input" data-cef="'+name+'" aria-label="'+esc(label)+'">'+opts.map(function(o){ return '<option value="'+esc(o[0])+'"'+(o[0]===cur?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('')+'</select>'; }
     var html='<div class="panel"><h2>Idea Bank</h2><p class="rule">Research from the Scanner: what worked, by the numbers that matter for its funnel stage, with hooks, visual hooks and talking points. You write the script: "Turn into a reel" opens the script editor with the idea attached.</p>'+
-      '<div class="ce-filters">'+sel('lane',[['','All lanes']].concat(CE_LANES),f.lane,'Lane')+sel('status',[['','All statuses'],['new','New'],['planned','Planned'],['filmed','Filmed'],['skipped','Skipped']],f.status,'Status')+sel('funnel',[['','All funnels'],['TOF','TOF'],['MOF','MOF'],['BOF','BOF']],f.funnel,'Funnel')+sel('format',[['','All formats']].concat(formats.map(function(x){ return [x,x]; })),f.format,'Format')+sel('type',[['','Reels + carousels'],['reel','Reels'],['carousel','Carousels']],f.type,'Type')+sel('sort',[['new','Newest first'],['lane','By lane, then funnel']],f.sort,'Sort')+'<button type="button" class="btn" data-cef-office aria-pressed="'+(f.office?'true':'false')+'">Officemaxxing</button><span class="f-note">'+shown.length+' of '+all.length+'</span></div>';
+      '<div class="ce-filters">'+sel('lane',[['','All lanes']].concat(CE_LANES),f.lane,'Lane')+sel('status',[['','All statuses'],['new','New'],['planned','Planned'],['filmed','Filmed'],['skipped','Skipped']],f.status,'Status')+sel('funnel',[['','All funnels'],['TOF','TOF'],['MOF','MOF'],['BOF','BOF']],f.funnel,'Funnel')+sel('format',[['','All formats']].concat(formats.map(function(x){ return [x,ceFmtLabel(x)]; })),f.format,'Format')+sel('type',[['','Reels + carousels'],['reel','Reels'],['carousel','Carousels']],f.type,'Type')+sel('sort',[['new','Newest first'],['lane','By lane, then funnel']],f.sort,'Sort')+'<button type="button" class="btn" data-cef-office aria-pressed="'+(f.office?'true':'false')+'">Officemaxxing</button><span class="f-note">'+shown.length+' of '+all.length+'</span></div>';
     html+= shown.length ? '<div class="ce-ideas">'+shown.map(ceIdeaCard).join('')+'</div>' : '<div class="empty-state">No ideas match these filters.</div>';
     return html+'</div>';
   }
@@ -3551,7 +3553,7 @@ body{padding:0;}
     var formats=[]; rows.forEach(function(q){ var f=ceText(q.format); if(f&&formats.indexOf(f)<0) formats.push(f); }); formats.sort();
     var sel=function(name, opts, cur, label){ return '<select class="input" data-celib="'+name+'" aria-label="'+esc(label)+'">'+opts.map(function(o){ return '<option value="'+esc(o[0])+'"'+(o[0]===cur?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('')+'</select>'; };
     var statusOpts=[['','All statuses']].concat(CE_STATUS.concat(CE_SIDE).map(function(x){ return [x, CE_STATUS_LABEL[x]]; }));
-    html+='<div class="panel" id="ceLibLists"><h2>All posts</h2><div class="ce-libfilters">'+sel('status',statusOpts,ceLib.status,'Status')+sel('platform',[['','All platforms'],['INSTAGRAM','Instagram'],['TIKTOK','TikTok'],['YOUTUBE','YouTube'],['LINKEDIN','LinkedIn']],ceLib.platform,'Platform')+sel('format',[['','All formats']].concat(formats.map(function(x){ return [x,x]; })),ceLib.format,'Format')+sel('funnel',[['','All funnels'],['TOF','TOF'],['MOF','MOF'],['BOF','BOF']],ceLib.funnel,'Funnel')+'<input class="input" type="date" data-celib="from" value="'+esc(ceLib.from)+'" aria-label="From"><input class="input" type="date" data-celib="to" value="'+esc(ceLib.to)+'" aria-label="To"><input class="input" type="search" id="ceLibQ" value="'+esc(ceLib.q)+'" placeholder="Search title, caption, script" aria-label="Search" style="flex:1;min-width:160px"></div>';
+    html+='<div class="panel" id="ceLibLists"><h2>All posts</h2><div class="ce-libfilters">'+sel('status',statusOpts,ceLib.status,'Status')+sel('platform',[['','All platforms'],['INSTAGRAM','Instagram'],['TIKTOK','TikTok'],['YOUTUBE','YouTube'],['LINKEDIN','LinkedIn']],ceLib.platform,'Platform')+sel('format',[['','All formats']].concat(formats.map(function(x){ return [x,ceFmtLabel(x)]; })),ceLib.format,'Format')+sel('funnel',[['','All funnels'],['TOF','TOF'],['MOF','MOF'],['BOF','BOF']],ceLib.funnel,'Funnel')+'<input class="input" type="date" data-celib="from" value="'+esc(ceLib.from)+'" aria-label="From"><input class="input" type="date" data-celib="to" value="'+esc(ceLib.to)+'" aria-label="To"><input class="input" type="search" id="ceLibQ" value="'+esc(ceLib.q)+'" placeholder="Search title, caption, script" aria-label="Search" style="flex:1;min-width:160px"></div>';
     var f=ceLib, ql=f.q.trim().toLowerCase();
     var shown=rows.filter(function(q){
       if(f.status && !((q.status||'to_film')===f.status || (f.status==='error'&&q.posting&&q.posting.status==='error'))) return false;
@@ -3651,7 +3653,7 @@ body{padding:0;}
     var hookChips=[]; (idea&&Array.isArray(idea.hooks)?idea.hooks:[]).concat(!mine&&q&&Array.isArray(q.hooks)?q.hooks:[]).forEach(function(h){ h=ceText(h); if(h&&hookChips.indexOf(h)<0) hookChips.push(h); });
     var vChips=(idea&&Array.isArray(idea.visualHooks)?idea.visualHooks:[]).map(ceText).filter(Boolean);
     var fmt=val('format', q?ceText(q.format):(idea?ceText(idea.format):'')), fun=val('funnel', q?(ceFunnel(q.funnel)||''):(idea?(ceFunnel(idea.funnel)||''):'')), loc=val('location', q?ceText(q.location):'');
-    var sel=function(k, opts, cur, label){ var list=opts.slice(); if(cur&&list.indexOf(cur)<0) list.unshift(cur); return '<label>'+esc(label)+'<select class="input" data-cs="'+k+'"><option value="">–</option>'+list.map(function(o){ return '<option value="'+E(o)+'"'+(o===cur?' selected':'')+'>'+E(o)+'</option>'; }).join('')+'</select></label>'; };
+    var sel=function(k, opts, cur, label){ var list=opts.slice(); if(cur&&list.indexOf(cur)<0) list.unshift(cur); return '<label>'+esc(label)+'<select class="input" data-cs="'+k+'"><option value="">–</option>'+list.map(function(o){ return '<option value="'+E(o)+'"'+(o===cur?' selected':'')+'>'+E(k==='format'?ceFmtLabel(o):o)+'</option>'; }).join('')+'</select></label>'; };
     var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+(q?ceStatusChip(q.status,q):'<span class="chip stage">New reel</span>')+(idea?'<span class="chip grey">from @'+esc(String(idea.creator||'idea').replace(/^@/,''))+'</span>':'')+'</div><h2 style="margin-top:6px">Script editor</h2></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
     if(!isAdmin) html+='<div class="ce-note">View only: only the admin can save scripts.</div>';
     if(draft) html+='<div class="f-note">Restored your unsaved draft from '+esc(relTime(draft.at)||'earlier')+'. <button type="button" class="btn small" data-cs-discard>Discard draft</button></div>';
@@ -3794,9 +3796,11 @@ body{padding:0;}
 
 
   /* --- Add a filmed reel: footage from the phone (resumable upload to content-footage), a finished edit, or a folder on the Mac --- */
+  function ceNeedsFootage(q){ var u=q.footageUpload; return !u || !!u.error || u.status==='uploading' || u.status==='failed'; }
   function ceFootageChip(q){
     var u=q&&q.footageUpload; if(!u||u.pulledAt) return '';
     var live=ceUploads[q.id];
+    if(u.status==='failed') return '<span class="chip crit">Upload failed · add the footage again</span>';
     if(u.error) return '<span class="chip crit">Footage problem</span>';
     if(u.expiredNote) return '<span class="chip warn">Footage links expired</span>';
     if(live&&live.status==='uploading') return '<span class="chip warn">Uploading '+ceUplPct(live)+'%</span>';
@@ -3812,7 +3816,7 @@ body{padding:0;}
   }
   function ceBytes(n){ n=+n||0; if(n>=1e9) return (n/1e9).toFixed(1)+' GB'; if(n>=1e6) return Math.round(n/1e6)+' MB'; return Math.max(1,Math.round(n/1e3))+' KB'; }
   function ceUplPct(u){ var tot=0, sent=0; (u.files||[]).forEach(function(f){ tot+=f.size||0; sent+=f.sent||0; }); return tot?Math.floor(sent/tot*100):0; }
-  function ceAddOpenSlots(){ var today=HQ.sydNow().key, from=HQ.addDays(today,-7), end=HQ.addDays(today,28); return (state.contentQueue||[]).filter(function(q){ return ['needs_script','to_film'].indexOf(q.status)>=0 && HQ.isDayKey(q.date) && q.date>=from && q.date<=end && !(q.footageUpload&&!q.footageUpload.error); }).sort(function(a,b){ return a.date.localeCompare(b.date)||ceSlotOrder(a)-ceSlotOrder(b); }); }
+  function ceAddOpenSlots(){ var today=HQ.sydNow().key, from=HQ.addDays(today,-7), end=HQ.addDays(today,28); return (state.contentQueue||[]).filter(function(q){ return ['needs_script','to_film'].indexOf(q.status)>=0 && HQ.isDayKey(q.date) && q.date>=from && q.date<=end && ceNeedsFootage(q); }).sort(function(a,b){ return a.date.localeCompare(b.date)||ceSlotOrder(a)-ceSlotOrder(b); }); }
   function ceRenderAddReel(el){
     if(!ceAdd.force && !el.hidden && el.getAttribute('data-mode')==='add') return; // never wipe a form or a running upload
     ceAdd.force=false; el.setAttribute('data-mode','add'); el.classList.add('side');
@@ -3820,7 +3824,7 @@ body{padding:0;}
     var folders=(((state.contentAutopost||{}).footageFolders)||[]).filter(function(f){ return !f.slotId; });
     var today=HQ.sydNow().key, dayOpts='';
     for(var i=-7;i<28;i++){ var k=HQ.addDays(today,i); dayOpts+='<option value="'+k+'"'+(k===today?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':(i===-1?'Yesterday':HQ.fmtDay(k,'wd'))))+'</option>'; }
-    var sel=function(k, opts, cur, label){ return '<label>'+esc(label)+'<select class="input" data-ca-f="'+k+'"><option value="">–</option>'+opts.map(function(o){ return '<option value="'+E(o)+'"'+(o===cur?' selected':'')+'>'+E(o)+'</option>'; }).join('')+'</select></label>'; };
+    var sel=function(k, opts, cur, label){ return '<label>'+esc(label)+'<select class="input" data-ca-f="'+k+'"><option value="">–</option>'+opts.map(function(o){ return '<option value="'+E(o)+'"'+(o===cur?' selected':'')+'>'+E(k==='format'?ceFmtLabel(o):o)+'</option>'; }).join('')+'</select></label>'; };
     var html='<div class="ce-sheet-head"><div><h2>Add a filmed reel</h2><div class="ce-meta">Footage you’ve already shot, or a finished edit. The Mac picks it up within 20 minutes.</div></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
     html+='<div class="ce-editor ce-add">';
     html+='<div><span class="ce-k">Which slot?</span><label>Slot<select class="input" data-ca="slot">'+(pre&&opens.indexOf(pre)<0?'<option value="'+E(pre.id)+'" selected>'+E((HQ.isDayKey(pre.date)?HQ.fmtDay(pre.date,'wd'):'no day')+' · '+(ceText(pre.title)||'this reel'))+'</option>':'')+opens.map(function(o){ return '<option value="'+E(o.id)+'"'+(pre&&pre.id===o.id?' selected':'')+'>'+E(HQ.fmtDay(o.date,'wd')+' · '+(CE_SLOT_LABEL[ceSlotKey(o)]||'slot')+' · '+(o.title&&o.title!=='Open slot'?o.title:(o.status==='needs_script'?'open slot':'to film')))+'</option>'; }).join('')+'<option value="__new"'+(pre?'':' selected')+'>New reel on a day…</option></select></label>'+
@@ -3860,9 +3864,9 @@ body{padding:0;}
       var r=await supaClient.storage.from('content-footage').upload(path, file, {upsert:true, contentType:file.type||'application/octet-stream'}); if(r.error) throw r.error; onProgress(file.size); return;
     }
     await new Promise(function(resolve, reject){
-      var up=new tus.Upload(file, { endpoint: base+'/storage/v1/upload/resumable', retryDelays:[0,3000,5000,10000,20000,60000,120000], headers:{ authorization:'Bearer '+token, 'x-upsert':'true' }, uploadDataDuringCreation:true, removeFingerprintOnSuccess:true, chunkSize:6*1024*1024,
+      var up=new tus.Upload(file, { endpoint: base+'/storage/v1/upload/resumable', retryDelays:[0,3000,5000,10000,20000,60000,120000], headers:{ 'x-upsert':'true' }, uploadDataDuringCreation:true, removeFingerprintOnSuccess:true, chunkSize:6*1024*1024,
         metadata:{ bucketName:'content-footage', objectName:path, contentType:file.type||'application/octet-stream', cacheControl:'3600' },
-        onBeforeRequest: async function(req){ try{ var s2=await supaClient.auth.getSession(); var t2=s2&&s2.data&&s2.data.session&&s2.data.session.access_token; if(t2) req.setHeader('authorization','Bearer '+t2); }catch(e){} },
+        onBeforeRequest: async function(req){ var t2=token; try{ var s2=await supaClient.auth.getSession(); t2=(s2&&s2.data&&s2.data.session&&s2.data.session.access_token)||token; }catch(e){} req.setHeader('authorization','Bearer '+t2); },
         onError: function(err){ reject(err); }, onProgress: function(sent){ onProgress(sent); }, onSuccess: function(){ resolve(); } });
       up.findPreviousUploads().then(function(prev){ if(prev&&prev.length) up.resumeFromPreviousUpload(prev[0]); up.start(); }, function(){ up.start(); });
     });
@@ -3897,6 +3901,7 @@ body{padding:0;}
       if(create||Object.keys(fields).length){ var data=await ceInvoke('content-update', create?{id:id, create:create, fields:fields}:{id:id, fields:fields}); var q0=ceFindSlot(id); if(q0) Object.assign(q0, data.saved||fields); else state.contentQueue=(state.contentQueue||[]).concat([Object.assign({id:id}, data.saved||fields)]); }
     }catch(e){ say('Couldn’t add it: '+e.message, true); btn.disabled=false; btn.textContent='Add reel'; return; }
     var q=ceFindSlot(id)||{id:id}, now=ceNowIso();
+    var slotSel=root.querySelector('[data-ca="slot"]'); if(slotSel && slotSel.value==='__new'){ var opt=document.createElement('option'); opt.value=id; opt.textContent=(title||'This reel')+' (just added)'; slotSel.insertBefore(opt, slotSel.firstChild); slotSel.value=id; ceAddToggle(); }
     var fu=src==='mac'?{source:'mac', folder:folder, kind:kind, status:'linked', at:now}:{source:'upload', kind:kind, status:'uploading', files:[], startedAt:now};
     var patch={footageUpload:fu}; if(q.status==='needs_script'||!q.status) { patch.status='to_film'; patch.statusAt=now; }
     Object.assign(q, patch);
@@ -3913,7 +3918,7 @@ body{padding:0;}
       try{
         await ceUploadOne(p, f, function(sent){ u.files[i].sent=sent; var b=row&&row.querySelector('.bar i'); if(b) b.style.width=(f.size?Math.min(100,sent/f.size*100):100)+'%'; });
         u.files[i].sent=f.size; if(row) row.classList.add('done'); paths.push({path:p, name:f.name, size:f.size, type:f.type||null});
-      }catch(e){ if(row){ row.classList.add('err'); row.querySelector('span').textContent=f.name+' · failed: '+(e.message||e); } u.status='error'; say('An upload failed. Tap Add the footage again on this reel to retry; finished files are kept.', true); btn.disabled=false; btn.textContent='Add reel'; return; }
+      }catch(e){ if(row){ row.classList.add('err'); row.querySelector('span').textContent=f.name+' · failed: '+String(e.message||e).slice(0,240); } u.status='error'; var fuF=Object.assign({}, fu, {status:'failed', error:String(e.message||e).slice(0,300), failedAt:ceNowIso()}); q.footageUpload=fuF; try{ await db.collection('content_queue').doc(id).update({footageUpload:fuF}); }catch(e2){} say('The upload failed. Tap Add reel to try again (same reel); it resumes where it stopped.', true); btn.disabled=false; btn.textContent='Add reel'; renderNow('content'); return; }
     }
     try{
       var links=await ceFootageLinks(paths.map(function(x){ return x.path; }));
