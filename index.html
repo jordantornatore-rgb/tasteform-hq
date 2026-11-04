@@ -817,6 +817,16 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
 .ce-filmbub{display:block;width:100%;text-align:left;font-size:var(--t-xs);font-weight:600;color:var(--ce-purple);background:var(--ce-purple-soft);border:0;border-radius:8px;padding:5px 7px;cursor:pointer;}
 .ce-calhint{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
 @media (max-width:760px){ .ce-plangrid,.ce-plangrid.two{grid-template-columns:1fr;overflow:visible;} .ce-plangrid .ce-cal-day{min-height:0;} .ce-bulk .input,.ce-filmhead .input{width:100%;} }
+.ce-kind{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;border-radius:6px;padding:2px 7px;margin-bottom:3px;white-space:normal;}
+.ce-kind.full{background:var(--accent);color:var(--on-accent);}
+.ce-kind.trial{background:var(--ce-tof-soft);color:var(--ce-tof);border:1px dashed var(--ce-tof);}
+.ce-kind.car{background:var(--surface-2);color:var(--text-2);}
+.ce-trialbub{border:1px dashed var(--ce-tof);border-left:4px dashed var(--ce-tof);background:color-mix(in srgb,var(--ce-tof) 6%,var(--bg));padding-left:10px;cursor:pointer;}
+.ce-link{display:block;font-size:var(--t-xs);font-weight:700;color:var(--ce-tof);margin-top:3px;}
+.ce-cal-card.linkhl{box-shadow:0 0 0 3px var(--ce-tof);}
+.ce-goes .ce-go{font-size:var(--t-s);padding:8px 10px;border-radius:8px;margin-top:6px;line-height:1.45;}
+.ce-goes .ce-go.trial{background:var(--ce-tof-soft);border:1px dashed var(--ce-tof);}
+.ce-goes .ce-go.full{background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid var(--accent);}
 .ce-winchip{background:var(--good-soft);color:var(--good);}
 .ce-winner{border:1px solid var(--border-strong);border-radius:var(--r-m);padding:10px 12px;}
 .ce-trialmark{display:block;width:100%;text-align:left;font-size:var(--t-xs);color:var(--text-2);background:var(--surface-2);border:1px dashed var(--border-strong);border-radius:8px;padding:4px 6px;margin-bottom:4px;cursor:pointer;}
@@ -3105,6 +3115,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     if(q.angle) meta.push(ceText(q.angle)+' angle'); if(q.hookStyle) meta.push(ceText(q.hookStyle)+' hook');
     var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+cePlatformChips(q)+'</div><h2 style="margin-top:6px">'+esc(ceText(q.title)||'Untitled slot')+'</h2><div class="ce-meta" style="margin-top:4px">'+esc(meta.join(' · '))+'</div></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
     if(ceSheetMsg && ceSheetMsg.id===q.id) html+='<div class="'+(ceSheetMsg.err?'ce-note':'f-note')+'" role="status">'+esc(ceSheetMsg.text)+'</div>';
+    if(q.status!=='skipped') html+=ceGoesOut(q);
     // preview
     var vtag=ceVideoTag(q, null, 'ce-video'), nVers=Array.isArray(v.variants)?v.variants.length:0;
     if(vtag || v.thumbnailUrl) html+='<div class="ce-block" style="border-top:none;padding-top:0">'+(vtag||'<img class="ce-thumb" style="width:120px;height:213px" src="'+esc(v.thumbnailUrl)+'" alt="">')+'<div class="ce-chips">'+(vtag?'<button type="button" class="btn small" data-ce-play="'+esc(q.id)+'">▶ Phone preview'+(nVers>1?' · '+nVers+' versions':'')+'</button>':'')+(v.durationS!=null?'<span class="f-note">'+esc(num(v.durationS,1))+' s</span>':'')+'</div></div>';
@@ -3617,7 +3628,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   function ceDayOptions(cur){ var today=HQ.sydNow().key, out='<option value="">Move to…</option>'; for(var i=0;i<21;i++){ var k=HQ.addDays(today,i); out+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':HQ.fmtDay(k,'wd')))+'</option>'; } return out; }
   function ceLibCard(q, opts){
     opts=opts||{}; var w=ceWhenShort(cePostAtMs(q)), cap=ceText(q.caption).split('\n').filter(Boolean)[0]||'', trials=(q.posting&&q.posting.trials||[]).length;
-    return '<div class="ce-row">'+ceThumb(q)+'<div class="main"><button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="when">'+esc(w.label)+(w.countdown?'<small>'+esc(w.countdown)+'</small>':'')+'</span><span class="ce-chips">'+cePlatformChips(q)+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+ceWinnerChip(q)+'</span><span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span>'+(cap?'<span class="ce-meta">'+esc(cap.slice(0,140))+(cap.length>140?'…':'')+'</span>':'')+'<span class="ce-meta">'+esc(ceSoundLabel(q.sound))+(trials?' · '+trials+' trial'+(trials===1?'':'s'):'')+'</span>'+(opts.extra||'')+'</button>'+(q.sourceIdea?'<button type="button" class="btn small ce-fromidea" data-ce-goidea="'+esc(q.sourceIdea)+'">From idea ›</button>':'')+'</div></div>';
+    return '<div class="ce-row">'+ceThumb(q)+'<div class="main"><button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="when">'+esc(w.label)+(w.countdown?'<small>'+esc(w.countdown)+'</small>':'')+'</span><span class="ce-chips">'+cePlatformChips(q)+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+'</span>'+(function(){ var ti=ceTrialInfo(q); return '<span class="ce-chips">'+(ti?'<span class="ce-kind trial">🧪 TRIAL REELS '+esc(ti.at?HQ.fmtDay(HQ.sydDay(ti.at),'wd')+' '+HQ.fmtTime(ti.at):'')+'</span><span class="ce-kind full">📣 FULL REEL '+esc(cePostAtMs(q)?HQ.fmtDay(HQ.sydDay(cePostAtMs(q)),'wd')+' '+HQ.fmtTime(cePostAtMs(q)):'')+'</span>':ceKind(q, null))+'</span>'; })()+'<span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span>'+(cap?'<span class="ce-meta">'+esc(cap.slice(0,140))+(cap.length>140?'…':'')+'</span>':'')+'<span class="ce-meta">'+esc(ceSoundLabel(q.sound))+(trials?' · '+trials+' trial'+(trials===1?'':'s'):'')+'</span>'+(opts.extra||'')+'</button>'+(q.sourceIdea?'<button type="button" class="btn small ce-fromidea" data-ce-goidea="'+esc(q.sourceIdea)+'">From idea ›</button>':'')+'</div></div>';
   }
   function ceRenderLibrary(){
     var st=ceLoadState('contentQueue');
@@ -3707,13 +3718,52 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   function ceStageChip(q){ var k=ceStage(q); return '<span class="chip ce-stg st-'+k+'">'+esc(k==='editing'&&q.status==='to_film'?'Footage in · editing next':(CE_STAGE_LABEL[k]||k))+'</span>'; }
   function cePending(q){ return !cePosted(q) && q.status!=='skipped' && (q.unscheduled || !HQ.isDayKey(q.date)) && ['trialing','scheduled'].indexOf((q.posting||{}).status)<0; }
   function ceBubbleDay(q){ if(cePending(q)) return null; var at=cePostAtMs(q); return (ceIsWinner(q)||(q.posting&&q.posting.scheduledFor))&&at?HQ.sydDay(at):(HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):null)); }
+  // Trial reels vs the full reel. A reel that's trialled has two posts: the trial reels (Instagram, non-followers only)
+  // and the full reel (the winner, posted fresh to everyone). Returns null when only the full reel goes out.
+  function ceTrialInfo(q){
+    if(!q || ceSlotKey(q)==='carousel') return null; var p=q.posting||{}, H=3600000, now=Date.now();
+    var trials=(Array.isArray(p.trials)?p.trials:[]).filter(function(t){ return t && !t.cancelled; });
+    var vs=(q.video&&Array.isArray(q.video.variants)&&q.video.variants.length)||0;
+    if(trials.length){ var ts=trials.map(function(t){ return HQ.parseTs(t.postedAt||t.scheduledFor); }).filter(function(x){ return x!=null; }).sort(function(a,b){ return a-b; }); var best=null; trials.forEach(function(t){ if(t.metrics&&HQ.isNum(t.metrics.views)&&(!best||t.metrics.views>best.metrics.views)) best=t; }); return {n:trials.length, at:ts[0]||null, last:ts[ts.length-1]||null, running:p.status==='trialing', done:p.status!=='trialing', out:trials.filter(function(t){ return t.postedAt; }).length, best:best}; }
+    if(cePosted(q) || p.status==='scheduled' || q.trialChoice==='off') return null;
+    if(q.trialChoice==='on'){ var t=now+20*60000, sp=HQ.sydParts(t); if(sp.h<6||sp.h>=23) t=HQ.sydMidnight(sp.h>=23?HQ.addDays(sp.key,1):sp.key)+7*H; return {n:vs||(['needs_script','to_film','filmed','editing'].indexOf(q.status)>=0?5:1), at:t, planned:true, waiting:q.status!=='approved'}; }
+    if(vs>=2 || ['needs_script','to_film','filmed','editing'].indexOf(q.status)>=0){ var slot=cePostAtMs(q); if(!slot) return null; var left=slot-now; if(left>=72*H) return {n:vs||5, at:slot-72*H, planned:true, auto:true, waiting:q.status!=='approved'}; if(left>=24*H && q.status==='approved') return {n:vs||5, at:now+10*60000, planned:true, auto:true, short:true}; }
+    return null;
+  }
+  function ceFullPlatforms(q){ var wp=q.winnerPlan||{}, pls=Array.isArray(wp.platforms)&&wp.platforms.length?wp.platforms:cePlatforms(q); return pls.map(function(x){ return CE_PLATFORM_SHORT[x]||x; }).join(', '); }
+  function ceKind(q, ti){ if(ceSlotKey(q)==='carousel') return '<span class="ce-kind car">🖼 CAROUSEL</span>'; return '<span class="ce-kind full">📣 FULL REEL'+(ti?' · the winner':'')+'</span>'; }
+  function ceTrialStatus(q, ti){
+    if(ti.done) return q.winner&&q.winner.v?'Done · '+q.winner.v+' won':'Done';
+    if(ti.running) return ti.out?ti.out+' of '+ti.n+' out'+(ti.best?' · best '+num(ti.best.metrics.views)+' views ('+ti.best.v+')':''):'Starting';
+    if(ti.waiting) return 'Waiting for your OK';
+    return 'Starts '+HQ.fmtTime(ti.at);
+  }
+  function ceTrialBubble(q, ti){
+    var full=cePostAtMs(q);
+    return '<div class="ce-cal-card ce-bub ce-trialbub st-trialing" data-link="'+esc(q.id)+'"><button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'">'+
+      '<span class="ce-kind trial">🧪 TRIAL REELS · '+ti.n+' version'+(ti.n===1?'':'s')+'</span>'+
+      '<span class="t">'+(ti.at?(ti.planned?'from ~':'from ')+esc(HQ.fmtTime(ti.at)):'time set when approved')+(ti.n>1?' · 25 min apart':'')+'</span>'+
+      '<span class="ttl">'+esc(ceText(q.title)||'Untitled')+'</span>'+
+      '<span class="ce-meta">Instagram, non-followers only. Followers never see these.</span>'+
+      '<span class="ce-chips"><span class="chip ce-stg st-trialing">'+esc(ceTrialStatus(q, ti))+'</span>'+(ti.auto?'<span class="chip grey">automatic</span>':'')+'</span>'+
+      (full?'<span class="ce-link">→ Full reel '+esc(HQ.fmtDay(HQ.sydDay(full),'wd'))+' '+esc(HQ.fmtTime(full))+'</span>':'')+'</button></div>';
+  }
+  function ceGoesOut(q){
+    var ti=ceTrialInfo(q), at=cePostAtMs(q), when=function(t){ return t?ceWhenFull(t):'time not set'; };
+    var h='<div class="ce-block ce-goes"><span class="ce-k">What goes out</span>';
+    if(ceSlotKey(q)==='carousel') return h+'<div class="ce-go full"><b>🖼 Carousel</b> to '+esc(ceFullPlatforms(q)||'Instagram')+' · '+esc(when(at))+'</div></div>';
+    if(ti) h+='<div class="ce-go trial"><b>1 · 🧪 Trial reels</b> '+ti.n+' version'+(ti.n===1?'':'s')+' on Instagram, shown to non-followers only (your followers never see them). '+(ti.at?(ti.planned?'About ':'From ')+esc(when(ti.at)):'')+' · '+esc(ceTrialStatus(q, ti))+(ti.auto?' · automatic (2+ versions, 3+ days out)':'')+'</div>';
+    h+='<div class="ce-go full"><b>'+(ti?'2 · ':'')+'📣 Full reel</b> '+(ti?'the winning version, posted fresh to everyone':'posted to everyone')+' on '+esc(ceFullPlatforms(q)||'Instagram')+' · '+esc(when(at))+(ti?'':' · no trial')+'</div>';
+    return h+'</div>';
+  }
   function ceBubble(q, opts){
     opts=opts||{}; var at=cePostAtMs(q), lock=ceLocked(q), drag=isAdmin&&!lock.locked, sel=!!cePlan.sel[q.id], k=ceStage(q);
     var time=opts.tray?'Pending scheduling':(at&&(ceHasTime(q)||cePosted(q))?HQ.fmtTime(at):(CE_SLOT_LABEL[ceSlotKey(q)]||'slot')+' · '+HQ.fmtTime(at||Date.now()));
     var meta=[ceFmtLabel?ceText(q.format):'', ceText(q.location)].filter(Boolean).join(' · ');
-    return '<div class="ce-cal-card ce-bub st-'+k+(sel?' sel':'')+(ceMoving[q.id]?' moving':'')+'"'+(drag?' data-ce-drag="'+esc(q.id)+'"':'')+'>'+
+    var ti=ceTrialInfo(q);
+    return '<div class="ce-cal-card ce-bub st-'+k+(sel?' sel':'')+(ceMoving[q.id]?' moving':'')+'"'+(drag?' data-ce-drag="'+esc(q.id)+'"':'')+(ti?' data-link="'+esc(q.id)+'"':'')+'>'+
       (isAdmin?'<label class="ce-bubsel" title="Select"><input type="checkbox" data-cep-sel="'+esc(q.id)+'"'+(sel?' checked':'')+' aria-label="Select '+esc(ceText(q.title)||'video')+'"></label>':'')+
-      '<div class="row">'+(ceHasVideo(q)?ceThumb(q):'')+'<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="t">'+esc(time)+(ceMoving[q.id]?' <span class="ce-spin"></span>':'')+'</span><span class="ttl">'+esc(ceText(q.title)&&q.title!=='Open slot'?ceText(q.title):(q.status==='needs_script'?'Open slot · write a script':'Untitled'))+'</span><span class="ce-chips">'+ceStageChip(q)+ceWinnerChip(q)+'</span>'+(meta?'<span class="ce-meta">'+esc(meta)+'</span>':'')+(q.filmDate&&HQ.isDayKey(q.filmDate)&&['script','film','upload'].indexOf(k)>=0?'<span class="ce-meta">🎥 film '+esc(HQ.fmtDay(q.filmDate,'wd'))+'</span>':'')+'</button></div>'+
+      '<div class="row">'+(ceHasVideo(q)?ceThumb(q):'')+'<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'">'+ceKind(q, ti)+'<span class="t">'+esc(time)+(ceMoving[q.id]?' <span class="ce-spin"></span>':'')+'</span><span class="ttl">'+esc(ceText(q.title)&&q.title!=='Open slot'?ceText(q.title):(q.status==='needs_script'?'Open slot · write a script':'Untitled'))+'</span><span class="ce-chips">'+ceStageChip(q)+'</span>'+(ti?'<span class="ce-link">← '+(ti.planned?'Trial reels first, ~':'Trial reels ')+esc(ti.at?HQ.fmtDay(HQ.sydDay(ti.at),'wd')+' '+HQ.fmtTime(ti.at):'')+'</span>':'')+(meta?'<span class="ce-meta">'+esc(meta)+'</span>':'')+(q.filmDate&&HQ.isDayKey(q.filmDate)&&['script','film','upload'].indexOf(k)>=0?'<span class="ce-meta">🎥 film '+esc(HQ.fmtDay(q.filmDate,'wd'))+'</span>':'')+'</button></div>'+
       (opts.tray&&isAdmin?'<select class="input" data-ce-moveday="'+esc(q.id)+'" aria-label="Schedule on">'+ceDayOptions(null).replace('Move to…','Schedule on…')+'</select>':'')+'</div>';
   }
   function ceDayPick(attr, val, cur, label){ var today=HQ.sydNow().key, o='<option value="">'+esc(label)+'</option>'; for(var i=-1;i<28;i++){ var k=HQ.addDays(today,i); o+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':(i===-1?'Yesterday':HQ.fmtDay(k,'wd'))))+'</option>'; } return '<select class="input" '+attr+'="'+esc(val)+'" aria-label="'+esc(label)+'">'+o+'<option value="__none">No film day</option></select>'; }
@@ -3747,7 +3797,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     html+='<div class="ce-plangrid'+(cePlan.span===14?' two':'')+'">'+days.map(function(d){
       var mine=inView.filter(function(q){ return ceBubbleDay(q)===d && match(q); }).sort(function(a,b){ return (cePostAtMs(a)||0)-(cePostAtMs(b)||0); });
       var fl=(films[d]||[]).map(function(q){ return '<button type="button" class="ce-filmbub" data-ce-open="'+esc(q.id)+'">🎥 Film · '+esc(ceText(q.title)||'video')+(q.location?' · '+esc(ceText(q.location)):'')+'</button>'; }).join('');
-      var marks=(cePlan.stage==='all'||cePlan.stage==='trialing')?all.filter(function(q){ return (q.posting||{}).status==='trialing'; }).map(function(q){ var vs=(q.posting.trials||[]).filter(function(t){ return !t.cancelled && HQ.sydDay(t.postedAt||t.scheduledFor)===d; }).map(function(t){ return t.v; }); return vs.length?'<button type="button" class="ce-trialmark" data-ce-open="'+esc(q.id)+'">🧪 Trial reels '+esc(vs.join(', '))+' · '+esc(ceText(q.title)||'reel')+'</button>':''; }).join(''):'';
+      var marks=all.filter(function(q){ if(cePending(q)) return false; var ti=ceTrialInfo(q); return ti && ti.at && HQ.sydDay(ti.at)===d && (cePlan.stage==='all'||cePlan.stage==='trialing'||match(q)); }).map(function(q){ return ceTrialBubble(q, ceTrialInfo(q)); }).join('');
       return '<div class="ce-cal-day'+(d===today?' today':'')+(d<today?' past':'')+'" data-day="'+d+'"><div class="dh"><span>'+esc(HQ.DAYN[HQ.dowOf(d)].slice(0,3))+(d===today?' · today':'')+'</span><span>'+esc(HQ.fmtDay(d,'short'))+'</span></div>'+fl+marks+(mine.length?mine.map(function(q){ return ceBubble(q); }).join(''):(fl||marks?'':'<div class="ce-empty">–</div>'))+(isAdmin&&d>=today?'<button type="button" class="ce-addday" data-ce-newreel="'+d+'" aria-label="New reel on '+esc(HQ.fmtDay(d,'wd'))+'">+ New reel</button>':'')+'</div>';
     }).join('')+'</div>';
     setText('ceSub', (inView.length+tray.length)+' videos · '+(counts.film||0)+' to film · '+(counts.review||0)+' to review · '+tray.length+' pending scheduling');
@@ -3755,6 +3805,9 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   }
   document.addEventListener('click', function(ev){ var b=ev.target.closest&&ev.target.closest('[data-cep-shot]'); if(!b) return; var id=b.getAttribute('data-cep-shot'); ceApplyStage([id], b.getAttribute('data-v')==='1'?'upload':'film').then(function(){ ceRenderSheet(); }); });
   document.addEventListener('change', function(ev){ var s1=ev.target.closest&&ev.target.closest('[data-cep-filmone]'); if(!s1||!s1.value) return; ceSetFilmDay([s1.getAttribute('data-cep-filmone')], s1.value).then(function(){ ceRenderSheet(); }); });
+  (function(){ var hl=function(id, on){ document.querySelectorAll('[data-link]').forEach(function(el){ el.classList.toggle('linkhl', on && el.getAttribute('data-link')===id); }); };
+    document.addEventListener('mouseover', function(ev){ var c=ev.target.closest&&ev.target.closest('[data-link]'); hl(c?c.getAttribute('data-link'):null, !!c); });
+    document.addEventListener('focusin', function(ev){ var c=ev.target.closest&&ev.target.closest('[data-link]'); if(c) hl(c.getAttribute('data-link'), true); }); })();
   async function ceApplyStage(ids, to){
     if(!isAdmin||!db) return; var now=ceNowIso(), done=0, skipped=[];
     for(var i=0;i<ids.length;i++){ var q=ceFindSlot(ids[i]); if(!q) continue; var ps=(q.posting||{}).status;

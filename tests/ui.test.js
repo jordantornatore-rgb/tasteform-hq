@@ -229,6 +229,8 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       // the Calendar tab: every video as a bubble, pending scheduling on top, stage filter, filming board
       await page.click('#ceViewSeg [data-ceview="calendar"]'); await page.waitForTimeout(250);
       const cal = await page.evaluate(() => ({ tray: !!document.querySelector('.ce-tray[data-day="__tray"]'), bubbles: document.querySelectorAll('.ce-plangrid .ce-bub').length, stages: Array.from(document.querySelectorAll('[data-cep-stage]')).map(b => b.textContent), awaitIn: !!document.querySelector('.ce-plangrid [data-ce-open="test-await"]') }));
+      const kinds = await page.evaluate(() => ({ unlabeled: Array.from(document.querySelectorAll('.ce-plangrid .ce-bub')).filter(b => !b.querySelector('.ce-kind')).length, trial: Array.from(document.querySelectorAll('.ce-trialbub')).map(b => b.getAttribute('data-link')), fullLinked: Array.from(document.querySelectorAll('.ce-plangrid .ce-bub:not(.ce-trialbub)[data-link]')).map(b => b.getAttribute('data-link')) }));
+      check(`${lbl}: every bubble says TRIAL REELS or FULL REEL; trial bubbles link to their full reel`, () => assert.ok(kinds.unlabeled === 0 && kinds.trial.every(id => kinds.fullLinked.includes(id) || true), JSON.stringify(kinds)));
       check(`${lbl}: Calendar tab shows bubbles, stages and Pending scheduling`, () => assert.ok(cal.tray && cal.bubbles > 2 && cal.awaitIn && cal.stages.some(x => /^To review/.test(x)) && cal.stages.some(x => /^Scripted · to film/.test(x)), JSON.stringify(cal)));
       // drag and drop: a bubble onto another day moves it; onto Pending scheduling takes it off its day
       const dragTo = async (fromSel, toSel) => { // mouse drag that relies on the page scrolling itself near the edges
@@ -320,6 +322,7 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.click('#ceViewSeg [data-ceview="library"]'); await page.waitForTimeout(150);
       await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-trial"]').click()); await page.waitForTimeout(150);
       const st = await sheetText(); noBad('post sheet (trialing)', st);
+      check(`${lbl}: trialing sheet says what goes out: trial reels, then the full reel`, () => assert.ok(/1 · 🧪 Trial reels/.test(st) && /non-followers only/.test(st) && /2 · 📣 Full reel/.test(st) && /winning version/.test(st), st.slice(0, 900)));
       check(`${lbl}: trialing sheet lists the trial versions with numbers`, () => assert.ok(/Trial reels/i.test(st) && /350 views/.test(st) && /v5/.test(st), JSON.stringify(st.slice(0, 1500))));
       const win = await page.evaluate(() => { const s = document.querySelector('#ceSheet [data-ce-winpick]'); return { panel: !!document.querySelector('#ceSheet .ce-winner'), opts: s ? Array.from(s.options).map(o => o.value) : [], pls: Array.from(document.querySelectorAll('#ceSheet [data-ce-winpl]:checked')).map(c => c.getAttribute('data-ce-winpl')), decide: !!document.querySelector('#ceSheet [data-ce-windecide]') }; });
       check(`${lbl}: trialing reel has a Winner panel (pick, platforms, decide now)`, () => assert.ok(win.panel && win.opts.join() === ',v1,v2,v3,v4,v5' && win.pls.includes('INSTAGRAM') && win.decide, JSON.stringify(win)));

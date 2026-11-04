@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.7.2 — 4 Nov 2026 (trial reels vs the full reel, clearly)
+
+- Every calendar bubble and Library card says what it is: 📣 FULL REEL (posted to everyone) or 🧪 TRIAL REELS (Instagram, non-followers only), or 🖼 CAROUSEL.
+- A reel that's trialled now has two linked bubbles: 🧪 Trial reels on the day they start (how many versions, waiting for your OK / n of 5 out with the best views / done, which won) and 📣 Full reel on the day the winner posts to everyone. Each points at the other ("→ Full reel Sat 4:00pm", "← Trial reels first, Wed 4:10pm"); hovering one highlights both. Automatic trials (2+ versions, 3+ days out) show too, marked automatic.
+- Reel sheet: "What goes out" at the top: 1 · Trial reels (who sees them, when, status) and 2 · Full reel (the winner, where, when), or "Full reel · no trial".
+
 ## 2.7.1 — 4 Nov 2026 (drag and drop that works on a phone)
 
 - Calendar drag and drop rebuilt: grab a bubble anywhere (title, time, thumbnail) and drop it on a day or in Pending scheduling. On a phone, press and hold for a moment, then drag: the page no longer scrolls away and cancels the drag, and it scrolls by itself when you drag near the top or bottom edge. Thumbnails no longer start the browser's own image drag; long-press doesn't open the copy menu.
