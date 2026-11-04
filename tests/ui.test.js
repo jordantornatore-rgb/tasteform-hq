@@ -66,6 +66,7 @@ function contentFixtures(today) {
     ev('b', 'test-e1', 'enrolled', -72, ['recipe: hsp', 'country: uk', 'job: corporate']), ev('b', 'test-e1', 'sent', -72, ['recipe: hsp', 'country: uk', 'job: corporate']), ev('b', 'test-e1', 'replied', -60),
     ev('c', 'test-e1', 'enrolled', -1)]); }
 { const cf = contentFixtures(TODAY); fixtures.content_queue = fixtures.content_queue.concat(cf.queue); fixtures.content_ideas = fixtures.content_ideas.concat(cf.ideas); }
+fixtures.content_sounds = (fixtures.content_sounds || []).concat([{ id: 'test-fullsong', data: { artist: 'Test Artist', title: 'Whole Song', vibe: 'calm', durationS: 200, partS: 60, partKind: 'chorus', fullSong: true, previewPath: 'sounds/test-fullsong.mp4', waveform: Array.from({ length: 240 }, (_, i) => 20 + (i * 13) % 80) } }]);
 const dms = docs('dm_threads'), tfDaily = docs('tf_daily'), tfResponses = docs('tf_responses'), contacts = docs('contacts');
 const leads = dms.filter(d => d.category === 'lead' && !d.notApplicable);
 const exp = {};
@@ -282,6 +283,17 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.click('#ceSheet [data-ce-edit="sound"]'); await page.waitForTimeout(100);
       const sndUi = await page.evaluate(() => ({ start: !!document.querySelector('#ceSheet [data-ce-f="start"]'), play: !!document.querySelector('#ceSheet [data-ce-snd="track"]'), mix: !!document.querySelector('#ceSheet [data-ce-snd="mix"]') }));
       check(`${lbl}: sound editor has the start slider and play button`, () => assert.ok(sndUi.start && sndUi.play && !sndUi.mix, JSON.stringify(sndUi)));
+      // Instagram-style picker: choosing a full song puts the box on Instagram's part; dragging moves it
+      await page.selectOption('#ceSheet [data-ce-f="soundId"]', 'test-fullsong'); await page.waitForTimeout(80);
+      const wv1 = await page.evaluate(() => ({ st: document.querySelector('#ceSheet [data-ce-f="start"]').value, out: document.querySelector('#ceSheet [data-ce-startout]').textContent, bars: document.querySelectorAll('#ceSheet .ce-wave .bars i').length, lit: document.querySelectorAll('#ceSheet .ce-wave .bars i.in').length, ig: !!document.querySelector('#ceSheet .ce-wave .ig'), left: document.querySelector('#ceSheet .ce-wave .win').style.left }));
+      check(`${lbl}: full song shows as a waveform with the box on the chorus`, () => assert.ok(wv1.st === '60' && /^1:00 – /.test(wv1.out) && wv1.bars === 240 && wv1.lit > 0 && wv1.lit < 240 && wv1.ig && parseFloat(wv1.left) === 30, JSON.stringify(wv1)));
+      const box = await page.$eval('#ceSheet .ce-wave', e => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
+      await page.mouse.move(box.x + box.w * 0.8, box.y + box.h / 2); await page.mouse.down(); await page.mouse.move(box.x + box.w * 0.85, box.y + box.h / 2); await page.mouse.up(); await page.waitForTimeout(50);
+      const wv2 = await page.evaluate(() => ({ st: +document.querySelector('#ceSheet [data-ce-f="start"]').value, max: +document.querySelector('#ceSheet [data-ce-f="start"]').max }));
+      check(`${lbl}: dragging the box moves the start and keeps the box inside the song`, () => assert.ok(wv2.st > 100 && wv2.st <= wv2.max, JSON.stringify(wv2)));
+      await page.click('#ceSheet [data-ce-igpart]'); await page.waitForTimeout(30);
+      const igBack = await page.$eval('#ceSheet [data-ce-f="start"]', e => e.value); check(`${lbl}: "Chorus" jumps back`, () => assert.strictEqual(igBack, '60'));
+      await page.selectOption('#ceSheet [data-ce-f="soundId"]', ''); await page.waitForTimeout(50);
       await page.click('#ceSheet [data-ce-snd="track"]'); await page.waitForTimeout(100);
       const sndMsg = await page.$eval('#ceSheet [data-ce-sndplay]', e => e.textContent); check(`${lbl}: playing with no song picked explains itself`, () => assert.ok(/Pick a song|preview shelf/.test(sndMsg), sndMsg));
       await page.keyboard.press('Escape'); await page.keyboard.press('Escape'); await page.waitForTimeout(80);

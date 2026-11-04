@@ -768,6 +768,22 @@ body{padding:0;}
 .ce-editor .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .ce-editor input[type=range]{width:100%;}
 .ce-note{font-size:var(--t-s);color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px;}
+.ce-wave-wrap{display:grid;gap:6px;margin:4px 0 8px;}
+.ce-wave-top,.ce-wave-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:var(--t-s);color:var(--muted);}
+.ce-wave-top output{color:var(--text);font-variant-numeric:tabular-nums;font-weight:600;}
+.ce-wave{position:relative;height:72px;border-radius:12px;background:var(--surface-2);cursor:pointer;touch-action:none;overflow:hidden;user-select:none;-webkit-user-select:none;}
+.ce-wave:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.ce-wave .bars{position:absolute;inset:8px 4px;display:flex;align-items:center;gap:1px;pointer-events:none;}
+.ce-wave .bars i{flex:1;min-width:1px;background:var(--text-2);opacity:.35;border-radius:1px;}
+.ce-wave .bars i.in{background:var(--accent);opacity:1;}
+.ce-wave.flat .bars i{opacity:.18;}
+.ce-wave .win{position:absolute;top:0;bottom:0;border:2px solid var(--accent);border-radius:12px;cursor:grab;pointer-events:none;box-sizing:border-box;}
+.ce-wave.dragging .win{cursor:grabbing;}
+.ce-wave .head{position:absolute;top:2px;bottom:2px;width:2px;background:var(--text);left:0;display:none;}
+.ce-wave.playing .head{display:block;}
+.ce-wave .ig{position:absolute;top:0;bottom:0;border-left:2px dashed var(--warn);pointer-events:none;}
+.ce-wave-foot .linklike{background:none;border:0;padding:4px 0;color:var(--accent);font:inherit;cursor:pointer;text-decoration:underline;}
+.ce-wave-fine{font-size:var(--t-s);color:var(--muted);}
 .ce-libfilters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .ce-libfilters .input{min-width:0;max-width:100%;}
 /* ===== Content Engine: add a filmed reel (uploads) ===== */
@@ -3124,9 +3140,9 @@ body{padding:0;}
       var bank=(state.contentSounds||[]).filter(function(x){ return x && !String(x.id).startsWith('_'); });
       var cur=q.sound&&q.sound.bankId?String(q.sound.bankId):'', vol=q.sound&&HQ.isNum(q.sound.musicVolume)?Math.min(30,q.sound.musicVolume):(q.sound&&HQ.isNum(q.sound.musicSoundVolume)?Math.min(30,q.sound.musicSoundVolume):10);
       body='<label>Sound<select class="input" data-ce-f="soundId"><option value=""'+(cur?'':' selected')+'>No music</option>'+bank.map(function(x){ return '<option value="'+E(x.id)+'" data-title="'+E(x.igAudioTitle||((x.artist?x.artist+' – ':'')+(x.title||x.id)))+'"'+(String(x.id)===cur?' selected':'')+' data-path="'+E(x.previewPath||'')+'" data-dur="'+E(HQ.isNum(x.durationS)?x.durationS:(x.localAudio&&HQ.isNum(x.localAudio.durationS)?x.localAudio.durationS:30))+'">'+E((x.artist?x.artist+' – ':'')+(x.title||x.id))+(x.vibe?' · '+E(x.vibe):'')+'</option>'; }).join('')+'</select></label><label>Music volume <output data-ce-volout>'+vol+'</output><input type="range" min="0" max="30" step="1" value="'+vol+'" data-ce-f="volume" aria-label="Music volume"></label>'+
-        (function(){ var curS=bank.find(function(x){ return String(x.id)===cur; }), dur=curS&&HQ.isNum(curS.durationS)?curS.durationS:30, st=q.sound&&HQ.isNum(q.sound.startS)?Math.min(q.sound.startS,dur):0; return '<label>Start the song at <output data-ce-startout>'+ceClock(st)+'</output><input type="range" min="0" max="'+dur+'" step="0.5" value="'+st+'" data-ce-f="start" aria-label="Start the song at"></label>'; })()+
-        '<div class="acts"><button type="button" class="btn small" data-ce-snd="track">▶ Play the song from here</button>'+(q.video&&(q.video.originalPreviewUrl)?'<button type="button" class="btn small" data-ce-snd="mix">▶ Preview with my video</button>':'')+'<button type="button" class="btn small" data-ce-snd="stop">■ Stop</button></div><div data-ce-sndplay></div>'+
-        '<div class="f-note">Mixed into the video file; your voice stays at 100. Talking heads: 8–12. Pick the part of the song with the slider, listen, then Save: the video re-renders with it.'+(q.video&&q.video.originalPreviewUrl?'':' "Preview with my video" appears on finished edits you add yourself.')+'</div>';
+        (function(){ var curS=bank.find(function(x){ return String(x.id)===cur; }), st=q.sound&&HQ.isNum(q.sound.startS)?q.sound.startS:(curS&&HQ.isNum(curS.partS)?curS.partS:0); return ceWaveHtml(curS, st, ceVideoLen(q)); })()+
+        '<div class="acts"><button type="button" class="btn small" data-ce-snd="track">▶ Play this part</button>'+(q.video&&(q.video.originalPreviewUrl)?'<button type="button" class="btn small" data-ce-snd="mix">▶ Preview with my video</button>':'')+'<button type="button" class="btn small" data-ce-snd="stop">■ Stop</button></div><div data-ce-sndplay></div>'+
+        '<div class="f-note">Mixed into the video file; your voice stays at 100. Talking heads: 8–12. Drag the box along the song to pick the part (like Instagram), listen, then Save: the video re-renders with it. The dashed line marks the chorus (or Instagram’s part of the song).'+(q.video&&q.video.originalPreviewUrl?'':' "Preview with my video" appears on finished edits you add yourself.')+'</div>';
     }
     else if(section==='platforms'){ var have=cePlatforms(q); body='<div class="ce-chips">'+['INSTAGRAM','TIKTOK','YOUTUBE','LINKEDIN'].map(function(pl){ return '<label class="chip grey" style="min-height:36px;cursor:pointer"><input type="checkbox" data-ce-pl="'+pl+'"'+(have.indexOf(pl)>=0?' checked':'')+'> '+esc(CE_PLATFORM_SHORT[pl])+'</label>'; }).join('')+'</div><div class="f-note">TikTok posts once it is connected in Outstand.</div>'; }
     return '<div class="ce-editor" data-ce-editor="'+section+'">'+body+acts+'</div>';
@@ -3142,7 +3158,7 @@ body{padding:0;}
     if(section==='linkedin') return {linkedin:f('linkedin')};
     if(section==='caption') return {caption:f('caption')};
     if(section==='meta') return {format:f('format'), funnel:f('funnel'), angle:f('angle'), hookStyle:f('hookStyle'), location:f('location'), effort:f('effort')};
-    if(section==='sound'){ var selEl=root.querySelector('[data-ce-f="soundId"]'), opt=selEl&&selEl.options[selEl.selectedIndex]; var id=selEl?selEl.value:''; var vol=parseInt(f('volume'),10); if(!id) return {sound:{bankId:null, title:'No music', musicVolume:0, voiceVolume:100, mixedIntoFile:true, setBy:'jordan'}}; var st=parseFloat(f('start')); return {sound:{bankId:id, title:opt.getAttribute('data-title'), musicVolume:isNaN(vol)?10:vol, voiceVolume:100, startS:isNaN(st)?0:Math.round(st*2)/2, mixedIntoFile:true, setBy:'jordan'}}; }
+    if(section==='sound'){ var selEl=root.querySelector('[data-ce-f="soundId"]'), opt=selEl&&selEl.options[selEl.selectedIndex]; var id=selEl?selEl.value:''; var vol=parseInt(f('volume'),10); if(!id) return {sound:{bankId:null, title:'No music', musicVolume:0, voiceVolume:100, mixedIntoFile:true, setBy:'jordan'}}; var st=parseFloat(f('start')), full=(state.contentSounds||[]).some(function(x){ return String(x.id)===id && x.fullSong; }), o={bankId:id, title:opt.getAttribute('data-title'), musicVolume:isNaN(vol)?10:vol, voiceVolume:100, startS:isNaN(st)?0:Math.round(st*2)/2, mixedIntoFile:true, setBy:'jordan'}; if(full) o.startBase='full'; return {sound:o}; }
     if(section==='platforms') return {platforms:Array.prototype.filter.call(root.querySelectorAll('[data-ce-pl]'), function(c){ return c.checked; }).map(function(c){ return c.getAttribute('data-ce-pl'); })};
     return {};
   }
@@ -3410,6 +3426,7 @@ body{padding:0;}
       var pv=t.closest('[data-ce-pv]'); if(pv&&cePreview){ cePreview.v=pv.getAttribute('data-ce-pv'); cePreview.force=true; ceRenderSheet(); return; }
       var mo=t.closest('[data-ce-more]'); if(mo&&cePreview){ cePreview.more=true; cePreview.force=true; ceRenderSheet(); return; }
       var snb=t.closest('[data-ce-snd]'); if(snb){ ceSndPlay(snb.getAttribute('data-ce-snd'), snb); return; }
+      var igp=t.closest('[data-ce-igpart]'); if(igp){ var ww=igp.closest('.ce-wave-wrap'); ceWaveSet(ww, parseFloat(igp.getAttribute('data-ce-igpart'))||0); return; }
       var adr=t.closest('[data-ce-addreel]'); if(adr){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceAdd={id:adr.getAttribute('data-ce-addreel')||null, force:true}; ceRenderSheet(); return; }
       var ads=t.closest('[data-ca-submit]'); if(ads){ ceSubmitAddReel(ads); return; }
       var sct=t.closest('[data-ce-script]'); if(sct){ ceOpenScript({id:sct.getAttribute('data-ce-script')}); return; }
@@ -3442,7 +3459,7 @@ body{padding:0;}
     function onChange(ev){
       var s=ev.target.closest('select[data-cef]'); if(s){ ceFilters[s.getAttribute('data-cef')]=s.value; renderNow('content'); return; }
       var lf=ev.target.closest('[data-celib]'); if(lf){ ceLib[lf.getAttribute('data-celib')]=lf.value; renderNow('content'); return; }
-      var sid=ev.target.closest('[data-ce-f="soundId"]'); if(sid){ ceSndStop(); var op=sid.options[sid.selectedIndex], d=parseFloat(op&&op.getAttribute('data-dur'))||30, rg=sid.closest('[data-ce-editor]').querySelector('[data-ce-f="start"]'); if(rg){ rg.max=d; if(parseFloat(rg.value)>d){ rg.value=0; } var so2=rg.parentElement.querySelector('[data-ce-startout]'); if(so2) so2.textContent=ceClock(rg.value); } return; }
+      var sid=ev.target.closest('[data-ce-f="soundId"]'); if(sid){ ceSndStop(); var wr=sid.closest('[data-ce-editor]').querySelector('.ce-wave-wrap'), ns=(state.contentSounds||[]).find(function(x){ return String(x.id)===sid.value; }); if(wr){ wr.outerHTML=ceWaveHtml(ns, ns&&HQ.isNum(ns.partS)?ns.partS:0, parseFloat(wr.getAttribute('data-win'))||30); } return; }
       var cax=ev.target.closest('[data-ca]'); if(cax&&ceAdd){ ceAddToggle(); return; }
       var sp=ev.target.closest('[data-cs="slotpick"]'); if(sp){ var ns=sp.closest('.ce-script').querySelector('.ce-newslot'); if(ns) ns.hidden=sp.value!=='__new'; return; }
       var tm=ev.target.closest('select[data-ce-time]'); if(tm){ var id=tm.getAttribute('data-ce-time'), q=ceFindSlot(id); if(!q) return; var at=cePostAtMs(q), day=HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):HQ.sydNow().key); ceMove(id, day, tm.value); return; }
@@ -3453,7 +3470,7 @@ body{padding:0;}
       var csx=ev.target.closest('[data-cs],[data-cs-hook]'); if(csx){ if(csx.hasAttribute('data-cs-grow')) ceGrow(csx); if(csx.getAttribute('data-cs')==='script') ceWordCount(csx); return; }
       var lit=ev.target.closest('[data-ce-f="linkedin"]'); if(lit){ var lw=lit.parentElement.querySelector('[data-ce-liwarn]'); if(lw) lw.hidden=/TasteForm/.test(lit.value); return; }
       var vol=ev.target.closest('[data-ce-f="volume"]'); if(vol){ var o=vol.parentElement.querySelector('[data-ce-volout]'); if(o) o.textContent=vol.value; return; }
-      var stv=ev.target.closest('[data-ce-f="start"]'); if(stv){ var so=stv.parentElement.querySelector('[data-ce-startout]'); if(so) so.textContent=ceClock(stv.value); return; }
+      var stv=ev.target.closest('[data-ce-f="start"]'); if(stv){ ceWaveSync(stv.closest('.ce-wave-wrap')); return; }
       var qq=ev.target.closest('#ceLibQ'); if(qq){ clearTimeout(ceLib._t); ceLib._t=setTimeout(function(){ ceLib.q=qq.value; ceLib.focusQ=true; renderNow('content'); }, 250); }
     }
     if(view){ view.addEventListener('click', onClick); view.addEventListener('change', onChange); view.addEventListener('input', onInput); }
@@ -3837,7 +3854,7 @@ body{padding:0;}
     html+='<div><span class="ce-k">Which slot?</span><label>Slot<select class="input" data-ca="slot">'+(pre&&opens.indexOf(pre)<0?'<option value="'+E(pre.id)+'" selected>'+E((HQ.isDayKey(pre.date)?HQ.fmtDay(pre.date,'wd'):'no day')+' · '+(ceText(pre.title)||'this reel'))+'</option>':'')+opens.map(function(o){ return '<option value="'+E(o.id)+'"'+(pre&&pre.id===o.id?' selected':'')+'>'+E(HQ.fmtDay(o.date,'wd')+' · '+(CE_SLOT_LABEL[ceSlotKey(o)]||'slot')+' · '+(o.title&&o.title!=='Open slot'?o.title:(o.status==='needs_script'?'open slot':'to film')))+'</option>'; }).join('')+'<option value="__new"'+(pre?'':' selected')+'>New reel on a day…</option></select></label>'+
       '<div class="grid" data-ca-new'+(pre?' hidden':'')+'><label>Day<select class="input" data-ca-f="date">'+dayOpts+'</select></label><label>Slot type<select class="input" data-ca-f="slottype">'+['high','low','carousel'].map(function(x){ return '<option value="'+x+'">'+esc(CE_SLOT_LABEL[x])+'</option>'; }).join('')+'</select></label></div></div>';
     html+='<label>Title<input class="input" type="text" data-ca-f="title" maxlength="140" value="'+E(pre&&pre.title!=='Open slot'?pre.title:'')+'" placeholder="One line, so you can find it"></label>';
-    html+='<div><span class="ce-k">What is it?</span><div class="ce-choice"><label><input type="radio" name="ca-kind" value="raw" data-ca="kind" checked><span>Raw footage<small>The pipeline edits it with your notes, makes 5 versions and trials them.</small></span></label><label><input type="radio" name="ca-kind" value="final" data-ca="kind"><span>Finished edit<small>Post it as it is. It still comes to you for approval first.</small></span></label></div></div>';
+    html+='<div><span class="ce-k">What is it?</span><div class="ce-choice"><label><input type="radio" name="ca-kind" value="raw" data-ca="kind" checked><span>Raw footage<small>The pipeline edits it with your notes, makes 5 versions and trials them.</small></span></label><label><input type="radio" name="ca-kind" value="final" data-ca="kind"><span>Finished edit<small>Post it as it is. Add 2 or more versions (different hooks, covers, cuts) and each goes out as an Instagram trial reel 72 h before the slot; the best one posts to everyone. It still comes to you for approval first.</small></span></label></div></div>';
     html+='<div><span class="ce-k">Where is it?</span><div class="ce-choice"><label><input type="radio" name="ca-src" value="upload" data-ca="src" checked><span>Upload from this device<small>Videos, photos, audio. Big files are fine; it resumes if the connection drops.</small></span></label><label><input type="radio" name="ca-src" value="mac" data-ca="src"><span>Already on the Mac<small>A folder in footage/ (AirDrop or iCloud).</small></span></label></div></div>';
     html+='<div data-ca-upload><input type="file" multiple accept="video/*,image/*,audio/*,.mov,.mp4,.m4v,.heic" data-ca-files aria-label="Footage files"><div class="f-note">Keep HQ open on this screen until the bars finish.</div></div>';
     html+='<div data-ca-mac hidden>'+(folders.length?'<label>Folder in footage/<select class="input" data-ca-f="folder">'+folders.map(function(f){ return '<option value="'+E(f.name)+'">'+E(f.name+' · '+f.files+' file'+(f.files===1?'':'s')+(f.changedAt?' · '+(relTime(f.changedAt)||''):''))+'</option>'; }).join('')+'</select></label>':'<div class="empty-state">No unclaimed folders in footage/ on the Mac'+((state.contentAutopost||{}).footageFoldersAt?' (checked '+esc(relTime(state.contentAutopost.footageFoldersAt)||'')+')':'')+'. Drop the footage into its own folder there and it shows up here within 20 minutes.</div>')+'</div>';
@@ -3974,8 +3991,41 @@ body{padding:0;}
 
   /* --- Sound picker: hear the song from the chosen point, or your video with the song underneath (live, before saving) --- */
   var ceSnd={audio:null, video:null, timer:null, mode:null};
+  function ceVideoLen(q){ var v=q&&q.video||{}, f=q&&q.footage||{}; return HQ.isNum(v.durationS)&&v.durationS>0?v.durationS:(HQ.isNum(f.durationS)&&f.durationS>0?f.durationS:30); }
+  // Instagram-style picker: the whole song as bars, a box as long as the video that you drag to choose the part.
+  function ceWaveHtml(s, st, win){
+    var E=esc, dur=s&&HQ.isNum(s.durationS)&&s.durationS>0?s.durationS:30, w=s&&Array.isArray(s.waveform)&&s.waveform.length?s.waveform:null;
+    win=Math.max(1,+win||30); var max=dur>win?dur-win:dur; st=Math.max(0,Math.min(+st||0,max));
+    var len=Math.min(win,dur), pk=(w||Array.apply(null,Array(120)).map(function(_,i){ return 30+((i*37)%40); })), n=pk.length;
+    var bars=pk.map(function(v,i){ var t=(i+0.5)/n*dur; return '<i'+(t>=st&&t<=st+len?' class="in"':'')+' style="height:'+Math.max(6,Math.min(100,+v||0))+'%"></i>'; }).join('');
+    var txt=ceClock(st)+' – '+ceClock(Math.min(dur,st+len))+(win>dur?' (loops)':'');
+    var ig=s&&HQ.isNum(s.partS)&&s.partS<dur?s.partS:null;
+    return '<div class="ce-wave-wrap" data-dur="'+dur+'" data-win="'+win+'"><div class="ce-wave-top"><span>'+(s?'Your '+E(ceClock(win))+' video uses':'Pick a song first')+'</span><output data-ce-startout>'+(s?E(txt):'')+'</output></div>'+
+      '<div class="ce-wave'+(w?'':' flat')+'" data-ce-wave role="slider" tabindex="0" aria-label="Part of the song" aria-valuemin="0" aria-valuemax="'+max+'" aria-valuenow="'+st+'" aria-valuetext="from '+E(txt)+'"><div class="bars">'+bars+'</div>'+(ig!=null?'<span class="ig" style="left:'+(ig/dur*100).toFixed(2)+'%"></span>':'')+'<div class="win" style="left:'+(st/dur*100).toFixed(3)+'%;width:'+Math.min(100-st/dur*100,len/dur*100).toFixed(3)+'%"><span class="head"></span></div></div>'+
+      '<div class="ce-wave-foot"><span>0:00</span>'+(ig!=null?'<button type="button" class="linklike" data-ce-igpart="'+ig+'">'+(s.partKind==='trend'?'Trending part':(s.partKind==='ig'?'Instagram’s part':'Chorus'))+' ('+E(ceClock(ig))+')</button>':'')+'<span>'+E(ceClock(dur))+(s&&s.fullSong?' · full song':'')+'</span></div>'+
+      '<label class="ce-wave-fine">Fine-tune <input type="range" min="0" max="'+max+'" step="0.5" value="'+st+'" data-ce-f="start" aria-label="Start the song at"></label></div>';
+  }
+  function ceWaveSync(wr){
+    if(!wr) return; var rg=wr.querySelector('[data-ce-f="start"]'), wv=wr.querySelector('[data-ce-wave]'), box=wr.querySelector('.win'), out=wr.querySelector('[data-ce-startout]');
+    var dur=parseFloat(wr.getAttribute('data-dur'))||30, win=parseFloat(wr.getAttribute('data-win'))||30, st=parseFloat(rg.value)||0, len=Math.min(win,dur);
+    box.style.left=(st/dur*100).toFixed(3)+'%'; box.style.width=Math.min(100-st/dur*100, len/dur*100).toFixed(3)+'%';
+    var bars=wv.querySelectorAll('.bars i'), n=bars.length; for(var i=0;i<n;i++){ var t=(i+0.5)/n*dur; bars[i].classList.toggle('in', t>=st&&t<=st+len); }
+    var txt=ceClock(st)+' – '+ceClock(Math.min(dur,st+len))+(win>dur?' (loops)':''); if(out) out.textContent=txt; wv.setAttribute('aria-valuenow',st); wv.setAttribute('aria-valuetext','from '+txt);
+  }
+  function ceWaveSet(wr, st){ if(!wr) return; var rg=wr.querySelector('[data-ce-f="start"]'); rg.value=Math.max(0,Math.min(parseFloat(rg.max)||0, Math.round(st*2)/2)); ceWaveSync(wr); }
+  function ceWaveHead(wr, t){ if(!wr) return; var wv=wr.querySelector('[data-ce-wave]'), h=wr.querySelector('.head'), win=Math.min(parseFloat(wr.getAttribute('data-win'))||30, parseFloat(wr.getAttribute('data-dur'))||30); if(t==null){ wv.classList.remove('playing'); return; } wv.classList.add('playing'); h.style.left=Math.max(0,Math.min(100,t/win*100)).toFixed(2)+'%'; }
+  (function(){
+    var drag=null;
+    function at(wv, x){ var r=wv.getBoundingClientRect(), wr=wv.closest('.ce-wave-wrap'), dur=parseFloat(wr.getAttribute('data-dur'))||30; return Math.max(0,Math.min(1,(x-r.left)/r.width))*dur; }
+    document.addEventListener('pointerdown', function(ev){ var wv=ev.target.closest&&ev.target.closest('[data-ce-wave]'); if(!wv) return; var wr=wv.closest('.ce-wave-wrap'), rg=wr.querySelector('[data-ce-f="start"]'), st=parseFloat(rg.value)||0, win=Math.min(parseFloat(wr.getAttribute('data-win'))||30, parseFloat(wr.getAttribute('data-dur'))||30), t=at(wv, ev.clientX);
+      var off=(t>=st&&t<=st+win)?t-st:win/2; drag={wv:wv, wr:wr, off:off}; wv.classList.add('dragging'); try{ wv.setPointerCapture(ev.pointerId); }catch(e){} ceWaveSet(wr, t-off); ev.preventDefault(); });
+    document.addEventListener('pointermove', function(ev){ if(!drag) return; ceWaveSet(drag.wr, at(drag.wv, ev.clientX)-drag.off); });
+    function end(){ if(!drag) return; drag.wv.classList.remove('dragging'); drag=null; }
+    document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+    document.addEventListener('keydown', function(ev){ var wv=ev.target.closest&&ev.target.closest('[data-ce-wave]'); if(!wv) return; var k=ev.key, d=k==='ArrowRight'||k==='ArrowUp'?1:(k==='ArrowLeft'||k==='ArrowDown'?-1:0); if(!d) return; var wr=wv.closest('.ce-wave-wrap'), rg=wr.querySelector('[data-ce-f="start"]'); ceWaveSet(wr,(parseFloat(rg.value)||0)+d*(ev.shiftKey?5:1)); ev.preventDefault(); });
+  })();
   function ceClock(t){ t=Math.max(0,+t||0); var m=Math.floor(t/60), s=t-m*60; return m+':'+(s<10?'0':'')+(Math.round(s*10)/10).toString().replace(/\.0$/,''); }
-  function ceSndStop(){ if(ceSnd.timer) clearInterval(ceSnd.timer); ceSnd.timer=null; ['audio','video'].forEach(function(k){ var el=ceSnd[k]; if(el){ try{ el.pause(); }catch(e){} el.remove(); ceSnd[k]=null; } }); ceSnd.mode=null; }
+  function ceSndStop(){ if(ceSnd.timer) clearInterval(ceSnd.timer); ceSnd.timer=null; document.querySelectorAll('.ce-wave.playing').forEach(function(w){ w.classList.remove('playing'); }); ['audio','video'].forEach(function(k){ var el=ceSnd[k]; if(el){ try{ el.pause(); }catch(e){} el.remove(); ceSnd[k]=null; } }); ceSnd.mode=null; }
   async function ceSignedPreview(path){ var c=ceSigned[path]; if(c&&Date.now()-c.at<50*60000) return c.url; var r=await supaClient.storage.from('content-previews').createSignedUrl(path, 3600); if(r.error||!r.data) throw (r.error||new Error('no url')); ceSigned[path]={url:r.data.signedUrl, at:Date.now()}; return r.data.signedUrl; }
   async function ceSndPlay(mode, btn){
     var root=btn.closest('[data-ce-editor]'); if(!root) return; ceSndStop(); if(mode==='stop') return;
@@ -3985,13 +4035,15 @@ body{padding:0;}
     if(!pth){ box.innerHTML='<div class="f-note">'+(sel&&sel.value?'This song isn’t on the preview shelf yet; it’s added on the pipeline’s next run.':'Pick a song first.')+'</div>'; return; }
     try{
       var url=await ceSignedPreview(pth), a=document.createElement('audio'); a.setAttribute('data-ce-sndaudio',''); a.preload='auto'; a.src=url; ceSnd.audio=a; document.body.appendChild(a); ceSnd.mode=mode;
-      if(mode==='track'){ a.volume=1; a.currentTime=st; await a.play(); box.innerHTML='<div class="f-note">Playing the song from '+esc(ceClock(st))+' (full volume, so you can hear the part). Stops after 20 seconds.</div>'; ceSnd.timer=setInterval(function(){ if(a.currentTime>=st+20||a.ended) ceSndStop(); }, 250); return; }
+      var wr=root.querySelector('.ce-wave-wrap'), win=Math.min(parseFloat(wr&&wr.getAttribute('data-win'))||30, dur), began=Date.now();
+      if(mode==='track'){ a.volume=1; a.currentTime=st; await a.play(); box.innerHTML='<div class="f-note">Playing the part in the box on repeat (full volume, so you can hear it). Drag the box while it plays.</div>';
+        ceSnd.timer=setInterval(function(){ var sr=root.querySelector('[data-ce-f="start"]'), ns=parseFloat(sr&&sr.value)||0; if(ns!==st){ st=ns; a.currentTime=st; } if(a.currentTime>=st+win||a.ended){ a.currentTime=st; a.play().catch(function(){}); } ceWaveHead(wr, a.currentTime-st); if(Date.now()-began>180000) ceSndStop(); }, 100); return; }
       var q=ceFindSlot(ceOpenId), v=document.createElement('video'); v.className='ce-video'; v.controls=true; v.setAttribute('playsinline',''); v.setAttribute('data-ce-sndvideo',''); v.src=q.video.originalPreviewUrl; box.innerHTML=''; box.appendChild(v); ceSnd.video=v; a.volume=Math.min(1,vol);
       var sync=function(force){ var want=(st+v.currentTime)%dur; if(force||Math.abs(a.currentTime-want)>0.25) a.currentTime=want; };
       v.addEventListener('play', function(){ sync(true); a.play().catch(function(){}); }); v.addEventListener('pause', function(){ a.pause(); }); v.addEventListener('seeked', function(){ sync(true); }); v.addEventListener('ended', function(){ a.pause(); });
-      ceSnd.timer=setInterval(function(){ if(!v.paused) sync(false); var vr=root.querySelector('[data-ce-f="volume"]'), sr=root.querySelector('[data-ce-f="start"]'); if(vr) a.volume=Math.min(1,(parseInt(vr.value,10)||0)/100); if(sr && parseFloat(sr.value)!==st){ st=parseFloat(sr.value)||0; sync(true); } }, 250);
+      ceSnd.timer=setInterval(function(){ if(!v.paused) sync(false); var vr=root.querySelector('[data-ce-f="volume"]'), sr=root.querySelector('[data-ce-f="start"]'); if(vr) a.volume=Math.min(1,(parseInt(vr.value,10)||0)/100); if(sr && parseFloat(sr.value)!==st){ st=parseFloat(sr.value)||0; sync(true); } ceWaveHead(wr, v.currentTime); }, 150);
       await v.play().catch(function(){});
-      var note=document.createElement('div'); note.className='f-note'; note.textContent='Your video with the song underneath, as it will be mixed. Move the sliders while it plays.'; box.appendChild(note);
+      var note=document.createElement('div'); note.className='f-note'; note.textContent='Your video with the song underneath, as it will be mixed. Drag the box or the volume while it plays.'; box.appendChild(note);
     }catch(e){ box.innerHTML='<div class="ce-note">Couldn’t play it: '+esc(e.message||String(e))+'</div>'; ceSndStop(); }
   }
 

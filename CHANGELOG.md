@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.6.3 — 4 Nov 2026 (whole songs, Instagram-style picker, trial versions of your own edits)
+
+- Sound section: the whole song is drawn as a waveform with a box as long as your video. Drag the box (or tap where you want it, or use the arrow keys) to pick the part, like Instagram; the bars inside light up and the time shows above. A dashed line marks the chorus (or Instagram's part of the song), with a button to jump back to it. The fine-tune slider stays underneath.
+- Picking a different song puts the box on its chorus. "▶ Play this part" loops the part in the box while you drag; "▶ Preview with my video" follows the box live.
+- The bank's songs are now the full tracks (36 of 43; five rare clips and two original sounds stay as clips). A saved start is measured in the full song (`sound.startBase: "full"`).
+- Add a filmed reel → Finished edit: add 2 or more versions and they're trialled as v1…vN like any reel; one file still posts as it is.
+
 ## 2.6.2 — 4 Nov 2026 (pick the part of the song)
 
 - Sound section: "Start the song at" slider (`sound.startS`), "▶ Play the song from here" (20 s at full volume) and, on finished edits you added, "▶ Preview with my video": your original video with the song underneath at the chosen point and volume, live, with the sliders working while it plays. Saving re-renders the video from that point. Bank tracks are on private Storage (`content-previews/sounds/<id>.mp4`, `content_sounds.previewPath`).
