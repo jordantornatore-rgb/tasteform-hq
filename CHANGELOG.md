@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.4 — 5 Nov 2026 (rename a reel)
+
+- Tap a reel's name at the top of its sheet (✎) to rename it. Enter or Save saves; Escape or Cancel leaves it. Not posted yet: saved like any edit (a scheduled reel's YouTube title is updated in Outstand too). Already posted: only HQ's name changes; the live post keeps its title.
+
 ## 2.7.3 — 4 Nov 2026 (duplicate a reel)
 
 - ⧉ Duplicate on every reel sheet (admin): a new reel with the same title + "(copy)", hooks, visual hook, script, editing notes, CTA, caption, slides, format, funnel, location, sound and platforms. No footage, video, trials or posts. It lands in Pending scheduling at "to be filmed" (or "needs script"); drag it onto a day. The copy says "Copy of …" with a link back; the original isn't touched.

@@ -334,6 +334,16 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-sched"]').click()); await page.waitForTimeout(150);
       const ss = await sheetText(); noBad('post sheet (scheduled)', ss);
       check(`${lbl}: scheduled sheet shows the winner, low confidence and the YouTube claim note`, () => assert.ok(/🏆/.test(ss) && /low confidence/.test(ss) && /YouTube may claim/.test(ss) && /Gold standard|gold standard/.test(ss), JSON.stringify(ss.slice(0, 1500))));
+      // Rename: tap the title, type, Enter saves through content-update; Escape cancels without closing the sheet
+      await page.click('#ceSheet [data-ce-rename="test-sched"]'); await page.waitForTimeout(80);
+      await page.fill('#ceSheet [data-ce-titlein]', 'Renamed reel'); await page.keyboard.press('Escape'); await page.waitForTimeout(80);
+      const esc1 = await page.evaluate(() => ({ open: !document.getElementById('ceSheet').hidden, input: !!document.querySelector('#ceSheet [data-ce-titlein]'), title: window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-sched').data.title }));
+      check(`${lbl}: Escape cancels the rename and keeps the sheet open`, () => assert.ok(esc1.open && !esc1.input && esc1.title !== 'Renamed reel', JSON.stringify(esc1)));
+      await page.click('#ceSheet [data-ce-rename="test-sched"]'); await page.waitForTimeout(80);
+      await page.fill('#ceSheet [data-ce-titlein]', 'Renamed reel'); await page.keyboard.press('Enter'); await page.waitForTimeout(200);
+      const ren = await page.evaluate(() => ({ call: window.__HQ_TEST.client.__calls.filter(c => c.name === 'content-update' && c.body.id === 'test-sched' && c.body.fields && c.body.fields.title).pop(), h2: document.querySelector('#ceSheet h2') && document.querySelector('#ceSheet h2').innerText, lib: document.getElementById('ceRoot').innerText }));
+      check(`${lbl}: renaming a reel saves the new title and shows it`, () => assert.ok(ren.call && ren.call.body.fields.title === 'Renamed reel' && /Renamed reel/i.test(ren.h2) && /Renamed reel/i.test(ren.lib), JSON.stringify({ call: ren.call, h2: ren.h2 })));
+      await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-sched'); r.data.title = 'Renamed reel'; });
       // Duplicate (script only): a new reel in Pending scheduling with the same script; the original is untouched
       const before = await page.evaluate(() => JSON.stringify(window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-sched').data));
       await page.click('#ceSheet [data-ce-dup="test-sched"]'); await page.waitForTimeout(250);
