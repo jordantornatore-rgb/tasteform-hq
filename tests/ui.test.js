@@ -273,6 +273,12 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-trial"]').click()); await page.waitForTimeout(150);
       const st = await sheetText(); noBad('post sheet (trialing)', st);
       check(`${lbl}: trialing sheet lists the trial versions with numbers`, () => assert.ok(/Trial reels/i.test(st) && /350 views/.test(st) && /v5/.test(st), JSON.stringify(st.slice(0, 1500))));
+      const win = await page.evaluate(() => { const s = document.querySelector('#ceSheet [data-ce-winpick]'); return { panel: !!document.querySelector('#ceSheet .ce-winner'), opts: s ? Array.from(s.options).map(o => o.value) : [], pls: Array.from(document.querySelectorAll('#ceSheet [data-ce-winpl]:checked')).map(c => c.getAttribute('data-ce-winpl')), decide: !!document.querySelector('#ceSheet [data-ce-windecide]') }; });
+      check(`${lbl}: trialing reel has a Winner panel (pick, platforms, decide now)`, () => assert.ok(win.panel && win.opts.join() === ',v1,v2,v3,v4,v5' && win.pls.includes('INSTAGRAM') && win.decide, JSON.stringify(win)));
+      await page.selectOption('#ceSheet [data-ce-winpick]', 'v2'); await page.waitForTimeout(150);
+      await page.click('#ceSheet [data-ce-winpl="LINKEDIN"]'); await page.waitForTimeout(150);
+      const wsaved = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-trial'); return r && r.data.winnerPlan; });
+      check(`${lbl}: winner pick and platforms are saved on the reel`, () => assert.ok(wsaved && wsaved.pick === 'v2' && !wsaved.platforms.includes('LINKEDIN') && wsaved.platforms.includes('INSTAGRAM'), JSON.stringify(wsaved)));
       await page.keyboard.press('Escape');
       await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-sched"]').click()); await page.waitForTimeout(150);
       const ss = await sheetText(); noBad('post sheet (scheduled)', ss);

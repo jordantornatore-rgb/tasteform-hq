@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.6 — 4 Nov 2026 (the winner in the schedule)
+
+- A trial reel now sits in the calendar and Up next at the time its winner posts, with a 🏆 Winner chip. Before the trials start (Trial reel: Yes) that time is projected: 72 h after the first pipeline run after you approve, or the time you moved it to if that leaves 24 h+ after the trials. The days the trial reels go out show 🧪 markers.
+- Winner panel on the reel: which version wins (Automatic by the funnel's number, or pick v1…vN; live views shown), which platforms the winner goes to, and "Decide now and post the winner". Saved as `winnerPlan {pick, platforms, decideNow}`. Caption, LinkedIn and title edits go out with the winner; Schedule moves the winner's time.
+
 ## 2.6.5 — 4 Nov 2026 (sounds grouped by video type)
 
 - The Sound list is grouped the way @martinwang.mp4's "Background music for short form" reel groups it: Emotional, Tactical / educational, A challenge, Storytelling, Deep (3 songs each, all full tracks), then everything else under (Other). Picking a grouped song says when to use it.

@@ -768,6 +768,9 @@ body{padding:0;}
 .ce-editor .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .ce-editor input[type=range]{width:100%;}
 .ce-note{font-size:var(--t-s);color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px;}
+.ce-winchip{background:var(--good-soft);color:var(--good);}
+.ce-winner{border:1px solid var(--border-strong);border-radius:var(--r-m);padding:10px 12px;}
+.ce-trialmark{display:block;width:100%;text-align:left;font-size:var(--t-xs);color:var(--text-2);background:var(--surface-2);border:1px dashed var(--border-strong);border-radius:8px;padding:4px 6px;margin-bottom:4px;cursor:pointer;}
 .ce-sndhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
 .ce-toggle,.ce-editor label.ce-toggle{display:inline-flex;flex-direction:row;align-items:center;gap:6px;font-size:var(--t-s);font-weight:500;letter-spacing:0;text-transform:none;color:var(--text-2);cursor:pointer;min-height:32px;}
 .ce-toggle input{width:18px;height:18px;accent-color:var(--accent);}
@@ -3072,11 +3075,12 @@ body{padding:0;}
     // schedule controls
     var at=cePostAtMs(q), hm=at?HQ.sydParts(at).h*60+HQ.sydParts(at).min:null, hmStr=hm==null?null:HQ.pad(Math.floor(hm/60))+':'+HQ.pad(hm%60);
     html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Schedule</span>'+(ceMoving[q.id]?'<span class="ce-spin" aria-label="moving"></span>':'')+'</div>';
-    html+='<div class="ce-txt">'+(at?esc(ceWhenFull(at))+(p.status==='scheduled'?' · scheduled':(p.plannedFor?' · planned, not scheduled yet':' · slot time'))+(p.scheduleSource?' ('+esc(p.scheduleSource)+')':''):'– no time yet')+'</div>';
+    html+='<div class="ce-txt">'+(at?esc(ceWhenFull(at))+(p.status==='scheduled'?' · scheduled':(ceWinnerPending(q)?' · 🏆 winner (projected)':(p.status==='trialing'?' · 🏆 winner':(p.plannedFor?' · planned, not scheduled yet':' · slot time'))))+(p.scheduleSource?' ('+esc(p.scheduleSource)+')':''):'– no time yet')+'</div>';
     if(lock.locked) html+='<div class="f-note">'+esc(lock.why)+'. Day and time can\'t change.</div>';
     else if(isAdmin) html+='<div class="ce-fbrow"><select class="input" data-ce-moveday="'+esc(q.id)+'" aria-label="Day">'+ceDayOptions(date)+'</select><select class="input" data-ce-time="'+esc(q.id)+'" aria-label="Time">'+ceTimeOptions(hmStr)+'</select></div><div class="f-note">Changes move the post straight away'+(p.status==='scheduled'?' (Outstand first, then here)':'')+'.</div>';
     var links=p.permalinks||{}; var ids=p.postIds||(p.postId?{INSTAGRAM:p.postId}:{});
     if(Object.keys(ids).length||Object.keys(links).length) html+='<div class="ce-txt">'+Object.keys(ids).map(function(pl){ return esc(CE_PLATFORM_SHORT[pl]||pl)+': '+(links[pl.toLowerCase()]?'<a class="ce-a" href="'+esc(links[pl.toLowerCase()])+'" target="_blank" rel="noopener">open ↗</a>':'<span class="mono">'+esc(String(ids[pl]).slice(0,8))+'</span>'); }).join(' · ')+'</div>';
+    if(ceIsWinner(q)) html+=ceWinnerPanel(q);
     if(Array.isArray(p.trials)&&p.trials.length) html+='<div class="ce-trials"><span class="ce-k">Trial reels · '+(p.trialMode==='short'?'short test':'72-hour test')+(p.status==='trialing'&&p.plannedFor?' · the winner goes to everyone '+esc(ceWhenFull(p.plannedFor)):'')+'</span>'+p.trials.map(function(t){ var won=q.winner&&q.winner.v===t.v; return '<div class="ce-trial'+(won?' won':'')+'"><b>'+esc(t.v||'–')+(won?' 🏆':'')+'</b> <span class="muted">'+esc(ceText(t.diff))+'</span><div class="ce-meta">'+(t.cancelled?'pulled':(t.postedAt?'out '+esc(ceWhenFull(t.postedAt)):'goes out '+esc(ceWhenFull(t.scheduledFor))))+(t.metrics?' · '+esc(ceTrialNums(t.metrics)):(t.postedAt?' · numbers – (pulled every 12 h)':''))+(t.shortcode?' · <a class="ce-a" href="https://www.instagram.com/reel/'+esc(t.shortcode)+'/" target="_blank" rel="noopener">open ↗</a>':'')+'</div></div>'; }).join('')+(q.winner?'<div class="ce-win">🏆 '+esc(q.winner.v)+': '+esc(ceText(q.winner.why))+(q.winnerConfidence==='low'?' <span class="chip warn">low confidence</span>':'')+'</div>':'')+'</div>';
     if(isAdmin && !posted && ceSlotKey(q)!=='carousel' && ['trialing','scheduled','posted'].indexOf(p.status)<0) html+=ceTrialPicker(q);
     else if(q.noTrial) html+='<div class="f-note">No trial: '+esc(ceText(q.noTrial))+'.</div>';
@@ -3524,8 +3528,21 @@ body{padding:0;}
   function cePosted(q){ var ps=q.posting&&q.posting.status; return q.status==='posted' || ps==='posted'; }
   function ceLocked(q){ var ps=q.posting&&q.posting.status; if(q.status==='posted'||['posted','posting','publishing'].indexOf(ps)>=0) return {locked:true, why:'Posted'}; var at=cePostAtMs(q); if(ps==='scheduled' && at && at-Date.now()<5*60000) return {locked:true, why:'Posting now'}; return {locked:false}; }
   function ceSlotTimes(){ var p=state.contentPosting||{}; return Object.assign({high:'19:00', low:'12:00', carousel:'07:30', trialSpacingMin:90}, p.slotTimes||{}); }
-  function cePostAtMs(q){ var p=q.posting||{}; if(p.scheduledFor&&HQ.parseTs(p.scheduledFor)!=null) return HQ.parseTs(p.scheduledFor); if(p.plannedFor&&HQ.parseTs(p.plannedFor)!=null) return HQ.parseTs(p.plannedFor); if(HQ.isDayKey(q.date)){ var hm=ceSlotTimes()[ceSlotKey(q)]; if(hm){ var pr=hm.split(':').map(Number); return HQ.sydMidnight(q.date)+(pr[0]*60+pr[1])*60000; } } return null; }
-  function ceHasTime(q){ var p=q.posting||{}; return !!(p.scheduledFor||p.plannedFor); }
+  // A reel with "Trial reel: Yes" whose trials haven't started: the winner lands 72 h after the trials start
+  // (the pipeline starts them on its first run after approval), or at the time Jordan moved it to (24 h+ after the trials).
+  function ceWinnerPending(q){ var p=q.posting||{}; return q.trialChoice==='on' && ceSlotKey(q)!=='carousel' && !cePosted(q) && ['trialing','scheduled','posted'].indexOf(p.status)<0; }
+  function ceIsWinner(q){ var p=q.posting||{}; return ceWinnerPending(q) || (p.status==='trialing' && Array.isArray(p.trials) && p.trials.length>0); }
+  function ceProjectedWinnerMs(q){
+    if(!ceWinnerPending(q)) return null; var p=q.posting||{}, n=Math.max(1,(q.video&&Array.isArray(q.video.variants)&&q.video.variants.length)||5), H=3600000;
+    var t=Date.now()+20*60000, sp=HQ.sydParts(t); if(sp.h<6||sp.h>=23) t=HQ.sydMidnight(sp.h>=23?HQ.addDays(sp.key,1):sp.key)+7*H;
+    var last=t+(n-1)*25*60000, mine=p.movedAt&&p.plannedFor?HQ.parseTs(p.plannedFor):null;
+    if(mine && mine>=last+24*H) return mine;
+    var w=t+72*H, wp=HQ.sydParts(w); if(wp.h<7) w=HQ.sydMidnight(wp.key)+7.5*H; else if(wp.h>=22) w=HQ.sydMidnight(HQ.addDays(wp.key,1))+7.5*H;
+    return w;
+  }
+  function ceWinnerChip(q){ if(!ceIsWinner(q)) return ''; var p=q.posting||{}, n=(p.trials||[]).length; return '<span class="chip ce-winchip">🏆 Winner'+(n?' of '+n+' trial'+(n===1?'':'s'):' · trials start once approved')+'</span>'; }
+  function cePostAtMs(q){ var pw=ceProjectedWinnerMs(q); if(pw) return pw; var p=q.posting||{}; if(p.scheduledFor&&HQ.parseTs(p.scheduledFor)!=null) return HQ.parseTs(p.scheduledFor); if(p.plannedFor&&HQ.parseTs(p.plannedFor)!=null) return HQ.parseTs(p.plannedFor); if(HQ.isDayKey(q.date)){ var hm=ceSlotTimes()[ceSlotKey(q)]; if(hm){ var pr=hm.split(':').map(Number); return HQ.sydMidnight(q.date)+(pr[0]*60+pr[1])*60000; } } return null; }
+  function ceHasTime(q){ var p=q.posting||{}; return !!(p.scheduledFor||p.plannedFor||ceWinnerPending(q)); }
   function cePlatforms(q){ var p=q.posting||{}, acc=((state.contentPosting||{}).outstand||{}).accounts||{}; var def=['INSTAGRAM','YOUTUBE','LINKEDIN'].concat(acc.TIKTOK?['TIKTOK']:[]); if(ceSlotKey(q)==='carousel') def=['INSTAGRAM','LINKEDIN']; var list=Array.isArray(p.platforms)&&p.platforms.length?p.platforms:def; return list.map(function(x){ return String(x).toUpperCase(); }); }
   function cePlatformChips(q){ return cePlatforms(q).map(function(pl){ return '<span class="chip grey">'+esc(CE_PLATFORM_SHORT[pl]||pl)+'</span>'; }).join(''); }
   function ceWhenFull(when){ var t=HQ.parseTs(when); if(t==null) return '–'; var k=HQ.sydDay(t), today=HQ.sydNow().key, lbl = k===today?'Today':(k===HQ.addDays(today,1)?'Tomorrow':(k===HQ.addDays(today,-1)?'Yesterday':HQ.fmtDay(k,'wd'))); return lbl+' '+HQ.fmtTime(t); }
@@ -3543,7 +3560,7 @@ body{padding:0;}
   function ceDayOptions(cur){ var today=HQ.sydNow().key, out='<option value="">Move to…</option>'; for(var i=0;i<21;i++){ var k=HQ.addDays(today,i); out+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':HQ.fmtDay(k,'wd')))+'</option>'; } return out; }
   function ceLibCard(q, opts){
     opts=opts||{}; var w=ceWhenShort(cePostAtMs(q)), cap=ceText(q.caption).split('\n').filter(Boolean)[0]||'', trials=(q.posting&&q.posting.trials||[]).length;
-    return '<div class="ce-row">'+ceThumb(q)+'<div class="main"><button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="when">'+esc(w.label)+(w.countdown?'<small>'+esc(w.countdown)+'</small>':'')+'</span><span class="ce-chips">'+cePlatformChips(q)+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+'</span><span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span>'+(cap?'<span class="ce-meta">'+esc(cap.slice(0,140))+(cap.length>140?'…':'')+'</span>':'')+'<span class="ce-meta">'+esc(ceSoundLabel(q.sound))+(trials?' · '+trials+' trial'+(trials===1?'':'s'):'')+'</span>'+(opts.extra||'')+'</button>'+(q.sourceIdea?'<button type="button" class="btn small ce-fromidea" data-ce-goidea="'+esc(q.sourceIdea)+'">From idea ›</button>':'')+'</div></div>';
+    return '<div class="ce-row">'+ceThumb(q)+'<div class="main"><button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="when">'+esc(w.label)+(w.countdown?'<small>'+esc(w.countdown)+'</small>':'')+'</span><span class="ce-chips">'+cePlatformChips(q)+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+ceWinnerChip(q)+'</span><span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span>'+(cap?'<span class="ce-meta">'+esc(cap.slice(0,140))+(cap.length>140?'…':'')+'</span>':'')+'<span class="ce-meta">'+esc(ceSoundLabel(q.sound))+(trials?' · '+trials+' trial'+(trials===1?'':'s'):'')+'</span>'+(opts.extra||'')+'</button>'+(q.sourceIdea?'<button type="button" class="btn small ce-fromidea" data-ce-goidea="'+esc(q.sourceIdea)+'">From idea ›</button>':'')+'</div></div>';
   }
   function ceRenderLibrary(){
     var st=ceLoadState('contentQueue');
@@ -3596,7 +3613,7 @@ body{padding:0;}
     var filtered=!!(f.status||f.platform||f.format||f.funnel||f.from||f.to||ql);
     html+='<div class="f-note">'+shown.length+' of '+rows.length+(filtered?' (filtered)':'')+'</div>';
     // up next
-    var next=shown.filter(function(q){ return q.posting&&(q.posting.status==='scheduled'||q.posting.status==='trialing')&&!cePosted(q); }).sort(function(a,b){ return (cePostAtMs(a)||9e15)-(cePostAtMs(b)||9e15); });
+    var next=shown.filter(function(q){ return (q.posting&&(q.posting.status==='scheduled'||q.posting.status==='trialing')&&!cePosted(q)) || (ceWinnerPending(q)&&q.status==='approved'); }).sort(function(a,b){ return (cePostAtMs(a)||9e15)-(cePostAtMs(b)||9e15); });
     html+='<h3>Up next · '+next.length+'</h3>';
     if(!next.length) html+='<div class="empty-state">Nothing scheduled'+(filtered?' in this filter':'')+'. Approved posts are scheduled by the pipeline within 20 minutes.</div>';
     else { var byDay={}, order=[]; next.forEach(function(q){ var k=HQ.sydDay(cePostAtMs(q))||'none'; if(!byDay[k]){ byDay[k]=[]; order.push(k); } byDay[k].push(q); }); html+=order.map(function(k){ return '<div class="ce-daygroup"><h3 class="small">'+esc(k==='none'?'No day':(k===HQ.sydNow().key?'Today · ':'')+HQ.fmtDay(k,'wd'))+'</h3><div class="ce-list">'+byDay[k].map(function(q){ return ceLibCard(q); }).join('')+'</div></div>'; }).join(''); }
@@ -3619,12 +3636,14 @@ body{padding:0;}
   }
   function ceRenderCalendar(rows){
     var today=HQ.sydNow().key, ws=HQ.addDays(HQ.weekStart(today), ceCalOffset*7), we=HQ.addDays(ws,6), days=HQ.dayRange(ws,we);
-    var inWeek=rows.filter(function(q){ var at=cePostAtMs(q); var k=HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):null); return k && k>=ws && k<=we; });
+    var inWeek=rows.filter(function(q){ var at=cePostAtMs(q); var k=(ceIsWinner(q)&&at)?HQ.sydDay(at):(HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):null)); return k && k>=ws && k<=we; });
+    var trialMarks={}; rows.forEach(function(q){ var p=q.posting||{}; if(p.status!=='trialing') return; (p.trials||[]).forEach(function(t){ var k=HQ.sydDay(t.postedAt||t.scheduledFor); if(!k||k<ws||k>we||t.cancelled) return; var key=k+'|'+q.id; if(!trialMarks[key]) trialMarks[key]={day:k, q:q, vs:[]}; trialMarks[key].vs.push(t.v); }); });
     var noTime=inWeek.filter(function(q){ return !ceHasTime(q) && !cePosted(q) && q.status!=='needs_script'; });
     var html='<div class="panel"><div class="chart-head"><div><h2>Calendar · '+esc(HQ.fmtDay(ws,'short'))+' – '+esc(HQ.fmtDay(we,'short'))+'</h2><p class="rule" style="margin-top:4px">'+(isAdmin?'Drag a card to another day (hold, then drag, on a phone) or use Move to… and the time dropdown. Moves update Outstand straight away. Dashed cards are open slots: tap one to write its script.':'Sydney days. Only the admin can move posts.')+'</p></div><div class="range" role="group" aria-label="Week"><button type="button" data-cecal="-1">← Prev</button><button type="button" data-cecal="0" aria-pressed="'+(ceCalOffset===0?'true':'false')+'">This week</button><button type="button" data-cecal="1">Next →</button></div></div>';
     html+='<div class="ce-cal">'+days.map(function(d){
       var mine=inWeek.filter(function(q){ var at=cePostAtMs(q); return at && (ceHasTime(q)||cePosted(q)||q.status==='needs_script') && HQ.sydDay(at)===d; }).sort(function(a,b){ return cePostAtMs(a)-cePostAtMs(b); });
-      return '<div class="ce-cal-day" data-day="'+d+'"><div class="dh"><span>'+esc(HQ.DAYN[HQ.dowOf(d)].slice(0,3))+(d===today?'<i class="ce-dot" aria-hidden="true"></i>':'')+'</span><span>'+esc(HQ.fmtDay(d,'short'))+'</span></div>'+(mine.length?mine.map(ceCalCard).join(''):'<div class="ce-empty">–</div>')+(isAdmin&&d>=today?'<button type="button" class="ce-addday" data-ce-newreel="'+d+'" aria-label="New reel on '+esc(HQ.fmtDay(d,'wd'))+'">+ New reel</button>':'')+'</div>';
+      var marks=Object.keys(trialMarks).map(function(k){ return trialMarks[k]; }).filter(function(m){ return m.day===d; }).map(function(m){ return '<button type="button" class="ce-trialmark" data-ce-open="'+esc(m.q.id)+'">🧪 Trial reels '+esc(m.vs.join(', '))+' · '+esc(ceText(m.q.title)||'reel')+'</button>'; }).join('');
+      return '<div class="ce-cal-day" data-day="'+d+'"><div class="dh"><span>'+esc(HQ.DAYN[HQ.dowOf(d)].slice(0,3))+(d===today?'<i class="ce-dot" aria-hidden="true"></i>':'')+'</span><span>'+esc(HQ.fmtDay(d,'short'))+'</span></div>'+marks+(mine.length?mine.map(ceCalCard).join(''):(marks?'':'<div class="ce-empty">–</div>'))+(isAdmin&&d>=today?'<button type="button" class="ce-addday" data-ce-newreel="'+d+'" aria-label="New reel on '+esc(HQ.fmtDay(d,'wd'))+'">+ New reel</button>':'')+'</div>';
     }).join('')+'</div>';
     if(noTime.length) html+='<div class="ce-notime"><span class="ce-k">No time yet · '+noTime.length+'</span><div class="f-note" style="margin-bottom:6px">Slots without a planned time. Pick a day and time to plan one; the pipeline otherwise uses the slot default ('+esc(ceHmLabel(ceSlotTimes().high))+' high, '+esc(ceHmLabel(ceSlotTimes().low))+' low, '+esc(ceHmLabel(ceSlotTimes().carousel))+' carousel).</div><div class="ce-cal">'+noTime.map(ceCalCard).join('')+'</div></div>';
     return html+'</div>';
@@ -3634,7 +3653,7 @@ body{padding:0;}
     var at=cePostAtMs(q), lock=ceLocked(q), canMove=isAdmin&&!lock.locked, hasTime=ceHasTime(q)||cePosted(q), hmStr=at&&hasTime?HQ.pad(HQ.sydParts(at).h)+':'+HQ.pad(HQ.sydParts(at).min):null;
     return '<div class="ce-cal-card'+(ceMoving[q.id]?' moving':'')+(canMove&&hasTime?' drag':'')+'"'+(canMove&&hasTime?' data-ce-drag="'+esc(q.id)+'"':'')+'>'+
       '<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="t">'+(hasTime&&at?esc(HQ.fmtTime(at)):'–')+(ceMoving[q.id]?' <span class="ce-spin"></span>':'')+'</span>'+(lock.locked?'<span class="lock">'+esc(lock.why)+'</span>':(!hasTime?'<span class="lock">'+esc(HQ.isDayKey(q.date)?HQ.fmtDay(q.date,'wd'):'no day')+' · no time yet</span>':''))+'</button>'+
-      '<div class="row">'+ceThumb(q)+'<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span><span class="ce-chips">'+cePlatformChips(q)+'</span><span class="ce-chips">'+ceStatusChip(q.status,q)+'</span></button></div>'+
+      '<div class="row">'+ceThumb(q)+'<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'"><span class="ttl">'+esc(ceText(q.title)||'Untitled slot')+'</span><span class="ce-chips">'+cePlatformChips(q)+'</span><span class="ce-chips">'+ceStatusChip(q.status,q)+ceWinnerChip(q)+'</span></button></div>'+
       (canMove?'<select class="input" data-ce-time="'+esc(q.id)+'" aria-label="Time">'+ceTimeOptions(hmStr)+'</select><select class="input" data-ce-moveday="'+esc(q.id)+'" aria-label="Move to day">'+ceDayOptions(HQ.isDayKey(q.date)?q.date:null)+'</select>':'')+'</div>';
   }
 
@@ -4027,6 +4046,31 @@ body{padding:0;}
     return html;
   }
   function ceSoundWhen(id){ var x=(state.contentSounds||[]).find(function(s){ return String(s.id)===String(id); }); return x&&x.group?x.group+(x.groupWhen?': use it '+x.groupWhen+'.':''):''; }
+  function ceWinnerPanel(q){
+    var p=q.posting||{}, wp=q.winnerPlan||{}, trials=Array.isArray(p.trials)?p.trials:[], vars=(q.video&&Array.isArray(q.video.variants))?q.video.variants:[];
+    var vs=trials.length?trials:vars, at=cePostAtMs(q), pending=ceWinnerPending(q), canEdit=isAdmin&&!cePosted(q);
+    var stage=String(ceFunnel(q.funnel)||'TOF'), how=stage==='MOF'?'shares + saves per view':(stage==='BOF'?'comments per view':'views');
+    var pls=Array.isArray(wp.platforms)&&wp.platforms.length?wp.platforms:cePlatforms(q);
+    var h='<div class="ce-block ce-winner"><span class="ce-k">🏆 Winner</span><div class="ce-txt">'+(at?'Posts to everyone '+esc(ceWhenFull(at)):'Time set when the trials start')+(pending?(p.movedAt&&HQ.parseTs(p.plannedFor)===at?' (your time)':' · 72 h after the trials start, which is the first pipeline run after you approve'):'')+'.</div>'+(pending&&p.movedAt&&p.plannedFor&&HQ.parseTs(p.plannedFor)!==at?'<div class="f-note">The time you picked ('+esc(ceWhenFull(p.plannedFor))+') is too soon after the trials, so the winner keeps the 72-hour time. Pick a time 24 h+ later to use your own.</div>':'');
+    if(canEdit){
+      h+='<label class="ce-k" style="display:block;margin-top:8px">Which version<select class="input" data-ce-winpick="'+esc(q.id)+'"><option value=""'+(wp.pick?'':' selected')+'>Automatic · best '+esc(how)+' ('+esc(stage)+')</option>'+vs.map(function(x){ var m=x.metrics; return '<option value="'+esc(x.v)+'"'+(wp.pick===x.v?' selected':'')+'>'+esc(x.v)+(x.diff?' · '+esc(ceText(x.diff)).slice(0,60):'')+(m&&HQ.isNum(m.views)?' · '+num(m.views)+' views':'')+'</option>'; }).join('')+'</select></label>';
+      h+='<div class="ce-k" style="margin-top:8px">Winner goes to</div><div class="ce-chips">'+['INSTAGRAM','YOUTUBE','LINKEDIN','TIKTOK'].map(function(pl){ return '<label class="chip grey" style="min-height:36px;cursor:pointer"><input type="checkbox" data-ce-winpl="'+pl+'" data-id="'+esc(q.id)+'"'+(pls.indexOf(pl)>=0?' checked':'')+'> '+esc(CE_PLATFORM_SHORT[pl])+'</label>'; }).join('')+'</div>';
+      if(!pending && trials.some(function(t){ return t.postedAt; })) h+='<div class="acts" style="margin-top:8px">'+(wp.decideNow?'<span class="chip grey">Deciding now · posts within 25 minutes</span>':'<button type="button" class="btn small" data-ce-windecide="'+esc(q.id)+'">Decide now and post the winner</button>')+'</div>';
+      h+='<div class="f-note">Caption, LinkedIn text and title below go out with the winner: edit them any time before it posts. Move the winner’s day and time in Schedule'+(pending?' (keep it 24 h+ after the trials so they get numbers)':'')+'.</div>';
+    }
+    return h+'</div>';
+  }
+  async function ceSaveWinner(id, change, msg){
+    var q=ceFindSlot(id); if(!q||!isAdmin||!db) return; var wp=Object.assign({}, q.winnerPlan||{}, change, {updatedAt:ceNowIso()});
+    try{ await db.collection('content_queue').doc(id).update({winnerPlan:wp}); q.winnerPlan=wp; ceSetSheetMsg(id, msg); }
+    catch(e){ ceSetSheetMsg(id, 'Couldn’t save: '+(e.message||e), true); }
+    renderNow('content'); ceRenderSheet();
+  }
+  document.addEventListener('change', function(ev){
+    var pk=ev.target.closest&&ev.target.closest('[data-ce-winpick]'); if(pk){ var v=pk.value||null; ceSaveWinner(pk.getAttribute('data-ce-winpick'), {pick:v}, v?'The winner will be '+v+'.':'The best version by the numbers wins.'); return; }
+    var pl=ev.target.closest&&ev.target.closest('[data-ce-winpl]'); if(pl){ var id=pl.getAttribute('data-id'), box=pl.closest('.ce-winner'), sel=Array.prototype.filter.call(box.querySelectorAll('[data-ce-winpl]'), function(c){ return c.checked; }).map(function(c){ return c.getAttribute('data-ce-winpl'); }); if(!sel.length){ pl.checked=true; ceSetSheetMsg(id, 'The winner needs at least one platform.', true); return; } ceSaveWinner(id, {platforms:sel}, 'Winner goes to '+sel.map(function(x){ return CE_PLATFORM_SHORT[x]; }).join(', ')+'.'); }
+  });
+  document.addEventListener('click', function(ev){ var b=ev.target.closest&&ev.target.closest('[data-ce-windecide]'); if(!b) return; if(!window.confirm('Pick the winner now and post it to everyone in the next 25 minutes?')) return; ceSaveWinner(b.getAttribute('data-ce-windecide'), {decideNow:true, decideNowAt:ceNowIso()}, 'Deciding now: the winner posts within 25 minutes.'); });
   function ceVideoLen(q){ var v=q&&q.video||{}, f=q&&q.footage||{}; return HQ.isNum(v.durationS)&&v.durationS>0?v.durationS:(HQ.isNum(f.durationS)&&f.durationS>0?f.durationS:30); }
   // Instagram-style picker: the whole song as bars, a box as long as the video that you drag to choose the part.
   function ceWaveHtml(s, st, win){

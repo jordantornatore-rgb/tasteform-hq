@@ -34,6 +34,9 @@ Preview + Phone preview, Needs-you reason and Mark fixed, posting error, "The vi
 ### Trial reel? (add-reel sheet and post sheet, before trials start)
 `trialChoice`: `on` = trial every version as soon as it's approved, the winner posts to everyone 72 h after the first trial; `off` = post at the slot, no trial; unset = automatic (2+ versions and the slot 3+ days away). Written straight to the row (`trialChoice`, `trialChoiceAt`).
 
+### Winner (trialing reels, and Trial reel: Yes before the trials start)
+Calendar / Up next place the reel at the winner's time (`posting.plannedFor`, or projected for Yes: 72 h after the trials start, or Jordan's moved time if 24 h+ after the last trial), with 🧪 markers on trial days. The Winner panel writes `winnerPlan {pick: "v2"|null, platforms: [...], decideNow: true}` straight to the row; the pipeline uses the pick instead of the numbers, posts to those platforms, and with decideNow posts the winner within 25 minutes.
+
 ### Statuses
 Main: `needs_script → to_film → filmed → editing → edited → awaiting_approval → approved → trialing → scheduled → posted`. Side: `changes_requested` (purple), `needs_jordan` and `error` (red), `skipped`, `cancelled` ("Pulled"). `posting.status`: `trialing | scheduled | posted | error | cancelled`.
 
