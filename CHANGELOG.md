@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.7.3 — 4 Nov 2026 (duplicate a reel)
+
+- ⧉ Duplicate on every reel sheet (admin): a new reel with the same title + "(copy)", hooks, visual hook, script, editing notes, CTA, caption, slides, format, funnel, location, sound and platforms. No footage, video, trials or posts. It lands in Pending scheduling at "to be filmed" (or "needs script"); drag it onto a day. The copy says "Copy of …" with a link back; the original isn't touched.
+- Footage for a duplicated script goes to the original first, then the copy (the pipeline's matcher breaks the tie by `dupRoot`/`duplicatedAt`).
+
 ## 2.7.2 — 4 Nov 2026 (trial reels vs the full reel, clearly)
 
 - Every calendar bubble and Library card says what it is: 📣 FULL REEL (posted to everyone) or 🧪 TRIAL REELS (Instagram, non-followers only), or 🖼 CAROUSEL.

@@ -334,6 +334,13 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-sched"]').click()); await page.waitForTimeout(150);
       const ss = await sheetText(); noBad('post sheet (scheduled)', ss);
       check(`${lbl}: scheduled sheet shows the winner, low confidence and the YouTube claim note`, () => assert.ok(/🏆/.test(ss) && /low confidence/.test(ss) && /YouTube may claim/.test(ss) && /Gold standard|gold standard/.test(ss), JSON.stringify(ss.slice(0, 1500))));
+      // Duplicate (script only): a new reel in Pending scheduling with the same script; the original is untouched
+      const before = await page.evaluate(() => JSON.stringify(window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-sched').data));
+      await page.click('#ceSheet [data-ce-dup="test-sched"]'); await page.waitForTimeout(250);
+      const dup = await page.evaluate(() => { const t = window.__HQ_TEST.client.__tables.content_queue, o = t.find(x => x.id === 'test-sched'), c = t.find(x => x.data.duplicatedFrom === 'test-sched'); return c ? { id: c.id, d: c.data, oScript: o.data.script, oHooks: JSON.stringify(o.data.hooks), sheet: document.getElementById('ceSheet').innerText } : null; });
+      check(`${lbl}: Duplicate makes a script-only copy waiting in Pending scheduling`, () => assert.ok(dup && dup.d.unscheduled === true && dup.d.script === dup.oScript && JSON.stringify(dup.d.hooks) === dup.oHooks && / \(copy\)$/.test(dup.d.title) && dup.d.status === (String(dup.oScript || '').trim() ? 'to_film' : 'needs_script') && dup.d.caption === 'Cap' && !dup.d.video && !dup.d.posting && !dup.d.footage && /Copy of/.test(dup.sheet) && /Pending scheduling/.test(dup.sheet), JSON.stringify(dup && { id: dup.id, d: dup.d, s: dup.sheet.slice(0, 400) })));
+      const after = await page.evaluate(() => JSON.stringify(window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-sched').data));
+      check(`${lbl}: duplicating leaves the original untouched`, () => assert.strictEqual(after, before));
       await page.keyboard.press('Escape');
       // sound section: pick the part of the song
       await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-await"]').click()); await page.waitForTimeout(150);

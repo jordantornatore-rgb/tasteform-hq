@@ -3113,7 +3113,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     function single(val, key){ var t=ceText(val); if(!t) return '<div class="ce-txt muted">– not in this slot\'s brief</div>'; return '<div class="ce-line"><div class="t">'+esc(t)+'</div>'+ceCopyBtn(key, t)+'</div>'; }
     var meta=[date?HQ.fmtDay(date,'wd'):(q.day?String(q.day):'no day'), CE_SLOT_LABEL[ceSlotKey(q)]||'slot –', ceCap(q.effort)?ceCap(q.effort)+' effort':'effort –', ceText(q.location)||'location –'];
     if(q.angle) meta.push(ceText(q.angle)+' angle'); if(q.hookStyle) meta.push(ceText(q.hookStyle)+' hook');
-    var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+cePlatformChips(q)+'</div><h2 style="margin-top:6px">'+esc(ceText(q.title)||'Untitled slot')+'</h2><div class="ce-meta" style="margin-top:4px">'+esc(meta.join(' · '))+'</div></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
+    var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+ceFormatChip(q.format)+ceFunnelChip(q.funnel)+ceStatusChip(q.status,q)+cePlatformChips(q)+'</div><h2 style="margin-top:6px">'+esc(ceText(q.title)||'Untitled slot')+'</h2><div class="ce-meta" style="margin-top:4px">'+esc(meta.join(' · '))+'</div>'+(q.duplicatedFrom?'<div class="f-note">Copy of <button type="button" class="ce-a" style="background:none;border:0;padding:0;font:inherit;text-decoration:underline;cursor:pointer" data-ce-open="'+esc(q.duplicatedFrom)+'">'+esc(ceText((ceFindSlot(q.duplicatedFrom)||{}).title)||'the original')+'</button></div>':'')+'</div><span class="ce-chips" style="flex-wrap:nowrap">'+(isAdmin?'<button type="button" class="btn small" data-ce-dup="'+esc(q.id)+'" title="New reel with the same script, waiting to be filmed">⧉ Duplicate</button>':'')+'<button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></span></div>';
     if(ceSheetMsg && ceSheetMsg.id===q.id) html+='<div class="'+(ceSheetMsg.err?'ce-note':'f-note')+'" role="status">'+esc(ceSheetMsg.text)+'</div>';
     if(q.status!=='skipped') html+=ceGoesOut(q);
     // preview
@@ -3502,6 +3502,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       var adr=t.closest('[data-ce-addreel]'); if(adr){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceAdd={id:adr.getAttribute('data-ce-addreel')||null, force:true}; ceRenderSheet(); return; }
       var ads=t.closest('[data-ca-submit]'); if(ads){ ceSubmitAddReel(ads); return; }
       var sct=t.closest('[data-ce-script]'); if(sct){ ceOpenScript({id:sct.getAttribute('data-ce-script')}); return; }
+      var dup=t.closest('[data-ce-dup]'); if(dup){ ceDuplicate(dup.getAttribute('data-ce-dup'), dup); return; }
       var tr=t.closest('[data-ce-toreel]'); if(tr){ ceOpenScript({ideaId:tr.getAttribute('data-ce-toreel')}); return; }
       var nr=t.closest('[data-ce-newreel]'); if(nr){ var nd=nr.getAttribute('data-ce-newreel'); ceOpenScript({date:HQ.isDayKey(nd)?nd:null}); return; }
       var uh=t.closest('[data-cs-usehook]'); if(uh){ var tas=uh.closest('.ce-script').querySelectorAll('[data-cs-hook]'); for(var hi=0;hi<tas.length;hi++){ if(!tas[hi].value.trim()){ tas[hi].value=uh.getAttribute('data-cs-usehook'); ceGrow(tas[hi]); tas[hi].focus(); break; } } return; }
@@ -3826,6 +3827,27 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     if(!isAdmin||!db) return; var v=day==='__none'?null:day, n=0;
     for(var i=0;i<ids.length;i++){ var q=ceFindSlot(ids[i]); if(!q) continue; try{ await db.collection('content_queue').doc(q.id).update({filmDate:v}); q.filmDate=v; n++; }catch(e){} }
     cePlan.msg=v?n+' to film '+HQ.fmtDay(v,'wd')+'.':'Film day cleared on '+n+'.'; renderNow('content');
+  }
+  /* Duplicate (script only): a new reel with the same words, sound and platforms. No footage, video, trials or posts.
+     It waits in Pending scheduling at "to be filmed"; the original is untouched. */
+  var CE_DUP_FIELDS=['hooks','visualHook','script','editNotes','cta','body','ending','caption','linkedin','slides','format','funnel','angle','hookStyle','location','effort','sound','platforms'];
+  async function ceDuplicate(id, btn){
+    var q=ceFindSlot(id); if(!q||!isAdmin) return;
+    var today=HQ.sydNow().key, slot=ceSlotKey(q)||'high', code={high:'hi',low:'lo',carousel:'car'}[slot]||'hi';
+    var nid=HQ.weekStart(today)+'-'+['sun','mon','tue','wed','thu','fri','sat'][HQ.dowOf(today)]+'-'+code+'-'+Math.random().toString(36).slice(2,6);
+    var fields={title:(ceText(q.title)||'Untitled')+' (copy)'};
+    CE_DUP_FIELDS.forEach(function(k){ var v=q[k]; if(v==null||v==='') return; if(Array.isArray(v)&&!v.length) return; fields[k]=JSON.parse(JSON.stringify(v)); });
+    if(btn){ btn.disabled=true; btn.textContent='Duplicating…'; }
+    try{
+      var data=await ceInvoke('content-update', {id:nid, create:{date:today, slot:slot}, fields:fields});
+      var now=ceNowIso(), extra={unscheduled:true, unscheduledAt:now, duplicatedFrom:q.id, dupRoot:q.dupRoot||q.id, duplicatedAt:now};
+      if(q.sourceIdea) extra.sourceIdea=q.sourceIdea;
+      await db.collection('content_queue').doc(nid).update(extra);
+      var row=Object.assign({id:nid, date:today, slot:slot, status:String(fields.script||'').trim()?'to_film':'needs_script'}, fields, (data&&data.saved)||{}, extra);
+      var have=ceFindSlot(nid); if(have) Object.assign(have, row); else state.contentQueue=(state.contentQueue||[]).concat([row]);
+      ceOpenId=nid; ceEdit=null; ceSetSheetMsg(nid, 'Copy made. It’s in Pending scheduling, '+(row.status==='to_film'?'to be filmed':'waiting for a script')+'. Change the script if you like, then drag it onto a day in the Calendar.');
+      renderNow('content'); ceRenderSheet();
+    }catch(e){ if(btn){ btn.disabled=false; btn.textContent='⧉ Duplicate'; } ceSetSheetMsg(id, 'Couldn’t duplicate: '+(e.message||e), true); ceRenderSheet(); }
   }
   async function ceUnschedule(id){
     var q=ceFindSlot(id); if(!q||!isAdmin||!db) return; var ps=(q.posting||{}).status;

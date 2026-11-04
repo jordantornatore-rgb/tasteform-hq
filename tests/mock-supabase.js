@@ -44,6 +44,7 @@
     // edge functions: content-reschedule answers like the real one (date + plannedFor), everything else just echoes
     var functions = { invoke: function (name, opts) { var body = (opts && opts.body) || {}; calls.push({ name: name, body: body });
       if (name === 'content-reschedule') { var d = new Date(body.postDate); var key = new Date(d.getTime() + 11 * 3600000).toISOString().slice(0, 10); var row = (tables.content_queue || []).find(function (r) { return r.id === body.id; }); var posting = Object.assign({}, row && row.data.posting, { plannedFor: body.postDate, movedAt: new Date().toISOString() }); if (row) row.data = Object.assign({}, row.data, { date: key, posting: posting }); return Promise.resolve({ data: { ok: true, id: body.id, date: key, day: 'x', weekStart: key, posting: posting }, error: null }); }
+      if (name === 'content-update' && body.create) { tables.content_queue = tables.content_queue || []; if (!tables.content_queue.find(function (r) { return r.id === body.id; })) tables.content_queue.push({ id: body.id, data: Object.assign({ date: body.create.date, slot: body.create.slot || 'high', status: String((body.fields || {}).script || '').trim() ? 'to_film' : 'needs_script' }, body.fields || {}) }); }
       return Promise.resolve({ data: { ok: true, saved: body.fields || {} }, error: null }); } };
     return { from: from, functions: functions, __calls: calls, __tables: tables, __stats: stats, auth: { signOut: function () { return Promise.resolve({}); } } };
   }
