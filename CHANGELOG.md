@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.1 — 4 Nov 2026 (add reels you've already filmed)
+
+- **+ Add filmed reel** (Library) and **Filmed this? Add the footage** (post sheet of a to-film reel): attach raw footage or a finished edit to an open slot or a new reel, uploaded from the phone (resumable, private bucket `content-footage`, 7-day signed links for the Mac) or linked from a folder already in `footage/` on the Mac. Finished edits skip editing and trials and come to you for approval.
+- Footage status chips on cards and a Footage block in the post sheet.
+- `supabase/migrations/20261104_content_footage_bucket.sql` (bucket + admin-only policies, applied).
+
 ## 2.8.0 — 4 Nov 2026 (Analytics tab)
 
 - New **Analytics** tab (Growth group; phone → More), Metricool-style, for everyone signed in. Period 7 / 30 / 90 days (Instagram's own ranges), each compared with the window before it.

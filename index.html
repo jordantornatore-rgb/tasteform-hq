@@ -770,6 +770,20 @@ body{padding:0;}
 .ce-note{font-size:var(--t-s);color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px;}
 .ce-libfilters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .ce-libfilters .input{min-width:0;max-width:100%;}
+/* ===== Content Engine: add a filmed reel (uploads) ===== */
+.ce-add .ce-choice{display:flex;gap:6px;flex-wrap:wrap;}
+.ce-add .ce-choice label{flex:1 1 200px;border:1px solid var(--border);border-radius:var(--r-m);padding:10px 12px;display:flex;gap:8px;align-items:flex-start;cursor:pointer;min-height:var(--tap);text-transform:none;letter-spacing:0;font-size:var(--t-s);font-weight:600;color:var(--text);flex-direction:row;}
+.ce-add .ce-choice label small{display:block;font-weight:400;color:var(--muted);margin-top:2px;}
+.ce-add .ce-choice input{margin-top:3px;}
+.ce-add .ce-choice label:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);}
+.ce-add [hidden]{display:none !important;}
+.ce-add input[type=file]{width:100%;min-height:var(--tap);font-size:var(--t-s);}
+.ce-upl{display:flex;flex-direction:column;gap:6px;}
+.ce-upl .f{font-size:var(--t-s);display:flex;flex-direction:column;gap:3px;}
+.ce-upl .bar{height:8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);overflow:hidden;}
+.ce-upl .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s;}
+.ce-upl .f.done .bar i{background:var(--good);}
+.ce-upl .f.err{color:var(--crit);}
 /* ===== Content Engine v2: script editor, filming sheet, phone preview, research cards ===== */
 .ce-play{position:relative;padding:0;border:none;background:none;cursor:pointer;flex-shrink:0;display:block;border-radius:8px;color:inherit;}
 .ce-play .pl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;text-shadow:0 1px 6px rgba(0,0,0,.7);pointer-events:none;}
@@ -2842,6 +2856,7 @@ body{padding:0;}
   var ceWeekOffset=0, ceShowFilming=false, ceOpenId=null, ceCopyTexts={}, ceBusy={};
   var ceFilters={status:'', funnel:'', format:'', type:'', office:false, lane:'', sort:'new'};
   var CE_LANES=[['niche','Niche'],['fitness','Fitness'],['format','Format'],['audience','Audience']];
+  var ceAdd=null, ceUploads={}, ceLinkRefresh={}, ceTusLoading=null;
   var ceScript=null, ceScriptTimer=null, ceFilm=false, ceFilmForce=false, cePreview=null, ceSigned={}, ceBroken={}, ceIdeaFocus=null, ceStdOpen=false, ceInspoEdit=null, ceHoverEl=null;
 
   function ceIdx(s){ return CE_STATUS.indexOf(String(s||'')); }
@@ -2856,6 +2871,7 @@ body{padding:0;}
     var out='<span class="chip '+cls+'">'+esc(label)+'</span>';
     if(pst==='error' && s!=='error') out+='<span class="chip crit">Error</span>';
     if(q&&q.reEditRequested&&s!=='posted') out+='<span class="chip ce-purple">Re-edit queued</span>';
+    out+=ceFootageChip(q);
     return out;
   }
   function ceText(v){ var s = v==null ? '' : (Array.isArray(v) ? v.map(function(x){ return x==null?'':String(x); }).join('\n') : (typeof v==='object' ? JSON.stringify(v) : String(v))); return s.trim(); }
@@ -2919,7 +2935,7 @@ body{padding:0;}
   function ceTrialNums(m){ return [['views','views'],['likes','likes'],['comments','comments'],['shares','shares'],['saves','saves'],['follows','follows']].filter(function(k){ return HQ.isNum(m[k[0]]); }).map(function(k){ return num(m[k[0]])+' '+k[1]; }).join(' · ')||'numbers –'; }
   function ceIdeaById(id){ return id?(state.contentIdeas||[]).find(function(i){ return i.id===id||i.shortcode===id; })||null:null; }
   function ceLinkedinRead(t){ t=ceText(t); if(!t) return '<div class="ce-txt muted">– not written yet</div>'; return '<div class="ce-line"><div class="t">'+esc(t).replace(/@?\[?TasteForm\]?(\(urn:li:organization:\d+\))?/g, '<span class="chip ce-li">@TasteForm</span>')+'</div>'+ceCopyBtn('linkedin', t)+'</div>'; }
-  function ceCloseOverlays(){ if(ceScript){ ceSaveDraft(); } if(ceScriptTimer){ clearInterval(ceScriptTimer); ceScriptTimer=null; } ceScript=null; ceFilm=false; cePreview=null; }
+  function ceCloseOverlays(){ if(ceScript){ ceSaveDraft(); } if(ceScriptTimer){ clearInterval(ceScriptTimer); ceScriptTimer=null; } ceScript=null; ceFilm=false; cePreview=null; ceAdd=null; }
   function ceCloseAll(){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceRenderSheet(); }
 
   RENDER.content = function(){
@@ -2997,6 +3013,7 @@ body{padding:0;}
     if(ceScript){ ceRenderScriptEditor(el); return; }
     if(ceFilm){ ceRenderFilmSheet(el); return; }
     if(cePreview){ ceRenderPreview(el); return; }
+    if(ceAdd){ ceRenderAddReel(el); return; }
     if(el.getAttribute('data-mode')){ el.removeAttribute('data-mode'); el.classList.remove('side'); el.innerHTML=''; }
     var q=ceOpenId ? ceFindSlot(ceOpenId) : null;
     if(!q){ ceOpenId=null; ceEdit=null; el.hidden=true; el.innerHTML=''; return; }
@@ -3020,6 +3037,8 @@ body{padding:0;}
     else if(['needs_script','to_film','filmed','editing'].indexOf(q.status)>=0) html+='<div class="ce-block" style="border-top:none;padding-top:0"><div class="f-note">Not edited yet ('+esc(ceStatusLabel(q.status))+'). The pipeline uploads the edit as soon as it is rendered.</div></div>';
     if(q.needsJordan && q.status==='needs_jordan') html+='<div class="ce-note"><b>Needs you:</b> '+esc(ceText(q.needsJordan.reason))+(isAdmin?' <button type="button" class="btn small" data-ce-act="fixed" data-id="'+esc(q.id)+'">Mark fixed</button>':'')+'</div>';
     if(p.status==='error' && p.error) html+='<div class="ce-note"><b>Posting error:</b> '+esc(ceText(p.error))+'</div>';
+    if(isAdmin && !posted && ['needs_script','to_film'].indexOf(q.status)>=0 && !(q.footageUpload&&!q.footageUpload.error)) html+='<div><button type="button" class="btn primary" data-ce-addreel="'+esc(q.id)+'">Filmed this? Add the footage</button></div>';
+    if(q.footageUpload) html+=ceFootageNote(q);
     if(q.scriptChangedAfterEdit && !posted) html+='<div class="ce-note">The video was cut from the old script.'+(isAdmin&&!q.reEditRequested?' <button type="button" class="btn small" data-ce-act="reedit" data-id="'+esc(q.id)+'">Re-edit video</button>':(q.reEditRequested?' Re-edit queued; the pipeline picks it up within 20 minutes.':''))+'</div>';
     if(['approved','trialing','scheduled','posted'].indexOf(q.status)>=0 && q.format) html+= q.goldStandard ? '<div class="f-note">⭐ Gold standard for '+esc(ceText(q.format))+(q.goldCopiedAt?' · copied to templates/'+esc(ceText(q.format))+'/gold/':' · the pipeline copies it on its next run')+'</div>' : (isAdmin?'<div><button type="button" class="btn" data-ce-act="gold" data-id="'+esc(q.id)+'">⭐ Make this the gold standard for '+esc(ceText(q.format))+'</button></div>':'');
     if(p.ytClaimRisk && !posted) html+='<div class="f-note">YouTube may claim or mute the music on this one (no licensed track fitted).</div>';
@@ -3385,6 +3404,8 @@ body{padding:0;}
       var pl=t.closest('[data-ce-play]'); if(pl){ if(ceDrag.moved) return; ceStopHover(); ceCloseOverlays(); ceOpenId=null; ceEdit=null; cePreview={id:pl.getAttribute('data-ce-play'), v:null, force:true}; ceRenderSheet(); return; }
       var pv=t.closest('[data-ce-pv]'); if(pv&&cePreview){ cePreview.v=pv.getAttribute('data-ce-pv'); cePreview.force=true; ceRenderSheet(); return; }
       var mo=t.closest('[data-ce-more]'); if(mo&&cePreview){ cePreview.more=true; cePreview.force=true; ceRenderSheet(); return; }
+      var adr=t.closest('[data-ce-addreel]'); if(adr){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceAdd={id:adr.getAttribute('data-ce-addreel')||null, force:true}; ceRenderSheet(); return; }
+      var ads=t.closest('[data-ca-submit]'); if(ads){ ceSubmitAddReel(ads); return; }
       var sct=t.closest('[data-ce-script]'); if(sct){ ceOpenScript({id:sct.getAttribute('data-ce-script')}); return; }
       var tr=t.closest('[data-ce-toreel]'); if(tr){ ceOpenScript({ideaId:tr.getAttribute('data-ce-toreel')}); return; }
       var nr=t.closest('[data-ce-newreel]'); if(nr){ var nd=nr.getAttribute('data-ce-newreel'); ceOpenScript({date:HQ.isDayKey(nd)?nd:null}); return; }
@@ -3415,6 +3436,7 @@ body{padding:0;}
     function onChange(ev){
       var s=ev.target.closest('select[data-cef]'); if(s){ ceFilters[s.getAttribute('data-cef')]=s.value; renderNow('content'); return; }
       var lf=ev.target.closest('[data-celib]'); if(lf){ ceLib[lf.getAttribute('data-celib')]=lf.value; renderNow('content'); return; }
+      var cax=ev.target.closest('[data-ca]'); if(cax&&ceAdd){ ceAddToggle(); return; }
       var sp=ev.target.closest('[data-cs="slotpick"]'); if(sp){ var ns=sp.closest('.ce-script').querySelector('.ce-newslot'); if(ns) ns.hidden=sp.value!=='__new'; return; }
       var tm=ev.target.closest('select[data-ce-time]'); if(tm){ var id=tm.getAttribute('data-ce-time'), q=ceFindSlot(id); if(!q) return; var at=cePostAtMs(q), day=HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):HQ.sydNow().key); ceMove(id, day, tm.value); return; }
       var md=ev.target.closest('select[data-ce-moveday]'); if(md){ var id2=md.getAttribute('data-ce-moveday'), q2=ceFindSlot(id2); if(!q2||!md.value) return; var at2=cePostAtMs(q2), hm=at2?HQ.pad(HQ.sydParts(at2).h)+':'+HQ.pad(HQ.sydParts(at2).min):(ceSlotTimes()[ceSlotKey(q2)]||'19:00'); ceMove(id2, md.value, hm); return; }
@@ -3428,7 +3450,7 @@ body{padding:0;}
     }
     if(view){ view.addEventListener('click', onClick); view.addEventListener('change', onChange); view.addEventListener('input', onInput); }
     if(sheet){ sheet.addEventListener('click', function(ev){ if(ev.target===sheet){ if(ceEdit){ ceEdit=null; ceRenderSheet(); return; } ceCloseAll(); return; } onClick(ev); }); sheet.addEventListener('change', onChange); sheet.addEventListener('input', onInput);
-      document.addEventListener('keydown', function(ev){ if(ev.key!=='Escape') return; if(ceEdit&&ceOpenId){ ceEdit=null; ceRenderSheet(); } else if(ceOpenId||ceScript||ceFilm||cePreview){ ceCloseAll(); } }); }
+      document.addEventListener('keydown', function(ev){ if(ev.key!=='Escape') return; if(ceEdit&&ceOpenId){ ceEdit=null; ceRenderSheet(); } else if(ceOpenId||ceScript||ceFilm||cePreview||ceAdd){ ceCloseAll(); } }); }
     // previews: a broken video flags itself; only one video plays at a time; desktop hover plays a card thumbnail muted
     document.addEventListener('error', function(ev){ var tg=ev.target; if(tg && tg.tagName==='VIDEO' && tg.hasAttribute('data-ce-vid') && tg.getAttribute('src')) ceVideoFailed(tg); }, true);
     document.addEventListener('play', function(ev){ document.querySelectorAll('video').forEach(function(v){ if(v!==ev.target && !v.paused) v.pause(); }); }, true);
@@ -3497,6 +3519,7 @@ body{padding:0;}
     var st=ceLoadState('contentQueue');
     if(st!=='ok'){ setText('ceSub', st==='loading'?'Loading…':'Sync error'); return '<div class="panel"><h2>Library</h2>'+ceStateBox(st,'the content library')+'</div>'; }
     var rows=(state.contentQueue||[]).slice(), posting=state.contentPosting||{}, ap=state.contentAutopost||{}, now=Date.now();
+    if(isAdmin) setTimeout(ceRefreshFootageLinks, 0);
     var count=function(f){ return rows.filter(f).length; };
     var stages=CE_STATUS.map(function(s){ return {s:s, n:count(function(q){ return (q.status||'to_film')===s; })}; });
     var nj=count(function(q){ return q.status==='needs_jordan'; }), er=count(function(q){ return q.status==='error' || (q.posting&&q.posting.status==='error'); });
@@ -3508,7 +3531,7 @@ body{padding:0;}
       '<span class="f-note">'+(state.contentMetaLoaded.autopost ? (ap.lastRunAt ? 'Pipeline ran '+esc(relTime(ap.lastRunAt)||'')+' · '+(ap.ok===false?'<b style="color:var(--crit)">failed</b>':'ok')+(ap.note?' · '+esc(ceText(ap.note)):'') : 'Pipeline has not run yet (no meta/autopost record).') : 'Loading the pipeline record…')+'</span></div>';
     html+='<div class="ce-strip">'+stages.map(function(x,i){ return (i?'<span class="arrow">→</span>':'')+'<button type="button" class="ce-stage'+(x.n?'':' zero')+'" data-celf="'+x.s+'" aria-pressed="'+(ceLib.status===x.s?'true':'false')+'"><b>'+x.n+'</b>'+esc(CE_STATUS_LABEL[x.s])+'</button>'; }).join('')+
       '<span class="arrow"> </span><button type="button" class="ce-stage red'+(nj?'':' zero')+'" data-celf="needs_jordan" aria-pressed="'+(ceLib.status==='needs_jordan'?'true':'false')+'"><b>'+nj+'</b>Needs Jordan</button><button type="button" class="ce-stage red'+(er?'':' zero')+'" data-celf="error" aria-pressed="'+(ceLib.status==='error'?'true':'false')+'"><b>'+er+'</b>Errors</button></div>'+
-      '<div class="ce-chips" style="margin-top:8px"><button type="button" class="btn" data-ce="filmsheet">Filming sheet · '+count(function(q){ return q.status==='to_film'; })+' to film</button>'+(isAdmin?'<button type="button" class="btn" data-ce-newreel="">+ New reel</button>':'')+'</div></div>';
+      '<div class="ce-chips" style="margin-top:8px"><button type="button" class="btn" data-ce="filmsheet">Filming sheet · '+count(function(q){ return q.status==='to_film'; })+' to film</button>'+(isAdmin?'<button type="button" class="btn" data-ce-newreel="">+ New reel</button><button type="button" class="btn primary" data-ce-addreel="">+ Add filmed reel</button>':'')+'</div></div>';
     // needs jordan
     var njRows=rows.filter(function(q){ return q.status==='needs_jordan'; }).sort(function(a,b){ return (HQ.parseTs(b.statusAt)||0)-(HQ.parseTs(a.statusAt)||0); });
     if(njRows.length) html+='<div class="panel" style="border-color:var(--crit)"><h2 style="color:var(--crit)">Needs you · '+njRows.length+'</h2><p class="rule">The pipeline stopped on these. Fix the cause, then mark it fixed and the next run retries.</p><div class="ce-list">'+njRows.map(function(q){ return ceLibCard(q, {extra:'<span class="ce-note">'+esc(ceText(q.needsJordan&&q.needsJordan.reason)||'no reason recorded')+'</span>'}); }).join('')+'</div></div>';
@@ -3768,6 +3791,151 @@ body{padding:0;}
     var rows=(state.contentQueue||[]).filter(function(q){ return q.adCandidate===true; }).sort(function(a,b){ return (HQ.parseTs(b.adCheckedAt)||0)-(HQ.parseTs(a.adCheckedAt)||0); });
     return '<div class="panel"><h2>Turn into an ad</h2><p class="rule">Reels that beat your 30-day median on their stage metric by 2× or more, 7 days after posting. Reels already running as ads are left out.</p>'+(rows.length?'<div class="ce-list">'+rows.map(function(q){ return ceLibCard(q, {extra:'<span class="ce-win">'+esc(ceText(q.adWhy)||'beat the median')+'</span>'}); }).join('')+'</div>':'<div class="empty-state">No ad candidates yet. A reel lands here when it doubles your 30-day median on its stage metric.</div>')+'</div>';
   }
+
+
+  /* --- Add a filmed reel: footage from the phone (resumable upload to content-footage), a finished edit, or a folder on the Mac --- */
+  function ceFootageChip(q){
+    var u=q&&q.footageUpload; if(!u||u.pulledAt) return '';
+    var live=ceUploads[q.id];
+    if(u.error) return '<span class="chip crit">Footage problem</span>';
+    if(u.expiredNote) return '<span class="chip warn">Footage links expired</span>';
+    if(live&&live.status==='uploading') return '<span class="chip warn">Uploading '+ceUplPct(live)+'%</span>';
+    if(u.status==='uploading') return '<span class="chip warn">Upload not finished</span>';
+    if(u.source==='mac') return '<span class="chip stage">Footage on the Mac · picked up within 20 min</span>';
+    return '<span class="chip stage">'+(u.kind==='final'?'Finished edit':'Footage')+' uploaded · on the Mac within 20 min</span>';
+  }
+  function ceFootageNote(q){
+    var u=q.footageUpload||{}, files=Array.isArray(u.files)?u.files:[];
+    var what=u.source==='mac'?'Folder on the Mac: '+esc(ceText(u.folder)):(u.kind==='final'?'Finished edit uploaded ('+files.length+' file'+(files.length===1?'':'s')+')':'Footage uploaded ('+files.length+' file'+(files.length===1?'':'s')+', '+esc(ceBytes(files.reduce(function(a,f){ return a+(+f.size||0); },0)))+')');
+    var state=u.error?'<b style="color:var(--crit)">'+esc(ceText(u.error))+'</b>':(u.expiredNote?esc(ceText(u.expiredNote)):(u.pulledAt?'On the Mac '+esc(relTime(u.pulledAt)||'')+'.':(u.status==='uploading'?'The upload didn’t finish. Add the footage again to restart it.':'Waiting for the Mac (it checks every 20 minutes).')));
+    return '<div class="ce-block"><span class="ce-k">Footage</span><div class="ce-txt">'+what+'</div><div class="f-note">'+state+'</div></div>';
+  }
+  function ceBytes(n){ n=+n||0; if(n>=1e9) return (n/1e9).toFixed(1)+' GB'; if(n>=1e6) return Math.round(n/1e6)+' MB'; return Math.max(1,Math.round(n/1e3))+' KB'; }
+  function ceUplPct(u){ var tot=0, sent=0; (u.files||[]).forEach(function(f){ tot+=f.size||0; sent+=f.sent||0; }); return tot?Math.floor(sent/tot*100):0; }
+  function ceAddOpenSlots(){ var today=HQ.sydNow().key, from=HQ.addDays(today,-7), end=HQ.addDays(today,28); return (state.contentQueue||[]).filter(function(q){ return ['needs_script','to_film'].indexOf(q.status)>=0 && HQ.isDayKey(q.date) && q.date>=from && q.date<=end && !(q.footageUpload&&!q.footageUpload.error); }).sort(function(a,b){ return a.date.localeCompare(b.date)||ceSlotOrder(a)-ceSlotOrder(b); }); }
+  function ceRenderAddReel(el){
+    if(!ceAdd.force && !el.hidden && el.getAttribute('data-mode')==='add') return; // never wipe a form or a running upload
+    ceAdd.force=false; el.setAttribute('data-mode','add'); el.classList.add('side');
+    var pre=ceAdd.id?ceFindSlot(ceAdd.id):null, opens=ceAddOpenSlots(), E=function(v){ return esc(v==null?'':String(v)); };
+    var folders=(((state.contentAutopost||{}).footageFolders)||[]).filter(function(f){ return !f.slotId; });
+    var today=HQ.sydNow().key, dayOpts='';
+    for(var i=-7;i<28;i++){ var k=HQ.addDays(today,i); dayOpts+='<option value="'+k+'"'+(k===today?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':(i===-1?'Yesterday':HQ.fmtDay(k,'wd'))))+'</option>'; }
+    var sel=function(k, opts, cur, label){ return '<label>'+esc(label)+'<select class="input" data-ca-f="'+k+'"><option value="">–</option>'+opts.map(function(o){ return '<option value="'+E(o)+'"'+(o===cur?' selected':'')+'>'+E(o)+'</option>'; }).join('')+'</select></label>'; };
+    var html='<div class="ce-sheet-head"><div><h2>Add a filmed reel</h2><div class="ce-meta">Footage you’ve already shot, or a finished edit. The Mac picks it up within 20 minutes.</div></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
+    html+='<div class="ce-editor ce-add">';
+    html+='<div><span class="ce-k">Which slot?</span><label>Slot<select class="input" data-ca="slot">'+(pre&&opens.indexOf(pre)<0?'<option value="'+E(pre.id)+'" selected>'+E((HQ.isDayKey(pre.date)?HQ.fmtDay(pre.date,'wd'):'no day')+' · '+(ceText(pre.title)||'this reel'))+'</option>':'')+opens.map(function(o){ return '<option value="'+E(o.id)+'"'+(pre&&pre.id===o.id?' selected':'')+'>'+E(HQ.fmtDay(o.date,'wd')+' · '+(CE_SLOT_LABEL[ceSlotKey(o)]||'slot')+' · '+(o.title&&o.title!=='Open slot'?o.title:(o.status==='needs_script'?'open slot':'to film')))+'</option>'; }).join('')+'<option value="__new"'+(pre?'':' selected')+'>New reel on a day…</option></select></label>'+
+      '<div class="grid" data-ca-new'+(pre?' hidden':'')+'><label>Day<select class="input" data-ca-f="date">'+dayOpts+'</select></label><label>Slot type<select class="input" data-ca-f="slottype">'+['high','low','carousel'].map(function(x){ return '<option value="'+x+'">'+esc(CE_SLOT_LABEL[x])+'</option>'; }).join('')+'</select></label></div></div>';
+    html+='<label>Title<input class="input" type="text" data-ca-f="title" maxlength="140" value="'+E(pre&&pre.title!=='Open slot'?pre.title:'')+'" placeholder="One line, so you can find it"></label>';
+    html+='<div><span class="ce-k">What is it?</span><div class="ce-choice"><label><input type="radio" name="ca-kind" value="raw" data-ca="kind" checked><span>Raw footage<small>The pipeline edits it with your notes, makes 5 versions and trials them.</small></span></label><label><input type="radio" name="ca-kind" value="final" data-ca="kind"><span>Finished edit<small>Post it as it is. It still comes to you for approval first.</small></span></label></div></div>';
+    html+='<div><span class="ce-k">Where is it?</span><div class="ce-choice"><label><input type="radio" name="ca-src" value="upload" data-ca="src" checked><span>Upload from this device<small>Videos, photos, audio. Big files are fine; it resumes if the connection drops.</small></span></label><label><input type="radio" name="ca-src" value="mac" data-ca="src"><span>Already on the Mac<small>A folder in footage/ (AirDrop or iCloud).</small></span></label></div></div>';
+    html+='<div data-ca-upload><input type="file" multiple accept="video/*,image/*,audio/*,.mov,.mp4,.m4v,.heic" data-ca-files aria-label="Footage files"><div class="f-note">Keep HQ open on this screen until the bars finish.</div></div>';
+    html+='<div data-ca-mac hidden>'+(folders.length?'<label>Folder in footage/<select class="input" data-ca-f="folder">'+folders.map(function(f){ return '<option value="'+E(f.name)+'">'+E(f.name+' · '+f.files+' file'+(f.files===1?'':'s')+(f.changedAt?' · '+(relTime(f.changedAt)||''):''))+'</option>'; }).join('')+'</select></label>':'<div class="empty-state">No unclaimed folders in footage/ on the Mac'+((state.contentAutopost||{}).footageFoldersAt?' (checked '+esc(relTime(state.contentAutopost.footageFoldersAt)||'')+')':'')+'. Drop the footage into its own folder there and it shows up here within 20 minutes.</div>')+'</div>';
+    html+='<div class="grid">'+sel('format',CE_FORMATS,pre?ceText(pre.format):'','Format')+sel('funnel',['TOF','MOF','BOF'],pre?(ceFunnel(pre.funnel)||''):'','Funnel')+sel('location',CE_LOCS,pre?ceText(pre.location):'','Location')+'</div>';
+    html+='<label>What you said (optional)<textarea class="input" data-ca-f="script" data-cs-grow placeholder="Paste or type your script if you have it. The pipeline transcribes the footage anyway.">'+E(pre&&pre.script||'')+'</textarea></label>';
+    html+='<label data-ca-notes>Editing notes (optional)<textarea class="input" data-ca-f="editNotes" data-cs-grow placeholder="Text on screen, B-roll, zooms, music feel…">'+E(pre&&pre.editNotes||'')+'</textarea></label>';
+    html+='<div class="acts"><button type="button" class="btn primary" data-ca-submit>Add reel</button><button type="button" class="btn" data-ce="close">Close</button></div><div data-ca-msg role="status"></div><div class="ce-upl" data-ca-progress></div>';
+    html+='</div>';
+    el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>'; el.hidden=false;
+    var cb=$('ceSheetClose'); if(cb) cb.focus();
+  }
+  function ceAddToggle(){
+    var root=document.querySelector('#ceSheet .ce-add'); if(!root) return;
+    var slot=root.querySelector('[data-ca="slot"]'), src=root.querySelector('[data-ca="src"]:checked'), kind=root.querySelector('[data-ca="kind"]:checked');
+    var nw=root.querySelector('[data-ca-new]'); if(nw) nw.hidden=!(slot&&slot.value==='__new');
+    var up=root.querySelector('[data-ca-upload]'), mac=root.querySelector('[data-ca-mac]'); if(up) up.hidden=!(src&&src.value==='upload'); if(mac) mac.hidden=!(src&&src.value==='mac');
+    var notes=root.querySelector('[data-ca-notes]'); if(notes) notes.hidden=!!(kind&&kind.value==='final');
+  }
+  function ceLoadTus(){
+    if(window.tus) return Promise.resolve(window.tus);
+    if(ceTusLoading) return ceTusLoading;
+    ceTusLoading=new Promise(function(res){ var sc=document.createElement('script'); sc.src='https://cdn.jsdelivr.net/npm/tus-js-client@4.1.0/dist/tus.min.js'; sc.onload=function(){ res(window.tus||null); }; sc.onerror=function(){ res(null); }; document.head.appendChild(sc); });
+    return ceTusLoading;
+  }
+  function ceSafeName(n){ return String(n||'file').normalize('NFKD').replace(/[^\w.\-]+/g,'-').replace(/^-+|-+$/g,'').slice(-120)||'file'; }
+  async function ceUploadOne(path, file, onProgress){
+    var tus=await ceLoadTus(), base=(supaClient&&supaClient.supabaseUrl)||'https://hucqdrekawzsrbbkczgj.supabase.co';
+    var sess=await supaClient.auth.getSession(), token=sess&&sess.data&&sess.data.session&&sess.data.session.access_token;
+    if(!token) throw new Error('Sign in again.');
+    if(!tus){ // no resumable client: plain upload (fine for smaller files)
+      var r=await supaClient.storage.from('content-footage').upload(path, file, {upsert:true, contentType:file.type||'application/octet-stream'}); if(r.error) throw r.error; onProgress(file.size); return;
+    }
+    await new Promise(function(resolve, reject){
+      var up=new tus.Upload(file, { endpoint: base+'/storage/v1/upload/resumable', retryDelays:[0,3000,5000,10000,20000,60000,120000], headers:{ authorization:'Bearer '+token, 'x-upsert':'true' }, uploadDataDuringCreation:true, removeFingerprintOnSuccess:true, chunkSize:6*1024*1024,
+        metadata:{ bucketName:'content-footage', objectName:path, contentType:file.type||'application/octet-stream', cacheControl:'3600' },
+        onBeforeRequest: async function(req){ try{ var s2=await supaClient.auth.getSession(); var t2=s2&&s2.data&&s2.data.session&&s2.data.session.access_token; if(t2) req.setHeader('authorization','Bearer '+t2); }catch(e){} },
+        onError: function(err){ reject(err); }, onProgress: function(sent){ onProgress(sent); }, onSuccess: function(){ resolve(); } });
+      up.findPreviousUploads().then(function(prev){ if(prev&&prev.length) up.resumeFromPreviousUpload(prev[0]); up.start(); }, function(){ up.start(); });
+    });
+  }
+  async function ceFootageLinks(paths){
+    var r=await supaClient.storage.from('content-footage').createSignedUrls(paths, 7*86400);
+    if(r.error) throw r.error;
+    var exp=new Date(Date.now()+7*86400000).toISOString();
+    return (r.data||[]).map(function(x){ return {path:x.path, url:x.signedUrl, urlExpires:exp}; });
+  }
+  async function ceSubmitAddReel(btn){
+    if(!isAdmin||!db) return;
+    var root=document.querySelector('#ceSheet .ce-add'); if(!root) return;
+    var g=function(k){ var x=root.querySelector('[data-ca-f="'+k+'"]'); return x?x.value:''; };
+    var msg=root.querySelector('[data-ca-msg]'), say=function(t, err){ msg.textContent=t; msg.className=err?'ce-note':'f-note'; };
+    var slot=root.querySelector('[data-ca="slot"]').value, kind=(root.querySelector('[data-ca="kind"]:checked')||{}).value||'raw', src=(root.querySelector('[data-ca="src"]:checked')||{}).value||'upload';
+    var files=src==='upload'?Array.prototype.slice.call((root.querySelector('[data-ca-files]')||{}).files||[]):[];
+    var folder=src==='mac'?g('folder'):'';
+    var title=g('title').trim();
+    if(src==='upload'&&!files.length){ say('Pick the files to upload.', true); return; }
+    if(src==='mac'&&!folder){ say('Pick the folder on the Mac.', true); return; }
+    if(kind==='final'&&src==='upload'&&!files.some(function(f){ return /^video\//.test(f.type)||/\.(mov|mp4|m4v)$/i.test(f.name); })){ say('A finished edit needs a video file.', true); return; }
+    var id=slot, create=null;
+    if(slot==='__new'){
+      if(!title){ say('Give it a title.', true); return; }
+      var date=g('date'), st=g('slottype')||'high', dn=['sun','mon','tue','wed','thu','fri','sat'][HQ.dowOf(date)], code={high:'hi',low:'lo',carousel:'car'}[st]||'hi';
+      id=HQ.weekStart(date)+'-'+dn+'-'+code+'-'+Math.random().toString(36).slice(2,6); create={date:date, slot:st};
+    }
+    var fields={}; if(title) fields.title=title; ['format','funnel','location'].forEach(function(k){ if(g(k)) fields[k]=g(k); }); if(g('script').trim()) fields.script=g('script'); if(kind==='raw'&&g('editNotes').trim()) fields.editNotes=g('editNotes');
+    btn.disabled=true; btn.textContent='Adding…';
+    try{
+      if(create||Object.keys(fields).length){ var data=await ceInvoke('content-update', create?{id:id, create:create, fields:fields}:{id:id, fields:fields}); var q0=ceFindSlot(id); if(q0) Object.assign(q0, data.saved||fields); else state.contentQueue=(state.contentQueue||[]).concat([Object.assign({id:id}, data.saved||fields)]); }
+    }catch(e){ say('Couldn’t add it: '+e.message, true); btn.disabled=false; btn.textContent='Add reel'; return; }
+    var q=ceFindSlot(id)||{id:id}, now=ceNowIso();
+    var fu=src==='mac'?{source:'mac', folder:folder, kind:kind, status:'linked', at:now}:{source:'upload', kind:kind, status:'uploading', files:[], startedAt:now};
+    var patch={footageUpload:fu}; if(q.status==='needs_script'||!q.status) { patch.status='to_film'; patch.statusAt=now; }
+    Object.assign(q, patch);
+    try{ await db.collection('content_queue').doc(id).update(patch); }catch(e){ say('Couldn’t save: '+(e.message||e), true); btn.disabled=false; btn.textContent='Add reel'; return; }
+    renderNow('content');
+    if(src==='mac'){ say('Added. The Mac links "'+folder+'" to this reel within 20 minutes.', false); btn.textContent='Added'; return; }
+    // uploads, one after another so a slow connection isn't split 5 ways
+    var prog=root.querySelector('[data-ca-progress]'), u=ceUploads[id]={status:'uploading', files:files.map(function(f){ return {name:f.name, size:f.size, sent:0}; })};
+    prog.innerHTML=files.map(function(f,i){ return '<div class="f" data-ca-file="'+i+'"><span>'+esc(f.name)+' · '+esc(ceBytes(f.size))+'</span><div class="bar"><i></i></div></div>'; }).join('');
+    say('Uploading '+files.length+' file'+(files.length===1?'':'s')+'… keep this screen open.', false); btn.textContent='Uploading…';
+    var paths=[];
+    for(var i=0;i<files.length;i++){
+      var f=files[i], p=id+'/'+(i+1)+'-'+ceSafeName(f.name), row=prog.querySelector('[data-ca-file="'+i+'"]');
+      try{
+        await ceUploadOne(p, f, function(sent){ u.files[i].sent=sent; var b=row&&row.querySelector('.bar i'); if(b) b.style.width=(f.size?Math.min(100,sent/f.size*100):100)+'%'; });
+        u.files[i].sent=f.size; if(row) row.classList.add('done'); paths.push({path:p, name:f.name, size:f.size, type:f.type||null});
+      }catch(e){ if(row){ row.classList.add('err'); row.querySelector('span').textContent=f.name+' · failed: '+(e.message||e); } u.status='error'; say('An upload failed. Tap Add the footage again on this reel to retry; finished files are kept.', true); btn.disabled=false; btn.textContent='Add reel'; return; }
+    }
+    try{
+      var links=await ceFootageLinks(paths.map(function(x){ return x.path; }));
+      var done=paths.map(function(x){ var l=links.find(function(y){ return y.path===x.path; })||{}; return Object.assign({}, x, {url:l.url||null, urlExpires:l.urlExpires||null}); });
+      var fu2=Object.assign({}, fu, {status:'uploaded', files:done, uploadedAt:ceNowIso()});
+      q.footageUpload=fu2; await db.collection('content_queue').doc(id).update({footageUpload:fu2});
+      u.status='done'; say('Uploaded. The Mac picks it up within 20 minutes'+(kind==='final'?' and it comes to you for approval.':' and starts the edit.'), false); btn.textContent='Done';
+    }catch(e){ u.status='error'; say('Uploaded, but saving the links failed: '+(e.message||e)+'. Open this reel again to retry.', true); btn.disabled=false; btn.textContent='Add reel'; }
+    renderNow('content');
+  }
+  // Download links are valid for 7 days; refresh them while the Mac hasn't pulled the files yet (admin only, once a session).
+  async function ceRefreshFootageLinks(){
+    if(!isAdmin||!db||!supaClient||!supaClient.storage) return;
+    var soon=Date.now()+2*86400000;
+    for(var q of (state.contentQueue||[])){
+      var u=q.footageUpload; if(!u||u.source!=='upload'||u.status!=='uploaded'||u.pulledAt||ceLinkRefresh[q.id]) continue;
+      var files=Array.isArray(u.files)?u.files:[]; if(!files.length||!files.some(function(f){ return !f.urlExpires||HQ.parseTs(f.urlExpires)<soon; })) continue;
+      ceLinkRefresh[q.id]=true;
+      try{ var links=await ceFootageLinks(files.map(function(f){ return f.path; })); var fu=Object.assign({}, u, {files:files.map(function(f){ var l=links.find(function(y){ return y.path===f.path; })||{}; return Object.assign({}, f, {url:l.url||f.url, urlExpires:l.urlExpires||f.urlExpires}); }), expiredNote:null, linksRefreshedAt:ceNowIso()}); q.footageUpload=fu; await db.collection('content_queue').doc(q.id).update({footageUpload:fu}); }catch(e){}
+    }
+  }
+  window.addEventListener('beforeunload', function(ev){ if(Object.keys(ceUploads).some(function(k){ return ceUploads[k].status==='uploading'; })){ ev.preventDefault(); ev.returnValue=''; } });
 
   /* ---------- data layer ---------- */
   function subscribe(){

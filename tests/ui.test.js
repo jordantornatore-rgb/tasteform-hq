@@ -49,6 +49,7 @@ function contentFixtures(today) {
       row('sched', { date: d(1), slot: 'high', format: 'F2', funnel: 'BOF', status: 'scheduled', title: 'Scheduled reel', caption: 'Cap', winner: { v: 'v2', why: 'BOF: best comments per view' }, winnerConfidence: 'low', video: { file: 'x/v2.mp4', previewUrl: 'https://media.example.test/v2.mp4', variants: vars }, posting: { status: 'scheduled', provider: 'outstand', postId: 'pMAIN', postIds: { INSTAGRAM: 'pMAIN' }, scheduledFor: at(24), platforms: ['INSTAGRAM', 'YOUTUBE', 'LINKEDIN'], ytClaimRisk: true } }),
       row('posted', { date: d(-8), slot: 'high', format: 'F2', funnel: 'TOF', status: 'posted', title: 'Posted reel', goldStandard: true, goldAt: NOW_ISO, postedShortcode: 'POSTED123', adCandidate: true, adWhy: 'TOF views 2.4x your 30-day median (6 posts)', metrics: { views: 5000, at24h: { views: 3000 }, at7d: { views: 5000 } }, posting: { status: 'posted', provider: 'outstand', postId: 'pOLD', postedAt: at(-8 * 24), permalinks: { instagram: 'https://www.instagram.com/reel/POSTED123/' } } }),
       row('nj', { date: d(5), slot: 'low', format: 'F7', funnel: 'TOF', status: 'needs_jordan', title: 'Blocked reel', needsJordan: { reason: 'Need: B-roll of the office lift', at: NOW_ISO } }),
+      row('upl', { date: d(7), slot: 'low', format: 'F7', funnel: 'TOF', status: 'to_film', title: 'Uploaded footage reel', footageUpload: { source: 'upload', kind: 'raw', status: 'uploaded', files: [{ name: 'IMG_1.MOV', path: 'x/1-IMG_1.MOV', size: 123456789, url: 'https://example.test/x', urlExpires: at(24 * 6) }], uploadedAt: NOW_ISO } }),
       row('err', { date: d(6), slot: 'low', format: 'F7', funnel: 'TOF', status: 'approved', title: 'Errored reel', posting: { status: 'error', provider: 'outstand', error: 'instagram: media has edit lists' } }),
     ],
     ideas: [{ id: 'test-idea1', data: { shortcode: 'IDEA1', url: 'https://www.instagram.com/reel/IDEA1/', creator: 'someone', followers: 120000, lane: 'format', type: 'reel', format: 'F6', funnel: 'MOF', views: 200000, shares: 4000, comments: 900, status: 'new', pinned: true, foundAt: NOW_ISO, adaptation: 'Run it as a desk-job version.', whyItWorked: 'High share rate.', hooks: ['Idea hook one', 'Idea hook two'], visualHooks: ['Close-up of a lunchbox'], talkingPoints: ['Point one', 'Point two'], related: [{ url: 'https://www.instagram.com/reel/REL1/', creator: 'other', followers: 5000, views: 80000, shares: 900, comments: 100, stageNote: 'same topic' }] } }],
@@ -275,6 +276,18 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-sched"]').click()); await page.waitForTimeout(150);
       const ss = await sheetText(); noBad('post sheet (scheduled)', ss);
       check(`${lbl}: scheduled sheet shows the winner, low confidence and the YouTube claim note`, () => assert.ok(/🏆/.test(ss) && /low confidence/.test(ss) && /YouTube may claim/.test(ss) && /Gold standard|gold standard/.test(ss), JSON.stringify(ss.slice(0, 1500))));
+      await page.keyboard.press('Escape');
+      // add a filmed reel
+      await page.click('#ceViewSeg [data-ceview="library"]'); await page.waitForTimeout(150);
+      const libAdd = await visibleText(page); check(`${lbl}: uploaded footage shows its chip`, () => assert.ok(/Footage uploaded/i.test(libAdd), libAdd.slice(0, 300)));
+      await page.click('#ceRoot [data-ce-addreel=""]'); await page.waitForTimeout(150);
+      const add = await sheetText(); noBad('add filmed reel', add);
+      check(`${lbl}: add-reel sheet offers slots, raw/final and upload/Mac`, () => assert.ok(/Add a filmed reel/i.test(add) && /Raw footage/.test(add) && /Finished edit/.test(add) && /Upload from this device/.test(add) && /Already on the Mac/.test(add) && /New reel on a day/.test(add), add.slice(0, 600)));
+      await page.click('#ceSheet input[value="mac"]'); await page.waitForTimeout(80);
+      const macShown = await page.$eval('#ceSheet [data-ca-mac]', e => !e.hidden); check(`${lbl}: choosing the Mac shows the folder picker`, () => assert.ok(macShown));
+      await page.click('#ceSheet [data-ca-submit]'); await page.waitForTimeout(80);
+      const addMsg = await page.$eval('#ceSheet [data-ca-msg]', e => e.textContent); check(`${lbl}: no folder and no title is refused with a reason`, () => assert.ok(/folder|title/i.test(addMsg), addMsg));
+      await sheetTargets('add filmed reel');
       await page.keyboard.press('Escape');
       // performance: ad candidates
       await page.click('#ceViewSeg [data-ceview="perf"]'); await page.waitForTimeout(150);
