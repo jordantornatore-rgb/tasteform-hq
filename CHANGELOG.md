@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.7.5 — 5 Nov 2026 (trial reels on their own day)
+
+- Trial reel = Yes: the reel sheet has "🧪 Trial reels start" (day + time), separate from the 📣 full reel's time in Schedule. Default is "as soon as it's approved". If the reel isn't approved by the time you pick, the trials start the moment you approve it.
+- The 🧪 Trial reels bubble in the Calendar drags on its own: drop it on a day to move only the trials (same time of day). The 📣 Full reel bubble still moves the winner.
+- Once the trials are booked, you can still move them until the first one goes out; the pipeline cancels and re-books them within 20 minutes. The winner keeps your time if it's still at least 1 h after the last trial.
+
 ## 2.7.4 — 5 Nov 2026 (rename a reel)
 
 - Tap a reel's name at the top of its sheet (✎) to rename it. Enter or Save saves; Escape or Cancel leaves it. Not posted yet: saved like any edit (a scheduled reel's YouTube title is updated in Outstand too). Already posted: only HQ's name changes; the live post keeps its title.

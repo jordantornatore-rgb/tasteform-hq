@@ -359,6 +359,28 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.selectOption('#ceSheet [data-ce-trial]', 'on'); await page.waitForTimeout(150);
       const trialSaved = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await'); return r && r.data.trialChoice; });
       check(`${lbl}: choosing Yes saves trialChoice "on"`, () => assert.strictEqual(trialSaved, 'on'));
+      // Trial reels start on their own day/time; the full reel keeps its time
+      const winBefore = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await'); return JSON.stringify((r.data.posting || {}).plannedFor || null); });
+      const tdays = await page.$$eval('#ceSheet [data-ce-tday] option', os => os.map(o => o.value));
+      check(`${lbl}: Trial reel = Yes shows a Trial reels start day and time`, () => assert.ok(tdays.length > 3, JSON.stringify(tdays)));
+      await page.selectOption('#ceSheet [data-ce-tday]', tdays[2]); await page.waitForTimeout(200);
+      await page.selectOption('#ceSheet [data-ce-ttime]', '07:00'); await page.waitForTimeout(200);
+      const ts = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await'); const iso = r.data.trialStartAt; const f = new Intl.DateTimeFormat('en-CA', { timeZone: 'Australia/Sydney', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)); return { iso, f, win: JSON.stringify((r.data.posting || {}).plannedFor || null), goes: (document.querySelector('#ceSheet .ce-goes') || {}).innerText || '' }; });
+      check(`${lbl}: picking the trial start saves trialStartAt (Sydney time) and leaves the full reel alone`, () => assert.ok(ts.iso && ts.f.startsWith(tdays[2]) && /07:00/.test(ts.f) && ts.win === winBefore && /7:00\s*am/i.test(ts.goes), JSON.stringify(ts)));
+      await page.click('#ceSheet [data-ce-tnow="test-await"]'); await page.waitForTimeout(150);
+      const tsNow = await page.evaluate(() => window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await').data.trialStartAt);
+      check(`${lbl}: "As soon as it's approved" clears the trial start`, () => assert.strictEqual(tsNow, null));
+      // the 🧪 bubble drags on its own: it moves only the trial start, not the full reel
+      await page.keyboard.press('Escape'); await page.waitForTimeout(80);
+      await page.click('#ceViewSeg [data-ceview="calendar"]'); await page.waitForTimeout(200);
+      const tb = '.ce-plangrid .ce-trialbub[data-ce-dragkind="trial"][data-ce-drag="test-await"]';
+      const tbDay = await page.$eval(tb, e => e.closest('[data-day]').getAttribute('data-day')).catch(() => null);
+      const tbTo = tbDay && await page.$$eval('.ce-plangrid .ce-cal-day[data-day]', (els, d) => { const ks = els.map(e => e.getAttribute('data-day')); return ks[ks.indexOf(d) + 1]; }, tbDay);
+      const rsBefore = await page.evaluate(() => window.__HQ_TEST.client.__calls.filter(c => c.name === 'content-reschedule').length);
+      if (tbTo) await dragTo(tb, `.ce-plangrid .ce-cal-day[data-day="${tbTo}"]`);
+      const tdrag = await page.evaluate((to) => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await'); const iso = r.data.trialStartAt; const day = iso ? new Intl.DateTimeFormat('en-CA', { timeZone: 'Australia/Sydney', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso)) : null; return { day, to, rs: window.__HQ_TEST.client.__calls.filter(c => c.name === 'content-reschedule').length, onDay: (document.querySelector('.ce-plangrid .ce-trialbub[data-ce-drag="test-await"]') || { closest: () => null }).closest('[data-day]')?.getAttribute('data-day') }; }, tbTo);
+      check(`${lbl}: dragging the trial bubble to another day moves only the trials`, () => assert.ok(tbDay && tdrag.day === tbTo && tdrag.rs === rsBefore && tdrag.onDay === tbTo, JSON.stringify({ tbDay, ...tdrag, rsBefore })));
+      await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-await"]').click()); await page.waitForTimeout(150);
       await page.click('#ceSheet [data-ce-edit="sound"]'); await page.waitForTimeout(100);
       const sndUi = await page.evaluate(() => ({ start: !!document.querySelector('#ceSheet [data-ce-f="start"]'), play: !!document.querySelector('#ceSheet [data-ce-snd="track"]'), mix: !!document.querySelector('#ceSheet [data-ce-snd="mix"]') }));
       check(`${lbl}: sound editor has the start slider and play button`, () => assert.ok(sndUi.start && sndUi.play && !sndUi.mix, JSON.stringify(sndUi)));
