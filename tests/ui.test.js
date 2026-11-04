@@ -301,6 +301,39 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       check(`${lbl}: AI hooks become tap-to-use chips, not prefilled`, () => assert.ok(chip.includes('AI hook to tap'), JSON.stringify(chip)));
       await sheetTargets('script editor');
       await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
+      // Reel types: each has its own layout; a short clip saves its shot, on-screen line, length and caption
+      await page.evaluate(() => document.querySelector('#ceRoot [data-ce-newreel=""]').click()); await page.waitForTimeout(150);
+      const types = await page.$$eval('#ceSheet [data-cs-type]', els => els.map(e => e.getAttribute('data-cs-type')));
+      check(`${lbl}: the script editor offers the four reel types`, () => assert.deepStrictEqual(types, ['talking', 'voiceover', 'short', 'carousel']));
+      await page.fill('#ceSheet [data-cs="title"]', 'Desk lunch POV');
+      await page.click('#ceSheet [data-cs-type="short"]'); await page.waitForTimeout(150);
+      const shortUi = await page.evaluate(() => ({ hooks: document.querySelectorAll('#ceSheet [data-cs-hook]').length, shot: !!document.querySelector('#ceSheet [data-cs="shot"]'), ost: !!document.querySelector('#ceSheet [data-cs="onScreenText"]'), cap: !!document.querySelector('#ceSheet [data-cs="caption"]'), title: document.querySelector('#ceSheet [data-cs="title"]').value }));
+      check(`${lbl}: Short clip shows shot / on-screen text / length / caption, no hooks, and keeps the title typed before switching`, () => assert.ok(shortUi.hooks === 0 && shortUi.shot && shortUi.ost && shortUi.cap && shortUi.title === 'Desk lunch POV', JSON.stringify(shortUi)));
+      await page.fill('#ceSheet [data-cs="shot"]', 'Me at the desk opening a container');
+      await page.fill('#ceSheet [data-cs="onScreenText"]', 'POV: lunch before 2pm');
+      await page.fill('#ceSheet [data-cs="caption"]', 'Eat at 12, not 3. Here is why it works.');
+      await page.selectOption('#ceSheet [data-cs="slotpick"]', '__later');
+      await page.click('#ceSheet [data-cs-save]'); await page.waitForTimeout(250);
+      const shortRow = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.data && x.data.title === 'Desk lunch POV'); return r && r.data; });
+      check(`${lbl}: a Short clip saves reelType, shot, on-screen text, length and caption, ready to film`, () => assert.ok(shortRow && shortRow.reelType === 'short' && shortRow.shot && shortRow.onScreenText === 'POV: lunch before 2pm' && shortRow.lengthS === 7 && /Eat at 12/.test(shortRow.caption) && shortRow.status === 'to_film' && shortRow.unscheduled === true, JSON.stringify(shortRow)));
+      await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
+      // Voiceover: shot list and "on top of the video" lines are saved as lists
+      await page.evaluate(() => document.querySelector('#ceRoot [data-ce-newreel=""]').click()); await page.waitForTimeout(150);
+      await page.click('#ceSheet [data-cs-type="voiceover"]'); await page.waitForTimeout(150);
+      await page.fill('#ceSheet [data-cs="title"]', 'Chicken bowl voiceover');
+      await page.fill('#ceSheet [data-cs="script"]', 'This is the bowl that got Dom down 35kg.');
+      await page.fill('#ceSheet [data-cs="shots"]', 'Chicken into the air fryer\nSlicing it\nThe bowl');
+      await page.fill('#ceSheet [data-cs="overlays"]', 'Dom before/after — on "35kg"\nMacros card | at the end');
+      await page.selectOption('#ceSheet [data-cs="slotpick"]', '__later');
+      await page.click('#ceSheet [data-cs-save]'); await page.waitForTimeout(250);
+      const voRow = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.data && x.data.title === 'Chicken bowl voiceover'); return r && r.data; });
+      check(`${lbl}: a Voiceover reel saves the voiceover as its script, the shot list and the overlays (what + when)`, () => assert.ok(voRow && voRow.reelType === 'voiceover' && /Dom down 35kg/.test(voRow.script) && voRow.shots.length === 3 && voRow.overlays.length === 2 && voRow.overlays[0].what === 'Dom before/after' && voRow.overlays[0].when === 'on "35kg"' && voRow.overlays[1].when === 'at the end', JSON.stringify(voRow)));
+      await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
+      // Add reel: one upload box per kind of file
+      await page.evaluate(() => document.querySelector('#ceRoot [data-ce-addreel=""]').click()); await page.waitForTimeout(150);
+      const roles = await page.$$eval('#ceSheet [data-ca-files]', els => els.map(e => e.getAttribute('data-ca-files')));
+      check(`${lbl}: Add reel has separate boxes for footage, voiceover and photos to put on top`, () => assert.deepStrictEqual(roles, ['footage', 'voiceover', 'overlay']));
+      await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
       // Idea Bank: research card + Turn into a reel
       await page.click('#ceViewSeg [data-ceview="ideas"]'); await page.waitForTimeout(150);
       const ideas = await visibleText(page); noBad('idea bank', ideas);

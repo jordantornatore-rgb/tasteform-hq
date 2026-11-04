@@ -668,6 +668,12 @@ body{padding:0;}
 @media (min-width:761px){.ce-sheet{align-items:center;padding:24px;}.ce-sheet-card{max-width:720px;border-radius:var(--r-l);max-height:88vh;}}
 .ce-sheet-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
 .ce-sheet-head > div{min-width:0;flex:1;}
+.ce-roles{display:grid;gap:8px;}
+.ce-role{display:grid;gap:4px;padding:10px 12px;border:1px dashed var(--line,rgba(127,127,127,.35));border-radius:10px;}
+.ce-role small{opacity:.75;font-size:.8rem;}
+.ce-typeseg{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px;}
+.ce-typeseg button{border:1px solid var(--line,rgba(127,127,127,.3));background:transparent;color:inherit;border-radius:999px;padding:8px 12px;min-height:40px;font:inherit;font-size:.85rem;cursor:pointer;}
+.ce-typeseg button.on{background:color-mix(in srgb,#89653F 40%,transparent);border-color:#89653F;font-weight:700;}
 .ce-lmform{display:grid;gap:10px;margin-top:8px;}
 .ce-lmform label{display:grid;gap:4px;font-size:.85rem;}
 .ce-lmchip{background:color-mix(in srgb,#89653F 26%,transparent);}
@@ -2943,6 +2949,26 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   var CE_PLATFORM_SHORT={INSTAGRAM:'IG', TIKTOK:'TikTok', YOUTUBE:'YT', LINKEDIN:'LinkedIn'};
   var CE_FORMATS=['F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','F13','F14','F15','F16','F17','C1','C2','C3','C4','C5','C6','C7'];
   var CE_FORMAT_NAMES={F1:'Recipe ASMR B-roll', F2:'Cutout over images', F3:'Corporate POV / meme', F4:'Physique + one line', F5:'Tier list', F6:'List-builder (icons)', F7:'Diagnosis talking head', F8:'Myth vs reality', F9:'Day in the life', F10:'Notes-app plan', F11:'My Story chapter', F12:'Client proof', F13:'Coaching-call clip', F14:'Coach-told case study', F15:'Before/after + hard truth', F16:'Vulnerable talking head', F17:'Corporate authority', C1:'Habit list carousel', C2:'Editorial essay carousel', C3:'Food list carousel', C4:'How-to / plan carousel', C5:'Two-photo chain carousel', C6:'Stats / story carousel', C7:'Text guide carousel'};
+  /* Reel types: each has its own script layout in the editor and its own editing rules on the Mac (autopost-run.md). */
+  var CE_TYPES=[
+    {k:'talking', label:'Talking to camera', icon:'🎙', note:'Hooks, then the script you say to camera, then the ending.'},
+    {k:'voiceover', label:'Voiceover + footage', icon:'🎬', note:'You film the footage (e.g. the recipe), record the voiceover, and list what goes on top (before/afters, screenshots).'},
+    {k:'short', label:'Short clip + caption', icon:'⚡', note:'A 5–10 second clip with one line on screen. The value is in the caption.'},
+    {k:'carousel', label:'Carousel', icon:'🖼', note:'Slides with text and photos. The caption does the rest.'}];
+  var CE_TYPE_OF_FORMAT={F1:'voiceover',F2:'voiceover',F9:'voiceover',F12:'voiceover',F3:'short',F4:'short',F15:'short'};
+  function ceTypeOf(q, fmt){ if(q&&q.reelType) return q.reelType; if(q&&ceSlotKey(q)==='carousel') return 'carousel'; var f=String(fmt||(q&&q.format)||'').toUpperCase(); if(/^C\d/.test(f)) return 'carousel'; return CE_TYPE_OF_FORMAT[f]||'talking'; }
+  function ceTypeBlock(q){
+    var k=ceTypeOf(q), t=ceTypeInfo(k), E=esc, rows=[];
+    if(k==='voiceover'){ if(Array.isArray(q.shots)&&q.shots.length) rows.push('<div class="ce-k">Shot list</div><ol class="ce-copylist">'+q.shots.map(function(x){ return '<li>'+E(ceText(x))+'</li>'; }).join('')+'</ol>'); if(Array.isArray(q.overlays)&&q.overlays.length) rows.push('<div class="ce-k">On top of the video</div><ul class="ce-copylist">'+q.overlays.map(function(o){ return '<li>'+E(ceText(o.what))+(o.when?' <span class="muted">· '+E(ceText(o.when))+'</span>':'')+'</li>'; }).join('')+'</ul>'); }
+    if(k==='short'){ if(q.shot) rows.push('<div class="ce-k">What to film</div><div class="ce-txt">'+E(ceText(q.shot))+'</div>'); if(q.onScreenText) rows.push('<div class="ce-k">On-screen text</div><div class="ce-txt">'+E(ceText(q.onScreenText))+'</div>'); rows.push('<div class="f-note">'+E((q.lengthS||7)+' seconds. The value goes in the caption.')+'</div>'); }
+    var f=(q.footageUpload&&Array.isArray(q.footageUpload.files))?q.footageUpload.files:[], by={}; f.forEach(function(x){ var r=x.role||'footage'; by[r]=(by[r]||0)+1; });
+    if(f.length && (by.voiceover||by.overlay)) rows.push('<div class="f-note">Files: '+E([by.footage?by.footage+' footage':'', by.voiceover?by.voiceover+' voiceover':'', by.overlay?by.overlay+' to put on top':''].filter(Boolean).join(' · '))+'</div>');
+    return '<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">'+t.icon+' '+E(t.label)+'</span>'+(isAdmin&&!cePosted(q)?'<button type="button" class="btn small" data-ce-script="'+E(q.id)+'">Change type</button>':'')+'</div>'+rows.join('')+'</div>';
+  }
+  function ceTypeInfo(k){ return CE_TYPES.find(function(t){ return t.k===k; })||CE_TYPES[0]; }
+  function ceOverlayLines(arr){ return (Array.isArray(arr)?arr:[]).map(function(o){ return typeof o==='string'?o:(ceText(o.what)+(o.when?' — '+ceText(o.when):'')); }).join('\n'); }
+  function ceParseOverlays(txt){ return String(txt||'').split(/\n+/).map(function(l){ return l.trim(); }).filter(Boolean).map(function(l){ var m=l.split(/\s+[—–-]\s+|\s*\|\s*/); return {what:m[0].trim(), when:m.slice(1).join(' — ').trim()}; }); }
+  function ceLines(txt){ return String(txt||'').split(/\n+/).map(function(l){ return l.replace(/^\s*(\d+[.)]|[-•*])\s*/,'').trim(); }).filter(Boolean); }
   function ceFmtLabel(v){ var s=String(v==null?'':v).trim(), k=s.toUpperCase(); return CE_FORMAT_NAMES[k] ? k+' · '+CE_FORMAT_NAMES[k] : s; }
   var CE_ANGLES=['corporate pain','how we fix it','client proof',"Jordan's story"], CE_HOOKSTYLES=['call-out','contrarian','story','proof'], CE_LOCS=['desk','car','mirror','kitchen','gym','outside'], CE_EFFORTS=['high','med','low'];
   var CE_QUICK=['07:30','12:00','17:30','19:00','20:30'];
@@ -3189,6 +3215,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     html+=block('Sound', '<div class="ce-txt">♪ '+esc(ceSoundLabel(q.sound))+(q.reEditRequested&&!posted?'<div class="f-note">Being mixed in now; the preview above is the previous mix until the pipeline\u2019s next run (within 20 minutes).</div>':'')+(q.sound&&q.sound.soundSwap?'<div class="f-note">'+esc(q.sound.soundSwap)+'</div>':'')+'</div>', null, null, 'sound');
     html+=block('Hooks'+(Array.isArray(q.hooks)?' ('+q.hooks.length+')':''), lines(q.hooks,'hook', function(t){ var k=t.toLowerCase(), out=''; if(filmedSet.indexOf(k)>=0) out+='<span class="chip good">filmed</span>'; if(trialBy[k]) out+='<span class="chip grey">trial · '+esc(ceWhenFull(trialBy[k].scheduledFor))+'</span>'; return out; }), 'hooks', Array.isArray(q.hooks)?q.hooks.map(ceText).join('\n'):'', 'hooks');
     var wc=ceWords(q.script);
+    html+=ceTypeBlock(q);
     html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Script'+(wc?' · '+wc+' words · ~'+esc(ceReadTime(wc)):'')+'</span><span class="ce-chips">'+(q.script?ceCopyBtn('script', q.script, 'Copy'):'')+(isAdmin&&!posted?'<button type="button" class="btn small" data-ce-script="'+esc(q.id)+'">'+(q.script?'Edit script':'Write script')+'</button>':'')+'</span></div>'+(q.script?'<div class="ce-script-read">'+esc(q.script)+'</div>':'<div class="ce-txt muted">– no script yet. Jordan writes it in the script editor.</div>')+'</div>';
     html+='<div class="ce-block"><span class="ce-k">Visual hook</span>'+single(q.visualHook,'visualHook')+'</div>';
     html+='<div class="ce-block"><span class="ce-k">Editing notes</span>'+single(q.editNotes,'editNotes')+'</div>';
@@ -3533,6 +3560,8 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       var uh=t.closest('[data-cs-usehook]'); if(uh){ var tas=uh.closest('.ce-script').querySelectorAll('[data-cs-hook]'); for(var hi=0;hi<tas.length;hi++){ if(!tas[hi].value.trim()){ tas[hi].value=uh.getAttribute('data-cs-usehook'); ceGrow(tas[hi]); tas[hi].focus(); break; } } return; }
       var uv=t.closest('[data-cs-usevis]'); if(uv){ var vta=uv.closest('.ce-script').querySelector('[data-cs="visualHook"]'); vta.value=(vta.value.trim()?vta.value.replace(/\s+$/,'')+'\n':'')+uv.getAttribute('data-cs-usevis'); ceGrow(vta); vta.focus(); return; }
       var svs=t.closest('[data-cs-save]'); if(svs){ ceSaveScript(svs); return; }
+      var ctp=t.closest('[data-cs-type]'); if(ctp&&ceScript){ var root0=ctp.closest('.ce-script'), hid=root0&&root0.querySelector('[data-cs="reelType"]'); if(hid) hid.value=ctp.getAttribute('data-cs-type'); ceScript.forceDraft=true; ceScript.lastSig=null; ceSaveDraft(); ceScript.type=ctp.getAttribute('data-cs-type'); ceScript.force=true; ceRenderSheet(); return; }
+      var ads=t.closest('[data-cs-addslide]'); if(ads){ var box=ads.parentElement.querySelector('[data-cs-slides]'), n=box.querySelectorAll('[data-cs-slide]').length; if(n>=10) return; var ta=document.createElement('textarea'); ta.className='input'; ta.rows=3; ta.setAttribute('data-cs-slide', n); ta.setAttribute('data-cs-grow',''); ta.setAttribute('aria-label','Slide '+(n+1)); ta.placeholder='Slide '+(n+1); box.appendChild(ta); ta.focus(); return; }
       var dsd=t.closest('[data-cs-discard]'); if(dsd&&ceScript){ try{ localStorage.removeItem(ceScriptKey()); }catch(e){} ceScript.lastSig=null; ceScript.force=true; ceScript.noDraft=true; ceRenderSheet(); return; }
       var ins=t.closest('[data-ce-inspo]'); if(ins){ ceInspoEdit=ins.getAttribute('data-ce-inspo'); renderNow('content'); return; }
       var inss=t.closest('[data-ce-inspo-save]'); if(inss){ ceSaveInspo(inss.getAttribute('data-ce-inspo-save')); return; }
@@ -4031,7 +4060,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   function ceOpenScript(o){
     ceCloseOverlays(); ceOpenId=null; ceEdit=null;
     var q=o.id?ceFindSlot(o.id):null;
-    ceScript={id:o.id||null, ideaId:o.ideaId||(q&&q.sourceIdea)||null, date:o.date||null, slot:o.slot||'high', force:true};
+    ceScript={id:o.id||null, ideaId:o.ideaId||(q&&q.sourceIdea)||null, date:o.date||null, slot:o.slot||'high', force:true, type:o.type||null};
     ceRenderSheet();
   }
   function ceScriptKey(){ return 'hqScriptDraft:'+(ceScript.id||('new:'+(ceScript.ideaId||'')+':'+(ceScript.date||''))); }
@@ -4041,11 +4070,12 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   function ceScriptFields(root){
     var g=function(k){ var x=root.querySelector('[data-cs="'+k+'"]'); return x?x.value:''; };
     var hooksAll=Array.prototype.map.call(root.querySelectorAll('[data-cs-hook]'), function(t){ return t.value; });
-    return {title:g('title').trim(), hooksAll:hooksAll, hooks:hooksAll.map(function(h){ return h.trim(); }).filter(Boolean).slice(0,5), visualHook:g('visualHook'), script:g('script'), editNotes:g('editNotes'), cta:g('cta').trim(), format:g('format'), funnel:g('funnel'), location:g('location'), slotpick:g('slotpick'), date:g('date'), slot:g('slot')};
+    var slides=Array.prototype.map.call(root.querySelectorAll('[data-cs-slide]'), function(t){ return t.value; });
+    return {reelType:g('reelType')||'talking', title:g('title').trim(), hooksAll:hooksAll, hooks:hooksAll.map(function(h){ return h.trim(); }).filter(Boolean).slice(0,5), visualHook:g('visualHook'), script:g('script'), editNotes:g('editNotes'), cta:g('cta').trim(), caption:g('caption'), shots:g('shots'), overlays:g('overlays'), shot:g('shot'), onScreenText:g('onScreenText').trim(), lengthS:g('lengthS'), slides:slides, format:g('format'), funnel:g('funnel'), location:g('location'), slotpick:g('slotpick'), date:g('date'), slot:g('slot')};
   }
   function ceSaveDraft(){
     if(!ceScript) return; var root=document.querySelector('#ceSheet .ce-script'); if(!root) return;
-    var f=ceScriptFields(root); if(!(f.title||f.script.trim()||f.hooks.length||f.visualHook.trim()||f.editNotes.trim()||f.cta)) return;
+    var f=ceScriptFields(root); if(!ceScript.forceDraft && !(f.title||f.script.trim()||f.hooks.length||f.visualHook.trim()||f.editNotes.trim()||f.cta||f.caption.trim()||f.shot.trim()||f.shots.trim()||f.overlays.trim()||f.slides.some(function(x){ return x.trim(); }))) return; ceScript.forceDraft=false;
     var sig=JSON.stringify(f); if(sig===ceScript.lastSig) return; ceScript.lastSig=sig;
     try{ localStorage.setItem(ceScriptKey(), JSON.stringify({at:ceNowIso(), f:f})); var d=root.querySelector('[data-cs-draft]'); if(d) d.textContent='Draft saved on this device '+HQ.fmtTime(new Date().toISOString())+'.'; }catch(e){}
   }
@@ -4074,14 +4104,36 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     if(!isAdmin) html+='<div class="ce-note">View only: only the admin can save scripts.</div>';
     if(draft) html+='<div class="f-note">Restored your unsaved draft from '+esc(relTime(draft.at)||'earlier')+'. <button type="button" class="btn small" data-cs-discard>Discard draft</button></div>';
     if(q && Array.isArray(q.body) && q.body.length && !q.script) html+='<details class="ce-idea-panel"><summary>Old AI-drafted beats (reference only)</summary><ol class="ce-copylist">'+q.body.map(function(b){ return '<li>'+esc(ceText(b))+'</li>'; }).join('')+'</ol></details>';
+    var rtype=ceScript.type||val('reelType', ceTypeOf(q, fmt)), ti0=ceTypeInfo(rtype);
     html+='<div class="ce-editor ce-script">';
+    html+='<div><span class="ce-k">What kind of reel?</span><div class="ce-typeseg" role="radiogroup">'+CE_TYPES.map(function(t){ return '<button type="button" role="radio" aria-checked="'+(t.k===rtype?'true':'false')+'" class="'+(t.k===rtype?'on':'')+'" data-cs-type="'+t.k+'">'+t.icon+' '+esc(t.label)+'</button>'; }).join('')+'</div><div class="f-note">'+esc(ti0.note)+'</div><input type="hidden" data-cs="reelType" value="'+E(rtype)+'"></div>';
     html+='<label>Title<input class="input" type="text" data-cs="title" maxlength="140" value="'+E(title)+'" placeholder="One line"></label>';
-    html+='<div><span class="ce-k">Spoken hooks · up to 5 you\'ll film</span>'+(hookChips.length?'<div class="ce-chips" style="margin-bottom:6px">'+hookChips.slice(0,8).map(function(h){ return '<button type="button" class="ce-chipbtn" data-cs-usehook="'+E(h)+'">+ '+E(h)+'</button>'; }).join('')+'</div>':'')+hooks.map(function(h,i){ return '<textarea class="input" rows="2" data-cs-hook="'+i+'" data-cs-grow aria-label="Hook '+(i+1)+'" placeholder="Hook '+(i+1)+'">'+E(h)+'</textarea>'; }).join('')+'</div>';
-    html+='<div><span class="ce-k">Visual hook · what\'s on screen in the first 1–2 seconds</span>'+(vChips.length?'<div class="ce-chips" style="margin-bottom:6px">'+vChips.map(function(h){ return '<button type="button" class="ce-chipbtn" data-cs-usevis="'+E(h)+'">+ '+E(h)+'</button>'; }).join('')+'</div>':'')+'<textarea class="input" data-cs="visualHook" data-cs-grow aria-label="Visual hook" placeholder="Shot, prop, text overlay, location">'+E(val('visualHook', q&&q.visualHook||''))+'</textarea></div>';
-    html+='<div><span class="ce-k">Script</span><textarea class="input" data-cs="script" data-cs-grow aria-label="Script" placeholder="Write it the way you\'d say it.">'+E(val('script', q&&q.script||''))+'</textarea><div class="count" data-cs-wc></div></div>';
-    html+='<div><span class="ce-k">Editing notes</span><textarea class="input" data-cs="editNotes" data-cs-grow aria-label="Editing notes" style="min-height:120px" placeholder="e.g. 0:03 text \'the scale lied\' / B-roll of me at desk on line 2 / punch in on \'take photos\'">'+E(val('editNotes', q&&q.editNotes||''))+'</textarea></div>';
-    html+='<label>CTA / ending line<input class="input" type="text" data-cs="cta" maxlength="300" value="'+E(val('cta', q?(q.cta||''):''))+'" placeholder="The last line you say"></label>';
-    html+='<div class="grid">'+sel('format',CE_FORMATS,fmt,'Format')+sel('funnel',['TOF','MOF','BOF'],fun,'Funnel')+sel('location',CE_LOCS,loc,'Location')+'</div>';
+    var hookBox=function(n, label){ var hs=hooks.slice(0,n); return '<div><span class="ce-k">'+label+'</span>'+(hookChips.length?'<div class="ce-chips" style="margin-bottom:6px">'+hookChips.slice(0,8).map(function(h){ return '<button type="button" class="ce-chipbtn" data-cs-usehook="'+E(h)+'">+ '+E(h)+'</button>'; }).join('')+'</div>':'')+hs.map(function(h,i){ return '<textarea class="input" rows="2" data-cs-hook="'+i+'" data-cs-grow aria-label="Hook '+(i+1)+'" placeholder="Hook '+(i+1)+'">'+E(h)+'</textarea>'; }).join('')+'</div>'; };
+    var visBox='<div><span class="ce-k">Visual hook · what\'s on screen in the first 1–2 seconds</span>'+(vChips.length?'<div class="ce-chips" style="margin-bottom:6px">'+vChips.map(function(h){ return '<button type="button" class="ce-chipbtn" data-cs-usevis="'+E(h)+'">+ '+E(h)+'</button>'; }).join('')+'</div>':'')+'<textarea class="input" data-cs="visualHook" data-cs-grow aria-label="Visual hook" placeholder="Shot, prop, text overlay, location">'+E(val('visualHook', q&&q.visualHook||''))+'</textarea></div>';
+    var scriptBox=function(label, ph){ return '<div><span class="ce-k">'+label+'</span><textarea class="input" data-cs="script" data-cs-grow aria-label="'+E(label)+'" placeholder="'+E(ph)+'">'+E(val('script', q&&q.script||''))+'</textarea><div class="count" data-cs-wc></div></div>'; };
+    var notesBox='<div><span class="ce-k">Editing notes</span><textarea class="input" data-cs="editNotes" data-cs-grow aria-label="Editing notes" style="min-height:120px" placeholder="e.g. 0:03 text \'the scale lied\' / punch in on \'take photos\' / music feel">'+E(val('editNotes', q&&q.editNotes||''))+'</textarea></div>';
+    var ctaBox='<label>CTA / ending line<input class="input" type="text" data-cs="cta" maxlength="300" value="'+E(val('cta', q?(q.cta||''):''))+'" placeholder="The last line you say, or e.g. Comment LUNCH"></label>';
+    var capBox=function(label, ph){ return '<div><span class="ce-k">'+label+'</span><textarea class="input" data-cs="caption" data-cs-grow aria-label="Caption" style="min-height:140px" placeholder="'+E(ph)+'">'+E(val('caption', q&&q.caption||''))+'</textarea><div class="f-note">Your words go out as they are; the Mac only writes a caption when this is empty.</div></div>'; };
+    if(rtype==='talking'){ html+=hookBox(5, 'Spoken hooks · up to 5 you\'ll film')+visBox+scriptBox('Script', 'Write it the way you\'d say it.')+notesBox+ctaBox; }
+    else if(rtype==='voiceover'){
+      html+=hookBox(3, 'Hook · the first line (said and on screen), up to 3 to test')+visBox+scriptBox('Voiceover', 'What you say over the footage, the way you\'d say it.');
+      html+='<div><span class="ce-k">Shot list · what to film, in order</span><textarea class="input" data-cs="shots" data-cs-grow aria-label="Shot list" placeholder="One per line, e.g.\nChicken thighs into the air fryer\nSlicing it on the board\nThe bowl, top-down">'+E(val('shots', (q&&Array.isArray(q.shots)?q.shots:[]).map(ceText).join('\n')))+'</textarea></div>';
+      html+='<div><span class="ce-k">On top of the video · photos, screenshots, text</span><textarea class="input" data-cs="overlays" data-cs-grow aria-label="Overlays" placeholder="One per line: what — when, e.g.\nDom before/after — on &quot;he lost 35kg&quot;\nMacros card 540 cal / 48g protein — at the end">'+E(val('overlays', ceOverlayLines(q&&q.overlays)))+'</textarea><div class="f-note">Add the photos with the footage (the “Photos to put on top” box). The Mac matches them to these lines by name and order.</div></div>';
+      html+=notesBox+ctaBox;
+    }
+    else if(rtype==='short'){
+      html+='<div><span class="ce-k">What to film</span><textarea class="input" data-cs="shot" data-cs-grow aria-label="What to film" placeholder="One shot, e.g. me at the desk opening a meal-prep container, slow push-in">'+E(val('shot', q&&q.shot||''))+'</textarea></div>';
+      html+='<label>On-screen text<input class="input" type="text" data-cs="onScreenText" maxlength="160" value="'+E(val('onScreenText', q&&q.onScreenText||''))+'" placeholder="The one line people read, e.g. POV: you ate lunch before 2pm for once"></label>';
+      var len=String(val('lengthS','')||(q&&q.lengthS)||7);
+      html+='<label>Length<select class="input" data-cs="lengthS">'+['5','7','10','15'].map(function(x){ return '<option value="'+x+'"'+(x===len?' selected':'')+'>'+x+' seconds</option>'; }).join('')+'</select></label>';
+      html+=capBox('Caption · the value', 'The tip, the numbers, the why. This is where the reel earns the save.')+notesBox;
+    }
+    else {
+      var sl=(Array.isArray(d.slides)?d.slides:(q&&Array.isArray(q.slides)?q.slides.map(ceText):[])).slice(0,10); while(sl.length<3) sl.push('');
+      html+='<div><span class="ce-k">Slides · slide 1 is the hook</span><div data-cs-slides>'+sl.map(function(x,i){ return '<textarea class="input" rows="3" data-cs-slide="'+i+'" data-cs-grow aria-label="Slide '+(i+1)+'" placeholder="Slide '+(i+1)+(i===0?': the hook':'')+'. Text, then a line for the photo, e.g. [photo: Dom before/after]">'+E(x)+'</textarea>'; }).join('')+'</div><button type="button" class="btn small" data-cs-addslide>+ Slide</button><div class="f-note">Add the photos with “Photos to put on top” when you add the files.</div></div>';
+      html+=capBox('Caption', 'What the slides don\'t say.')+ctaBox;
+    }
+    html+='<div class="grid">'+sel('format',CE_FORMATS.filter(function(f){ return rtype==='carousel'?/^C/.test(f):!/^C/.test(f); }),fmt,'Format')+sel('funnel',['TOF','MOF','BOF'],fun,'Funnel')+sel('location',CE_LOCS,loc,'Location')+'</div>';
     if(q) html+='<div><span class="ce-k">Day and slot</span><div class="ce-txt">'+esc(HQ.isDayKey(q.date)?HQ.fmtDay(q.date,'wd'):'no day')+' · '+esc(CE_SLOT_LABEL[ceSlotKey(q)]||'slot –')+'</div><div class="f-note">Move it from the calendar or the post sheet.</div></div>';
     else {
       var opens=ceOpenSlots(), pick=ceScript.date?'__new':(opens[0]?opens[0].id:'__new'), today=HQ.sydNow().key, dayOpts='';
@@ -4102,7 +4154,8 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     var root=document.querySelector('#ceSheet .ce-script'); if(!root||!isAdmin||!ceScript) return;
     var f=ceScriptFields(root), msg=root.querySelector('[data-cs-msg]');
     var say=function(t, err){ if(msg){ msg.textContent=t; msg.className=err?'ce-note':'f-note'; } };
-    if(!f.title && !f.script.trim()){ say('Add a title or the script first.', true); return; }
+    var hasBody=f.script.trim()||f.shot.trim()||f.caption.trim()||f.slides.some(function(x){ return x.trim(); });
+    if(!f.title && !hasBody){ say('Add a title or the script first.', true); return; }
     var id=ceScript.id, create=null;
     if(!id){
       if(f.slotpick && f.slotpick!=='__new' && f.slotpick!=='__later') id=f.slotpick;
@@ -4113,14 +4166,22 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
         id=HQ.weekStart(f.date)+'-'+dn+'-'+code+'-'+Math.random().toString(36).slice(2,6); create={date:f.date, slot:f.slot||'high'};
       }
     }
-    var fields={title:f.title, hooks:f.hooks, visualHook:f.visualHook, script:f.script, editNotes:f.editNotes, cta:f.cta};
+    var fields={title:f.title, editNotes:f.editNotes, cta:f.cta}, extra={reelType:f.reelType};
+    if(f.reelType==='talking'||f.reelType==='voiceover'){ fields.hooks=f.hooks; fields.visualHook=f.visualHook; fields.script=f.script; }
+    if(f.reelType==='voiceover'){ extra.shots=ceLines(f.shots); extra.overlays=ceParseOverlays(f.overlays); }
+    if(f.reelType==='short'){ extra.shot=f.shot; extra.onScreenText=f.onScreenText; extra.lengthS=+f.lengthS||7; }
+    if(f.reelType==='carousel'){ fields.slides=f.slides.map(function(x){ return x.trim(); }).filter(Boolean); }
+    if((f.reelType==='short'||f.reelType==='carousel') && f.caption.trim()) fields.caption=f.caption;
     if(f.format) fields.format=f.format; if(f.funnel) fields.funnel=f.funnel; if(f.location) fields.location=f.location;
     if(ceScript.ideaId) fields.sourceIdea=ceScript.ideaId;
     var oldKey=ceScriptKey(); btn.disabled=true; btn.textContent='Saving…';
     try{
       var data=await ceInvoke('content-update', create?{id:id, create:create, fields:fields}:{id:id, fields:fields});
       var saved=data.saved||fields, q=ceFindSlot(id);
-      if(later){ try{ await db.collection('content_queue').doc(id).update({unscheduled:true, unscheduledAt:ceNowIso()}); saved=Object.assign({}, saved, {unscheduled:true}); }catch(e){} }
+      if(later){ extra.unscheduled=true; extra.unscheduledAt=ceNowIso(); }
+      var qx=ceFindSlot(id), stNow=(saved&&saved.status)||(qx&&qx.status);
+      if((f.reelType==='short'||f.reelType==='carousel') && (!stNow||stNow==='needs_script') && hasBody){ extra.status='to_film'; extra.statusAt=ceNowIso(); }
+      try{ await db.collection('content_queue').doc(id).update(extra); saved=Object.assign({}, saved, extra); }catch(e){ say('Saved the script, but not the '+ceTypeInfo(f.reelType).label.toLowerCase()+' parts: '+(e.message||e), true); }
       if(q) Object.assign(q, saved); else state.contentQueue=(state.contentQueue||[]).concat([Object.assign({id:id}, saved)]);
       try{ localStorage.removeItem(oldKey); }catch(e){}
       var idea=ceIdeaById(ceScript.ideaId); if(idea){ idea.status='planned'; idea.plannedFor=id; }
@@ -4252,7 +4313,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     html+='<div><span class="ce-k">What is it?</span><div class="ce-choice"><label><input type="radio" name="ca-kind" value="raw" data-ca="kind" checked><span>Raw footage<small>The pipeline edits it with your notes, makes 5 versions and trials them.</small></span></label><label><input type="radio" name="ca-kind" value="final" data-ca="kind"><span>Finished edit<small>Your own edit, posted as it is. Add several versions (different hooks, covers, cuts) to test them against each other. It still comes to you for approval first.</small></span></label></div></div>';
     html+='<label>Trial reel?<select class="input" data-ca-f="trial"><option value="on" selected>Yes · trial it, post the winner 72 h later</option><option value="off">No · post it at the slot</option></select></label><div class="f-note" style="margin-top:-6px">Yes: every version goes out as an Instagram trial reel (non-followers only) once you approve it, and 72 hours later the best one posts to everyone. Works with one version too.</div>';
     html+='<div><span class="ce-k">Where is it?</span><div class="ce-choice"><label><input type="radio" name="ca-src" value="upload" data-ca="src" checked><span>Upload from this device<small>Videos, photos, audio. Big files are fine; it resumes if the connection drops.</small></span></label><label><input type="radio" name="ca-src" value="mac" data-ca="src"><span>Already on the Mac<small>A folder in footage/ (AirDrop or iCloud).</small></span></label></div></div>';
-    html+='<div data-ca-upload><input type="file" multiple accept="video/*,image/*,audio/*,.mov,.mp4,.m4v,.heic" data-ca-files aria-label="Footage files"><div class="f-note">Keep HQ open on this screen until the bars finish.</div></div>';
+    html+='<div data-ca-upload class="ce-roles"><label class="ce-role"><b>🎥 Video footage</b><small>The clips you filmed (all takes are fine).</small><input type="file" multiple accept="video/*,.mov,.mp4,.m4v" data-ca-files="footage" aria-label="Video footage"></label><label class="ce-role" data-ca-extra><b>🎙 Voiceover</b><small>Optional: a voice memo or a video of you talking. It becomes the audio; the footage is cut to it.</small><input type="file" multiple accept="audio/*,video/*,.m4a,.mp3,.wav,.mov,.mp4" data-ca-files="voiceover" aria-label="Voiceover"></label><label class="ce-role" data-ca-extra><b>🖼 Photos to put on top</b><small>Optional: before/afters, screenshots, a macros card. Say where each goes in the script’s “On top of the video” list (file names help).</small><input type="file" multiple accept="image/*,.heic,video/*" data-ca-files="overlay" aria-label="Photos to put on top"></label><div class="f-note">Keep HQ open on this screen until the bars finish.</div></div>';
     html+='<div data-ca-mac hidden>'+(folders.length?'<label>Folder in footage/<select class="input" data-ca-f="folder">'+folders.map(function(f){ return '<option value="'+E(f.name)+'">'+E(f.name+' · '+f.files+' file'+(f.files===1?'':'s')+(f.changedAt?' · '+(relTime(f.changedAt)||''):''))+'</option>'; }).join('')+'</select></label>':'<div class="empty-state">No unclaimed folders in footage/ on the Mac'+((state.contentAutopost||{}).footageFoldersAt?' (checked '+esc(relTime(state.contentAutopost.footageFoldersAt)||'')+')':'')+'. Drop the footage into its own folder there and it shows up here within 20 minutes.</div>')+'</div>';
     html+='<div class="grid">'+sel('format',CE_FORMATS,pre?ceText(pre.format):'','Format')+sel('funnel',['TOF','MOF','BOF'],pre?(ceFunnel(pre.funnel)||''):'','Funnel')+sel('location',CE_LOCS,pre?ceText(pre.location):'','Location')+'</div>';
     html+='<label>What you said (optional)<textarea class="input" data-ca-f="script" data-cs-grow placeholder="Paste or type your script if you have it. The pipeline transcribes the footage anyway.">'+E(pre&&pre.script||'')+'</textarea></label>';
@@ -4268,6 +4329,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     var nw=root.querySelector('[data-ca-new]'); if(nw) nw.hidden=!(slot&&slot.value==='__new');
     var up=root.querySelector('[data-ca-upload]'), mac=root.querySelector('[data-ca-mac]'); if(up) up.hidden=!(src&&src.value==='upload'); if(mac) mac.hidden=!(src&&src.value==='mac');
     var notes=root.querySelector('[data-ca-notes]'); if(notes) notes.hidden=!!(kind&&kind.value==='final');
+    root.querySelectorAll('[data-ca-extra]').forEach(function(x){ x.hidden=!!(kind&&kind.value==='final'); });
   }
   function ceLoadTus(){
     if(window.tus) return Promise.resolve(window.tus);
@@ -4312,7 +4374,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     var g=function(k){ var x=root.querySelector('[data-ca-f="'+k+'"]'); return x?x.value:''; };
     var msg=root.querySelector('[data-ca-msg]'), say=function(t, err){ msg.textContent=t; msg.className=err?'ce-note':'f-note'; };
     var slot=root.querySelector('[data-ca="slot"]').value, kind=(root.querySelector('[data-ca="kind"]:checked')||{}).value||'raw', src=(root.querySelector('[data-ca="src"]:checked')||{}).value||'upload';
-    var files=src==='upload'?Array.prototype.slice.call((root.querySelector('[data-ca-files]')||{}).files||[]):[];
+    var files=[], roles=[]; if(src==='upload') root.querySelectorAll('[data-ca-files]').forEach(function(inp){ var role=inp.getAttribute('data-ca-files')||'footage'; if(kind==='final' && role!=='footage') return; Array.prototype.forEach.call(inp.files||[], function(f){ files.push(f); roles.push(role); }); });
     var folder=src==='mac'?g('folder'):'';
     var title=g('title').trim();
     if(src==='upload'&&!files.length){ say('Pick the files to upload.', true); return; }
@@ -4348,7 +4410,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     var upFile=async function(i){
       var f=files[i], p=id+'/'+(i+1)+'-'+ceSafeName(f.name), row=prog.querySelector('[data-ca-file="'+i+'"]');
       var bar=function(sent){ u.files[i].sent=sent; var b=row&&row.querySelector('.bar i'); if(b) b.style.width=(f.size?Math.min(100,sent/f.size*100):100)+'%'; };
-      if(f.size<=PART){ await ceUploadOne(p, f, bar); paths.push({path:p, name:f.name, size:f.size, type:f.type||null}); }
+      if(f.size<=PART){ await ceUploadOne(p, f, bar); paths.push({path:p, name:f.name, size:f.size, type:f.type||null, role:roles[i]||'footage'}); }
       else {
         var n=Math.ceil(f.size/PART), parts=[];
         for(var k=0;k<n;k++){
@@ -4356,7 +4418,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
           await ceUploadOne(pp, new File([blob], ceSafeName(f.name)+'.part'+(k+1), {type:'application/octet-stream', lastModified:f.lastModified||0}), (function(base){ return function(sent){ bar(base+sent); }; })(from));
           parts.push({path:pp, size:blob.size});
         }
-        paths.push({path:p, name:f.name, size:f.size, type:f.type||null, parts:parts});
+        paths.push({path:p, name:f.name, size:f.size, type:f.type||null, role:roles[i]||'footage', parts:parts});
       }
       u.files[i].sent=f.size; if(row) row.classList.add('done');
     };

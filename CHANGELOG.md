@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.9.0 — 5 Nov 2026 (reel types + labelled files)
+
+- Script editor: **What kind of reel?** Talking to camera (hooks, script, ending), Voiceover + footage (hook, voiceover, shot list, what goes on top and when), Short clip + caption (the shot, one on-screen line, 5–15 s, the caption carries the value), Carousel (slides, slide 1 the hook, caption). Switching keeps what you've typed. Formats follow the type (C formats for carousels).
+- The reel sheet shows the type's parts (shot list, overlays, the shot and on-screen line) with **Change type**.
+- Add reel: separate boxes for 🎥 video footage, 🎙 voiceover and 🖼 photos to put on top. The Mac files them into footage/, voiceover/ and overlays/ and edits by type.
+
 ## 2.8.0 — 5 Nov 2026 (🧲 lead magnets from a reel)
 
 - Reel sheet: **🧲 Lead magnet**. Tap "Make lead magnet", give it a name, the comment word(s), type, who it's for and what goes in it. The Mac writes the outline (every fact with its source), you approve or send changes; it builds the PDF in the 9-5 Split style, you check the pages here; then **Build GHL + ManyChat** lets it set up the survey, email workflow and ManyChat comment trigger in your Chrome. Nothing touches GoHighLevel or ManyChat before that tap.
