@@ -790,6 +790,7 @@ body{padding:0;}
 .ce-bub .ttl{font-size:var(--t-s);-webkit-line-clamp:3;}
 .ce-bub .row .ce-open{flex:1;min-width:0;text-align:left;}
 .ce-bub .ce-thumb{width:36px;height:64px;}
+.ce-bub .chip{white-space:normal;max-width:100%;}
 .ce-bub.sel{outline:2px solid var(--accent);}
 .ce-bubsel{position:absolute;left:6px;top:8px;}
 .ce-bubsel input{width:18px;height:18px;accent-color:var(--accent);}
@@ -3590,7 +3591,7 @@ body{padding:0;}
     var w=t+72*H, wp=HQ.sydParts(w); if(wp.h<7) w=HQ.sydMidnight(wp.key)+7.5*H; else if(wp.h>=22) w=HQ.sydMidnight(HQ.addDays(wp.key,1))+7.5*H;
     return w;
   }
-  function ceWinnerChip(q){ if(!ceIsWinner(q)) return ''; var p=q.posting||{}, n=(p.trials||[]).length; return '<span class="chip ce-winchip">🏆 Winner'+(n?' of '+n+' trial'+(n===1?'':'s'):' · trials start once approved')+'</span>'; }
+  function ceWinnerChip(q){ if(!ceIsWinner(q)) return ''; var p=q.posting||{}, n=(p.trials||[]).length; return '<span class="chip ce-winchip" title="'+(n?'The winner of '+n+' trial reels posts at this time':'Trial reel: trials start once you approve it, the winner posts at this time')+'">🏆 '+(n?'Winner of '+n:'Trial reel')+'</span>'; }
   function cePostAtMs(q){ var pw=ceProjectedWinnerMs(q); if(pw) return pw; var p=q.posting||{}; if(p.scheduledFor&&HQ.parseTs(p.scheduledFor)!=null) return HQ.parseTs(p.scheduledFor); if(p.plannedFor&&HQ.parseTs(p.plannedFor)!=null) return HQ.parseTs(p.plannedFor); if(HQ.isDayKey(q.date)){ var hm=ceSlotTimes()[ceSlotKey(q)]; if(hm){ var pr=hm.split(':').map(Number); return HQ.sydMidnight(q.date)+(pr[0]*60+pr[1])*60000; } } return null; }
   function ceHasTime(q){ var p=q.posting||{}; return !!(p.scheduledFor||p.plannedFor||ceWinnerPending(q)); }
   function cePlatforms(q){ var p=q.posting||{}, acc=((state.contentPosting||{}).outstand||{}).accounts||{}; var def=['INSTAGRAM','YOUTUBE','LINKEDIN'].concat(acc.TIKTOK?['TIKTOK']:[]); if(ceSlotKey(q)==='carousel') def=['INSTAGRAM','LINKEDIN']; var list=Array.isArray(p.platforms)&&p.platforms.length?p.platforms:def; return list.map(function(x){ return String(x).toUpperCase(); }); }
