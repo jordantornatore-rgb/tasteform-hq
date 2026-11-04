@@ -3,6 +3,7 @@
 ## 2.6.1 — 4 Nov 2026 (add reels you've already filmed)
 
 - Fix: uploads sent the sign-in token twice in one header ("Invalid Compact JWS"); it's now set once per request. A failed upload is saved as `footageUpload.status: failed`, shows "Upload failed · add the footage again", and retrying in the same sheet reuses the reel instead of creating another.
+- Files over 45 MB upload as 45 MB parts (the storage plan caps one object at 50 MB); the Mac joins them and checks the size. Tested with a 52 MB file.
 - Every format dropdown and chip shows the format's name next to its code (F7 · Diagnosis talking head, C3 · Food list carousel …).
 
 - **+ Add filmed reel** (Library) and **Filmed this? Add the footage** (post sheet of a to-film reel): attach raw footage or a finished edit to an open slot or a new reel, uploaded from the phone (resumable, private bucket `content-footage`, 7-day signed links for the Mac) or linked from a folder already in `footage/` on the Mac. Finished edits skip editing and trials and come to you for approval.

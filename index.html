@@ -3871,6 +3871,15 @@ body{padding:0;}
       up.findPreviousUploads().then(function(prev){ if(prev&&prev.length) up.resumeFromPreviousUpload(prev[0]); up.start(); }, function(){ up.start(); });
     });
   }
+  // signed links for every stored object (a whole file, or each of its parts)
+  async function ceLinkFiles(files){
+    var all=[]; files.forEach(function(f){ if(Array.isArray(f.parts)&&f.parts.length) f.parts.forEach(function(pt){ all.push(pt.path); }); else all.push(f.path); });
+    var links=await ceFootageLinks(all), get=function(pth){ return links.find(function(y){ return y.path===pth; })||{}; };
+    return files.map(function(f){
+      if(Array.isArray(f.parts)&&f.parts.length){ var parts=f.parts.map(function(pt){ var l=get(pt.path); return Object.assign({}, pt, {url:l.url||pt.url||null, urlExpires:l.urlExpires||pt.urlExpires||null}); }); return Object.assign({}, f, {parts:parts, url:null, urlExpires:parts.reduce(function(m,pt){ return !m||(pt.urlExpires&&pt.urlExpires<m)?pt.urlExpires:m; }, null)}); }
+      var l=get(f.path); return Object.assign({}, f, {url:l.url||f.url||null, urlExpires:l.urlExpires||f.urlExpires||null});
+    });
+  }
   async function ceFootageLinks(paths){
     var r=await supaClient.storage.from('content-footage').createSignedUrls(paths, 7*86400);
     if(r.error) throw r.error;
@@ -3913,16 +3922,29 @@ body{padding:0;}
     prog.innerHTML=files.map(function(f,i){ return '<div class="f" data-ca-file="'+i+'"><span>'+esc(f.name)+' · '+esc(ceBytes(f.size))+'</span><div class="bar"><i></i></div></div>'; }).join('');
     say('Uploading '+files.length+' file'+(files.length===1?'':'s')+'… keep this screen open.', false); btn.textContent='Uploading…';
     var paths=[];
-    for(var i=0;i<files.length;i++){
+    // Supabase caps a single stored file at 50 MB on this plan, so anything bigger goes up as 45 MB parts that the Mac joins.
+    var PART=45*1024*1024;
+    var upFile=async function(i){
       var f=files[i], p=id+'/'+(i+1)+'-'+ceSafeName(f.name), row=prog.querySelector('[data-ca-file="'+i+'"]');
-      try{
-        await ceUploadOne(p, f, function(sent){ u.files[i].sent=sent; var b=row&&row.querySelector('.bar i'); if(b) b.style.width=(f.size?Math.min(100,sent/f.size*100):100)+'%'; });
-        u.files[i].sent=f.size; if(row) row.classList.add('done'); paths.push({path:p, name:f.name, size:f.size, type:f.type||null});
-      }catch(e){ if(row){ row.classList.add('err'); row.querySelector('span').textContent=f.name+' · failed: '+String(e.message||e).slice(0,240); } u.status='error'; var fuF=Object.assign({}, fu, {status:'failed', error:String(e.message||e).slice(0,300), failedAt:ceNowIso()}); q.footageUpload=fuF; try{ await db.collection('content_queue').doc(id).update({footageUpload:fuF}); }catch(e2){} say('The upload failed. Tap Add reel to try again (same reel); it resumes where it stopped.', true); btn.disabled=false; btn.textContent='Add reel'; renderNow('content'); return; }
+      var bar=function(sent){ u.files[i].sent=sent; var b=row&&row.querySelector('.bar i'); if(b) b.style.width=(f.size?Math.min(100,sent/f.size*100):100)+'%'; };
+      if(f.size<=PART){ await ceUploadOne(p, f, bar); paths.push({path:p, name:f.name, size:f.size, type:f.type||null}); }
+      else {
+        var n=Math.ceil(f.size/PART), parts=[];
+        for(var k=0;k<n;k++){
+          var from=k*PART, blob=f.slice(from, Math.min(f.size, from+PART)), pp=p+'.part'+String(k+1).padStart(3,'0')+'of'+String(n).padStart(3,'0');
+          await ceUploadOne(pp, new File([blob], ceSafeName(f.name)+'.part'+(k+1), {type:'application/octet-stream', lastModified:f.lastModified||0}), (function(base){ return function(sent){ bar(base+sent); }; })(from));
+          parts.push({path:pp, size:blob.size});
+        }
+        paths.push({path:p, name:f.name, size:f.size, type:f.type||null, parts:parts});
+      }
+      u.files[i].sent=f.size; if(row) row.classList.add('done');
+    };
+    for(var i=0;i<files.length;i++){
+      try{ await upFile(i); }
+      catch(e){ var row=prog.querySelector('[data-ca-file="'+i+'"]'); if(row){ row.classList.add('err'); row.querySelector('span').textContent=files[i].name+' · failed: '+String(e.message||e).slice(0,240); } u.status='error'; var fuF=Object.assign({}, fu, {status:'failed', error:String(e.message||e).slice(0,300), failedAt:ceNowIso()}); q.footageUpload=fuF; try{ await db.collection('content_queue').doc(id).update({footageUpload:fuF}); }catch(e2){} say('The upload failed. Tap Add reel to try again (same reel); it resumes where it stopped.', true); btn.disabled=false; btn.textContent='Add reel'; renderNow('content'); return; }
     }
     try{
-      var links=await ceFootageLinks(paths.map(function(x){ return x.path; }));
-      var done=paths.map(function(x){ var l=links.find(function(y){ return y.path===x.path; })||{}; return Object.assign({}, x, {url:l.url||null, urlExpires:l.urlExpires||null}); });
+      var done=await ceLinkFiles(paths);
       var fu2=Object.assign({}, fu, {status:'uploaded', files:done, uploadedAt:ceNowIso()});
       q.footageUpload=fu2; await db.collection('content_queue').doc(id).update({footageUpload:fu2});
       u.status='done'; say('Uploaded. The Mac picks it up within 20 minutes'+(kind==='final'?' and it comes to you for approval.':' and starts the edit.'), false); btn.textContent='Done';
@@ -3937,7 +3959,7 @@ body{padding:0;}
       var u=q.footageUpload; if(!u||u.source!=='upload'||u.status!=='uploaded'||u.pulledAt||ceLinkRefresh[q.id]) continue;
       var files=Array.isArray(u.files)?u.files:[]; if(!files.length||!files.some(function(f){ return !f.urlExpires||HQ.parseTs(f.urlExpires)<soon; })) continue;
       ceLinkRefresh[q.id]=true;
-      try{ var links=await ceFootageLinks(files.map(function(f){ return f.path; })); var fu=Object.assign({}, u, {files:files.map(function(f){ var l=links.find(function(y){ return y.path===f.path; })||{}; return Object.assign({}, f, {url:l.url||f.url, urlExpires:l.urlExpires||f.urlExpires}); }), expiredNote:null, linksRefreshedAt:ceNowIso()}); q.footageUpload=fu; await db.collection('content_queue').doc(q.id).update({footageUpload:fu}); }catch(e){}
+      try{ var fu=Object.assign({}, u, {files:await ceLinkFiles(files), expiredNote:null, linksRefreshedAt:ceNowIso()}); q.footageUpload=fu; await db.collection('content_queue').doc(q.id).update({footageUpload:fu}); }catch(e){}
     }
   }
   window.addEventListener('beforeunload', function(ev){ if(Object.keys(ceUploads).some(function(k){ return ceUploads[k].status==='uploading'; })){ ev.preventDefault(); ev.returnValue=''; } });
