@@ -668,6 +668,17 @@ body{padding:0;}
 @media (min-width:761px){.ce-sheet{align-items:center;padding:24px;}.ce-sheet-card{max-width:720px;border-radius:var(--r-l);max-height:88vh;}}
 .ce-sheet-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
 .ce-sheet-head > div{min-width:0;flex:1;}
+.ce-lmform{display:grid;gap:10px;margin-top:8px;}
+.ce-lmform label{display:grid;gap:4px;font-size:.85rem;}
+.ce-lmchip{background:color-mix(in srgb,#89653F 26%,transparent);}
+.ce-lmchip.you{background:color-mix(in srgb,#d9a441 40%,transparent);}
+.ce-lmchip.live{background:color-mix(in srgb,#3fa36b 34%,transparent);}
+.ce-lmout{margin-top:8px;} .ce-lmout ol,.ce-lmout ul{margin:6px 0 8px 20px;} .ce-lmout li{margin-bottom:6px;}
+.ce-lmpages{display:flex;gap:8px;overflow-x:auto;padding:6px 0;-webkit-overflow-scrolling:touch;}
+.ce-lmpg{flex:none;width:118px;aspect-ratio:1058/1688;border-radius:6px;overflow:hidden;background:#111;display:block;}
+.ce-lmpg img{width:100%;height:100%;object-fit:cover;display:block;}
+.ce-lmchg{display:flex;gap:6px;align-items:flex-start;margin-top:8px;} .ce-lmchg textarea{flex:1;min-width:0;}
+.ce-lmwait{display:flex;gap:8px;align-items:center;font-size:.85rem;margin-top:10px;}
 .ce-titlebtn{all:unset;cursor:pointer;border-radius:6px;overflow-wrap:anywhere;}
 .ce-titlebtn:hover,.ce-titlebtn:focus-visible{background:color-mix(in srgb,currentColor 8%,transparent);outline:none;}
 .ce-pen{font-size:.7em;opacity:.55;margin-left:4px;}
@@ -3109,6 +3120,8 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     var wasOpen=!el.hidden;
     if(wasOpen && el.querySelector('[data-ce-editor]') && ceEdit && ceEdit.id===q.id && !ceEdit.force) return; // an editor is open: keep Jordan's typing
     if(wasOpen && ceRename===q.id && el.querySelector('[data-ce-titlein]') && !ceRenameForce) return;
+    if(wasOpen && !ceLmForce && Array.prototype.some.call(el.querySelectorAll('[data-lm-in]'), function(x){ return (x.value && x.defaultValue!==x.value) || x===document.activeElement; })) return;
+    ceLmForce=false;
     if(ceRename && ceRename!==q.id) ceRename=null; ceRenameForce=false;
     if(wasOpen){ var ta=el.querySelector('textarea.ce-fb'); if(ta && ta.value && !ceEdit) return; }
     if(ceEdit) ceEdit.force=false;
@@ -3153,6 +3166,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     if(Array.isArray(p.trials)&&p.trials.length) html+='<div class="ce-trials"><span class="ce-k">Trial reels · '+(p.trialMode==='short'?'short test':'72-hour test')+(p.status==='trialing'&&p.plannedFor?' · the winner goes to everyone '+esc(ceWhenFull(p.plannedFor)):'')+'</span>'+p.trials.map(function(t){ var won=q.winner&&q.winner.v===t.v; return '<div class="ce-trial'+(won?' won':'')+'"><b>'+esc(t.v||'–')+(won?' 🏆':'')+'</b> <span class="muted">'+esc(ceText(t.diff))+'</span><div class="ce-meta">'+(t.cancelled?'pulled':(t.postedAt?'out '+esc(ceWhenFull(t.postedAt)):'goes out '+esc(ceWhenFull(t.scheduledFor))))+(t.metrics?' · '+esc(ceTrialNums(t.metrics)):(t.postedAt?' · numbers – (pulled every 12 h)':''))+(t.shortcode?' · <a class="ce-a" href="https://www.instagram.com/reel/'+esc(t.shortcode)+'/" target="_blank" rel="noopener">open ↗</a>':'')+'</div></div>'; }).join('')+(q.winner?'<div class="ce-win">🏆 '+esc(q.winner.v)+': '+esc(ceText(q.winner.why))+(q.winnerConfidence==='low'?' <span class="chip warn">low confidence</span>':'')+'</div>':'')+'</div>';
     if(isAdmin && !posted && ceSlotKey(q)!=='carousel' && ['trialing','scheduled','posted'].indexOf(p.status)<0) html+=ceTrialPicker(q);
     else if(isAdmin && ceTrialMovable(q)) html+=ceTrialPicker(q);
+    if(ceSlotKey(q)!=='carousel' || q.leadMagnet) html+=ceLmBlock(q);
     else if(q.noTrial) html+='<div class="f-note">No trial: '+esc(ceText(q.noTrial))+'.</div>';
     if(q.winner && !(Array.isArray(p.trials)&&p.trials.length)) html+='<div class="ce-win">🏆 '+esc(q.winner.v)+': '+esc(ceText(q.winner.why))+(q.winnerConfidence==='low'?' <span class="chip warn">low confidence</span>':'')+'</div>';
     if(isAdmin){
@@ -3190,7 +3204,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       html+='<div class="ce-block"><div class="ce-block-head"><span class="ce-k" style="margin:0">Results</span>'+(link?'<a class="ce-a" href="'+esc(link)+'" target="_blank" rel="noopener">Open post ↗</a>':'')+'</div>'+ceMetricsGrid(m)+(m.at24h||m.at7d?'<div class="ce-metrics2">'+(m.at24h?'24h: '+esc(ceMetricsLine(m.at24h)):'24h: –')+' · '+(m.at7d?'7d: '+esc(ceMetricsLine(m.at7d)):'7d: – not pulled yet')+'</div>':'<div class="f-note">– = the pipeline pulls numbers 24 h and 7 d after posting.</div>')+'</div>';
     }
     el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>';
-    el.hidden=false; ceAttachSources(el);
+    el.hidden=false; ceAttachSources(el); ceLmLoadPreviews(el);
     var c2=el.querySelector('.ce-sheet-card'); if(c2&&sc) c2.scrollTop=sc;
     if(!wasOpen){ var cb=$('ceSheetClose'); if(cb) cb.focus(); }
     if(ceEdit&&ceEdit.id===q.id){ var fi=el.querySelector('[data-ce-editor] .input'); if(fi&&!wasOpen) fi.focus(); }
@@ -3788,7 +3802,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     var ti=ceTrialInfo(q);
     return '<div class="ce-cal-card ce-bub st-'+k+(sel?' sel':'')+(ceMoving[q.id]?' moving':'')+'"'+(drag?' data-ce-drag="'+esc(q.id)+'"':'')+(ti?' data-link="'+esc(q.id)+'"':'')+'>'+
       (isAdmin?'<label class="ce-bubsel" title="Select"><input type="checkbox" data-cep-sel="'+esc(q.id)+'"'+(sel?' checked':'')+' aria-label="Select '+esc(ceText(q.title)||'video')+'"></label>':'')+
-      '<div class="row">'+(ceHasVideo(q)?ceThumb(q):'')+'<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'">'+ceKind(q, ti)+'<span class="t">'+esc(time)+(ceMoving[q.id]?' <span class="ce-spin"></span>':'')+'</span><span class="ttl">'+esc(ceText(q.title)&&q.title!=='Open slot'?ceText(q.title):(q.status==='needs_script'?'Open slot · write a script':'Untitled'))+'</span><span class="ce-chips">'+ceStageChip(q)+'</span>'+(ti?'<span class="ce-link">← '+(ti.planned?'Trial reels first, ~':'Trial reels ')+esc(ti.at?HQ.fmtDay(HQ.sydDay(ti.at),'wd')+' '+HQ.fmtTime(ti.at):'')+'</span>':'')+(meta?'<span class="ce-meta">'+esc(meta)+'</span>':'')+(q.filmDate&&HQ.isDayKey(q.filmDate)&&['script','film','upload'].indexOf(k)>=0?'<span class="ce-meta">🎥 film '+esc(HQ.fmtDay(q.filmDate,'wd'))+'</span>':'')+'</button></div>'+
+      '<div class="row">'+(ceHasVideo(q)?ceThumb(q):'')+'<button type="button" class="ce-open" data-ce-open="'+esc(q.id)+'">'+ceKind(q, ti)+'<span class="t">'+esc(time)+(ceMoving[q.id]?' <span class="ce-spin"></span>':'')+'</span><span class="ttl">'+esc(ceText(q.title)&&q.title!=='Open slot'?ceText(q.title):(q.status==='needs_script'?'Open slot · write a script':'Untitled'))+'</span><span class="ce-chips">'+ceStageChip(q)+ceLmChip(q)+'</span>'+(ti?'<span class="ce-link">← '+(ti.planned?'Trial reels first, ~':'Trial reels ')+esc(ti.at?HQ.fmtDay(HQ.sydDay(ti.at),'wd')+' '+HQ.fmtTime(ti.at):'')+'</span>':'')+(meta?'<span class="ce-meta">'+esc(meta)+'</span>':'')+(q.filmDate&&HQ.isDayKey(q.filmDate)&&['script','film','upload'].indexOf(k)>=0?'<span class="ce-meta">🎥 film '+esc(HQ.fmtDay(q.filmDate,'wd'))+'</span>':'')+'</button></div>'+
       (opts.tray&&isAdmin?'<select class="input" data-ce-moveday="'+esc(q.id)+'" aria-label="Schedule on">'+ceDayOptions(null).replace('Move to…','Schedule on…')+'</select>':'')+'</div>';
   }
   function ceDayPick(attr, val, cur, label){ var today=HQ.sydNow().key, o='<option value="">'+esc(label)+'</option>'; for(var i=-1;i<28;i++){ var k=HQ.addDays(today,i); o+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(i===0?'Today':(i===1?'Tomorrow':(i===-1?'Yesterday':HQ.fmtDay(k,'wd'))))+'</option>'; } return '<select class="input" '+attr+'="'+esc(val)+'" aria-label="'+esc(label)+'">'+o+'<option value="__none">No film day</option></select>'; }
@@ -3852,6 +3866,85 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     for(var i=0;i<ids.length;i++){ var q=ceFindSlot(ids[i]); if(!q) continue; try{ await db.collection('content_queue').doc(q.id).update({filmDate:v}); q.filmDate=v; n++; }catch(e){} }
     cePlan.msg=v?n+' to film '+HQ.fmtDay(v,'wd')+'.':'Film day cleared on '+n+'.'; renderNow('content');
   }
+  /* Lead magnet (🧲): Jordan's side is q.leadMagnet (HQ writes it), the Mac's is q.leadMagnetBuild (only the Mac writes it).
+     Mirrors scripts/magnets/state.mjs. The Mac (claude --chrome) builds the outline, then the PDF, then, only after
+     "Build GHL + ManyChat", the survey, workflow and ManyChat automation. A reel with one waits to post until it's live. */
+  var ceLmForce=false, ceLmForm={};
+  function ceLmTs(v){ return v?(HQ.parseTs(v)||0):0; }
+  function ceLmStep(lm, b){ if(!lm||!lm.requestedAt) return null; b=b||{}; if(b.stage==='live') return null; if(b.needsYou && !(ceLmTs(lm.retryAt)>ceLmTs(b.needsYou.at))) return null; var n=function(a){ return Array.isArray(a)?a.length:0; };
+    if(!b.outline) return 'outline'; if(!lm.outlineApprovedAt) return n(lm.outlineFeedback)>(b.outlineRev||0)?'outline':null; if(!b.pdfAt) return 'pdf'; if(!lm.pdfApprovedAt) return n(lm.pdfFeedback)>(b.pdfRev||0)?'pdf':null; return lm.funnelApprovedAt?'funnel':null; }
+  function ceLmState(q){ var lm=q&&q.leadMagnet, b=(q&&q.leadMagnetBuild)||{}; if(!lm||!lm.requestedAt) return 'none'; if(b.stage==='live') return 'live'; if(b.needsYou && !(ceLmTs(lm.retryAt)>ceLmTs(b.needsYou.at))) return 'needs_you';
+    var st=ceLmStep(lm, b); if(st==='outline') return b.outline?'outline_revising':'outlining'; if(st==='pdf') return b.pdfAt?'pdf_revising':'building_pdf'; if(st==='funnel') return 'building_funnel'; if(!lm.outlineApprovedAt) return 'outline_ready'; if(!lm.pdfApprovedAt) return 'pdf_ready'; return 'pdf_approved'; }
+  var CE_LM_LABEL={outlining:'Mac is writing the outline', outline_revising:'Mac is changing the outline', outline_ready:'Outline ready for you', building_pdf:'Mac is building the PDF', pdf_revising:'Mac is changing the PDF', pdf_ready:'PDF ready for you', pdf_approved:'PDF approved · funnel not started', building_funnel:'Mac is building GHL + ManyChat', needs_you:'Needs you', live:'Live'};
+  function ceLmChip(q){ var k=ceLmState(q); if(k==='none') return ''; var mine=['outline_ready','pdf_ready','needs_you','pdf_approved'].indexOf(k)>=0; return '<span class="chip ce-lmchip'+(k==='live'?' live':(mine?' you':''))+'" title="Lead magnet: '+esc(CE_LM_LABEL[k]||k)+'">🧲 '+esc(k==='live'?'Live':(mine?'Your turn':'Building'))+'</span>'; }
+  function ceLmKeyword(q){ var t=[q.cta,q.caption].map(ceText).join(' '), m=t.match(/comment\s+["“']?([A-Za-z0-9]{3,20})["”']?/i); return m?m[1].toUpperCase():''; }
+  function ceLmBlock(q){
+    var lm=q.leadMagnet||{}, b=q.leadMagnetBuild||{}, k=ceLmState(q), id=esc(q.id), E=esc, last=Array.isArray(b.log)&&b.log.length?b.log[b.log.length-1]:null;
+    var h='<div class="ce-block ce-lm"><div class="ce-block-head"><span class="ce-k" style="margin:0">🧲 Lead magnet'+(lm.name?' · '+E(lm.name):'')+'</span>'+(k!=='none'?'<span class="chip ce-lmchip'+(k==='live'?' live':'')+'">'+E(CE_LM_LABEL[k]||k)+'</span>':'')+'</div>';
+    if(k==='none'){
+      if(!isAdmin) return h+'<div class="f-note">No lead magnet on this reel.</div></div>';
+      if(!ceLmForm[q.id]) return h+'<div class="f-note">A free PDF people get by commenting a word: the Mac writes it in your style, then sets up the GoHighLevel survey + emails and the ManyChat reply.</div><div class="acts"><button type="button" class="btn" data-lm-open="'+id+'">🧲 Make lead magnet</button></div></div>';
+      var kw=ceLmKeyword(q);
+      h+='<div class="ce-lmform"><label>Name<input class="input" data-lm-in data-lm-f="name" maxlength="80" placeholder="e.g. The 9-5 Desk Lunch Guide" value="'+E(ceText(q.title)&&q.title!=='Open slot'?'':'')+'"></label>'+
+        '<label>Comment word(s)<input class="input" data-lm-in data-lm-f="keywords" maxlength="60" placeholder="e.g. LUNCH" value="'+E(kw)+'"></label>'+
+        '<label>Type<select class="input" data-lm-f="type"><option value="guide">Guide (training, habits, maths)</option><option value="recipe">Recipe</option><option value="tool">Calculator / tool</option></select></label>'+
+        '<label>Who it’s for<input class="input" data-lm-in data-lm-f="audience" maxlength="140" value="Guys working a 9-5 who want to lose the gut without living in the gym"></label>'+
+        '<label>What goes in it<textarea class="input" data-lm-in data-lm-f="notes" rows="4" placeholder="Key points, the recipe, the claims you want in it. The Mac checks every fact against a real source."></textarea></label>'+
+        '<div class="acts"><button type="button" class="btn primary" data-lm-start="'+id+'">Start: Mac writes the outline</button><button type="button" class="btn" data-lm-cancel="'+id+'">Cancel</button></div>'+
+        '<div class="f-note">Nothing goes into GoHighLevel or ManyChat until you tap “Build GHL + ManyChat” after checking the PDF. This reel waits to post until the lead magnet is live.</div></div>';
+      return h+'</div>';
+    }
+    h+='<div class="f-note">'+E((lm.keywords||[]).length?'Comment '+lm.keywords.join(' / '):'')+(lm.type?' · '+ceCap(lm.type):'')+(last?' · '+relTime(last.at)+': '+ceText(last.text):'')+'</div>';
+    if(['outlining','outline_revising','building_pdf','pdf_revising','building_funnel'].indexOf(k)>=0) h+='<div class="f-note">The Mac picks this up on its next run (every 20 minutes, 6am–11pm). Nothing for you to do yet.</div>';
+    if(k==='needs_you'){
+      h+='<div class="ce-note"><b>Needs you:</b> '+E(ceText(b.needsYou.reason))+'</div>';
+      if(isAdmin) h+=(/drive/i.test(b.needsYou.reason||'')?'<label class="ce-k" style="display:block">Drive share link<input class="input" data-lm-in data-lm-f="driveUrl" placeholder="https://drive.google.com/file/d/…" value="'+E(lm.driveUrl||'')+'"></label>':'')+'<div class="acts"><button type="button" class="btn primary" data-lm-retry="'+id+'">Fixed, try again</button></div>';
+    }
+    if(b.outline && (k==='outline_ready'||k==='outline_revising'||!lm.outlineApprovedAt)){
+      var o=b.outline||{};
+      h+='<details class="ce-lmout"'+(k==='outline_ready'?' open':'')+'><summary>Outline · '+((o.pages||[]).length)+' pages</summary><ol>'+(o.pages||[]).map(function(pg){ return '<li><b>'+E(ceText(pg.title))+'</b>'+(pg.body?'<div class="f-note">'+E(ceText(pg.body))+'</div>':'')+'</li>'; }).join('')+'</ol>'+
+        ((o.claims||[]).length?'<div class="ce-k">Facts and where they’re from</div><ul>'+o.claims.map(function(c){ return '<li>'+E(ceText(c.claim))+' <span class="muted">· '+(c.url?'<a class="ce-a" href="'+E(c.url)+'" target="_blank" rel="noopener">'+E(ceText(c.source)||'source')+' ↗</a>':E(ceText(c.source)||'no source yet'))+'</span></li>'; }).join('')+'</ul>':'')+
+        ((o.assumptions||[]).length?'<div class="ce-k">Assumed (check these)</div><ul>'+o.assumptions.map(function(a){ return '<li>'+E(ceText(a))+'</li>'; }).join('')+'</ul>':'')+'</details>';
+      if(isAdmin && k==='outline_ready') h+='<div class="acts"><button type="button" class="btn primary" data-lm-ok="outline" data-id="'+id+'">Approve outline · build the PDF</button></div>'+ceLmChanges(q.id, 'outline');
+    }
+    if(Array.isArray(b.pages) && b.pages.length && k!=='live'){
+      h+='<div class="ce-lmpages">'+b.pages.map(function(pg){ return pg.preview?'<a class="ce-lmpg" data-lm-prev="'+E(pg.preview)+'" target="_blank" rel="noopener" aria-label="Page '+pg.n+'"><img alt="Page '+pg.n+'"></a>':''; }).join('')+'</div>';
+      if(isAdmin && k==='pdf_ready') h+='<div class="acts"><button type="button" class="btn primary" data-lm-ok="funnel" data-id="'+id+'">Looks good · build GHL + ManyChat</button><button type="button" class="btn" data-lm-ok="pdf" data-id="'+id+'">Looks good, not yet</button></div>'+ceLmChanges(q.id, 'pdf');
+      if(isAdmin && k==='pdf_approved') h+='<div class="acts"><button type="button" class="btn primary" data-lm-ok="funnel" data-id="'+id+'">Build GHL + ManyChat</button></div>';
+    }
+    if(k==='live'){
+      var L=b.live||{};
+      h+='<div class="ce-txt">✅ Comment <b>'+E((L.keywords||lm.keywords||[]).join(' / '))+'</b> → ManyChat DM → GHL survey → emails with the PDF.</div><div class="ce-chips">'+(L.surveyUrl?'<a class="btn small" href="'+E(L.surveyUrl)+'" target="_blank" rel="noopener">Survey ↗</a>':'')+(L.driveUrl?'<a class="btn small" href="'+E(L.driveUrl)+'" target="_blank" rel="noopener">PDF ↗</a>':'')+'</div>'+
+        '<div class="f-note">'+E([L.workflow, L.manychat].filter(Boolean).join(' · '))+(L.verifiedAt?' · checked '+E(relTime(L.verifiedAt)):'')+'</div>'+((L.pending||[]).length?'<div class="ce-note"><b>Still on you:</b> '+L.pending.map(function(x){ return E(ceText(x)); }).join(' · ')+'</div>':'');
+    }
+    if(k!=='live' && isAdmin) h+='<label class="ce-lmwait"><input type="checkbox" data-lm-wait="'+id+'"'+(lm.dontWait?'':' checked')+'> Hold this reel until the lead magnet is live</label>'+((q.posting||{}).status==='scheduled'&&!lm.dontWait?'<div class="f-note">It’s already booked in Outstand, so it posts at its time either way. Pull it from the schedule if it should wait.</div>':'');
+    return h+'</div>';
+  }
+  function ceLmChanges(id, kind){ return '<div class="ce-lmchg"><textarea class="input" rows="2" data-lm-in data-lm-chg="'+esc(kind)+'" placeholder="What should change? The Mac does exactly what you write."></textarea><button type="button" class="btn small" data-lm-send="'+esc(kind)+'" data-id="'+esc(id)+'">Send changes</button></div>'; }
+  async function ceLmLoadPreviews(el){ var as=el.querySelectorAll('[data-lm-prev]'); for(var i=0;i<as.length;i++){ var a=as[i]; if(a.getAttribute('href')) continue; try{ var u=await ceSignedPreview(a.getAttribute('data-lm-prev')); a.setAttribute('href', u); a.querySelector('img').src=u; }catch(e){} } }
+  async function ceSaveLm(id, change, msg){
+    var q=ceFindSlot(id); if(!q||!isAdmin||!db) return; var next=Object.assign({}, q.leadMagnet||{}, change, {updatedAt:ceNowIso()});
+    try{ await db.collection('content_queue').doc(id).update({leadMagnet:next}); q.leadMagnet=next; ceSetSheetMsg(id, msg); }
+    catch(e){ ceSetSheetMsg(id, 'Couldn’t save: '+(e.message||e), true); }
+    ceLmForce=true; renderNow('content'); ceRenderSheet();
+  }
+  document.addEventListener('click', function(ev){
+    var t=ev.target; if(!t.closest) return;
+    var op=t.closest('[data-lm-open]'); if(op){ ceLmForm[op.getAttribute('data-lm-open')]=true; ceLmForce=true; ceRenderSheet(); return; }
+    var cn=t.closest('[data-lm-cancel]'); if(cn){ delete ceLmForm[cn.getAttribute('data-lm-cancel')]; ceLmForce=true; ceRenderSheet(); return; }
+    var st=t.closest('[data-lm-start]'); if(st){ var id=st.getAttribute('data-lm-start'), box=st.closest('.ce-lmform'), f={}; box.querySelectorAll('[data-lm-f]').forEach(function(x){ f[x.getAttribute('data-lm-f')]=String(x.value||'').trim(); });
+      if(!f.name){ ceSetSheetMsg(id, 'Give it a name first.', true); ceLmForce=true; ceRenderSheet(); return; }
+      var kws=f.keywords.split(/[\s,\/]+/).map(function(w){ return w.replace(/[^A-Za-z0-9]/g,'').toUpperCase(); }).filter(Boolean);
+      if(!kws.length){ ceSetSheetMsg(id, 'Add the word people comment (e.g. LUNCH).', true); ceLmForce=true; ceRenderSheet(); return; }
+      delete ceLmForm[id]; ceSaveLm(id, {name:f.name, keywords:kws, type:f.type||'guide', audience:f.audience, notes:f.notes, requestedAt:ceNowIso()}, 'Started. The Mac writes the outline on its next run.'); return; }
+    var ok=t.closest('[data-lm-ok]'); if(ok){ var id2=ok.getAttribute('data-id'), what=ok.getAttribute('data-lm-ok'), q2=ceFindSlot(id2), now=ceNowIso();
+      if(what==='outline') return ceSaveLm(id2, {outlineApprovedAt:now}, 'Outline approved. The Mac builds the PDF next.');
+      if(what==='pdf') return ceSaveLm(id2, {pdfApprovedAt:now}, 'PDF approved. Tap Build GHL + ManyChat when you want it set up.');
+      if(what==='funnel'){ if(!window.confirm('Let the Mac set up “'+((q2&&q2.leadMagnet&&q2.leadMagnet.name)||'this lead magnet')+'” in your GoHighLevel (survey + email workflow) and ManyChat (comment trigger), using your Chrome?')) return; return ceSaveLm(id2, {pdfApprovedAt:(q2&&q2.leadMagnet&&q2.leadMagnet.pdfApprovedAt)||now, funnelApprovedAt:now}, 'Go. The Mac builds the survey, emails and ManyChat on its next run.'); } }
+    var sd=t.closest('[data-lm-send]'); if(sd){ var id3=sd.getAttribute('data-id'), kind=sd.getAttribute('data-lm-send'), ta=sd.parentElement.querySelector('textarea'), txt=String(ta&&ta.value||'').trim(); if(!txt) return; var q3=ceFindSlot(id3), key=kind==='outline'?'outlineFeedback':'pdfFeedback', arr=((q3.leadMagnet||{})[key]||[]).concat([{at:ceNowIso(), text:txt}]), ch={}; ch[key]=arr; ta.value=''; ceSaveLm(id3, ch, 'Sent. The Mac makes the change on its next run.'); return; }
+    var rt=t.closest('[data-lm-retry]'); if(rt){ var id4=rt.getAttribute('data-lm-retry'), dv=rt.closest('.ce-lm').querySelector('[data-lm-f="driveUrl"]'), ch2={retryAt:ceNowIso()}; if(dv&&dv.value.trim()) ch2.driveUrl=dv.value.trim(); ceSaveLm(id4, ch2, 'The Mac tries again on its next run.'); return; }
+  });
+  document.addEventListener('change', function(ev){ var w=ev.target.closest&&ev.target.closest('[data-lm-wait]'); if(!w) return; ceSaveLm(w.getAttribute('data-lm-wait'), {dontWait:!w.checked}, w.checked?'This reel waits for the lead magnet.':'This reel posts at its time, live lead magnet or not.'); });
   /* Rename a reel from the sheet head. Not posted: content-update (a scheduled post's YouTube title follows in Outstand).
      Posted: only HQ's name changes (the live post keeps its title), written straight to the row. */
   async function ceSaveTitle(id, btn){

@@ -351,6 +351,39 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       check(`${lbl}: Duplicate makes a script-only copy waiting in Pending scheduling`, () => assert.ok(dup && dup.d.unscheduled === true && dup.d.script === dup.oScript && JSON.stringify(dup.d.hooks) === dup.oHooks && / \(copy\)$/.test(dup.d.title) && dup.d.status === (String(dup.oScript || '').trim() ? 'to_film' : 'needs_script') && dup.d.caption === 'Cap' && !dup.d.video && !dup.d.posting && !dup.d.footage && /Copy of/.test(dup.sheet) && /Pending scheduling/.test(dup.sheet), JSON.stringify(dup && { id: dup.id, d: dup.d, s: dup.sheet.slice(0, 400) })));
       const after = await page.evaluate(() => JSON.stringify(window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-sched').data));
       check(`${lbl}: duplicating leaves the original untouched`, () => assert.strictEqual(after, before));
+      // 🧲 Lead magnet on the copy: brief -> (Mac) outline -> approve -> (Mac) PDF -> "not yet" never unlocks GHL/ManyChat -> Build
+      if (dup) {
+        const lmRow = () => page.evaluate((id) => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === id); return r && r.data; }, dup.id);
+        const macWrites = (id, build) => page.evaluate(({ id, build }) => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === id); r.data = Object.assign({}, r.data, { leadMagnetBuild: Object.assign({}, r.data.leadMagnetBuild || {}, build) }); }, { id, build });
+        await page.click('#ceSheet [data-lm-open]'); await page.waitForTimeout(80);
+        await page.fill('#ceSheet [data-lm-f="name"]', 'Desk Lunch Guide'); await page.fill('#ceSheet [data-lm-f="keywords"]', 'lunch, Lunches');
+        await page.click('#ceSheet [data-lm-start]'); await page.waitForTimeout(200);
+        let d = await lmRow();
+        check(`${lbl}: Make lead magnet saves the brief (name, upper-case keywords, requested)`, () => assert.ok(d.leadMagnet && d.leadMagnet.name === 'Desk Lunch Guide' && d.leadMagnet.keywords.join() === 'LUNCH,LUNCHES' && d.leadMagnet.requestedAt && !d.leadMagnet.funnelApprovedAt, JSON.stringify(d.leadMagnet)));
+        const st1 = await page.$eval('#ceSheet .ce-lm', e => e.innerText);
+        check(`${lbl}: the panel says the Mac is writing the outline`, () => assert.ok(/writing the outline/i.test(st1), st1));
+        await macWrites(dup.id, { outline: { pages: [{ n: 1, title: 'Cover' }, { n: 2, title: 'The desk lunch rule' }], claims: [{ claim: 'Protein keeps you fuller', source: 'Leidy 2015', url: 'https://example.org/leidy' }], assumptions: ['Australian supermarket brands'] }, outlineRev: 0, outlineAt: new Date().toISOString() });
+        await page.waitForFunction(() => /Approve outline/.test((document.querySelector('#ceSheet .ce-lm') || {}).innerText || ''), null, { timeout: 20000 }).catch(() => null);
+        const st2 = await page.$eval('#ceSheet .ce-lm', e => e.innerText);
+        check(`${lbl}: the outline shows pages, sources and assumptions with Approve / Send changes`, () => assert.ok(/The desk lunch rule/.test(st2) && /Leidy 2015/.test(st2) && /Australian supermarket/.test(st2) && /Approve outline/.test(st2) && /Send changes/i.test(st2), st2));
+        await page.fill('#ceSheet [data-lm-chg="outline"]', 'Make page 2 shorter'); await page.click('#ceSheet [data-lm-send="outline"]'); await page.waitForTimeout(150);
+        d = await lmRow(); check(`${lbl}: outline changes are saved for the Mac`, () => assert.ok(d.leadMagnet.outlineFeedback && d.leadMagnet.outlineFeedback[0].text === 'Make page 2 shorter'));
+        await macWrites(dup.id, { outlineRev: 1, outlineAt: new Date().toISOString() });
+        await page.waitForFunction(() => /Approve outline/.test((document.querySelector('#ceSheet .ce-lm') || {}).innerText || ''), null, { timeout: 20000 }).catch(() => null);
+        await page.click('#ceSheet [data-lm-ok="outline"]'); await page.waitForTimeout(150);
+        d = await lmRow(); check(`${lbl}: Approve outline sets outlineApprovedAt`, () => assert.ok(d.leadMagnet.outlineApprovedAt));
+        await macWrites(dup.id, { pdfAt: new Date().toISOString(), pdfRev: 0, pages: [{ n: 1, preview: dup.id + '/lm-r1-p01.jpg' }, { n: 2, preview: dup.id + '/lm-r1-p02.jpg' }] });
+        await page.waitForFunction(() => /build GHL \+ ManyChat/.test((document.querySelector('#ceSheet .ce-lm') || {}).innerText || ''), null, { timeout: 20000 }).catch(() => null);
+        const pg = await page.$$eval('#ceSheet .ce-lmpg', els => els.length);
+        check(`${lbl}: the PDF pages show as previews with the two approve buttons`, () => assert.ok(pg === 2, String(pg)));
+        await page.click('#ceSheet [data-lm-ok="pdf"]'); await page.waitForTimeout(150);
+        d = await lmRow(); check(`${lbl}: "Looks good, not yet" approves the PDF but never unlocks GoHighLevel / ManyChat`, () => assert.ok(d.leadMagnet.pdfApprovedAt && !d.leadMagnet.funnelApprovedAt, JSON.stringify(d.leadMagnet)));
+        page.once('dialog', dlg => dlg.accept());
+        await page.click('#ceSheet [data-lm-ok="funnel"]'); await page.waitForTimeout(200);
+        d = await lmRow(); check(`${lbl}: Build GHL + ManyChat (after a confirm) sets funnelApprovedAt`, () => assert.ok(d.leadMagnet.funnelApprovedAt));
+        const chip = await page.evaluate((id) => { const b = document.querySelector('.ce-bub [data-ce-open="' + id + '"]'); return b ? b.innerText : null; }, dup.id);
+        check(`${lbl}: the reel's bubble carries the 🧲 chip`, () => assert.ok(chip === null || /🧲/.test(chip), String(chip)));
+      }
       await page.keyboard.press('Escape');
       // sound section: pick the part of the song
       await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-await"]').click()); await page.waitForTimeout(150);

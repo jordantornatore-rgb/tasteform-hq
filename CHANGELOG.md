@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.8.0 — 5 Nov 2026 (🧲 lead magnets from a reel)
+
+- Reel sheet: **🧲 Lead magnet**. Tap "Make lead magnet", give it a name, the comment word(s), type, who it's for and what goes in it. The Mac writes the outline (every fact with its source), you approve or send changes; it builds the PDF in the 9-5 Split style, you check the pages here; then **Build GHL + ManyChat** lets it set up the survey, email workflow and ManyChat comment trigger in your Chrome. Nothing touches GoHighLevel or ManyChat before that tap.
+- "Needs you" with a reason and **Fixed, try again**; a Drive link box when it needs one. When it's live: the keyword, survey and PDF links, and anything still on you.
+- The reel waits to post until its lead magnet is live (untick "Hold this reel" to let it go). Calendar bubbles show 🧲 Building / Your turn / Live.
+
 ## 2.7.5 — 5 Nov 2026 (trial reels on their own day)
 
 - Trial reel = Yes: the reel sheet has "🧪 Trial reels start" (day + time), separate from the 📣 full reel's time in Schedule. Default is "as soon as it's approved". If the reel isn't approved by the time you pick, the trials start the moment you approve it.
