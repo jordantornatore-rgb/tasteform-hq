@@ -686,6 +686,13 @@ body{padding:0;}
 .ce-lmpages{display:flex;gap:8px;overflow-x:auto;padding:6px 0;-webkit-overflow-scrolling:touch;}
 .ce-lmpg{flex:none;width:118px;aspect-ratio:1058/1688;border-radius:6px;overflow:hidden;background:#111;display:block;}
 .ce-lmpg img{width:100%;height:100%;object-fit:cover;display:block;}
+.ce-lmlist{display:flex;flex-direction:column;gap:12px;}
+.ce-lmcard{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--surface-2);display:flex;flex-direction:column;gap:8px;min-width:0;}
+.ce-lmcard .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+.ce-lmcard .nm{font-weight:700;font-size:1.05rem;}
+.ce-lmpast{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;}
+.ce-lmold{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;color:var(--text);text-decoration:none;background:var(--surface-2);}
+.ce-lmold:hover{border-color:var(--accent);}
 .ce-lmchg{display:flex;gap:6px;align-items:flex-start;margin-top:8px;} .ce-lmchg textarea{flex:1;min-width:0;}
 .ce-lmwait{display:flex;gap:8px;align-items:center;font-size:.85rem;margin-top:10px;}
 .ce-titlebtn{all:unset;cursor:pointer;border-radius:6px;overflow-wrap:anywhere;}
@@ -1523,6 +1530,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
         <button type="button" data-ceview="ideas" aria-pressed="false">Idea Bank</button>
         <button type="button" data-ceview="perf" aria-pressed="false">Performance</button>
         <button type="button" data-ceview="scan" aria-pressed="false">Scanner</button>
+        <button type="button" data-ceview="magnets" aria-pressed="false">Lead magnets</button>
       </div>
     </div>
     <div id="ceRoot" style="display:flex;flex-direction:column;gap:var(--s4);"><div class="panel"><div class="empty-state">Loading…</div></div></div>
@@ -2981,7 +2989,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   var CE_TEST_MONTH={start:'2026-11-03', end:'2026-12-03'};
   var CE_SCHEDULE='Scanner Mon/Wed/Fri 4:47am · Review + batch Sun 4:13pm';
   var CE_METRICS=[['n','Posts'],['posts','Posts'],['count','Posts'],['medianViews','Median views'],['avgViews','Avg views'],['views','Views'],['likes','Likes'],['comments','Comments'],['saves','Saves'],['shares','Shares'],['follows','Follows'],['dms','DMs'],['keywordComments','Keyword comments'],['applications','Applications'],['score','Score'],['value','Value']];
-  var ceView=(function(){ var v=read('hqCeView'); if(!read('hqPlannerSeen')){ store('hqPlannerSeen','1'); return 'calendar'; } return ['calendar','library','week','ideas','perf','scan'].indexOf(v)>=0 ? v : 'calendar'; })();
+  var ceView=(function(){ var v=read('hqCeView'); if(!read('hqPlannerSeen')){ store('hqPlannerSeen','1'); return 'calendar'; } return ['calendar','library','week','ideas','perf','scan','magnets'].indexOf(v)>=0 ? v : 'calendar'; })();
   var ceRename=null, ceRenameForce=false, ceWeekOffset=0, ceShowFilming=false, ceOpenId=null, ceCopyTexts={}, ceBusy={};
   var ceFilters={status:'', funnel:'', format:'', type:'', office:false, lane:'', sort:'new'};
   var CE_LANES=[['niche','Niche'],['fitness','Fitness'],['format','Format'],['audience','Audience']];
@@ -3073,8 +3081,9 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     ceCopyTexts={};
     var typing=document.activeElement && root.contains(document.activeElement) && /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName) && !/^(checkbox|radio|range|button)$/.test(document.activeElement.type||'') && document.activeElement.value;
     if(typing){ ceRenderSheet(); return; } // never wipe text Jordan is typing in a card; the next change re-renders
-    root.innerHTML = ceView==='ideas' ? ceRenderIdeas() : (ceView==='perf' ? ceRenderPerf() : (ceView==='scan' ? ceRenderScan() : (ceView==='week' ? ceRenderWeek() : (ceView==='calendar' ? ceRenderPlanner() : ceRenderLibrary()))));
+    root.innerHTML = ceView==='magnets' ? ceRenderMagnets() : ceView==='ideas' ? ceRenderIdeas() : (ceView==='perf' ? ceRenderPerf() : (ceView==='scan' ? ceRenderScan() : (ceView==='week' ? ceRenderWeek() : (ceView==='calendar' ? ceRenderPlanner() : ceRenderLibrary()))));
     if(ceView==='ideas' && ceIdeaFocus){ var fe=root.querySelector('[data-idea-id="'+CSS.escape(ceIdeaFocus)+'"]'); if(fe){ fe.classList.add('focus'); try{ fe.scrollIntoView({block:'center'}); }catch(e){} } ceIdeaFocus=null; }
+    if(ceView==='magnets') ceLmLoadPreviews(root);
     if(ceView==='library' && ceLib.focusQ){ var qi=$('ceLibQ'); if(qi){ qi.focus(); try{ qi.setSelectionRange(qi.value.length, qi.value.length); }catch(e){} } ceLib.focusQ=false; }
     ceRenderSheet();
   };
@@ -3581,7 +3590,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       var ins=t.closest('[data-ce-inspo]'); if(ins){ ceInspoEdit=ins.getAttribute('data-ce-inspo'); renderNow('content'); return; }
       var inss=t.closest('[data-ce-inspo-save]'); if(inss){ ceSaveInspo(inss.getAttribute('data-ce-inspo-save')); return; }
       var insc=t.closest('[data-ce-inspo-cancel]'); if(insc){ ceInspoEdit=null; renderNow('content'); return; }
-      var op=t.closest('[data-ce-open]'); if(op){ if(ceDrag.moved) return; var oid=op.getAttribute('data-ce-open'), oq=ceFindSlot(oid); if(oq && oq.status==='needs_script' && isAdmin){ ceOpenScript({id:oid}); return; } ceCloseOverlays(); ceOpenId=oid; ceEdit=null; ceScrollFb=op.hasAttribute('data-ce-fb'); ceRenderSheet(); return; }
+      var op=t.closest('[data-ce-open]'); if(op){ if(ceDrag.moved) return; var oid=op.getAttribute('data-ce-open'), oq=ceFindSlot(oid); if(oq && oq.status==='needs_script' && isAdmin && !op.hasAttribute('data-ce-sheet')){ ceOpenScript({id:oid}); return; } ceCloseOverlays(); ceOpenId=oid; ceEdit=null; ceScrollFb=op.hasAttribute('data-ce-fb'); ceRenderSheet(); return; }
       var cp=t.closest('[data-ce-copy]'); if(cp){ ceCopy(cp, ceCopyTexts[cp.getAttribute('data-ce-copy')]); return; }
       var stb=t.closest('[data-ce-status]'); if(stb){ if(!stb.disabled) ceSetStatus(ceOpenId, stb.getAttribute('data-ce-status')); return; }
       var ia=t.closest('[data-ce-idea]'); if(ia){ ceIdeaAction(ia.getAttribute('data-id'), ia.getAttribute('data-ce-idea')); return; }
@@ -3966,6 +3975,51 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   }
   function ceLmChanges(id, kind){ return '<div class="ce-lmchg"><textarea class="input" rows="2" data-lm-in data-lm-chg="'+esc(kind)+'" placeholder="What should change? The Mac does exactly what you write."></textarea><button type="button" class="btn small" data-lm-send="'+esc(kind)+'" data-id="'+esc(id)+'">Send changes</button></div>'; }
   async function ceLmLoadPreviews(el){ var as=el.querySelectorAll('[data-lm-prev]'); for(var i=0;i<as.length;i++){ var a=as[i]; if(a.getAttribute('href')) continue; try{ var u=await ceSignedPreview(a.getAttribute('data-lm-prev')); a.setAttribute('href', u); a.querySelector('img').src=u; }catch(e){} } }
+  /* Lead magnets list: every reel's magnet (newest work first, "your turn" on top) plus the older ones already in Drive. */
+  var CE_LM_DRIVE='https://drive.google.com/drive/folders/1zpoydZs23l8KkQsf6O53uXZhnLgo-icx';
+  var CE_LM_PAST=[
+    {name:'The 9-5 Split', kind:'Guide', url:'https://drive.google.com/file/d/1P8Jtt-XoHBibYJjvoUm6ZfPsMeiIT9pt/view'},
+    {name:'The 9-5 Fat Loss Maths', kind:'Guide', url:'https://drive.google.com/file/d/1FzZPJmcbN1lFLJHo3jrnUoYOzMy5Kst8/view'},
+    {name:'Healthy HSP', kind:'Recipe', url:'https://drive.google.com/file/d/1y1coE2g8S-waiQiF0JZy9MplgSv1pNz5/view'},
+    {name:'Metabolic Adaptation', kind:'Guide', url:'https://drive.google.com/file/d/1rSS5pUM5aN8FqT_MtCMy4nY2-2iaXfYW/view'},
+    {name:'Anabolic French Toast', kind:'Recipe', url:'https://drive.google.com/drive/folders/1_Jk2Eh8bnVGrEx7EiZtpbXOs2w_Ljagy'},
+    {name:'Loaded Sweet Potato', kind:'Recipe', url:'https://drive.google.com/drive/folders/1xDNZgMV_LS4Tk8qCo1FcGIMqkJOzuJQD'},
+    {name:'Kangaroo Bowl', kind:'Recipe', url:'https://drive.google.com/drive/folders/16SXX0VXVM3Qxome_-UEWokUBCs10LbNv'},
+    {name:'Crispy Chicken Burger', kind:'Recipe', url:'https://drive.google.com/drive/folders/1OF5ojZRojTpTAp5TgmGzkel9Em2bPSek'},
+    {name:'Double Quarter Pounder', kind:'Recipe', url:'https://drive.google.com/drive/folders/1hNmQyARueYulwWK8kbrTjCyMDZrqeSqQ'},
+    {name:'Chicken Alfredo', kind:'Recipe', url:'https://drive.google.com/drive/folders/1DDxNcuvxhBbnRjno8yPaYb1Ac66_q90d'},
+    {name:'Doner Kebab', kind:'Recipe', url:'https://drive.google.com/drive/folders/1RaYWf-y9l5WRpVNQaP0G1I1eNI8G2TTb'},
+    {name:'1 Week Meal Plan', kind:'Plan', url:'https://drive.google.com/drive/folders/16bkPMemMSXBPD1qvhfKfFdiayOrzFosc'}
+  ];
+  var CE_LM_MINE=['outline_ready','pdf_ready','needs_you','pdf_approved'];
+  function ceRenderMagnets(){
+    var st=ceLoadState('contentQueue'), E=esc;
+    if(st!=='ok'){ setText('ceSub', st==='loading'?'Loading…':'Sync error'); return '<div class="panel"><h2>Lead magnets</h2>'+ceStateBox(st,'the lead magnets')+'</div>'; }
+    var rows=(state.contentQueue||[]).filter(function(q){ return q.leadMagnet && q.leadMagnet.requestedAt; });
+    var rank=function(q){ var k=ceLmState(q); return CE_LM_MINE.indexOf(k)>=0?0:(k==='live'?2:1); };
+    var at=function(q){ var b=q.leadMagnetBuild||{}; return ceLmTs(b.updatedAt)||ceLmTs(q.leadMagnet.updatedAt)||ceLmTs(q.leadMagnet.requestedAt); };
+    rows.sort(function(a,b){ return rank(a)-rank(b) || at(b)-at(a); });
+    var mine=rows.filter(function(q){ return rank(q)===0; }).length, live=rows.filter(function(q){ return rank(q)===2; }).length;
+    setText('ceSub', rows.length+' lead magnet'+(rows.length===1?'':'s')+' in HQ'+(mine?' · '+mine+' need'+(mine===1?'s':'')+' you':'')+' · '+live+' live · '+CE_LM_PAST.length+' older in Drive');
+    var html='<div class="panel"><h2>Lead magnets</h2>';
+    if(!rows.length) html+='<div class="empty-state">None yet. Open a reel and tap “🧲 Make lead magnet”. It shows up here while the Mac builds it.</div>';
+    else html+='<div class="ce-lmlist">'+rows.map(function(q){
+      var lm=q.leadMagnet, b=q.leadMagnetBuild||{}, k=ceLmState(q), L=b.live||{}, last=Array.isArray(b.log)&&b.log.length?b.log[b.log.length-1]:null;
+      var kw=(L.keywords||lm.keywords||[]), pages=(Array.isArray(b.pages)?b.pages:[]).filter(function(pg){ return pg.preview; });
+      var meta=[kw.length?'Comment '+kw.join(' / '):'', lm.type?ceCap(lm.type):'', pages.length?pages.length+' pages':'', last?relTime(last.at)+': '+ceText(last.text):''].filter(Boolean).join(' · ');
+      return '<div class="ce-lmcard" data-lm-card="'+E(q.id)+'"><div class="hd"><div class="nm">'+E(ceText(lm.name)||'Untitled lead magnet')+'</div><span class="chip ce-lmchip'+(k==='live'?' live':(CE_LM_MINE.indexOf(k)>=0?' you':''))+'">'+E(CE_LM_LABEL[k]||k)+'</span></div>'+
+        (meta?'<div class="f-note">'+E(meta)+'</div>':'')+
+        (k==='needs_you'&&b.needsYou?'<div class="ce-note"><b>Needs you:</b> '+E(ceText(b.needsYou.reason))+'</div>':'')+
+        (pages.length?'<div class="ce-lmpages">'+pages.map(function(pg){ return '<a class="ce-lmpg" data-lm-prev="'+E(pg.preview)+'" target="_blank" rel="noopener" aria-label="Page '+pg.n+'"><img alt="Page '+pg.n+'"></a>'; }).join('')+'</div>':(b.outline?'<div class="f-note">Outline: '+((b.outline.pages||[]).length)+' pages planned. The PDF previews appear here once it’s built.</div>':''))+
+        '<div class="ce-chips">'+(L.driveUrl?'<a class="btn small" href="'+E(L.driveUrl)+'" target="_blank" rel="noopener">PDF ↗</a>':'')+(L.surveyUrl?'<a class="btn small" href="'+E(L.surveyUrl)+'" target="_blank" rel="noopener">Survey ↗</a>':'')+
+        '<button type="button" class="btn small'+(CE_LM_MINE.indexOf(k)>=0?' primary':'')+'" data-ce-open="'+E(q.id)+'" data-ce-sheet>'+(CE_LM_MINE.indexOf(k)>=0?'Open to check it':'Open reel')+' ›</button></div>'+
+        '<div class="f-note">Reel: '+E(ceText(q.title)||'Untitled')+(q.date?' · '+E(HQ.fmtDay(q.date,'wd')):'')+'</div></div>';
+    }).join('')+'</div>';
+    html+='</div>';
+    html+='<div class="panel"><div class="ce-block-head" style="justify-content:space-between"><h2 style="margin:0">Older ones in Drive</h2><a class="btn small" href="'+CE_LM_DRIVE+'" target="_blank" rel="noopener">Folder ↗</a></div><div class="f-note" style="margin:6px 0 10px">Made before the Mac built them, so there are no previews here. Each opens in Drive.</div><div class="ce-lmpast">'+
+      CE_LM_PAST.map(function(m){ return '<a class="ce-lmold" href="'+E(m.url)+'" target="_blank" rel="noopener"><span>'+E(m.name)+'</span><span class="muted">'+E(m.kind)+' ↗</span></a>'; }).join('')+'</div></div>';
+    return html;
+  }
   async function ceSaveLm(id, change, msg){
     var q=ceFindSlot(id); if(!q||!isAdmin||!db) return; var next=Object.assign({}, q.leadMagnet||{}, change, {updatedAt:ceNowIso()});
     try{ await db.collection('content_queue').doc(id).update({leadMagnet:next}); q.leadMagnet=next; ceSetSheetMsg(id, msg); }

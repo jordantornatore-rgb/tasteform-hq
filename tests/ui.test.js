@@ -425,6 +425,19 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
         d = await lmRow(); check(`${lbl}: Build GHL + ManyChat (after a confirm) sets funnelApprovedAt`, () => assert.ok(d.leadMagnet.funnelApprovedAt));
         const chip = await page.evaluate((id) => { const b = document.querySelector('.ce-bub [data-ce-open="' + id + '"]'); return b ? b.innerText : null; }, dup.id);
         check(`${lbl}: the reel's bubble carries the 🧲 chip`, () => assert.ok(chip === null || /🧲/.test(chip), String(chip)));
+        // Lead magnets list: this magnet with its pages, plus the older ones in Drive; Open reel opens its sheet
+        await page.keyboard.press('Escape');
+        const prevView = await page.evaluate(() => (document.querySelector('#ceViewSeg [aria-pressed="true"]') || {}).getAttribute('data-ceview'));
+        await page.click('#ceViewSeg [data-ceview="magnets"]'); await page.waitForTimeout(150);
+        const lml = await page.evaluate((id) => { const c = document.querySelector('[data-lm-card="' + id + '"]'); return { card: c ? c.innerText : null, pages: c ? c.querySelectorAll('.ce-lmpg').length : 0, old: Array.from(document.querySelectorAll('.ce-lmold')).map(a => a.innerText + ' ' + a.href), sub: document.getElementById('ceSub').innerText }; }, dup.id);
+        check(`${lbl}: Lead magnets list shows the magnet with its stage, comment word and page previews`, () => assert.ok(lml.card && /Desk Lunch Guide/.test(lml.card) && /building GHL/i.test(lml.card) && /LUNCH/.test(lml.card) && lml.pages === 2, JSON.stringify(lml)));
+        check(`${lbl}: Lead magnets list links the older magnets in Drive`, () => assert.ok(lml.old.length >= 4 && lml.old.some(t => /9-5 Split/.test(t) && /drive\.google\.com/.test(t)) && /older in Drive/.test(lml.sub), JSON.stringify(lml)));
+        await page.click('[data-lm-card="' + dup.id + '"] [data-ce-open]'); await page.waitForTimeout(150);
+        const lmOpen = await page.evaluate(() => { const s = document.getElementById('ceSheet'); return s && !s.hidden ? s.innerText : ''; });
+        check(`${lbl}: Open reel from the list opens that reel's sheet`, () => assert.ok(/Desk Lunch Guide/i.test(lmOpen), lmOpen.slice(0, 300)));
+        await page.keyboard.press('Escape');
+        if (prevView) { await page.click('#ceViewSeg [data-ceview="' + prevView + '"]'); await page.waitForTimeout(150); }
+        await page.evaluate((id) => { const b = document.querySelector('#ceRoot [data-ce-open="' + id + '"]'); if (b) b.click(); }, dup.id); await page.waitForTimeout(100);
       }
       await page.keyboard.press('Escape');
       // sound section: pick the part of the song

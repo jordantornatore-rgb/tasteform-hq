@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.9.2 — 5 Nov 2026 (lead magnets list)
+
+- Content Engine → **Lead magnets**: every reel's lead magnet in one list, "your turn" first, with its stage, comment word, page previews (tap for full size), PDF ↗ / Survey ↗ once live, and Open reel (always the reel view with the 🧲 panel, even before it has a script). Below it, the older magnets already in Drive (guides and recipe folders), each linked, plus the Drive folder.
+
 ## 2.9.1 — 5 Nov 2026 (remove a creator)
 
 - Scanner watchlist: a small ✕ next to each handle removes the account (marked `removed`, never deleted). Removed accounts sit under "Removed" with Undo. The Content Brain (§16) tells the Scanner to skip them and never add them back.
