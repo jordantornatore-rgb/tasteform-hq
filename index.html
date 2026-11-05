@@ -3989,7 +3989,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     {name:'Double Quarter Pounder', kind:'Recipe', url:'https://drive.google.com/drive/folders/1hNmQyARueYulwWK8kbrTjCyMDZrqeSqQ'},
     {name:'Chicken Alfredo', kind:'Recipe', url:'https://drive.google.com/drive/folders/1DDxNcuvxhBbnRjno8yPaYb1Ac66_q90d'},
     {name:'Doner Kebab', kind:'Recipe', url:'https://drive.google.com/drive/folders/1RaYWf-y9l5WRpVNQaP0G1I1eNI8G2TTb'},
-    {name:'1 Week Meal Plan', kind:'Plan', url:'https://drive.google.com/drive/folders/16bkPMemMSXBPD1qvhfKfFdiayOrzFosc'}
+    {name:'1 Week Meal Plan', kind:'', url:'https://drive.google.com/drive/folders/16bkPMemMSXBPD1qvhfKfFdiayOrzFosc'}
   ];
   var CE_LM_MINE=['outline_ready','pdf_ready','needs_you','pdf_approved'];
   function ceRenderMagnets(){
@@ -4017,7 +4017,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     }).join('')+'</div>';
     html+='</div>';
     html+='<div class="panel"><div class="ce-block-head" style="justify-content:space-between"><h2 style="margin:0">Older ones in Drive</h2><a class="btn small" href="'+CE_LM_DRIVE+'" target="_blank" rel="noopener">Folder ↗</a></div><div class="f-note" style="margin:6px 0 10px">Made before the Mac built them, so there are no previews here. Each opens in Drive.</div><div class="ce-lmpast">'+
-      CE_LM_PAST.map(function(m){ return '<a class="ce-lmold" href="'+E(m.url)+'" target="_blank" rel="noopener"><span>'+E(m.name)+'</span><span class="muted">'+E(m.kind)+' ↗</span></a>'; }).join('')+'</div></div>';
+      CE_LM_PAST.map(function(m){ return '<a class="ce-lmold" href="'+E(m.url)+'" target="_blank" rel="noopener"><span>'+E(m.name)+'</span><span class="muted">'+E(m.kind?m.kind+' ':'')+'↗</span></a>'; }).join('')+'</div></div>';
     return html;
   }
   async function ceSaveLm(id, change, msg){
