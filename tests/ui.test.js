@@ -66,6 +66,7 @@ function contentFixtures(today) {
     ev('b', 'test-e1', 'enrolled', -72, ['recipe: hsp', 'country: uk', 'job: corporate']), ev('b', 'test-e1', 'sent', -72, ['recipe: hsp', 'country: uk', 'job: corporate']), ev('b', 'test-e1', 'replied', -60),
     ev('c', 'test-e1', 'enrolled', -1)]); }
 { const cf = contentFixtures(TODAY); fixtures.content_queue = fixtures.content_queue.concat(cf.queue); fixtures.content_ideas = fixtures.content_ideas.concat(cf.ideas); }
+fixtures.content_creators = (fixtures.content_creators || []).concat([{ id: 'test.creator', data: { handle: 'test.creator', followers: 12000, medianReelViews: 4000, role: 'watchlist', addedBy: 'scanner' } }]);
 fixtures.content_sounds = (fixtures.content_sounds || []).concat([{ id: 'test-fullsong', data: { artist: 'Test Artist', title: 'Whole Song', vibe: 'calm', durationS: 200, partS: 60, partKind: 'chorus', fullSong: true, previewPath: 'sounds/test-fullsong.mp4', waveform: Array.from({ length: 240 }, (_, i) => 20 + (i * 13) % 80) } }, { id: 'test-emo', data: { artist: 'FKJ', title: 'Ylang Ylang', group: 'Emotional', groupWhen: 'if your video is emotional', durationS: 213, partS: 61, previewPath: 'sounds/test-emo.mp4' } }, { id: '_groups', data: { groups: [{ name: 'Emotional', when: 'if your video is emotional', order: 0 }, { name: 'Deep', when: 'if your video is deep', order: 4 }], other: '(Other)' } }]);
 const dms = docs('dm_threads'), tfDaily = docs('tf_daily'), tfResponses = docs('tf_responses'), contacts = docs('contacts');
 const leads = dms.filter(d => d.category === 'lead' && !d.notApplicable);
@@ -334,6 +335,14 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       const roles = await page.$$eval('#ceSheet [data-ca-files]', els => els.map(e => e.getAttribute('data-ca-files')));
       check(`${lbl}: Add reel has separate boxes for footage, voiceover and photos to put on top`, () => assert.deepStrictEqual(roles, ['footage', 'voiceover', 'overlay']));
       await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
+      // Scanner watchlist: ✕ removes a creator (marked, never deleted), Undo brings it back
+      await page.click('#ceViewSeg [data-ceview="scan"]'); await page.waitForTimeout(200);
+      await page.click('[data-cr-remove="test.creator"]'); await page.waitForTimeout(200);
+      const crR = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_creators.find(x => x.id === 'test.creator'); return { d: r && r.data, inTable: !!document.querySelector('[data-cr-remove="test.creator"]'), gone: (document.querySelector('.ce-crgone') || {}).innerText || '' }; });
+      check(`${lbl}: ✕ next to a creator marks them removed and moves them under Removed`, () => assert.ok(crR.d && crR.d.removed === true && crR.d.role === 'removed' && crR.d.handle === 'test.creator' && !crR.inTable && /Removed · 1/.test(crR.gone), JSON.stringify(crR)));
+      await page.click('.ce-crgone summary'); await page.click('[data-cr-restore="test.creator"]'); await page.waitForTimeout(200);
+      const crU = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_creators.find(x => x.id === 'test.creator'); return { removed: r.data.removed, role: r.data.role, inTable: !!document.querySelector('[data-cr-remove="test.creator"]') }; });
+      check(`${lbl}: Undo puts the creator back on the watchlist`, () => assert.ok(crU.removed === false && crU.role === 'watchlist' && crU.inTable, JSON.stringify(crU)));
       // Idea Bank: research card + Turn into a reel
       await page.click('#ceViewSeg [data-ceview="ideas"]'); await page.waitForTimeout(150);
       const ideas = await visibleText(page); noBad('idea bank', ideas);

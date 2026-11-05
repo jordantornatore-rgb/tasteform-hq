@@ -59,7 +59,7 @@ Pipeline (`tasteform-video/scripts/autopost`):
 
 **`content_sounds`** — the sound bank, `id` = slug: `title, artist, igAudioId, igAudioTitle, formats[], vibe, evidence[], downloadUrl`, plus from the Mac `previewPath` (full song in `content-previews/sounds/`), `durationS`, `waveform[240]`, `fullSong`, `partS` + `partKind` (chorus / ig / trend); `group`, `groupOrder`, `groupWhen` (from a reference reel); rows starting `_` are rules, and `_groups` holds the group order and names (`groups[{name, when, order, formats}]`, `other: "(Other)"`). The sound editor lists every bank row and draws the song as a waveform with a draggable box the length of the video (`sound.startS`, `startBase: "full"`); a new pick starts at `partS`.
 
-**`content_creators`** — the watchlist, `id` = handle: `handle, followers, followerHistory[{at, followers}], medianReelViews, lane, role, addedBy, addedReason, lastScannedAt`.
+**`content_creators`** — the watchlist, `id` = handle: `handle, followers, followerHistory[{at, followers}], medianReelViews, lane, role, addedBy, addedReason, lastScannedAt`, removed, removedAt, roleBefore` (✕ in the Scanner tab sets `removed: true` and `role: "removed"`; Undo restores `roleBefore`).
 
 **`meta` rows**
 - `posting`: `autoPost, autoPostChangedAt, provider ("outstand"), providerSince, outstand{base, accounts{INSTAGRAM{id, igUserId, username}, LINKEDIN{id}, YOUTUBE{id, channel}, TIKTOK? }, missing[], vaultKey}, linkedin{postAs, tagPage{urn, display}}, slotTimes{high, low, carousel, trialSpacingMin}`.

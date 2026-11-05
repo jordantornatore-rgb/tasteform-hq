@@ -668,6 +668,9 @@ body{padding:0;}
 @media (min-width:761px){.ce-sheet{align-items:center;padding:24px;}.ce-sheet-card{max-width:720px;border-radius:var(--r-l);max-height:88vh;}}
 .ce-sheet-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
 .ce-sheet-head > div{min-width:0;flex:1;}
+.ce-x{all:unset;cursor:pointer;margin-left:8px;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;font-size:12px;opacity:.55;}
+.ce-x:hover,.ce-x:focus-visible{opacity:1;background:color-mix(in srgb,#c0392b 30%,transparent);}
+.ce-crgone{margin-top:10px;} .ce-crrow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 0;}
 .ce-roles{display:grid;gap:8px;}
 .ce-role{display:grid;gap:4px;padding:10px 12px;border:1px dashed var(--line,rgba(127,127,127,.35));border-radius:10px;}
 .ce-role small{opacity:.75;font-size:.8rem;}
@@ -3425,16 +3428,28 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     html+='</div><div class="panel"><h2>Watchlist</h2><p class="rule">The accounts the Scanner reads. Median reel views is the bar a post must clear to become a brief.</p>';
     if(st!=='ok') html+=ceStateBox(st,'the watchlist');
     else {
-      var rows=(state.contentCreators||[]).slice().sort(function(a,b){ var am=HQ.isNum(a.medianReelViews)?a.medianReelViews:-1, bm=HQ.isNum(b.medianReelViews)?b.medianReelViews:-1; return bm-am || String(a.handle||a.id).localeCompare(String(b.handle||b.id)); });
+      var allC=(state.contentCreators||[]), gone=allC.filter(function(c){ return c.removed===true; });
+      var rows=allC.filter(function(c){ return c.removed!==true; }).sort(function(a,b){ var am=HQ.isNum(a.medianReelViews)?a.medianReelViews:-1, bm=HQ.isNum(b.medianReelViews)?b.medianReelViews:-1; return bm-am || String(a.handle||a.id).localeCompare(String(b.handle||b.id)); });
       if(!rows.length) html+='<div class="empty-state">No accounts on the watchlist yet. The Scanner adds them, or seed content_creators by hand.</div>';
       else html+='<div class="table-wrap"><table class="scores"><thead><tr><th>Handle</th><th class="num">Followers</th><th class="num">Median reel views</th><th>Added by</th><th>Last scanned</th></tr></thead><tbody>'+rows.map(function(c){
         var h=String(c.handle||c.id).replace(/^@/,'');
-        return '<tr><td class="op-name"><a href="https://www.instagram.com/'+esc(encodeURIComponent(h))+'/" target="_blank" rel="noopener">@'+esc(h)+'</a>'+(c.role&&String(c.role)!=='watchlist'?' <span class="chip grey">'+esc(String(c.role))+'</span>':'')+(c.addedReason?'<div class="op-sample" title="'+esc(ceText(c.addedReason))+'">'+esc(ceText(c.addedReason))+'</div>':'')+'</td><td class="num">'+num(c.followers)+'</td><td class="num">'+num(c.medianReelViews)+'</td><td>'+esc(ceText(c.addedBy)||'–')+'</td><td>'+(c.lastScannedAt?esc(relTime(c.lastScannedAt)||'–'):'–')+'</td></tr>';
-      }).join('')+'</tbody></table></div><div class="f-note">'+rows.length+' account'+(rows.length===1?'':'s')+'. – = not recorded by the Scanner yet.</div>';
+        return '<tr><td class="op-name"><a href="https://www.instagram.com/'+esc(encodeURIComponent(h))+'/" target="_blank" rel="noopener">@'+esc(h)+'</a>'+(isAdmin?'<button type="button" class="ce-x" data-cr-remove="'+esc(c.id)+'" title="Remove @'+esc(h)+' from the watchlist" aria-label="Remove @'+esc(h)+'">✕</button>':'')+(c.role&&String(c.role)!=='watchlist'?' <span class="chip grey">'+esc(String(c.role))+'</span>':'')+(c.addedReason?'<div class="op-sample" title="'+esc(ceText(c.addedReason))+'">'+esc(ceText(c.addedReason))+'</div>':'')+'</td><td class="num">'+num(c.followers)+'</td><td class="num">'+num(c.medianReelViews)+'</td><td>'+esc(ceText(c.addedBy)||'–')+'</td><td>'+(c.lastScannedAt?esc(relTime(c.lastScannedAt)||'–'):'–')+'</td></tr>';
+      }).join('')+'</tbody></table></div><div class="f-note">'+rows.length+' account'+(rows.length===1?'':'s')+'. – = not recorded by the Scanner yet.'+(isAdmin?' ✕ removes an account: the Scanner stops reading it and won’t add it back.':'')+'</div>';
+      if(gone.length) html+='<details class="ce-crgone"><summary>Removed · '+gone.length+'</summary>'+gone.map(function(c){ var h=String(c.handle||c.id).replace(/^@/,''); return '<div class="ce-crrow"><span>@'+esc(h)+(c.removedAt?' <span class="muted">· '+esc(relTime(c.removedAt)||'')+'</span>':'')+'</span>'+(isAdmin?'<button type="button" class="btn small" data-cr-restore="'+esc(c.id)+'">Undo</button>':'')+'</div>'; }).join('')+'</details>';
     }
     return html+'</div>';
   }
 
+  /* Watchlist: ✕ marks a creator removed (never deleted), so the Scanner skips it and never re-adds it (Content Brain §16). */
+  document.addEventListener('click', async function(ev){
+    var t=ev.target; if(!t.closest||!isAdmin||!db) return;
+    var rm=t.closest('[data-cr-remove]'), rs=t.closest('[data-cr-restore]'); if(!rm&&!rs) return;
+    var id=(rm||rs).getAttribute(rm?'data-cr-remove':'data-cr-restore'), c=(state.contentCreators||[]).find(function(x){ return x.id===id; }); if(!c) return;
+    var patch=rm?{removed:true, removedAt:ceNowIso(), removedBy:'jordan', roleBefore:c.role||null, role:'removed'}:{removed:false, restoredAt:ceNowIso(), role:c.roleBefore||'watchlist'};
+    (rm||rs).disabled=true;
+    try{ await db.collection('content_creators').doc(id).update(patch); Object.assign(c, patch); }catch(e){ showBanner('Couldn’t update @'+id+': '+(e.message||e)); }
+    renderNow('content');
+  });
   /* --- writes (admin only; every one merges into data) --- */
   async function ceSetStatus(id, status){
     if(!isAdmin || !db || !id) return;

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.9.1 — 5 Nov 2026 (remove a creator)
+
+- Scanner watchlist: a small ✕ next to each handle removes the account (marked `removed`, never deleted). Removed accounts sit under "Removed" with Undo. The Content Brain (§16) tells the Scanner to skip them and never add them back.
+
 ## 2.9.0 — 5 Nov 2026 (reel types + labelled files)
 
 - Script editor: **What kind of reel?** Talking to camera (hooks, script, ending), Voiceover + footage (hook, voiceover, shot list, what goes on top and when), Short clip + caption (the shot, one on-screen line, 5–15 s, the caption carries the value), Carousel (slides, slide 1 the hook, caption). Switching keeps what you've typed. Formats follow the type (C formats for carousels).
