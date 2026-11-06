@@ -674,6 +674,7 @@ body{padding:0;}
 .ce-roles{display:grid;gap:8px;}
 .ce-role{display:grid;gap:4px;padding:10px 12px;border:1px dashed var(--line,rgba(127,127,127,.35));border-radius:10px;}
 .ce-role small{opacity:.75;font-size:.8rem;}
+.ce-dirpick{background:none;border:0;padding:0;color:inherit;font:inherit;text-decoration:underline;cursor:pointer;}
 .ce-typeseg{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px;}
 .ce-typeseg button{border:1px solid var(--line,rgba(127,127,127,.3));background:transparent;color:inherit;border-radius:999px;padding:8px 12px;min-height:40px;font:inherit;font-size:.85rem;cursor:pointer;}
 .ce-typeseg button.on{background:color-mix(in srgb,#89653F 40%,transparent);border-color:#89653F;font-weight:700;}
@@ -3151,7 +3152,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     if(ceScript){ ceRenderScriptEditor(el); return; }
     if(ceFilm){ ceRenderFilmSheet(el); return; }
     if(cePreview){ ceRenderPreview(el); return; }
-    if(ceAdd){ ceRenderAddReel(el); return; }
+    if(ceAdd){ if(ceAdd.more) ceRenderAddMore(el); else ceRenderAddReel(el); return; }
     if(el.getAttribute('data-mode')){ el.removeAttribute('data-mode'); el.classList.remove('side'); el.innerHTML=''; }
     var q=ceOpenId ? ceFindSlot(ceOpenId) : null;
     if(!q){ ceOpenId=null; ceEdit=null; el.hidden=true; el.innerHTML=''; return; }
@@ -3182,6 +3183,8 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     if(p.status==='error' && p.error) html+='<div class="ce-note"><b>Posting error:</b> '+esc(ceText(p.error))+'</div>';
     if(isAdmin && !posted && ['needs_script','to_film'].indexOf(q.status)>=0 && ceNeedsFootage(q)) html+='<div><button type="button" class="btn primary" data-ce-addreel="'+esc(q.id)+'">'+(q.footageUpload?'Add the footage again':'Filmed this? Add the footage')+'</button></div>';
     if(q.footageUpload) html+=ceFootageNote(q);
+    html+=ceAddsNote(q);
+    if(isAdmin && !posted && !(['needs_script','to_film'].indexOf(q.status)>=0 && ceNeedsFootage(q))) html+='<div><button type="button" class="btn" data-ce-addmore="'+esc(q.id)+'">➕ Add footage or photos</button></div>';
     if(q.scriptChangedAfterEdit && !posted) html+='<div class="ce-note">The video was cut from the old script.'+(isAdmin&&!q.reEditRequested?' <button type="button" class="btn small" data-ce-act="reedit" data-id="'+esc(q.id)+'">Re-edit video</button>':(q.reEditRequested?' Re-edit queued; the pipeline picks it up within 20 minutes.':''))+'</div>';
     if(['approved','trialing','scheduled','posted'].indexOf(q.status)>=0 && q.format) html+= q.goldStandard ? '<div class="f-note">⭐ Gold standard for '+esc(ceText(q.format))+(q.goldCopiedAt?' · copied to templates/'+esc(ceText(q.format))+'/gold/':' · the pipeline copies it on its next run')+'</div>' : (isAdmin?'<div><button type="button" class="btn" data-ce-act="gold" data-id="'+esc(q.id)+'">⭐ Make this the gold standard for '+esc(ceText(q.format))+'</button></div>':'');
     if(p.ytClaimRisk && !posted) html+='<div class="f-note">YouTube may claim or mute the music on this one (no licensed track fitted).</div>';
@@ -3574,6 +3577,10 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       var igp=t.closest('[data-ce-igpart]'); if(igp){ var ww=igp.closest('.ce-wave-wrap'); ceWaveSet(ww, parseFloat(igp.getAttribute('data-ce-igpart'))||0); return; }
       var adr=t.closest('[data-ce-addreel]'); if(adr){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceAdd={id:adr.getAttribute('data-ce-addreel')||null, force:true}; ceRenderSheet(); return; }
       var ads=t.closest('[data-ca-submit]'); if(ads){ ceSubmitAddReel(ads); return; }
+      var dbt=t.closest('[data-ca-dirbtn]'); if(dbt){ ev.preventDefault(); var dip=dbt.parentElement.querySelector('[data-ca-dir]'); if(dip) dip.click(); return; }
+      var amo=t.closest('[data-ce-addmore]'); if(amo){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceAdd={id:amo.getAttribute('data-ce-addmore'), more:true, force:true}; ceRenderSheet(); return; }
+      var ams=t.closest('[data-cm-submit]'); if(ams){ ceSubmitAddMore(ams); return; }
+      var amb=t.closest('[data-cm-back]'); if(amb){ var bid=ceAdd&&ceAdd.id; ceCloseOverlays(); ceOpenId=bid; ceRenderSheet(); return; }
       var sct=t.closest('[data-ce-script]'); if(sct){ ceOpenScript({id:sct.getAttribute('data-ce-script')}); return; }
       var dup=t.closest('[data-ce-dup]'); if(dup){ ceDuplicate(dup.getAttribute('data-ce-dup'), dup); return; }
       var ren=t.closest('[data-ce-rename]'); if(ren){ ceRename=ren.getAttribute('data-ce-rename'); ceRenameForce=true; ceRenderSheet(); var inp=document.querySelector('#ceSheet [data-ce-titlein]'); if(inp){ inp.focus(); inp.select(); } return; }
@@ -3613,6 +3620,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       var sg=ev.target.closest('[data-ce-sndgroup]'); if(sg){ try{ localStorage.setItem('hq.sndGrouped', sg.checked?'1':'0'); }catch(e){} var ss=sg.closest('[data-ce-editor]').querySelector('[data-ce-f="soundId"]'); if(ss){ var keep=ss.value; ss.innerHTML=ceSoundOptions(keep, sg.checked); ss.value=keep; } return; }
       var sid=ev.target.closest('[data-ce-f="soundId"]'); if(sid){ var sw=sid.closest('[data-ce-editor]').querySelector('[data-ce-sndwhen]'); if(sw) sw.textContent=ceSoundWhen(sid.value); ceSndStop(); var wr=sid.closest('[data-ce-editor]').querySelector('.ce-wave-wrap'), ns=(state.contentSounds||[]).find(function(x){ return String(x.id)===sid.value; }); if(wr){ wr.outerHTML=ceWaveHtml(ns, ns&&HQ.isNum(ns.partS)?ns.partS:0, parseFloat(wr.getAttribute('data-win'))||30); } return; }
       var cax=ev.target.closest('[data-ca]'); if(cax&&ceAdd){ ceAddToggle(); return; }
+      var caf=ev.target.closest('[data-ca-files],[data-ca-dir]'); if(caf&&ceAdd){ ceFilesPicked(caf.closest('.ce-add')); return; }
       var sp=ev.target.closest('[data-cs="slotpick"]'); if(sp){ var ns=sp.closest('.ce-script').querySelector('.ce-newslot'); if(ns) ns.hidden=sp.value!=='__new'; return; }
       var tm=ev.target.closest('select[data-ce-time]'); if(tm){ var id=tm.getAttribute('data-ce-time'), q=ceFindSlot(id); if(!q) return; var at=cePostAtMs(q), day=HQ.isDayKey(q.date)?q.date:(at?HQ.sydDay(at):HQ.sydNow().key); ceMove(id, day, tm.value); return; }
       var md=ev.target.closest('select[data-ce-moveday]'); if(md){ var id2=md.getAttribute('data-ce-moveday'), q2=ceFindSlot(id2); if(!q2||!md.value) return; var at2=cePostAtMs(q2), hm=at2?HQ.pad(HQ.sydParts(at2).h)+':'+HQ.pad(HQ.sydParts(at2).min):(ceSlotTimes()[ceSlotKey(q2)]||'19:00'); ceMove(id2, md.value, hm); return; }
@@ -4382,11 +4390,12 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     html+='<div><span class="ce-k">What is it?</span><div class="ce-choice"><label><input type="radio" name="ca-kind" value="raw" data-ca="kind" checked><span>Raw footage<small>The pipeline edits it with your notes, makes 5 versions and trials them.</small></span></label><label><input type="radio" name="ca-kind" value="final" data-ca="kind"><span>Finished edit<small>Your own edit, posted as it is. Add several versions (different hooks, covers, cuts) to test them against each other. It still comes to you for approval first.</small></span></label></div></div>';
     html+='<label>Trial reel?<select class="input" data-ca-f="trial"><option value="on" selected>Yes · trial it, post the winner 72 h later</option><option value="off">No · post it at the slot</option></select></label><div class="f-note" style="margin-top:-6px">Yes: every version goes out as an Instagram trial reel (non-followers only) once you approve it, and 72 hours later the best one posts to everyone. Works with one version too.</div>';
     html+='<div><span class="ce-k">Where is it?</span><div class="ce-choice"><label><input type="radio" name="ca-src" value="upload" data-ca="src" checked><span>Upload from this device<small>Videos, photos, audio. Big files are fine; it resumes if the connection drops.</small></span></label><label><input type="radio" name="ca-src" value="mac" data-ca="src"><span>Already on the Mac<small>A folder in footage/ (AirDrop or iCloud).</small></span></label></div></div>';
-    html+='<div data-ca-upload class="ce-roles"><label class="ce-role"><b>🎥 Video footage</b><small>The clips you filmed (all takes are fine).</small><input type="file" multiple accept="video/*,.mov,.mp4,.m4v" data-ca-files="footage" aria-label="Video footage"></label><label class="ce-role" data-ca-extra><b>🎙 Voiceover</b><small>Optional: a voice memo or a video of you talking. It becomes the audio; the footage is cut to it.</small><input type="file" multiple accept="audio/*,video/*,.m4a,.mp3,.wav,.mov,.mp4" data-ca-files="voiceover" aria-label="Voiceover"></label><label class="ce-role" data-ca-extra><b>🖼 Photos to put on top</b><small>Optional: before/afters, screenshots, a macros card. Say where each goes in the script’s “On top of the video” list (file names help).</small><input type="file" multiple accept="image/*,.heic,video/*" data-ca-files="overlay" aria-label="Photos to put on top"></label><div class="f-note">Keep HQ open on this screen until the bars finish.</div></div>';
+    html+='<div data-ca-upload class="ce-roles"><label class="ce-role"><b>🎥 Video footage</b><small>The clips you filmed (all takes are fine).</small><input type="file" multiple accept="video/*,.mov,.mp4,.m4v" data-ca-files="footage" aria-label="Video footage"></label><label class="ce-role" data-ca-extra><b>🎙 Voiceover</b><small>Optional: a voice memo or a video of you talking. It becomes the audio; the footage is cut to it.</small><input type="file" multiple accept="audio/*,video/*,.m4a,.mp3,.wav,.mov,.mp4" data-ca-files="voiceover" aria-label="Voiceover"></label><label class="ce-role" data-ca-extra><b>🖼 Photos to put on top</b><small>Optional: before/afters, screenshots, a macros card. Say where each goes in the script’s “On top of the video” list (file names help).</small><input type="file" multiple accept="image/*,.heic,video/*" data-ca-files="overlay" aria-label="Photos to put on top">'+ceDirPick('overlay')+'</label><div class="f-note">Keep HQ open on this screen until the bars finish.</div></div>';
     html+='<div data-ca-mac hidden>'+(folders.length?'<label>Folder in footage/<select class="input" data-ca-f="folder">'+folders.map(function(f){ return '<option value="'+E(f.name)+'">'+E(f.name+' · '+f.files+' file'+(f.files===1?'':'s')+(f.changedAt?' · '+(relTime(f.changedAt)||''):''))+'</option>'; }).join('')+'</select></label>':'<div class="empty-state">No unclaimed folders in footage/ on the Mac'+((state.contentAutopost||{}).footageFoldersAt?' (checked '+esc(relTime(state.contentAutopost.footageFoldersAt)||'')+')':'')+'. Drop the footage into its own folder there and it shows up here within 20 minutes.</div>')+'</div>';
     html+='<div class="grid">'+sel('format',CE_FORMATS,pre?ceText(pre.format):'','Format')+sel('funnel',['TOF','MOF','BOF'],pre?(ceFunnel(pre.funnel)||''):'','Funnel')+sel('location',CE_LOCS,pre?ceText(pre.location):'','Location')+'</div>';
     html+='<label>What you said (optional)<textarea class="input" data-ca-f="script" data-cs-grow placeholder="Paste or type your script if you have it. The pipeline transcribes the footage anyway.">'+E(pre&&pre.script||'')+'</textarea></label>';
     html+='<label data-ca-notes>Editing notes (optional)<textarea class="input" data-ca-f="editNotes" data-cs-grow placeholder="Text on screen, B-roll, zooms, music feel…">'+E(pre&&pre.editNotes||'')+'</textarea></label>';
+    html+='<div class="f-note" data-ca-skip role="status"></div>';
     html+='<div class="acts"><button type="button" class="btn primary" data-ca-submit>Add reel</button><button type="button" class="btn" data-ce="close">Close</button></div><div data-ca-msg role="status"></div><div class="ce-upl" data-ca-progress></div>';
     html+='</div>';
     el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>'; el.hidden=false;
@@ -4443,7 +4452,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     var g=function(k){ var x=root.querySelector('[data-ca-f="'+k+'"]'); return x?x.value:''; };
     var msg=root.querySelector('[data-ca-msg]'), say=function(t, err){ msg.textContent=t; msg.className=err?'ce-note':'f-note'; };
     var slot=root.querySelector('[data-ca="slot"]').value, kind=(root.querySelector('[data-ca="kind"]:checked')||{}).value||'raw', src=(root.querySelector('[data-ca="src"]:checked')||{}).value||'upload';
-    var files=[], roles=[]; if(src==='upload') root.querySelectorAll('[data-ca-files]').forEach(function(inp){ var role=inp.getAttribute('data-ca-files')||'footage'; if(kind==='final' && role!=='footage') return; Array.prototype.forEach.call(inp.files||[], function(f){ files.push(f); roles.push(role); }); });
+    var files=[], roles=[]; if(src==='upload'){ var gat=ceGatherFiles(root, kind==='final'?['footage']:null); files=gat.files; roles=gat.roles; }
     var folder=src==='mac'?g('folder'):'';
     var title=g('title').trim();
     if(src==='upload'&&!files.length){ say('Pick the files to upload.', true); return; }
@@ -4503,6 +4512,103 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     }catch(e){ u.status='error'; say('Uploaded, but saving the links failed: '+(e.message||e)+'. Open this reel again to retry.', true); btn.disabled=false; btn.textContent='Add reel'; }
     renderNow('content');
   }
+  /* --- Add footage or photos to a reel that already has its footage (any reel that hasn't posted).
+     Each upload is its own batch in q.footageAdds, so it never touches footageUpload. The Mac downloads the batch into the
+     reel's footage folder (photos -> overlays/, voiceover -> voiceover/) and the next edit uses them: photos replace the
+     placeholder cards (matched by file name), new clips go where they fit. */
+  var CE_ROLE_OK={ footage:/\.(mov|mp4|m4v|avi|mkv|webm)$/i, voiceover:/\.(m4a|mp3|wav|aac|aiff?|caf|mov|mp4|m4v)$/i, overlay:/\.(jpe?g|png|heic|heif|webp|gif|tiff?|mov|mp4|m4v)$/i };
+  function ceDirPick(role){ var t=document.createElement('input'); return ('webkitdirectory' in t)?'<span class="f-note">or <button type="button" class="ce-dirpick" data-ca-dirbtn>pick a whole folder</button><input type="file" webkitdirectory multiple data-ca-dir="'+role+'" hidden></span>':''; }
+  // every picked file, by role; folders (which arrive as empty items), hidden files and the wrong kind of file are skipped and listed
+  function ceGatherFiles(root, onlyRoles){
+    var files=[], roles=[], skipped=[], seen={};
+    root.querySelectorAll('[data-ca-files],[data-ca-dir]').forEach(function(inp){
+      var role=inp.getAttribute('data-ca-files')||inp.getAttribute('data-ca-dir')||'footage'; if(onlyRoles && onlyRoles.indexOf(role)<0) return;
+      if(inp.parentElement && inp.parentElement.closest('[hidden]')) return;
+      Array.prototype.forEach.call(inp.files||[], function(f){
+        var n=f.name||'', key=role+'|'+(f.webkitRelativePath||n)+'|'+f.size;
+        if(seen[key]) return; seen[key]=1;
+        if(/^\./.test(n)) return;
+        if(!f.size){ skipped.push({name:n, why:'folder'}); return; }
+        var okType=role==='footage'?/^video\//.test(f.type):role==='voiceover'?/^(audio|video)\//.test(f.type):/^(image|video)\//.test(f.type);
+        if(!okType && !(CE_ROLE_OK[role]||/./).test(n)){ skipped.push({name:n, why:'type'}); return; }
+        files.push(f); roles.push(role);
+      });
+    });
+    return {files:files, roles:roles, skipped:skipped};
+  }
+  function ceFilesPicked(root){
+    if(!root) return; var box=root.querySelector('[data-ca-skip]'); if(!box) return;
+    var g=ceGatherFiles(root), fold=g.skipped.filter(function(x){ return x.why==='folder'; }), other=g.skipped.filter(function(x){ return x.why!=='folder'; });
+    var t=g.files.length?g.files.length+' file'+(g.files.length===1?'':'s')+' ready ('+ceBytes(g.files.reduce(function(a,f){ return a+f.size; },0))+').':'';
+    if(fold.length) t+=' Skipped '+fold.map(function(x){ return '“'+x.name+'”'; }).join(', ')+': '+(fold.length===1?'that’s a folder':'those are folders')+', which can’t upload as one file. Use “pick a whole folder”, or open it and select the files inside.';
+    if(other.length) t+=' Skipped '+other.length+' file'+(other.length===1?'':'s')+' that aren’t that kind ('+other.slice(0,3).map(function(x){ return x.name; }).join(', ')+(other.length>3?'…':'')+').';
+    box.textContent=t.trim(); box.className=fold.length||other.length?'ce-note':'f-note';
+  }
+  function ceAddsNote(q){
+    var adds=Array.isArray(q.footageAdds)?q.footageAdds:[]; if(!adds.length) return '';
+    var rows=adds.slice(-6).map(function(b){
+      var by={}; (b.files||[]).forEach(function(f){ var r=f.role||'footage'; by[r]=(by[r]||0)+1; });
+      var what=Object.keys(by).map(function(r){ var n=by[r]; return n+' '+(r==='overlay'?(n===1?'photo':'photos'):r==='voiceover'?'voiceover':(n===1?'clip':'clips')); }).join(', ')||'files';
+      var st=b.status==='failed'?'<b style="color:var(--crit)">upload failed'+(b.error?': '+esc(ceText(b.error)):'')+'</b>':b.status==='uploading'?(ceUploads[q.id+'+'+b.id]&&ceUploads[q.id+'+'+b.id].status==='uploading'?'uploading…':'upload didn’t finish, add them again'):b.error?'<b style="color:var(--crit)">'+esc(ceText(b.error))+'</b>':b.expiredNote?esc(ceText(b.expiredNote)):b.pulledAt?'on the Mac '+esc(relTime(b.pulledAt)||'')+(b.usedAt?', used in the edit':', the next edit uses them'):'waiting for the Mac (every 20 min)';
+      return '<div class="f-note">Added '+esc(relTime(b.at)||'')+': '+esc(what)+' · '+st+'</div>';
+    }).join('');
+    return '<div class="ce-block"><span class="ce-k">Added later</span>'+rows+'</div>';
+  }
+  function ceRenderAddMore(el){
+    if(!ceAdd.force && !el.hidden && el.getAttribute('data-mode')==='more') return; // never wipe a running upload
+    ceAdd.force=false; el.setAttribute('data-mode','more'); el.classList.add('side');
+    var q=ceFindSlot(ceAdd.id); if(!q){ ceAdd=null; el.hidden=true; el.innerHTML=''; return; }
+    var role=function(r, icon, title, help, accept){ return '<label class="ce-role"><b>'+icon+' '+title+'</b><small>'+help+'</small><input type="file" multiple accept="'+accept+'" data-ca-files="'+r+'" aria-label="'+title+'">'+ceDirPick(r)+'</label>'; };
+    var html='<div class="ce-sheet-head"><div><h2>Add footage or photos</h2><div class="ce-meta">'+esc(ceText(q.title)||'This reel')+'. The Mac picks them up within 20 minutes and re-edits with them.</div></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div>';
+    html+='<div class="ce-editor ce-add">';
+    html+='<div class="ce-roles">'+role('overlay','🖼','Photos','Before/afters, food, screenshots. They replace the placeholder cards; a file name like “greek yogurt” or “before” puts each in its spot.','image/*,.heic,video/*')+role('footage','🎥','More footage','Extra clips or B-roll. They’re cut in where they fit your script and notes.','video/*,.mov,.mp4,.m4v')+role('voiceover','🎙','Voiceover','A new voice memo or a video of you talking.','audio/*,video/*,.m4a,.mp3,.wav,.mov,.mp4')+'</div>';
+    html+='<label>Where should they go? (optional)<textarea class="input" data-cm-note data-cs-grow placeholder="e.g. the gym photo is the before, the two desk clips go after the lunch line"></textarea></label>';
+    html+='<div class="f-note" data-ca-skip role="status"></div>';
+    html+='<div class="acts"><button type="button" class="btn primary" data-cm-submit>Upload</button><button type="button" class="btn" data-cm-back>Back to the reel</button></div><div data-ca-msg role="status"></div><div class="ce-upl" data-ca-progress></div><div class="f-note">Keep HQ open on this screen until the bars finish.</div>';
+    html+='</div>';
+    el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>'; el.hidden=false;
+    var cb=$('ceSheetClose'); if(cb) cb.focus();
+  }
+  async function ceSubmitAddMore(btn){
+    if(!isAdmin||!db) return;
+    var root=document.querySelector('#ceSheet .ce-add'); if(!root||!ceAdd) return;
+    var msg=root.querySelector('[data-ca-msg]'), say=function(t, err){ msg.textContent=t; msg.className=err?'ce-note':'f-note'; };
+    var id=ceAdd.id, q=ceFindSlot(id); if(!q){ say('This reel is gone.', true); return; }
+    var g=ceGatherFiles(root), files=g.files, roles=g.roles, note=(root.querySelector('[data-cm-note]')||{}).value||'';
+    if(!files.length){ say(g.skipped.length?'Nothing to upload: '+(g.skipped.some(function(x){ return x.why==='folder'; })?'a folder can’t be picked as one file. Use “pick a whole folder”, or open it and select the files inside.':'those files aren’t photos, video or audio.'):'Pick the photos or footage to add.', true); return; }
+    var batch={id:'a'+Date.now().toString(36), at:ceNowIso(), status:'uploading', files:[], note:note.trim()||null, by:(currentUser&&currentUser.email)||null};
+    var save=async function(b){ var cur=ceFindSlot(id)||q, list=(Array.isArray(cur.footageAdds)?cur.footageAdds:[]).filter(function(x){ return x.id!==b.id; }).concat([b]).slice(-20); cur.footageAdds=list; await db.collection('content_queue').doc(id).update({footageAdds:list}); };
+    btn.disabled=true; btn.textContent='Uploading…';
+    try{ await save(batch); }catch(e){ say('Couldn’t save: '+(e.message||e), true); btn.disabled=false; btn.textContent='Upload'; return; }
+    var prog=root.querySelector('[data-ca-progress]'), u=ceUploads[id+'+'+batch.id]={status:'uploading', files:files.map(function(f){ return {name:f.name, size:f.size, sent:0}; })};
+    prog.innerHTML=files.map(function(f,i){ return '<div class="f" data-ca-file="'+i+'"><span>'+esc(f.webkitRelativePath||f.name)+' · '+esc(ceBytes(f.size))+'</span><div class="bar"><i></i></div></div>'; }).join('');
+    say('Uploading '+files.length+' file'+(files.length===1?'':'s')+'… keep this screen open.', false);
+    var paths=[], PART=45*1024*1024; // same 45 MB parts as the first upload (the plan caps one stored file at 50 MB)
+    for(var i=0;i<files.length;i++){
+      var f=files[i], p=id+'/add-'+batch.id+'/'+(i+1)+'-'+ceSafeName(f.name), row=prog.querySelector('[data-ca-file="'+i+'"]');
+      var bar=(function(i,f,row){ return function(sent){ u.files[i].sent=sent; var b=row&&row.querySelector('.bar i'); if(b) b.style.width=(f.size?Math.min(100,sent/f.size*100):100)+'%'; }; })(i,f,row);
+      try{
+        if(f.size<=PART){ await ceUploadOne(p, f, bar); paths.push({path:p, name:f.name, size:f.size, type:f.type||null, role:roles[i]}); }
+        else {
+          var n=Math.ceil(f.size/PART), parts=[];
+          for(var k=0;k<n;k++){ var from=k*PART, blob=f.slice(from, Math.min(f.size, from+PART)), pp=p+'.part'+String(k+1).padStart(3,'0')+'of'+String(n).padStart(3,'0');
+            await ceUploadOne(pp, new File([blob], ceSafeName(f.name)+'.part'+(k+1), {type:'application/octet-stream', lastModified:f.lastModified||0}), (function(base){ return function(sent){ bar(base+sent); }; })(from));
+            parts.push({path:pp, size:blob.size}); }
+          paths.push({path:p, name:f.name, size:f.size, type:f.type||null, role:roles[i], parts:parts});
+        }
+        u.files[i].sent=f.size; if(row) row.classList.add('done');
+      }catch(e){
+        if(row){ row.classList.add('err'); row.querySelector('span').textContent=f.name+' · failed: '+String(e.message||e).slice(0,240); }
+        u.status='error'; batch.status='failed'; batch.error=String(e.message||e).slice(0,300); try{ await save(batch); }catch(e2){}
+        say('The upload failed. Tap Upload to try again.', true); btn.disabled=false; btn.textContent='Upload'; renderNow('content'); return;
+      }
+    }
+    try{
+      batch.files=await ceLinkFiles(paths); batch.status='uploaded'; batch.uploadedAt=ceNowIso(); await save(batch);
+      u.status='done'; say('Uploaded. The Mac picks them up within 20 minutes and re-edits the reel with them.', false); btn.textContent='Done';
+    }catch(e){ u.status='error'; say('Uploaded, but saving the links failed: '+(e.message||e)+'. Tap Upload to try again.', true); btn.disabled=false; btn.textContent='Upload'; }
+    renderNow('content');
+  }
   // Download links are valid for 7 days; refresh them while the Mac hasn't pulled the files yet (admin only, once a session).
   async function ceRefreshFootageLinks(){
     if(!isAdmin||!db||!supaClient||!supaClient.storage) return;
@@ -4512,6 +4618,12 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       var files=Array.isArray(u.files)?u.files:[]; if(!files.length||!files.some(function(f){ return !f.urlExpires||HQ.parseTs(f.urlExpires)<soon; })) continue;
       ceLinkRefresh[q.id]=true;
       try{ var fu=Object.assign({}, u, {files:await ceLinkFiles(files), expiredNote:null, linksRefreshedAt:ceNowIso()}); q.footageUpload=fu; await db.collection('content_queue').doc(q.id).update({footageUpload:fu}); }catch(e){}
+    }
+    for(var q2 of (state.contentQueue||[])){ // later batches (Add footage or photos)
+      var adds=Array.isArray(q2.footageAdds)?q2.footageAdds:[]; if(ceLinkRefresh['+'+q2.id]) continue;
+      if(!adds.some(function(b){ return b.status==='uploaded'&&!b.pulledAt&&(b.files||[]).some(function(f){ return !f.urlExpires||HQ.parseTs(f.urlExpires)<soon; }); })) continue;
+      ceLinkRefresh['+'+q2.id]=true;
+      try{ var list=[]; for(var b of adds){ list.push(b.status==='uploaded'&&!b.pulledAt?Object.assign({}, b, {files:await ceLinkFiles(b.files||[]), expiredNote:null}):b); } q2.footageAdds=list; await db.collection('content_queue').doc(q2.id).update({footageAdds:list}); }catch(e){}
     }
   }
   window.addEventListener('beforeunload', function(ev){ if(Object.keys(ceUploads).some(function(k){ return ceUploads[k].status==='uploading'; })){ ev.preventDefault(); ev.returnValue=''; } });

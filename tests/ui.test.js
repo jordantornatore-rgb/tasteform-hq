@@ -335,6 +335,33 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       const roles = await page.$$eval('#ceSheet [data-ca-files]', els => els.map(e => e.getAttribute('data-ca-files')));
       check(`${lbl}: Add reel has separate boxes for footage, voiceover and photos to put on top`, () => assert.deepStrictEqual(roles, ['footage', 'voiceover', 'overlay']));
       await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
+      // Add footage or photos later: any reel that hasn't posted; a folder (an empty item) is skipped with a clear note; batches go to footageAdds
+      await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-await"]').click()); await page.waitForTimeout(150);
+      const hasMore = await page.evaluate(() => !!document.querySelector('#ceSheet [data-ce-addmore="test-await"]'));
+      check(`${lbl}: a reel waiting for approval offers Add footage or photos`, () => assert.ok(hasMore));
+      await page.click('#ceSheet [data-ce-addmore="test-await"]'); await page.waitForTimeout(150);
+      const moreRoles = await page.$$eval('#ceSheet [data-ca-files]', els => els.map(e => e.getAttribute('data-ca-files')));
+      check(`${lbl}: Add footage or photos has photos, more footage and voiceover`, () => assert.deepStrictEqual(moreRoles, ['overlay', 'footage', 'voiceover']));
+      await page.setInputFiles('#ceSheet [data-ca-files="overlay"]', [{ name: '1010 Diet photos', mimeType: '', buffer: Buffer.alloc(0) }]);
+      await page.waitForTimeout(80);
+      const skipNote = await page.$eval('#ceSheet [data-ca-skip]', e => e.textContent);
+      check(`${lbl}: picking a folder says it was skipped and how to add it`, () => assert.ok(/1010 Diet photos/.test(skipNote) && /folder/.test(skipNote) && /pick a whole folder/.test(skipNote), skipNote));
+      await page.evaluate(() => { // stub the store: uploads succeed at once, links come back signed
+        window.tus = { Upload: function (file, o) { this.findPreviousUploads = () => Promise.resolve([]); this.start = () => { o.onProgress(file.size); o.onSuccess(); }; } };
+        const c = window.__HQ_TEST.client; c.auth.getSession = () => Promise.resolve({ data: { session: { access_token: 't' } } });
+        c.storage = { from: () => ({ createSignedUrls: (paths) => Promise.resolve({ data: paths.map(p => ({ path: p, signedUrl: 'https://signed.test/' + p })) }) }) };
+      });
+      await page.setInputFiles('#ceSheet [data-ca-files="overlay"]', [{ name: 'greek yogurt.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('jpegdata') }, { name: 'empty folder', mimeType: '', buffer: Buffer.alloc(0) }]);
+      await page.setInputFiles('#ceSheet [data-ca-files="footage"]', [{ name: 'desk.MOV', mimeType: 'video/quicktime', buffer: Buffer.from('movdata!') }]);
+      await page.fill('#ceSheet [data-cm-note]', 'yogurt goes on meal 1');
+      await page.click('#ceSheet [data-cm-submit]'); await page.waitForTimeout(400);
+      const addRow = await page.evaluate(() => { const r = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await'); return r && r.data; });
+      const b0 = addRow && addRow.footageAdds && addRow.footageAdds[0];
+      check(`${lbl}: the batch is saved as footageAdds (photos and clips, with links and the note), footageUpload untouched`, () => assert.ok(b0 && b0.status === 'uploaded' && b0.files.length === 2 && b0.files.find(f => f.role === 'overlay' && f.name === 'greek yogurt.jpg' && /signed\.test/.test(f.url)) && b0.files.find(f => f.role === 'footage') && b0.note === 'yogurt goes on meal 1' && !addRow.footageUpload && b0.files.every(f => f.path.indexOf('test-await/add-' + b0.id + '/') === 0), JSON.stringify(addRow && addRow.footageAdds)));
+      await page.click('#ceSheet [data-cm-back]'); await page.waitForTimeout(150);
+      const addedTxt = await page.$eval('#ceSheet', e => { const k = Array.from(e.querySelectorAll('.ce-k')).find(x => /Added later/i.test(x.textContent)); return k ? k.parentElement.innerText : 'no Added later block'; });
+      check(`${lbl}: the reel shows what was added and that the Mac picks it up`, () => assert.ok(/Added later/i.test(addedTxt) && /1 photo, 1 clip/.test(addedTxt) && /waiting for the Mac/.test(addedTxt), addedTxt.slice(0, 800)));
+      await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
       // Scanner watchlist: ✕ removes a creator (marked, never deleted), Undo brings it back
       await page.click('#ceViewSeg [data-ceview="scan"]'); await page.waitForTimeout(200);
       await page.click('[data-cr-remove="test.creator"]'); await page.waitForTimeout(200);
