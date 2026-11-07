@@ -2994,7 +2994,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   var ceRename=null, ceRenameForce=false, ceWeekOffset=0, ceShowFilming=false, ceOpenId=null, ceCopyTexts={}, ceBusy={};
   var ceFilters={status:'', funnel:'', format:'', type:'', office:false, lane:'', sort:'new'};
   var CE_LANES=[['niche','Niche'],['fitness','Fitness'],['format','Format'],['audience','Audience']];
-  var ceAdd=null, ceUploads={}, ceLinkRefresh={}, ceTusLoading=null;
+  var ceAdd=null, ceUploads={}, ceLinkRefresh={}, ceTusLoading=null, ceBatchSeq=0;
   var ceScript=null, ceScriptTimer=null, ceFilm=false, ceFilmForce=false, cePreview=null, ceSigned={}, ceBroken={}, ceIdeaFocus=null, ceStdOpen=false, ceInspoEdit=null, ceHoverEl=null;
 
   function ceIdx(s){ return CE_STATUS.indexOf(String(s||'')); }
@@ -3580,6 +3580,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       var dbt=t.closest('[data-ca-dirbtn]'); if(dbt){ ev.preventDefault(); var dip=dbt.parentElement.querySelector('[data-ca-dir]'); if(dip) dip.click(); return; }
       var amo=t.closest('[data-ce-addmore]'); if(amo){ ceCloseOverlays(); ceOpenId=null; ceEdit=null; ceAdd={id:amo.getAttribute('data-ce-addmore'), more:true, force:true}; ceRenderSheet(); return; }
       var ams=t.closest('[data-cm-submit]'); if(ams){ ceSubmitAddMore(ams); return; }
+      var amr=t.closest('[data-cm-retry]'); if(amr){ ceSubmitAddMore(amr, true); return; }
       var amb=t.closest('[data-cm-back]'); if(amb){ var bid=ceAdd&&ceAdd.id; ceCloseOverlays(); ceOpenId=bid; ceRenderSheet(); return; }
       var sct=t.closest('[data-ce-script]'); if(sct){ ceOpenScript({id:sct.getAttribute('data-ce-script')}); return; }
       var dup=t.closest('[data-ce-dup]'); if(dup){ ceDuplicate(dup.getAttribute('data-ce-dup'), dup); return; }
@@ -4416,16 +4417,27 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     return ceTusLoading;
   }
   function ceSafeName(n){ return String(n||'file').normalize('NFKD').replace(/[^\w.\-]+/g,'-').replace(/^-+|-+$/g,'').slice(-120)||'file'; }
+  // The bucket only takes listed types; if it rejects this one (415 / "mime type … not supported"), send it once more as
+  // application/octet-stream, which is allowed. The Mac goes by the file name, not the stored type.
+  function ceTypeRejected(e){
+    var r=e&&e.originalResponse, st=r&&typeof r.getStatus==='function'?r.getStatus():(e&&(e.statusCode||e.status));
+    return String(st)==='415'||/response code: 415|invalid_mime_type|mime type[^"]{0,120}not supported/i.test(String((e&&e.message)||e||''));
+  }
   async function ceUploadOne(path, file, onProgress){
+    var ct=file.type||'application/octet-stream';
+    try{ await ceUploadAs(path, file, onProgress, ct); }
+    catch(e){ if(ct==='application/octet-stream'||!ceTypeRejected(e)) throw e; onProgress(0); await ceUploadAs(path, file, onProgress, 'application/octet-stream'); }
+  }
+  async function ceUploadAs(path, file, onProgress, ct){
     var tus=await ceLoadTus(), base=(supaClient&&supaClient.supabaseUrl)||'https://hucqdrekawzsrbbkczgj.supabase.co';
     var sess=await supaClient.auth.getSession(), token=sess&&sess.data&&sess.data.session&&sess.data.session.access_token;
     if(!token) throw new Error('Sign in again.');
     if(!tus){ // no resumable client: plain upload (fine for smaller files)
-      var r=await supaClient.storage.from('content-footage').upload(path, file, {upsert:true, contentType:file.type||'application/octet-stream'}); if(r.error) throw r.error; onProgress(file.size); return;
+      var r=await supaClient.storage.from('content-footage').upload(path, file, {upsert:true, contentType:ct}); if(r.error) throw r.error; onProgress(file.size); return;
     }
     await new Promise(function(resolve, reject){
       var up=new tus.Upload(file, { endpoint: base+'/storage/v1/upload/resumable', retryDelays:[0,3000,5000,10000,20000,60000,120000], headers:{ 'x-upsert':'true' }, uploadDataDuringCreation:true, removeFingerprintOnSuccess:true, chunkSize:6*1024*1024,
-        metadata:{ bucketName:'content-footage', objectName:path, contentType:file.type||'application/octet-stream', cacheControl:'3600' },
+        metadata:{ bucketName:'content-footage', objectName:path, contentType:ct, cacheControl:'3600' },
         onBeforeRequest: async function(req){ var t2=token; try{ var s2=await supaClient.auth.getSession(); t2=(s2&&s2.data&&s2.data.session&&s2.data.session.access_token)||token; }catch(e){} req.setHeader('authorization','Bearer '+t2); },
         onError: function(err){ reject(err); }, onProgress: function(sent){ onProgress(sent); }, onSuccess: function(){ resolve(); } });
       up.findPreviousUploads().then(function(prev){ if(prev&&prev.length) up.resumeFromPreviousUpload(prev[0]); up.start(); }, function(){ up.start(); });
@@ -4519,6 +4531,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   var CE_ROLE_OK={ footage:/\.(mov|mp4|m4v|avi|mkv|webm)$/i, voiceover:/\.(m4a|mp3|wav|aac|aiff?|caf|mov|mp4|m4v)$/i, overlay:/\.(jpe?g|png|heic|heif|webp|gif|tiff?|mov|mp4|m4v)$/i };
   function ceDirPick(role){ var t=document.createElement('input'); return ('webkitdirectory' in t)?'<span class="f-note">or <button type="button" class="ce-dirpick" data-ca-dirbtn>pick a whole folder</button><input type="file" webkitdirectory multiple data-ca-dir="'+role+'" hidden></span>':''; }
   // every picked file, by role; folders (which arrive as empty items), hidden files and the wrong kind of file are skipped and listed
+  function ceJunkFile(f){ var segs=String((f&&(f.webkitRelativePath||f.name))||'').split('/'); return segs.some(function(x){ return /^\./.test(x)||x==='__MACOSX'; })||/^(thumbs\.db|desktop\.ini|icon\r?)$/i.test(segs[segs.length-1]); }
   function ceGatherFiles(root, onlyRoles){
     var files=[], roles=[], skipped=[], seen={};
     root.querySelectorAll('[data-ca-files],[data-ca-dir]').forEach(function(inp){
@@ -4527,7 +4540,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       Array.prototype.forEach.call(inp.files||[], function(f){
         var n=f.name||'', key=role+'|'+(f.webkitRelativePath||n)+'|'+f.size;
         if(seen[key]) return; seen[key]=1;
-        if(/^\./.test(n)) return;
+        if(ceJunkFile(f)) return;
         if(!f.size){ skipped.push({name:n, why:'folder'}); return; }
         var okType=role==='footage'?/^video\//.test(f.type):role==='voiceover'?/^(audio|video)\//.test(f.type):/^(image|video)\//.test(f.type);
         if(!okType && !(CE_ROLE_OK[role]||/./).test(n)){ skipped.push({name:n, why:'type'}); return; }
@@ -4545,11 +4558,12 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     box.textContent=t.trim(); box.className=fold.length||other.length?'ce-note':'f-note';
   }
   function ceAddsNote(q){
-    var adds=Array.isArray(q.footageAdds)?q.footageAdds:[]; if(!adds.length) return '';
+    var adds=(Array.isArray(q.footageAdds)?q.footageAdds:[]).filter(function(b){ return b.status!=='retried'; }); if(!adds.length) return '';
     var rows=adds.slice(-6).map(function(b){
       var by={}; (b.files||[]).forEach(function(f){ var r=f.role||'footage'; by[r]=(by[r]||0)+1; });
       var what=Object.keys(by).map(function(r){ var n=by[r]; return n+' '+(r==='overlay'?(n===1?'photo':'photos'):r==='voiceover'?'voiceover':(n===1?'clip':'clips')); }).join(', ')||'files';
       var st=b.status==='failed'?'<b style="color:var(--crit)">upload failed'+(b.error?': '+esc(ceText(b.error)):'')+'</b>':b.status==='uploading'?(ceUploads[q.id+'+'+b.id]&&ceUploads[q.id+'+'+b.id].status==='uploading'?'uploading…':'upload didn’t finish, add them again'):b.error?'<b style="color:var(--crit)">'+esc(ceText(b.error))+'</b>':b.expiredNote?esc(ceText(b.expiredNote)):b.pulledAt?'on the Mac '+esc(relTime(b.pulledAt)||'')+(b.usedAt?', used in the edit':', the next edit uses them'):'waiting for the Mac (every 20 min)';
+      if(b.status!=='failed'&&Array.isArray(b.failed)&&b.failed.length) st+=' · <b style="color:var(--crit)">'+b.failed.length+' didn’t upload: '+esc(b.failed.slice(0,4).map(function(x){ return x.name; }).join(', ')+(b.failed.length>4?'…':''))+'</b>, add '+(b.failed.length===1?'it':'them')+' again';
       return '<div class="f-note">Added '+esc(relTime(b.at)||'')+': '+esc(what)+' · '+st+'</div>';
     }).join('');
     return '<div class="ce-block"><span class="ce-k">Added later</span>'+rows+'</div>';
@@ -4564,28 +4578,43 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     html+='<div class="ce-roles">'+role('overlay','🖼','Photos','Before/afters, food, screenshots. They replace the placeholder cards; a file name like “greek yogurt” or “before” puts each in its spot.','image/*,.heic,video/*')+role('footage','🎥','More footage','Extra clips or B-roll. They’re cut in where they fit your script and notes.','video/*,.mov,.mp4,.m4v')+role('voiceover','🎙','Voiceover','A new voice memo or a video of you talking.','audio/*,video/*,.m4a,.mp3,.wav,.mov,.mp4')+'</div>';
     html+='<label>Where should they go? (optional)<textarea class="input" data-cm-note data-cs-grow placeholder="e.g. the gym photo is the before, the two desk clips go after the lunch line"></textarea></label>';
     html+='<div class="f-note" data-ca-skip role="status"></div>';
-    html+='<div class="acts"><button type="button" class="btn primary" data-cm-submit>Upload</button><button type="button" class="btn" data-cm-back>Back to the reel</button></div><div data-ca-msg role="status"></div><div class="ce-upl" data-ca-progress></div><div class="f-note">Keep HQ open on this screen until the bars finish.</div>';
+    html+='<div class="acts"><button type="button" class="btn primary" data-cm-submit>Upload</button><button type="button" class="btn primary" data-cm-retry hidden>Retry failed</button><button type="button" class="btn" data-cm-back>Back to the reel</button></div><div data-ca-msg role="status"></div><div class="ce-upl" data-ca-progress></div><div class="f-note">Keep HQ open on this screen until the bars finish.</div>';
     html+='</div>';
     el.innerHTML='<div class="ce-sheet-card" role="document">'+html+'</div>'; el.hidden=false;
     var cb=$('ceSheetClose'); if(cb) cb.focus();
   }
-  async function ceSubmitAddMore(btn){
+  // One failing file never stops the others. Files that went up are saved as a batch straight away (the Mac can start);
+  // the failed ones are listed with "Retry failed", which sends only those, as a new batch. Nothing is sent twice.
+  async function ceSubmitAddMore(btn, retry){
     if(!isAdmin||!db) return;
     var root=document.querySelector('#ceSheet .ce-add'); if(!root||!ceAdd) return;
     var msg=root.querySelector('[data-ca-msg]'), say=function(t, err){ msg.textContent=t; msg.className=err?'ce-note':'f-note'; };
+    var upBtn=root.querySelector('[data-cm-submit]'), rtBtn=root.querySelector('[data-cm-retry]');
     var id=ceAdd.id, q=ceFindSlot(id); if(!q){ say('This reel is gone.', true); return; }
-    var g=ceGatherFiles(root), files=g.files, roles=g.roles, note=(root.querySelector('[data-cm-note]')||{}).value||'';
-    if(!files.length){ say(g.skipped.length?'Nothing to upload: '+(g.skipped.some(function(x){ return x.why==='folder'; })?'a folder can’t be picked as one file. Use “pick a whole folder”, or open it and select the files inside.':'those files aren’t photos, video or audio.'):'Pick the photos or footage to add.', true); return; }
-    var batch={id:'a'+Date.now().toString(36), at:ceNowIso(), status:'uploading', files:[], note:note.trim()||null, by:(currentUser&&currentUser.email)||null};
-    var save=async function(b){ var cur=ceFindSlot(id)||q, list=(Array.isArray(cur.footageAdds)?cur.footageAdds:[]).filter(function(x){ return x.id!==b.id; }).concat([b]).slice(-20); cur.footageAdds=list; await db.collection('content_queue').doc(id).update({footageAdds:list}); };
-    btn.disabled=true; btn.textContent='Uploading…';
-    try{ await save(batch); }catch(e){ say('Couldn’t save: '+(e.message||e), true); btn.disabled=false; btn.textContent='Upload'; return; }
-    var prog=root.querySelector('[data-ca-progress]'), u=ceUploads[id+'+'+batch.id]={status:'uploading', files:files.map(function(f){ return {name:f.name, size:f.size, sent:0}; })};
-    prog.innerHTML=files.map(function(f,i){ return '<div class="f" data-ca-file="'+i+'"><span>'+esc(f.webkitRelativePath||f.name)+' · '+esc(ceBytes(f.size))+'</span><div class="bar"><i></i></div></div>'; }).join('');
-    say('Uploading '+files.length+' file'+(files.length===1?'':'s')+'… keep this screen open.', false);
-    var paths=[], PART=45*1024*1024; // same 45 MB parts as the first upload (the plan caps one stored file at 50 MB)
-    for(var i=0;i<files.length;i++){
-      var f=files[i], p=id+'/add-'+batch.id+'/'+(i+1)+'-'+ceSafeName(f.name), row=prog.querySelector('[data-ca-file="'+i+'"]');
+    var run=ceAdd.run, idx;
+    if(retry){ if(!run||run.busy||!(run.failed.length||run.pending.length)) return; idx=run.failed.slice(); }
+    else {
+      if(run&&run.busy) return;
+      var g=ceGatherFiles(root), note=(root.querySelector('[data-cm-note]')||{}).value||'';
+      if(!g.files.length){ say(g.skipped.length?'Nothing to upload: '+(g.skipped.some(function(x){ return x.why==='folder'; })?'a folder can’t be picked as one file. Use “pick a whole folder”, or open it and select the files inside.':'those files aren’t photos, video or audio.'):'Pick the photos or footage to add.', true); return; }
+      run=ceAdd.run={files:g.files, roles:g.roles, note:note.trim()||null, failed:[], errors:{}, pending:[], lastBatch:null, busy:false};
+      idx=g.files.map(function(_, i){ return i; });
+    }
+    var files=run.files, roles=run.roles;
+    var batch={id:'a'+Date.now().toString(36)+(ceBatchSeq++).toString(36), at:ceNowIso(), status:'uploading', files:[], note:run.note, by:(currentUser&&currentUser.email)||null};
+    if(retry&&run.lastBatch) batch.retryOf=run.lastBatch;
+    var save=async function(b){ var cur=ceFindSlot(id)||q, old=Array.isArray(cur.footageAdds)?cur.footageAdds:[], list=old.some(function(x){ return x.id===b.id; })?old.map(function(x){ return x.id===b.id?b:x; }):old.concat([b]).slice(-20); cur.footageAdds=list; await db.collection('content_queue').doc(id).update({footageAdds:list}); };
+    run.busy=true; if(upBtn){ upBtn.disabled=true; upBtn.textContent='Uploading…'; } if(rtBtn){ rtBtn.disabled=true; rtBtn.hidden=!retry; rtBtn.textContent='Retrying…'; }
+    var stop=function(t){ run.busy=false; say(t, true); if(upBtn){ upBtn.disabled=!!retry; upBtn.textContent=retry?'Uploaded':'Upload'; } if(rtBtn){ rtBtn.disabled=false; rtBtn.textContent='Retry failed'; } };
+    try{ await save(batch); }catch(e){ stop('Couldn’t save: '+(e.message||e)); return; }
+    var key=id+'+'+batch.id, u=ceUploads[key]={status:'uploading', files:files.map(function(f){ return {name:f.name, size:f.size, sent:0}; })};
+    var prog=root.querySelector('[data-ca-progress]'), label=function(f){ return (f.webkitRelativePath||f.name)+' · '+ceBytes(f.size); };
+    if(!retry) prog.innerHTML=files.map(function(f,i){ return '<div class="f" data-ca-file="'+i+'"><span>'+esc(label(f))+'</span><div class="bar"><i></i></div></div>'; }).join('');
+    else idx.forEach(function(i){ var r0=prog.querySelector('[data-ca-file="'+i+'"]'); if(r0){ r0.classList.remove('err'); r0.querySelector('span').textContent=label(files[i]); var b0=r0.querySelector('.bar i'); if(b0) b0.style.width='0%'; } });
+    say((retry?'Retrying ':'Uploading ')+idx.length+' file'+(idx.length===1?'':'s')+'… keep this screen open.', false);
+    var paths=run.pending.slice(), failed=[], PART=45*1024*1024; // same 45 MB parts as the first upload (the plan caps one stored file at 50 MB)
+    for(var j=0;j<idx.length;j++){
+      var i=idx[j], f=files[i], p=id+'/add-'+batch.id+'/'+(i+1)+'-'+ceSafeName(f.name), row=prog.querySelector('[data-ca-file="'+i+'"]');
       var bar=(function(i,f,row){ return function(sent){ u.files[i].sent=sent; var b=row&&row.querySelector('.bar i'); if(b) b.style.width=(f.size?Math.min(100,sent/f.size*100):100)+'%'; }; })(i,f,row);
       try{
         if(f.size<=PART){ await ceUploadOne(p, f, bar); paths.push({path:p, name:f.name, size:f.size, type:f.type||null, role:roles[i]}); }
@@ -4598,15 +4627,32 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
         }
         u.files[i].sent=f.size; if(row) row.classList.add('done');
       }catch(e){
-        if(row){ row.classList.add('err'); row.querySelector('span').textContent=f.name+' · failed: '+String(e.message||e).slice(0,240); }
-        u.status='error'; batch.status='failed'; batch.error=String(e.message||e).slice(0,300); try{ await save(batch); }catch(e2){}
-        say('The upload failed. Tap Upload to try again.', true); btn.disabled=false; btn.textContent='Upload'; renderNow('content'); return;
+        var em=String((e&&e.message)||e).slice(0,240); failed.push(i); run.errors[i]=em;
+        if(row){ row.classList.add('err'); row.querySelector('span').textContent=(f.webkitRelativePath||f.name)+' · failed: '+em; }
       }
     }
-    try{
-      batch.files=await ceLinkFiles(paths); batch.status='uploaded'; batch.uploadedAt=ceNowIso(); await save(batch);
-      u.status='done'; say('Uploaded. The Mac picks them up within 20 minutes and re-edits the reel with them.', false); btn.textContent='Done';
-    }catch(e){ u.status='error'; say('Uploaded, but saving the links failed: '+(e.message||e)+'. Tap Upload to try again.', true); btn.disabled=false; btn.textContent='Upload'; }
+    run.failed=failed;
+    var failList=failed.map(function(i){ return {name:files[i].webkitRelativePath||files[i].name, error:String(run.errors[i]||'').slice(0,200)}; });
+    try{ batch.files=paths.length?await ceLinkFiles(paths):[]; run.pending=[]; }
+    catch(e){ // stored but not linked yet: keep them for the retry, which links them without sending them again
+      run.pending=paths; batch.files=[]; batch.status='failed'; batch.error='Saving the download links failed: '+String(e.message||e).slice(0,200); batch.failed=failList;
+      u.status='error'; try{ await save(batch); }catch(e2){} run.lastBatch=batch.id; renderNow('content');
+      stop('Uploaded, but saving the links failed: '+(e.message||e)+'. Tap Retry failed; it won’t send the files again.'); if(rtBtn) rtBtn.hidden=false; if(upBtn){ upBtn.disabled=true; upBtn.textContent='Uploaded'; } return;
+    }
+    batch.status=batch.files.length?'uploaded':'failed'; batch.uploadedAt=batch.files.length?ceNowIso():null; if(failList.length) batch.failed=failList;
+    if(!batch.files.length) batch.error=failList.length?failList[0].error:'Nothing uploaded';
+    try{ await save(batch); }catch(e){}
+    if(retry&&run.lastBatch){ // the earlier batch's failures are now carried by this one
+      var prevB=((ceFindSlot(id)||q).footageAdds||[]).find(function(x){ return x.id===run.lastBatch; });
+      if(prevB){ var pb=Object.assign({}, prevB, {failed:[], retriedIn:batch.id}); if(!(pb.files||[]).length) pb.status='retried'; try{ await save(pb); }catch(e){} }
+    }
+    run.lastBatch=batch.id; run.busy=false; u.status=failed.length?'error':'done';
+    if(!failed.length){ say((retry?'All uploaded now. ':'Uploaded. ')+'The Mac picks them up within 20 minutes and re-edits the reel with them.', false); if(upBtn){ upBtn.disabled=true; upBtn.textContent='Done'; } if(rtBtn) rtBtn.hidden=true; }
+    else {
+      var okN=idx.length-failed.length;
+      say((okN?okN+' of '+idx.length+' uploaded (the Mac picks those up within 20 minutes). ':'')+failed.length+' didn’t go up: '+failList.map(function(x){ return x.name; }).join(', ')+'. Tap Retry failed to send just '+(failed.length===1?'that one':'those')+'.', true);
+      if(upBtn){ upBtn.disabled=true; upBtn.textContent='Uploaded'; } if(rtBtn){ rtBtn.hidden=false; rtBtn.disabled=false; rtBtn.textContent='Retry failed'; }
+    }
     renderNow('content');
   }
   // Download links are valid for 7 days; refresh them while the Mac hasn't pulled the files yet (admin only, once a session).

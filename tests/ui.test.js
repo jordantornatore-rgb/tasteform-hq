@@ -361,6 +361,37 @@ async function visibleText(page) { return page.evaluate(() => document.getElemen
       await page.click('#ceSheet [data-cm-back]'); await page.waitForTimeout(150);
       const addedTxt = await page.$eval('#ceSheet', e => { const k = Array.from(e.querySelectorAll('.ce-k')).find(x => /Added later/i.test(x.textContent)); return k ? k.parentElement.innerText : 'no Added later block'; });
       check(`${lbl}: the reel shows what was added and that the Mac picks it up`, () => assert.ok(/Added later/i.test(addedTxt) && /1 photo, 1 clip/.test(addedTxt) && /waiting for the Mac/.test(addedTxt), addedTxt.slice(0, 800)));
+      // One bad file never stops the rest: a type the bucket rejects goes again as octet-stream, a failing file is listed with Retry failed,
+      // the retry sends only that file (as a new batch), and hidden files from a folder pick are skipped
+      await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
+      await page.evaluate(() => document.querySelector('#ceRoot [data-ce-open="test-await"]').click()); await page.waitForTimeout(150);
+      await page.click('#ceSheet [data-ce-addmore="test-await"]'); await page.waitForTimeout(150);
+      await page.evaluate(() => {
+        window.__tusCalls = []; window.__brokenOk = false;
+        window.tus = { Upload: function (file, o) { this.findPreviousUploads = () => Promise.resolve([]); this.start = () => {
+          const ct = o.metadata.contentType, name = o.metadata.objectName; window.__tusCalls.push({ name, ct });
+          if (ct === 'image/webp') { const e = new Error('tus: unexpected response while creating upload, response code: 415, response text: {"statusCode":"415","error":"invalid_mime_type","message":"mime type image/webp is not supported"}'); e.originalResponse = { getStatus: () => 415 }; return o.onError(e); }
+          if (/broken/.test(name) && !window.__brokenOk) return o.onError(new Error('network went away'));
+          o.onProgress(file.size); o.onSuccess(); }; } };
+      });
+      await page.setInputFiles('#ceSheet [data-ca-files="overlay"]', [
+        { name: 'a meal.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('a') },
+        { name: 'Scoop_1800x1800.png.webp', mimeType: 'image/webp', buffer: Buffer.from('webp') },
+        { name: 'broken.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('bb') },
+        { name: 'z last.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('zz') },
+        { name: '.DS_Store', mimeType: '', buffer: Buffer.from('ds') },
+        { name: '._a meal.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('rf') }]);
+      await page.click('#ceSheet [data-cm-submit]'); await page.waitForTimeout(400);
+      const r1 = await page.evaluate(() => { const d = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await').data; return { adds: d.footageAdds, calls: window.__tusCalls, retryShown: !document.querySelector('#ceSheet [data-cm-retry]').hidden, msg: document.querySelector('#ceSheet [data-ca-msg]').textContent }; });
+      const b1 = r1.adds[r1.adds.length - 1];
+      check(`${lbl}: a failed file doesn't stop the others; the rest are saved and the failed one is listed with Retry failed`, () => assert.ok(b1.status === 'uploaded' && b1.files.map(f => f.name).sort().join('|') === 'Scoop_1800x1800.png.webp|a meal.jpg|z last.jpg' && b1.failed.length === 1 && b1.failed[0].name === 'broken.jpg' && r1.retryShown && /broken\.jpg/.test(r1.msg) && /Retry failed/.test(r1.msg), JSON.stringify(r1)));
+      check(`${lbl}: a type the bucket rejects is sent again once as application/octet-stream`, () => { const w = r1.calls.filter(c => /Scoop/.test(c.name)); assert.ok(w.length === 2 && w[0].ct === 'image/webp' && w[1].ct === 'application/octet-stream', JSON.stringify(w)); });
+      check(`${lbl}: hidden files from a folder pick (.DS_Store, ._*) are skipped`, () => assert.ok(!r1.calls.some(c => /DS_Store|\/\d+-\._|\._a/.test(c.name)), JSON.stringify(r1.calls)));
+      await page.evaluate(() => { window.__brokenOk = true; window.__tusCalls = []; });
+      await page.click('#ceSheet [data-cm-retry]'); await page.waitForTimeout(400);
+      const r2 = await page.evaluate(() => { const d = window.__HQ_TEST.client.__tables.content_queue.find(x => x.id === 'test-await').data; return { adds: d.footageAdds, calls: window.__tusCalls, retryShown: !document.querySelector('#ceSheet [data-cm-retry]').hidden }; });
+      const b2 = r2.adds[r2.adds.length - 1], b1b = r2.adds.find(x => x.id === b1.id);
+      check(`${lbl}: Retry failed sends only the failed file, as a new batch, and clears the old batch's failures`, () => assert.ok(r2.calls.length === 1 && /broken/.test(r2.calls[0].name) && b2.id !== b1.id && b2.retryOf === b1.id && b2.status === 'uploaded' && b2.files.length === 1 && b2.files[0].name === 'broken.jpg' && !(b2.failed || []).length && b1b.status === 'uploaded' && b1b.failed.length === 0 && !r2.retryShown, JSON.stringify(r2)));
       await page.click('#ceSheet [data-ce="close"]'); await page.waitForTimeout(80);
       // Scanner watchlist: ✕ removes a creator (marked, never deleted), Undo brings it back
       await page.click('#ceViewSeg [data-ceview="scan"]'); await page.waitForTimeout(200);
