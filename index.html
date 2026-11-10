@@ -987,6 +987,23 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   .mini{min-height:var(--tap);}
 }
 
+/* ---------- Subscriptions tab ---------- */
+.sub-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--s3);}
+.sub-kpi{gap:2px;}.sub-kl{font-size:var(--t-xs);color:var(--muted);}.sub-kv{font-size:1.6rem;font-weight:800;}
+.sub-item{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--border);}
+.sub-item.off{opacity:.55;}.sub-item.editing{display:block;}
+.sub-name{font-weight:700;}.sub-what,.sub-note,.sub-pm{font-size:var(--t-s);color:var(--muted);}.sub-note{font-style:italic;}
+.sub-cost{text-align:right;}.sub-amt{font-weight:700;white-space:nowrap;}.sub-amt span{font-weight:500;color:var(--muted);font-size:var(--t-s);}
+.sub-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.sub-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.sub-soon{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--border);}
+.sub-sug{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-top:10px;border-top:1px solid var(--border);}
+.sub-sug .chip{cursor:pointer;}
+.sub-form{display:flex;flex-direction:column;gap:10px;}.sub-form label{display:flex;flex-direction:column;gap:4px;font-size:var(--t-xs);color:var(--muted);font-weight:600;}
+.sub-row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.sub-form .sub-actions{justify-content:flex-start;}
+@media (pointer:coarse){.sub-form .input{min-height:var(--tap);}}
+@media (max-width:700px){.sub-item{grid-template-columns:1fr;}.sub-cost{text-align:left;}.sub-side{align-items:flex-start;}.sub-actions{justify-content:flex-start;}.sub-row3{grid-template-columns:1fr 1fr;}}
 /* ---------- Challenge tab ---------- */
 .ch-top-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .ch-scanchip{border:none;cursor:pointer;min-height:32px;padding:4px 10px;}
@@ -1099,6 +1116,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       <button class="tab" role="tab" id="tabEmail" aria-selected="false" aria-controls="viewEmail" data-view="email" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Email</span></button>
       <div class="sb-group" id="sbGroupBusiness" hidden>Business</div>
       <button class="tab" role="tab" id="tabStripe" aria-selected="false" aria-controls="viewStripe" data-view="stripe" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Revenue</span><kbd>9</kbd></button>
+      <button class="tab" role="tab" id="tabSubs" aria-selected="false" aria-controls="viewSubs" data-view="subs" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg><span>Subscriptions</span></button>
       <button class="tab" role="tab" id="tabChallenge" aria-selected="false" aria-controls="viewChallenge" data-view="challenge" hidden><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg><span>Challenge</span><span class="tab-badge" id="chBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Routine</span><kbd>0</kbd></button>
     </nav>
@@ -1576,6 +1594,12 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     <div id="stripeRoot" style="display:flex;flex-direction:column;gap:var(--s4);"></div>
   </section>
 
+  <!-- ===== SUBSCRIPTIONS (admin only; public.subscriptions is admin-only in the database) ===== -->
+  <section id="viewSubs" role="tabpanel" aria-labelledby="tabSubs" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="top"><div><h1>Subscriptions</h1><div class="sub" id="subsSub">Loading…</div></div></div>
+    <div id="subsRoot" style="display:flex;flex-direction:column;gap:var(--s4);"></div>
+  </section>
+
   <!-- ===== CHALLENGE (admin only; challenge_* rows are admin-only in the database) ===== -->
   <section id="viewChallenge" role="tabpanel" aria-labelledby="tabChallenge" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div class="top">
@@ -1647,6 +1671,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       <button class="sheet-btn" data-view="ads">Ads</button>
       <button class="sheet-btn" data-view="email" id="sheetEmail" hidden>Email</button>
       <button class="sheet-btn" data-view="stripe" id="sheetStripe" hidden>Revenue</button>
+      <button class="sheet-btn" data-view="subs" id="sheetSubs" hidden>Subscriptions</button>
       <button class="sheet-btn" data-view="challenge" id="sheetChallenge" hidden>Challenge <span class="tab-badge" id="chBadgeBb" hidden></span></button>
       <button class="sheet-btn" data-view="routine" id="sheetRoutine" hidden>Routine</button>
       <button class="sheet-btn" id="sheetTheme">Theme: system</button>
@@ -1812,7 +1837,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     today:['dms','daily','contacts','tfResponses','tfDaily','igPosts','igStories','meta','stripe'],
     funnel:['tfResponses','tfDaily','igPosts','igStories','meta','dms','daily','ads'],
     leads:['contacts','meta','dms'], dms:['dms','daily','reviews','contacts','meta'], follow:['dms','meta'], magnets:['dms','meta'],
-    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], analytics:['igPosts','igAccount','meta'], email:['email'], stripe:['stripe','meta'], challenge:[], routine:[]
+    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], analytics:['igPosts','igAccount','meta'], email:['email'], stripe:['stripe','meta'], subs:[], challenge:[], routine:[]
   };
   var dirty = {global:true}, raf = null, currentView = 'today';
   window.__hqRenders = 0; // counted by the perf test
@@ -1830,14 +1855,14 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   Object.keys(VIEW_DEPS).forEach(function(v){ dirty[v]=true; });
 
   /* ---------- views ---------- */
-  var VIEWS={today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', challenge:'viewChallenge', routine:'viewRoutine'};
-  var ADMIN_VIEWS={stripe:1, routine:1, challenge:1, email:1};
+  var VIEWS={today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine'};
+  var ADMIN_VIEWS={stripe:1, subs:1, routine:1, challenge:1, email:1};
   function setView(view, push){
     if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='today';
     currentView = view;
     Object.keys(VIEWS).forEach(function(k){ var el=$(VIEWS[k]); if(el) el.hidden = k!==view; });
     document.querySelectorAll('[data-view]').forEach(function(b){ b.setAttribute('aria-selected', b.getAttribute('data-view')===view?'true':'false'); });
-    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['leads','magnets','ads','content','analytics','email','stripe','challenge','routine'].indexOf(view)>=0?'true':'false');
+    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['leads','magnets','ads','content','analytics','email','stripe','subs','challenge','routine'].indexOf(view)>=0?'true':'false');
     document.querySelectorAll('#tabRow .tab').forEach(function(t){ t.setAttribute('tabindex', t.getAttribute('data-view')===view?'0':'-1'); });
     if(push!==false){ try{ history.replaceState(null,'','#'+view); }catch(e){} }
     closeSheet();
@@ -1878,7 +1903,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'today'; })();
 
   /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
-  var VIEW_LABEL={today:'Today', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', challenge:'Challenge', routine:'Routine'};
+  var VIEW_LABEL={today:'Today', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine'};
   var VIEW_KEYS={'1':'today','2':'dms','3':'follow','4':'magnets','5':'leads','6':'funnel','7':'apps','8':'ads','9':'stripe','0':'routine'};
   var appEl=$('appRoot');
   function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
@@ -5954,6 +5979,149 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   });
   document.addEventListener('tf-auth-signed-out', function(){ S.admin=false; client=null; S.events={}; S.members=[]; S.clients=[]; S.reviews=[]; S.pendingEvents=[]; S.sig={}; S.loaded={}; if(timer) clearInterval(timer); setVisible(false); });
   window.__challenge={ S:S, standings:standings, activity:activity, buildDrafts:buildDrafts, scanHealth:scanHealth, reviewItems:reviewItems, pts:pts, render:render, loadAll:loadAll, weekFacts:weekFacts, draftWeek:draftWeek };
+})();
+</script>
+<script>
+/* ---------- Subscriptions tab (admin only; public.subscriptions is admin-only in the database too) ----------
+   What TasteForm pays for, what each costs, when it renews and where to manage it. Nothing is converted
+   between currencies: totals are shown per currency, so no made-up exchange rate sneaks in. */
+(function(){
+  'use strict';
+  var esc=HQ.esc;
+  var client=null, admin=false, active=false, timer=null;
+  var S={ list:[], loaded:false, loadError:null, editing:null, adding:false, confirmDel:null, msg:null, msgKind:'good', busy:false, showCancelled:false };
+  var CYCLES={ monthly:{label:'month', perMonth:1}, yearly:{label:'year', perMonth:1/12}, weekly:{label:'week', perMonth:52/12}, quarterly:{label:'quarter', perMonth:1/3} };
+  var SUGGEST=['Claude','Outstand','GoHighLevel','ManyChat','Typeform','Google Workspace','Canva','CapCut'];
+  function $(id){ return document.getElementById(id); }
+  function today(){ return new Date(Date.now()+10*3600000).toISOString().slice(0,10); } // Sydney-ish day; renewals are day-level
+  function addCycle(day, cycle){ var d=new Date(day+'T00:00:00Z'); if(cycle==='yearly') d.setUTCFullYear(d.getUTCFullYear()+1); else if(cycle==='quarterly') d.setUTCMonth(d.getUTCMonth()+3); else if(cycle==='weekly') d.setUTCDate(d.getUTCDate()+7); else d.setUTCMonth(d.getUTCMonth()+1); return d.toISOString().slice(0,10); }
+  // The next renewal on or after today: a stored date in the past rolls forward by whole cycles (display only).
+  function nextRenewal(s){ var d=s.nextRenewal; if(!HQ.isDayKey(d)) return null; var t=today(), n=0; while(d<t && n<500){ d=addCycle(d, s.cycle||'monthly'); n++; } return d; }
+  function daysUntil(d){ return Math.round((Date.parse(d+'T00:00:00Z')-Date.parse(today()+'T00:00:00Z'))/86400000); }
+  function perMonth(s){ var c=CYCLES[s.cycle]||CYCLES.monthly; return HQ.isNum(+s.amount) && s.amount!=='' && s.amount!=null ? (+s.amount)*c.perMonth : null; }
+  function isLive(s){ return s.status!=='cancelled'; }
+  function money(v, cur){ return HQ.money(v, cur||'AUD', Math.round(v)===v?0:2); }
+  function totals(list){
+    var by={}; list.filter(isLive).forEach(function(s){ var m=perMonth(s); if(m==null) return; var c=s.currency||'AUD'; by[c]=(by[c]||0)+m; });
+    return Object.keys(by).sort().map(function(c){ return { cur:c, month:by[c], year:by[c]*12 }; });
+  }
+  function slug(name){ return String(name||'sub').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'sub'; }
+  function nowIso(){ return new Date().toISOString(); }
+
+  async function load(){
+    if(!client||!admin) return;
+    try{
+      var r=await client.from('subscriptions').select('*'); if(r.error) throw r.error;
+      S.list=(r.data||[]).map(function(x){ return Object.assign({id:x.id}, x.data||{}); }); S.loaded=true; S.loadError=null;
+    }catch(e){ S.loadError=(e&&e.message)||String(e); }
+    render();
+  }
+  async function save(id, patch){
+    var cur=await client.from('subscriptions').select('*').eq('id', id).maybeSingle(); if(cur.error) throw cur.error;
+    var data=Object.assign({}, (cur.data&&cur.data.data)||{}, patch, { updatedAt:nowIso() });
+    var res=await client.from('subscriptions').upsert({ id:id, data:data, updated_at:nowIso() }); if(res.error) throw res.error;
+    var i=S.list.findIndex(function(s){ return s.id===id; }), full=Object.assign({id:id}, data); if(i>=0) S.list[i]=full; else S.list.push(full);
+  }
+  async function remove(id){ var res=await client.from('subscriptions').delete().eq('id', id); if(res.error) throw res.error; S.list=S.list.filter(function(s){ return s.id!==id; }); }
+  function flash(text, kind){ S.msg=text; S.msgKind=kind||'good'; render(); clearTimeout(flash.t); flash.t=setTimeout(function(){ S.msg=null; render(); }, 5000); }
+  async function guarded(fn){ if(S.busy) return; S.busy=true; try{ await fn(); }catch(e){ flash('Couldn\'t save: '+((e&&e.message)||e)+'. Nothing was changed.','crit'); } finally{ S.busy=false; render(); } }
+
+  function form(s){
+    s=s||{}; var cur=s.currency||'AUD', cyc=s.cycle||'monthly', st=s.status||'active';
+    function opt(v,l,sel){ return '<option value="'+v+'"'+(v===sel?' selected':'')+'>'+l+'</option>'; }
+    return '<div class="sub-form" data-sub-form="'+esc(s.id||'')+'">'
+      +'<label>Name<input class="input" name="name" value="'+esc(s.name||'')+'" placeholder="e.g. Supabase"></label>'
+      +'<label>What it\'s for<input class="input" name="what" value="'+esc(s.what||'')+'" placeholder="e.g. HQ database + footage storage"></label>'
+      +'<div class="sub-row3"><label>Cost<input class="input" name="amount" inputmode="decimal" value="'+esc(s.amount==null?'':String(s.amount))+'" placeholder="25"></label>'
+      +'<label>Currency<select class="input" name="currency">'+['AUD','USD','EUR','GBP','NZD'].map(function(c){ return opt(c,c,cur); }).join('')+'</select></label>'
+      +'<label>Every<select class="input" name="cycle">'+Object.keys(CYCLES).map(function(c){ return opt(c,CYCLES[c].label,cyc); }).join('')+'</select></label></div>'
+      +'<div class="sub-row3"><label>Next renewal<input class="input" type="date" name="nextRenewal" value="'+esc(s.nextRenewal||'')+'"></label>'
+      +'<label>Status<select class="input" name="status">'+opt('active','Active',st)+opt('trial','Free trial',st)+opt('cancelled','Cancelled',st)+'</select></label>'
+      +'<label>Paid with<input class="input" name="paidWith" value="'+esc(s.paidWith||'')+'" placeholder="e.g. Amex, PayPal"></label></div>'
+      +'<label>Where to manage it<input class="input" name="billingUrl" value="'+esc(s.billingUrl||'')+'" placeholder="https://… billing page"></label>'
+      +'<label>Notes<input class="input" name="notes" value="'+esc(s.notes||'')+'" placeholder="Why we have it, what to check before cancelling"></label>'
+      +'<div class="sub-actions"><button type="button" class="btn primary" data-sub="save">Save</button><button type="button" class="btn" data-sub="cancel-edit">Cancel</button></div></div>';
+  }
+  function readForm(el){
+    var v={}; el.querySelectorAll('[name]').forEach(function(i){ v[i.name]=i.value.trim(); });
+    var amt=v.amount.replace(/[^0-9.]/g,''); v.amount= amt===''?null:+amt;
+    if(v.billingUrl && !/^https?:\/\//i.test(v.billingUrl)) v.billingUrl='https://'+v.billingUrl;
+    return v;
+  }
+  function row(s){
+    var nr=isLive(s)?nextRenewal(s):null, dleft=nr?daysUntil(nr):null, pm=perMonth(s), c=CYCLES[s.cycle]||CYCLES.monthly;
+    var chip = s.status==='cancelled' ? '<span class="chip grey">Cancelled'+(s.cancelledAt?' '+esc(HQ.fmtDay(String(s.cancelledAt).slice(0,10),'short')):'')+'</span>'
+      : nr==null ? '<span class="chip grey">No renewal date</span>'
+      : '<span class="chip '+(dleft<=3?'crit':dleft<=7?'warn':'grey')+'">'+(s.status==='trial'?'Trial ends ':'Renews ')+(dleft===0?'today':dleft===1?'tomorrow':'in '+dleft+' days')+' · '+esc(HQ.fmtDay(nr,'short'))+'</span>';
+    if(S.editing===s.id) return '<div class="sub-item editing">'+form(s)+'</div>';
+    var del = S.confirmDel===s.id ? '<button type="button" class="btn small" data-sub="del-yes" data-id="'+esc(s.id)+'" style="color:var(--crit)">Delete for good</button><button type="button" class="btn small" data-sub="del-no">Keep</button>' : '<button type="button" class="btn small ghost" data-sub="del" data-id="'+esc(s.id)+'">Delete</button>';
+    return '<div class="sub-item'+(s.status==='cancelled'?' off':'')+'">'
+      +'<div class="sub-main"><div class="sub-name">'+esc(s.name||'Untitled')+'</div><div class="sub-what">'+esc(s.what||'')+'</div>'
+      +(s.notes?'<div class="sub-note">'+esc(s.notes)+'</div>':'')+'</div>'
+      +'<div class="sub-cost"><div class="sub-amt">'+(s.amount==null?'–':esc(money(+s.amount, s.currency)))+' <span>/ '+esc(c.label)+'</span></div>'
+      +(pm!=null && s.cycle && s.cycle!=='monthly' ? '<div class="sub-pm">≈ '+esc(money(Math.round(pm*100)/100, s.currency))+' / month</div>':'')
+      +(s.paidWith?'<div class="sub-pm">'+esc(s.paidWith)+'</div>':'')+'</div>'
+      +'<div class="sub-side">'+chip+'<div class="sub-actions">'
+      +(s.billingUrl?'<a class="btn small" href="'+esc(s.billingUrl)+'" target="_blank" rel="noopener">Manage</a>':'')
+      +'<button type="button" class="btn small" data-sub="edit" data-id="'+esc(s.id)+'">Edit</button>'
+      +(s.status==='cancelled'?'<button type="button" class="btn small" data-sub="reactivate" data-id="'+esc(s.id)+'">Reactivate</button>':'<button type="button" class="btn small" data-sub="mark-cancelled" data-id="'+esc(s.id)+'">Mark cancelled</button>')
+      +del+'</div></div></div>';
+  }
+  function render(){
+    var root=$('subsRoot'); if(!root) return;
+    if(!admin){ root.innerHTML='<div class="panel"><h2>Subscriptions</h2><p class="rule">This tab is admin only.</p></div>'; return; }
+    var live=S.list.filter(isLive), tot=totals(S.list);
+    var sub=$('subsSub'); if(sub) sub.textContent = !S.loaded ? 'Loading…' : live.length+' active · '+(tot.length?tot.map(function(t){ return money(Math.round(t.month*100)/100, t.cur)+'/mo'; }).join(' + '):'no costs entered');
+    var h='';
+    if(S.msg) h+='<div class="panel" style="border-color:var(--'+(S.msgKind==='crit'?'crit':'good')+')"><p class="rule" style="margin:0">'+esc(S.msg)+'</p></div>';
+    if(S.loadError) h+='<div class="panel" style="border-color:var(--crit)"><h2>Couldn\'t load subscriptions</h2><p class="rule">'+esc(S.loadError)+'. Retrying every minute.</p></div>';
+    if(tot.length) h+='<div class="sub-kpis">'+tot.map(function(t){ return '<div class="panel sub-kpi"><div class="sub-kl">'+esc(t.cur)+' per month</div><div class="sub-kv">'+esc(money(Math.round(t.month*100)/100, t.cur))+'</div><div class="sub-kl">'+esc(money(Math.round(t.year), t.cur))+' a year</div></div>'; }).join('')+'</div>';
+    var soon=live.map(function(s){ return {s:s, d:nextRenewal(s)}; }).filter(function(x){ return x.d && daysUntil(x.d)<=14; }).sort(function(a,b){ return a.d.localeCompare(b.d); });
+    if(soon.length) h+='<div class="panel"><h2>Renewing in the next 14 days</h2><p class="rule">Cancel or check these before they charge.</p>'+soon.map(function(x){ return '<div class="sub-soon"><span>'+esc(x.s.name)+'</span><span>'+esc(x.s.amount==null?'–':money(+x.s.amount, x.s.currency))+'</span><span class="chip '+(daysUntil(x.d)<=3?'crit':'warn')+'">'+esc(HQ.fmtDay(x.d,'wd'))+'</span></div>'; }).join('')+'</div>';
+    var shown=S.list.filter(function(s){ return S.showCancelled || isLive(s); }).sort(function(a,b){ var da=isLive(a)&&nextRenewal(a)||'9999', db=isLive(b)&&nextRenewal(b)||'9999'; return da.localeCompare(db) || String(a.name).localeCompare(String(b.name)); });
+    var cancelledN=S.list.length-live.length;
+    h+='<div class="panel"><div class="chart-head"><div><h2>All subscriptions</h2><p class="rule" style="margin-top:4px">Soonest renewal first. A renewal date in the past rolls forward by itself.</p></div>'
+      +'<div class="sub-actions">'+(cancelledN?'<button type="button" class="btn small" data-sub="toggle-cancelled">'+(S.showCancelled?'Hide':'Show')+' cancelled ('+cancelledN+')</button>':'')+'<button type="button" class="btn primary small" data-sub="add">+ Add</button></div></div>';
+    if(S.adding) h+='<div class="sub-item editing">'+form(S.adding===true?{}:S.adding)+'</div>';
+    h+= shown.length ? shown.map(row).join('') : (S.loaded?'<div class="empty-state">No subscriptions yet. Add the first one.</div>':'');
+    var have=S.list.map(function(s){ return String(s.name||'').toLowerCase(); });
+    var sug=SUGGEST.filter(function(n){ return have.indexOf(n.toLowerCase())<0; });
+    if(sug.length) h+='<div class="sub-sug"><span class="rule">Quick add:</span>'+sug.map(function(n){ return '<button type="button" class="btn small" data-sub="suggest" data-name="'+esc(n)+'">+ '+esc(n)+'</button>'; }).join('')+'</div>';
+    h+='</div>';
+    root.innerHTML=h;
+  }
+
+  document.addEventListener('click', function(ev){
+    if(!admin) return; var t=ev.target.closest && ev.target.closest('[data-sub]'); if(!t || !$('subsRoot') || !$('subsRoot').contains(t)) return;
+    var a=t.getAttribute('data-sub'), id=t.getAttribute('data-id');
+    if(a==='add'){ S.adding=true; S.editing=null; render(); return; }
+    if(a==='suggest'){ S.adding={ name:t.getAttribute('data-name') }; S.editing=null; render(); return; }
+    if(a==='edit'){ S.editing=id; S.adding=false; render(); return; }
+    if(a==='cancel-edit'){ S.editing=null; S.adding=false; render(); return; }
+    if(a==='toggle-cancelled'){ S.showCancelled=!S.showCancelled; render(); return; }
+    if(a==='del'){ S.confirmDel=id; render(); return; }
+    if(a==='del-no'){ S.confirmDel=null; render(); return; }
+    if(a==='del-yes'){ guarded(async function(){ var n=(S.list.find(function(s){ return s.id===id; })||{}).name; await remove(id); S.confirmDel=null; flash('Deleted '+(n||'it')+'.'); }); return; }
+    if(a==='mark-cancelled'){ guarded(async function(){ await save(id, { status:'cancelled', cancelledAt:nowIso() }); flash('Marked cancelled. It stays in the list (Show cancelled) so you have the record.'); }); return; }
+    if(a==='reactivate'){ guarded(async function(){ await save(id, { status:'active', cancelledAt:null }); flash('Back to active.'); }); return; }
+    if(a==='save'){
+      var f=t.closest('[data-sub-form]'), v=readForm(f), existing=f.getAttribute('data-sub-form');
+      if(!v.name){ flash('Give it a name first.','crit'); return; }
+      guarded(async function(){
+        var sid=existing; if(!sid){ sid=slug(v.name); var n=2; while(S.list.some(function(s){ return s.id===sid; })) sid=slug(v.name)+'-'+(n++); v.createdAt=nowIso(); }
+        await save(sid, v); S.editing=null; S.adding=false; flash('Saved '+v.name+'.');
+      });
+    }
+  });
+  document.addEventListener('hq-view', function(ev){ active = ev.detail && ev.detail.view==='subs'; if(active){ render(); load(); } });
+  function setVisible(on){ ['tabSubs','sheetSubs'].forEach(function(id){ var el=$(id); if(el) el.hidden=!on; }); }
+  document.addEventListener('tf-auth-ready', function(ev){
+    var role=ev.detail && ev.detail.profile && ev.detail.profile.role;
+    if(role==='admin'){ client=ev.detail.supabase; admin=true; setVisible(true); load(); if(timer) clearInterval(timer); timer=setInterval(function(){ if(active && document.visibilityState!=='hidden' && !S.editing && !S.adding) load(); }, 60000); }
+    else { client=null; admin=false; setVisible(false); render(); }
+  });
+  document.addEventListener('tf-auth-signed-out', function(){ admin=false; client=null; S.list=[]; S.loaded=false; if(timer) clearInterval(timer); setVisible(false); });
+  window.__subs={ S:S, totals:totals, nextRenewal:nextRenewal, perMonth:perMonth, render:render, load:load, daysUntil:daysUntil, addCycle:addCycle };
 })();
 </script>
 </body></html>

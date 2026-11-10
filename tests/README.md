@@ -10,3 +10,4 @@ Content Engine v2 rows are synthetic and committed inside `ui.test.js` (`content
 Env: `PLAYWRIGHT_PATH` (path to a playwright install), `HQ_CHROME` (Chromium executable; otherwise Playwright's bundled browser), `HQ_NOW` (fixed "now", ISO; default 2026-10-21T04:00:00Z).
 
 - `node tests/analytics.test.js [--shots dir]` — Analytics tab on committed synthetic data (no fixtures needed).
+- `node tests/subs.test.js [--shots dir]` — Subscriptions tab on committed synthetic data (no fixtures needed): totals per currency, renewals rolling forward, add/edit/cancel/delete writes, admin only.

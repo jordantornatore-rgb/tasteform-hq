@@ -13,7 +13,7 @@
     Object.keys(fixtures || {}).forEach(function (t) { tables[t] = (fixtures[t] || []).map(function (r) { return { id: r.id, data: r.data, updated_at: r.updated_at || '2026-10-21T00:00:00Z' }; }); });
     var stats = { selects: 0, upserts: 0 };
     function from(t) {
-      var filters = [], single = false, rng = null, ord = null;
+      var filters = [], single = false, rng = null, ord = null, del = false;
       var q = {
         select: function () { return q; },
         eq: function (c, v) { var m = /^data->>(\w+)$/.exec(c); filters.push(m ? function (r) { var x = r.data && r.data[m[1]]; return x != null && String(x) === String(v); } : function (r) { return r[c] === v; }); return q; },
@@ -24,12 +24,14 @@
         then: function (res, rej) {
           stats.selects++;
           if (opts.failTables && opts.failTables.indexOf(t) >= 0) return Promise.resolve({ data: null, error: { message: 'mock failure for ' + t } }).then(res, rej);
+          if (del) { stats.deletes = (stats.deletes || 0) + 1; tables[t] = (tables[t] || []).filter(function (r) { return !filters.every(function (f) { return f(r); }); }); return Promise.resolve({ data: null, error: null }).then(res, rej); }
           var rows = (tables[t] || []).filter(function (r) { return filters.every(function (f) { return f(r); }); });
           if (ord) rows = rows.slice().sort(function (x, y) { return String(x[ord]).localeCompare(String(y[ord])); });
           if (rng) rows = rows.slice(rng[0], rng[1] + 1);
           var out = single ? (rows[0] ? clone(rows[0]) : null) : rows.map(clone);
           return Promise.resolve({ data: out, error: null }).then(res, rej);
         },
+        delete: function () { del = true; return q; },
         upsert: function (row) {
           stats.upserts++;
           var arr = tables[t] || (tables[t] = []), i = -1;
