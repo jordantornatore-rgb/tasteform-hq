@@ -2,6 +2,8 @@
 // which the Mac holds in its Keychain and the database holds in the Vault (bundle_api_key()).
 // Body: { op: "merge", table, rows:[{id,data}] } | { op: "select", table, ids?:[], since?, limit? } | { op: "get", table, id }
 //     | { op: "previewUpload", path: "<rowId>/<file>.mp4|jpg" } -> a signed upload URL in the private content-previews bucket
+//     | { op: "footageRemove", rowId, paths:[...] } -> deletes uploaded footage from content-footage once the Mac has its own copy
+//       (Jordan, 10 Nov 2026). Only paths the row itself lists in an upload or batch that is already marked pulledAt.
 // merge goes through hq_merge, so only the fields sent are changed. Tables are limited to the content set.
 // Deploy: supabase functions deploy content-pipeline   (verify_jwt stays on; the Mac sends the public anon key as the bearer)
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -34,6 +36,22 @@ Deno.serve(async (req) => {
     if (error) return json(500, { error: error.message });
     return json(200, { ok: true, path: p, signedUrl: data.signedUrl, token: data.token });
   }
+  if (body.op === "footageRemove") {
+    const rowId = String(body.rowId || ""), paths = Array.isArray(body.paths) ? body.paths.map(String) : [];
+    if (!/^[A-Za-z0-9_-]{3,120}$/.test(rowId) || !paths.length || paths.length > 200) return json(400, { error: "footageRemove needs rowId and 1-200 paths" });
+    const { data: row, error: rerr } = await admin.from("content_queue").select("id,data").eq("id", rowId).maybeSingle();
+    if (rerr) return json(500, { error: rerr.message });
+    if (!row) return json(404, { error: "Post not found: " + rowId });
+    const d = (row.data || {}) as Record<string, any>, pulled = new Set<string>();
+    const add = (files: any[]) => (Array.isArray(files) ? files : []).forEach((f) => { if (f && f.path) pulled.add(String(f.path)); (Array.isArray(f && f.parts) ? f.parts : []).forEach((pt: any) => { if (pt && pt.path) pulled.add(String(pt.path)); }); });
+    if (d.footageUpload && d.footageUpload.pulledAt) add(d.footageUpload.files);
+    (Array.isArray(d.footageAdds) ? d.footageAdds : []).forEach((b: any) => { if (b && b.pulledAt) add(b.files); });
+    const bad = paths.filter((p: string) => !p.startsWith(rowId + "/") || !pulled.has(p));
+    if (bad.length) return json(403, { error: "Not pulled to the Mac yet (or not this reel's): " + bad.slice(0, 5).join(", ") });
+    const { data, error } = await admin.storage.from("content-footage").remove(paths);
+    if (error) return json(500, { error: error.message });
+    return json(200, { ok: true, removed: (data || []).map((o: any) => o.name) });
+  }
   const table = String(body.table || "");
   if (!TABLES.includes(table) && !READ_ONLY.includes(table)) return json(400, { error: "Table not allowed: " + table });
   if (READ_ONLY.includes(table) && body.op === "merge") return json(403, { error: "Read-only table: " + table });
@@ -60,5 +78,5 @@ Deno.serve(async (req) => {
     if (error) return json(500, { error: error.message });
     return json(200, { ok: true, rows: data });
   }
-  return json(400, { error: "op must be merge, get or select" });
+  return json(400, { error: "op must be merge, get, select, previewUpload or footageRemove" });
 });
