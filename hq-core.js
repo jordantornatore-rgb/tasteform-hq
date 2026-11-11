@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '2.8.0';
+  HQ.VERSION = '2.9.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -783,6 +783,142 @@
       scatter: { yKey: yKey, points: pts, medX: mx, medY: my, watchHave: withWatch.length, from: from90 },
       heat: heat, daysPosted: daysPosted, heatDays: hmPast.length, lastPostDay: lastPostDay,
       daysSincePost: lastPostDay ? HQ.daysBetween(lastPostDay, today) : null };
+  };
+
+  /* ---------- the four areas: Traffic, Leads, Sales, Delivery (Home + area pages) ----------
+     period: 7 | 30 | 'month' (calendar month to date vs the same days of last month).
+     Exact or blank, as everywhere: a number we can't measure is null.
+     DM numbers are left out on purpose while the DM scan is being fixed (opts.dmScanOk). */
+  HQ.PILLAR_PERIODS = [7, 30, 'month'];
+  HQ.pillarRange = function (today, period) {
+    if (period === 'month') {
+      var from = today.slice(0, 8) + '01', n = HQ.daysBetween(from, today);
+      var pf = HQ.addDays(from, -1).slice(0, 8) + '01', pt = HQ.addDays(pf, n);
+      var pEnd = HQ.addDays(from, -1); if (pt > pEnd) pt = pEnd;
+      return { from: from, to: today, prevFrom: pf, prevTo: pt, days: n + 1, label: 'this month' };
+    }
+    var N = period === 7 ? 7 : 30, f = HQ.addDays(today, -(N - 1)), ptt = HQ.addDays(f, -1);
+    return { from: f, to: today, prevFrom: HQ.addDays(ptt, -(N - 1)), prevTo: ptt, days: N, label: 'last ' + N + ' days' };
+  };
+  HQ.computePillars = function (state, now, period, opts) {
+    opts = opts || {}; state = state || {};
+    var today = HQ.sydDay(now == null ? Date.now() : now), R = HQ.pillarRange(today, period);
+    function m(cur, prev, extra) { return Object.assign({ value: HQ.isNum(cur) ? cur : null, prev: HQ.isNum(prev) ? prev : null, change: HQ.pctChange(cur, prev) }, extra || {}); }
+
+    // --- Traffic: posts published in the window (their lifetime numbers), plus account-level 7/30-day totals
+    var dated = [];
+    (state.igPosts || []).forEach(function (p) { var d = HQ.igPostDay(p); if (d) dated.push(Object.assign({}, p, { _day: d })); });
+    var inR = function (a, b) { return dated.filter(function (p) { return p._day >= a && p._day <= b; }); };
+    var curPosts = inR(R.from, R.to), prevPosts = inR(R.prevFrom, R.prevTo);
+    var cs = postWindowStats(curPosts), ps = postWindowStats(prevPosts);
+    var likes = sumField(curPosts, 'likes').value, comments = sumField(curPosts, 'comments').value;
+    var nf = curPosts.filter(function (p) { return HQ.isNum(p.viewersNonFollowersPct); });
+    var stories = (state.igStories || []).filter(function (s) { var d = s.postedAtDate ? HQ.sydDay(s.postedAtDate) : null; return d && d >= R.from && d <= R.to; });
+    var storyViews = sumField(stories, 'views');
+    var byDay = {}; (state.igAccount || []).forEach(function (r) { var k = r.date || r.id; if (HQ.isDayKey(k)) byDay[k] = r; });
+    var acc = null, accDay = null, pk = period === 7 ? 'p7' : (period === 30 ? 'p30' : null);
+    if (pk) for (var i = 0; i < 3 && !acc; i++) { var dk = HQ.addDays(today, -i); if (byDay[dk] && byDay[dk][pk]) { acc = byDay[dk][pk]; accDay = dk; } }
+    var accPrev = acc && byDay[HQ.addDays(accDay, -R.days)] ? byDay[HQ.addDays(accDay, -R.days)][pk] || null : null;
+    var A = function (k) { return acc && HQ.isNum(acc[k]) ? acc[k] : null; }, AP = function (k) { return accPrev && HQ.isNum(accPrev[k]) ? accPrev[k] : null; };
+    var fEnd = null; for (var j = 0; j < 3 && fEnd == null; j++) { var ek = HQ.addDays(today, -j); if (byDay[ek] && HQ.isNum(byDay[ek].followers)) fEnd = byDay[ek].followers; }
+    var fStartRow = byDay[HQ.addDays(R.from, -1)], fStart = fStartRow && HQ.isNum(fStartRow.followers) ? fStartRow.followers : null;
+    var accDays = Object.keys(byDay).sort();
+    var tf = HQ.tfSum(state.tfDaily, R.from, R.to), tfp = HQ.tfSum(state.tfDaily, R.prevFrom, R.prevTo);
+    var top = curPosts.filter(function (p) { return HQ.isNum(p.follows); }).sort(function (a, b) { return b.follows - a.follows; })[0] || null;
+    var traffic = {
+      headline: m(cs.follows, ps.follows, { label: 'new followers from posts' }),
+      followersNow: fEnd, netFollowers: fEnd != null && fStart != null ? fEnd - fStart : null, followersSince: accDays[0] || null,
+      views: m(cs.views, ps.views), reach: m(A('reached'), AP('reached')), accountViews: m(A('views'), AP('views')),
+      accountLevel: !!pk,
+      nonFollowerPct: nf.length ? Math.round(nf.reduce(function (a, p) { return a + p.viewersNonFollowersPct; }, 0) / nf.length) : null,
+      posts: m(cs.posts, ps.posts), saves: m(cs.saves, ps.saves), shares: m(cs.shares, ps.shares),
+      likes: m(likes, sumField(prevPosts, 'likes').value), comments: m(comments, sumField(prevPosts, 'comments').value),
+      storyViews: m(storyViews.have ? storyViews.value : null, null), stories: stories.length,
+      profileVisits: m(A('profileVisits'), AP('profileVisits')), linkTaps: m(A('externalLinkTaps'), AP('externalLinkTaps')),
+      formViews: m(tf.days ? tf.visits : null, tfp.days ? tfp.visits : null),
+      top: top ? { id: top.id, title: top.title || null, follows: top.follows, views: top.views, shortcode: top.shortcode || null, day: top._day } : null
+    };
+
+    // --- Leads: form views -> starts -> applications -> booked -> showed
+    var apps = HQ.appsInRange(state.tfResponses, R.from, R.to), appsPrev = HQ.appsInRange(state.tfResponses, R.prevFrom, R.prevTo);
+    var bySrc = {}; apps.forEach(function (r) { var s = r.source || 'unknown'; bySrc[s] = (bySrc[s] || 0) + 1; });
+    var fitKnown = apps.filter(function (r) { return r.fit === true || r.fit === false || r.fit === 'fit' || r.fit === 'not_fit'; });
+    var fitYes = fitKnown.filter(function (r) { return r.fit === true || r.fit === 'fit'; }).length;
+    // Typeform's daily sync writes started == completed (it only sees finished forms), so starts stay blank until it reads partial responses.
+    var startsReal = (state.tfDaily || []).some(function (d) { return HQ.isNum(+d.started) && +d.started !== +d.completed; });
+    var ghl = state.meta && state.meta.ghlSync, ghlOn = !!(ghl && ghl.connected);
+    var dmBooked = null;
+    if (opts.dmScanOk) dmBooked = (state.daily || []).filter(function (d) { var k = d.date || d.id; return k >= R.from && k <= R.to; }).reduce(function (a, d) { return a + (+d.callsBooked || 0); }, 0);
+    var booked = ghlOn && HQ.isNum(ghl.booked) ? ghl.booked : null;
+    var leads = {
+      headline: m(apps.length, appsPrev.length, { label: 'applications' }),
+      formViews: traffic.formViews,
+      starts: m(startsReal ? tf.started : null, startsReal ? tfp.started : null, { note: startsReal ? null : 'Typeform sync only counts finished forms' }),
+      applications: m(apps.length, appsPrev.length, { bySource: bySrc, qualified: fitKnown.length ? fitYes : null, qualifiedOf: fitKnown.length }),
+      booked: m(booked, null, { fromDms: dmBooked, note: ghlOn ? null : 'Needs GoHighLevel' }),
+      showed: m(null, null, { note: 'Needs GoHighLevel' }),
+      costPerBooked: m(null, null, { note: 'Needs ad spend' }),
+      rates: {
+        viewToStart: startsReal ? HQ.pct(tf.started, tf.visits) : null,
+        viewToApply: tf.days ? HQ.pct(apps.length, tf.visits) : null,
+        applyToBooked: null, showRate: null
+      }
+    };
+
+    // --- Sales: admin only; all from Stripe + GHL, blank until they're connected
+    var sum = state.stripe && state.stripe.summary, stripeOn = !!(state.meta && state.meta.stripeSync && state.meta.stripeSync.connected && sum);
+    var sales = {
+      connected: { stripe: stripeOn, ghl: ghlOn },
+      headline: m(null, null, { label: 'cash collected' }),
+      closed: m(stripeOn && period === 'month' && HQ.isNum(sum.newThisMonth) ? sum.newThisMonth : null, null),
+      closeRate: m(null, null), avgSale: m(null, null), cac: m(null, null), daysToClose: m(null, null), refunds: m(null, null)
+    };
+    if (stripeOn) {
+      var mon = (Array.isArray(sum.revenueByMonth) ? sum.revenueByMonth : []).filter(function (x) { return x && x.month === today.slice(0, 7); })[0];
+      if (period === 'month' && mon && HQ.isNum(mon.amount)) sales.headline.value = mon.amount;
+      sales.currency = sum.currency || 'AUD';
+    }
+
+    // --- Delivery: client counts arrive from hq_delivery_counts (names stay admin only); money rows need Stripe
+    var dc = state.deliveryCounts || null;
+    var delivery = {
+      headline: m(dc && HQ.isNum(dc.active) ? dc.active : null, null, { label: 'active clients' }),
+      churned: m(dc ? dc.left : null, null), joined: m(dc ? dc.joined : null, null),
+      avgWeeks: m(dc && dc.avgWeeks != null ? +dc.avgWeeks : null, null),
+      checkinsOnTime: m(dc ? dc.checkinsOnTime : null, null),
+      checkinReplyTime: m(null, null), referrals: m(null, null),
+      mrr: m(stripeOn && HQ.isNum(sum.mrr) ? sum.mrr : null, null),
+      failedPayments: m(stripeOn && Array.isArray(sum.risks) ? sum.risks.length : null, null),
+      ltv: m(null, null)
+    };
+
+    // --- the one line at the top: where people drop out between content and a call (facts only, no targets yet)
+    var leak = null, reach = traffic.reach.value, taps = traffic.linkTaps.value, fv = traffic.formViews.value;
+    if (HQ.isNum(reach) && HQ.isNum(taps) && reach > 0) {
+      leak = { text: HQ.num(taps) + ' of ' + HQ.compact(reach) + ' people reached tapped your link' + (HQ.isNum(fv) ? ', ' + HQ.num(fv) + ' opened the form' : '') + ' and ' + HQ.num(apps.length) + ' applied.', stage: 'traffic-to-form' };
+    } else if (HQ.isNum(fv) && fv > 0) {
+      leak = { text: HQ.num(fv) + ' people opened the form and ' + HQ.num(apps.length) + ' applied (' + (HQ.pct(apps.length, fv) || 0) + '%).', stage: 'form' };
+    }
+
+    // --- Do today: at most 3 things
+    var todo = [];
+    var unworked = HQ.appsUnworked(state.tfResponses, now, 14);
+    if (unworked.length) todo.push({ key: 'apps', label: 'Applications to call', count: unworked.length, go: 'apps' });
+    var cq = (state.contentQueue || []).filter(function (q) { return q.status === 'awaiting_approval'; });
+    if (cq.length) todo.push({ key: 'approve', label: 'Reels waiting for your approval', count: cq.length, go: 'content' });
+    var rc = state.routineCalls && state.routineCalls.dates, calls = null;
+    if (rc) { calls = 0; HQ.dayRange(today, HQ.addDays(today, 6)).forEach(function (d) { if (rc[d] && HQ.isNum(rc[d].count)) calls += rc[d].count; }); }
+    if (opts.dmScanOk && opts.dmsWaiting) todo.unshift({ key: 'dms', label: 'DMs waiting on you', count: opts.dmsWaiting, go: 'dms' });
+    if (calls) todo.push({ key: 'calls', label: 'Calls in the next 7 days', count: calls, go: null });
+
+    return { today: today, range: R, period: period, traffic: traffic, leads: leads, sales: sales, delivery: delivery, leak: leak, todo: todo.slice(0, 3) };
+  };
+  HQ.compact = function (v) {
+    if (!HQ.isNum(v)) return '–'; var a = Math.abs(v);
+    if (a >= 1e6) return (Math.round(v / 1e5) / 10).toString().replace(/\.0$/, '') + 'M';
+    if (a >= 1e4) return Math.round(v / 1e3) + 'k';
+    if (a >= 1e3) return (Math.round(v / 100) / 10).toString().replace(/\.0$/, '') + 'k';
+    return HQ.num(v);
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = HQ;

@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.0 — 11 Nov 2026 (Home + four areas)
+
+- New **Home** is the first page: one line on where people drop off between content and the form, four cards (Traffic, Leads, Sales, Delivery), and at most 3 things to do today. One 7 days / 30 days / Month switch for every page, remembered per device.
+- **Traffic**: new followers from posts, follower count, views, reach, non-follower %, posts, saves, shares, likes, comments, story views, best post for followers, then the hand-off to Leads (profile visits → link taps → form views).
+- **Leads** is a funnel: form views → starts → applications → booked → showed, with the rate between each step and "What feeds this" under each. Starts stay blank (the Typeform sync only counts finished forms); booked, show-ups and cost per booked call stay blank until GoHighLevel and ad spend are connected.
+- **Sales** (admin only): cash collected, sales closed, close rate, average sale, CAC, days from first DM to close, refunds. Blank until Stripe and GoHighLevel are connected; the page says how.
+- **Delivery**: active clients, joined, left, average weeks stayed, check-ins on time (from the challenge member list via `hq_delivery_counts`, counts only, so names stay admin only), plus MRR, failed payments and LTV once Stripe is connected.
+- DM numbers are off these pages while the DM scan is being fixed (`DM_SCAN_OK = false` in index.html). The DM tables, scans and the DMs / Follow-ups tabs are unchanged and still under Work / More.
+- Menu: Overview (Home, Traffic, Leads, Sales, Delivery) · Work (Daily brief, DMs, Follow-ups, Magnets, Warm Leads) · Tools. Phone bar: Home, Apps, Content, More. Shortcuts 1–5 open the overview pages.
+- Tests: `node tests/pillars.test.js [--fixtures dir]`; the mock client now answers `rpc()`.
+
 ## 2.9.2 — 5 Nov 2026 (lead magnets list)
 
 - Content Engine → **Lead magnets**: every reel's lead magnet in one list, "your turn" first, with its stage, comment word, page previews (tap for full size), PDF ↗ / Survey ↗ once live, and Open reel (always the reel view with the 🧲 panel, even before it has a script). Below it, the older magnets already in Drive (guides and recipe folders), each linked, plus the Drive folder.

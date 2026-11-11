@@ -1059,6 +1059,54 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
 .ch-hrow .dot.green{background:var(--good);} .ch-hrow .dot.amber{background:var(--warn);} .ch-hrow .dot.red{background:var(--crit);}
 @media (max-width:520px){ #chViewSeg{display:grid;grid-template-columns:1fr 1fr;width:100%;border-radius:var(--r-l);} #chViewSeg button{border-radius:var(--r-m);} .ch-hrow{grid-template-columns:14px 92px 1fr;} .ch-dm-msg{flex-direction:column;} .ch-dm-msg .btn{align-self:flex-end;} .ch-pts{font-size:20px;} }
 @media (pointer:coarse),(max-width:760px){ #viewChallenge .input,#viewChallenge .ch-scanchip,#viewChallenge .linkish{min-height:var(--tap);} }
+
+/* ---------- Home + the four areas (Traffic, Leads, Sales, Delivery) ---------- */
+.pl-top{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);flex-wrap:wrap}
+.pl-back{background:none;border:0;color:var(--accent);font:inherit;font-size:var(--t-m);font-weight:600;cursor:pointer;min-height:var(--tap);padding:0 4px 0 0}
+#plHome,#plTraffic,#plLeads,#plSales,#plDelivery{display:flex;flex-direction:column;gap:var(--s3)}
+.pl-seg{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);padding:3px;gap:2px}
+.pl-seg button{background:none;border:0;color:var(--muted);font:inherit;font-size:var(--t-s);padding:7px 12px;border-radius:9px;cursor:pointer;min-height:34px}
+.pl-seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--text);font-weight:600;box-shadow:var(--shadow)}
+.pl-leak{border:1px solid var(--warn);background:var(--warn-soft);border-radius:var(--r-l);padding:var(--s4)}
+.pl-leak .k{font-size:var(--t-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--warn);font-weight:700;margin-bottom:4px}
+.pl-leak p{margin:0;font-size:var(--t-m);color:var(--text)}
+.pl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s3)}
+@media (max-width:900px){.pl-grid{grid-template-columns:1fr 1fr}}
+.pl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:var(--s4);text-align:left;color:inherit;font:inherit;cursor:pointer;display:flex;flex-direction:column;min-height:132px;box-shadow:var(--shadow)}
+.pl-card:hover{border-color:var(--border-strong)}
+.pl-card:active{transform:scale(.985)}
+.pl-card .n{font-size:var(--t-xs);color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.pl-card .v{font-size:32px;font-weight:750;letter-spacing:-.02em;margin-top:6px;line-height:1.1}
+.pl-card .s{font-size:var(--t-s);color:var(--muted);margin-top:2px}
+.pl-card .t{margin-top:auto;padding-top:var(--s2);font-size:var(--t-s);font-weight:600}
+.pl-up{color:var(--good)}.pl-down{color:var(--crit)}.pl-flat{color:var(--muted)}
+.pl-blank{color:var(--muted);opacity:.7}
+.pl-admin{font-size:10px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);padding:1px 6px;border-radius:5px;margin-left:6px;vertical-align:2px;letter-spacing:.04em}
+.pl-h2{font-size:var(--t-s);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:var(--s2) 0 0;font-weight:700}
+.pl-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);overflow:hidden}
+.pl-row{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);padding:12px var(--s4);border-bottom:1px solid var(--border);min-height:var(--tap);width:100%;background:none;border-left:0;border-right:0;border-top:0;color:inherit;font:inherit;text-align:left}
+.pl-row:last-child{border-bottom:0}
+button.pl-row{cursor:pointer}
+button.pl-row:hover{background:var(--surface-2)}
+.pl-row .l{font-size:var(--t-m)}
+.pl-row .l small{display:block;color:var(--muted);font-size:var(--t-s)}
+.pl-row .r{text-align:right;font-weight:700;font-size:var(--t-l);white-space:nowrap}
+.pl-row .r small{display:block;font-size:var(--t-s);font-weight:600}
+.pl-row .go{color:var(--accent);font-weight:700}
+.pl-step{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);padding:12px var(--s4)}
+.pl-step .row{display:flex;justify-content:space-between;align-items:baseline}
+.pl-step .tt{font-weight:600}
+.pl-step .vv{font-size:24px;font-weight:750}
+.pl-step .src{font-size:var(--t-s);color:var(--muted);margin-top:2px}
+.pl-bar{height:6px;background:var(--surface-2);border-radius:3px;margin-top:8px;overflow:hidden}
+.pl-bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.pl-step details{margin-top:8px}
+.pl-step summary{font-size:var(--t-s);color:var(--accent);cursor:pointer}
+.pl-step .dr{display:flex;justify-content:space-between;font-size:var(--t-s);padding:3px 0;color:var(--muted)}
+.pl-step .dr span:last-child{color:var(--text)}
+.pl-conv{display:flex;gap:8px;padding:6px 0 6px 18px;font-size:var(--t-s);color:var(--muted)}
+.pl-note{font-size:var(--t-s);color:var(--muted);margin:0}
+.pl-funnel{display:flex;flex-direction:column}
 </style>
 </head>
 <body>
@@ -1100,25 +1148,30 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   <aside class="sidebar" id="sidebar">
     <div class="sb-brand"><span class="sb-logo" aria-hidden="true">TF</span><span class="sb-name">TasteForm <small>HQ</small></span><button type="button" class="sb-collapse" id="sbCollapse" title="Collapse sidebar" aria-label="Collapse sidebar">‹</button></div>
     <nav class="sb-nav" id="tabRow" role="tablist" aria-label="Sections">
-      <div class="sb-group">Command</div>
-      <button class="tab" role="tab" id="tabToday" aria-selected="true" aria-controls="viewToday" data-view="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Today</span><kbd>1</kbd></button>
-      <div class="sb-group">Pipeline</div>
-      <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>DMs</span><span class="tab-badge" id="dmsBadge" hidden></span><kbd>2</kbd></button>
-      <button class="tab" role="tab" id="tabFollow" aria-selected="false" aria-controls="viewFollow" data-view="follow"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/></svg><span>Follow-ups</span><span class="tab-badge" id="fuBadge" hidden></span><kbd>3</kbd></button>
-      <button class="tab" role="tab" id="tabMagnets" aria-selected="false" aria-controls="viewMagnets" data-view="magnets"><svg viewBox="0 0 24 24"><path d="M6 3v8a6 6 0 0 0 12 0V3"/><path d="M6 3h4v8H6zM14 3h4v8h-4z"/></svg><span>Magnets</span><span class="tab-badge" id="magBadge" hidden></span><kbd>4</kbd></button>
-      <button class="tab" role="tab" id="tabLeads" aria-selected="false" aria-controls="viewLeads" data-view="leads"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Warm Leads</span><kbd>5</kbd></button>
-      <div class="sb-group">Growth</div>
-      <button class="tab" role="tab" id="tabFunnel" aria-selected="false" aria-controls="viewFunnel" data-view="funnel"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Funnel</span><kbd>6</kbd></button>
-      <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg><span>Applications</span><span class="tab-badge" id="appsBadge" hidden></span><kbd>7</kbd></button>
-      <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads"><svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M17 8a4 4 0 0 1 0 8"/></svg><span>Ads</span><kbd>8</kbd></button>
+      <div class="sb-group">Overview</div>
+      <button class="tab" role="tab" id="tabHome" aria-selected="true" aria-controls="viewHome" data-view="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span><kbd>1</kbd></button>
+      <button class="tab" role="tab" id="tabTraffic" aria-selected="false" aria-controls="viewTraffic" data-view="traffic"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Traffic</span><kbd>2</kbd></button>
+      <button class="tab" role="tab" id="tabLeadflow" aria-selected="false" aria-controls="viewLeadflow" data-view="leadflow"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Leads</span><kbd>3</kbd></button>
+      <button class="tab" role="tab" id="tabSales" aria-selected="false" aria-controls="viewSales" data-view="sales" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Sales</span><kbd>4</kbd></button>
+      <button class="tab" role="tab" id="tabDelivery" aria-selected="false" aria-controls="viewDelivery" data-view="delivery"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span>Delivery</span><kbd>5</kbd></button>
+      <div class="sb-group">Work</div>
+      <button class="tab" role="tab" id="tabToday" aria-selected="false" aria-controls="viewToday" data-view="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Daily brief</span></button>
+            <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>DMs</span><span class="tab-badge" id="dmsBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabFollow" aria-selected="false" aria-controls="viewFollow" data-view="follow"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/></svg><span>Follow-ups</span><span class="tab-badge" id="fuBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabMagnets" aria-selected="false" aria-controls="viewMagnets" data-view="magnets"><svg viewBox="0 0 24 24"><path d="M6 3v8a6 6 0 0 0 12 0V3"/><path d="M6 3h4v8H6zM14 3h4v8h-4z"/></svg><span>Magnets</span><span class="tab-badge" id="magBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabLeads" aria-selected="false" aria-controls="viewLeads" data-view="leads"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Warm Leads</span></button>
+      <div class="sb-group">Tools</div>
+      <button class="tab" role="tab" id="tabFunnel" aria-selected="false" aria-controls="viewFunnel" data-view="funnel"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Funnel</span></button>
+      <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg><span>Applications</span><span class="tab-badge" id="appsBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads"><svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M17 8a4 4 0 0 1 0 8"/></svg><span>Ads</span></button>
       <button class="tab" role="tab" id="tabContent" aria-selected="false" aria-controls="viewContent" data-view="content"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5l2 4M14 5l2 4M10 12l4 2.5-4 2.5z"/></svg><span>Content Engine</span></button>
       <button class="tab" role="tab" id="tabAnalytics" aria-selected="false" aria-controls="viewAnalytics" data-view="analytics"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Analytics</span></button>
       <button class="tab" role="tab" id="tabEmail" aria-selected="false" aria-controls="viewEmail" data-view="email" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Email</span></button>
       <div class="sb-group" id="sbGroupBusiness" hidden>Business</div>
-      <button class="tab" role="tab" id="tabStripe" aria-selected="false" aria-controls="viewStripe" data-view="stripe" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Revenue</span><kbd>9</kbd></button>
+      <button class="tab" role="tab" id="tabStripe" aria-selected="false" aria-controls="viewStripe" data-view="stripe" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Revenue</span></button>
       <button class="tab" role="tab" id="tabSubs" aria-selected="false" aria-controls="viewSubs" data-view="subs" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg><span>Subscriptions</span></button>
       <button class="tab" role="tab" id="tabChallenge" aria-selected="false" aria-controls="viewChallenge" data-view="challenge" hidden><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg><span>Challenge</span><span class="tab-badge" id="chBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Routine</span><kbd>0</kbd></button>
+      <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Routine</span></button>
     </nav>
     <div class="sb-foot">
       <button type="button" class="sb-search" id="cmdkOpen" aria-label="Jump to a section (Cmd+K)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span>Jump to…</span><kbd>⌘K</kbd></button>
@@ -1138,7 +1191,27 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   <div class="cov-banner" id="coverageBanner" role="status" hidden></div>
 
   <!-- ===== TODAY ===== -->
-  <section id="viewToday" role="tabpanel" aria-labelledby="tabToday" style="display:flex;flex-direction:column;gap:var(--s4);">
+  <section id="viewHome" role="tabpanel" aria-labelledby="tabHome" style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="pl-top"><span></span><div class="pl-seg" role="group" aria-label="Time period" data-pl-seg></div></div>
+    <div id="plHome"></div>
+  </section>
+  <section id="viewTraffic" role="tabpanel" aria-labelledby="tabTraffic" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="pl-top"><button type="button" class="pl-back" data-go="home">‹ Home</button><div class="pl-seg" role="group" aria-label="Time period" data-pl-seg></div></div>
+    <div id="plTraffic"></div>
+  </section>
+  <section id="viewLeadflow" role="tabpanel" aria-labelledby="tabLeadflow" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="pl-top"><button type="button" class="pl-back" data-go="home">‹ Home</button><div class="pl-seg" role="group" aria-label="Time period" data-pl-seg></div></div>
+    <div id="plLeads"></div>
+  </section>
+  <section id="viewSales" role="tabpanel" aria-labelledby="tabSales" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="pl-top"><button type="button" class="pl-back" data-go="home">‹ Home</button><div class="pl-seg" role="group" aria-label="Time period" data-pl-seg></div></div>
+    <div id="plSales"></div>
+  </section>
+  <section id="viewDelivery" role="tabpanel" aria-labelledby="tabDelivery" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="pl-top"><button type="button" class="pl-back" data-go="home">‹ Home</button><div class="pl-seg" role="group" aria-label="Time period" data-pl-seg></div></div>
+    <div id="plDelivery"></div>
+  </section>
+  <section id="viewToday" role="tabpanel" aria-labelledby="tabToday" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div class="top">
       <div><h1 id="todayGreeting">Today</h1><div class="sub" id="todaySub">Loading…</div></div>
     </div>
@@ -1654,17 +1727,23 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
 
   <!-- phone bottom bar -->
   <nav class="bottombar" id="bottomBar" aria-label="Sections">
-    <button class="bb" data-view="today" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Today</button>
-    <button class="bb" data-view="funnel" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg>Funnel</button>
-    <button class="bb" data-view="dms" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>DMs<span class="tab-badge" id="dmsBadgeBb" hidden></span></button>
-    <button class="bb" data-view="follow" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/></svg>Follow<span class="tab-badge" id="fuBadgeBb" hidden></span></button>
+    <button class="bb" data-view="home" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
     <button class="bb" data-view="apps" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg>Apps<span class="tab-badge" id="appsBadgeBb" hidden></span></button>
+    <button class="bb" data-view="content" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 10l4 2-4 2z"/></svg>Content</button>
     <button class="bb" id="bbMore" aria-selected="false" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</button>
   </nav>
+  <span id="dmsBadgeBb" hidden></span><span id="fuBadgeBb" hidden></span>
   <div class="sheet" id="moreSheet" hidden role="dialog" aria-label="More sections">
     <div class="sheet-card">
       <h2>More</h2>
-      <button class="sheet-btn" data-view="content">Content Engine</button>
+      <button class="sheet-btn" data-view="traffic">Traffic</button>
+      <button class="sheet-btn" data-view="leadflow">Leads</button>
+      <button class="sheet-btn" data-view="sales" id="sheetSales" hidden>Sales</button>
+      <button class="sheet-btn" data-view="delivery">Delivery</button>
+      <button class="sheet-btn" data-view="today">Daily brief</button>
+      <button class="sheet-btn" data-view="dms">DMs</button>
+      <button class="sheet-btn" data-view="follow">Follow-ups</button>
+      <button class="sheet-btn" data-view="funnel">Funnel (old)</button>
       <button class="sheet-btn" data-view="analytics">Analytics</button>
       <button class="sheet-btn" data-view="leads">Warm Leads</button>
       <button class="sheet-btn" data-view="magnets">Magnets <span class="tab-badge" id="magBadgeBb" hidden></span></button>
@@ -1834,15 +1913,16 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
 
   /* ---------- render scheduler: only the visible tab + global strips, only when its data changed ---------- */
   var VIEW_DEPS = {
+    home:['pillars'], traffic:['pillars'], leadflow:['pillars'], sales:['pillars'], delivery:['pillars'],
     today:['dms','daily','contacts','tfResponses','tfDaily','igPosts','igStories','meta','stripe'],
     funnel:['tfResponses','tfDaily','igPosts','igStories','meta','dms','daily','ads'],
     leads:['contacts','meta','dms'], dms:['dms','daily','reviews','contacts','meta'], follow:['dms','meta'], magnets:['dms','meta'],
     apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], analytics:['igPosts','igAccount','meta'], email:['email'], stripe:['stripe','meta'], subs:[], challenge:[], routine:[]
   };
-  var dirty = {global:true}, raf = null, currentView = 'today';
+  var dirty = {global:true}, raf = null, currentView = 'home';
   window.__hqRenders = 0; // counted by the perf test
   function markDirty(key){
-    Object.keys(VIEW_DEPS).forEach(function(v){ if(VIEW_DEPS[v].indexOf(key)>=0) dirty[v]=true; });
+    Object.keys(VIEW_DEPS).forEach(function(v){ if(VIEW_DEPS[v].indexOf(key)>=0 || VIEW_DEPS[v][0]==='pillars') dirty[v]=true; });
     dirty.global = true; scheduleRender();
   }
   function scheduleRender(){ if(raf) return; raf = (window.requestAnimationFrame||function(f){ return setTimeout(f,16); })(function(){ raf=null; renderPass(); }); }
@@ -1855,17 +1935,18 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   Object.keys(VIEW_DEPS).forEach(function(v){ dirty[v]=true; });
 
   /* ---------- views ---------- */
-  var VIEWS={today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine'};
-  var ADMIN_VIEWS={stripe:1, subs:1, routine:1, challenge:1, email:1};
+  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine'};
+  var ADMIN_VIEWS={sales:1, stripe:1, subs:1, routine:1, challenge:1, email:1};
   function setView(view, push){
-    if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='today';
+    if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='home';
     currentView = view;
     Object.keys(VIEWS).forEach(function(k){ var el=$(VIEWS[k]); if(el) el.hidden = k!==view; });
     document.querySelectorAll('[data-view]').forEach(function(b){ b.setAttribute('aria-selected', b.getAttribute('data-view')===view?'true':'false'); });
-    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['leads','magnets','ads','content','analytics','email','stripe','subs','challenge','routine'].indexOf(view)>=0?'true':'false');
+    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['traffic','leadflow','sales','delivery','today','dms','follow','funnel','leads','magnets','ads','content','analytics','email','stripe','subs','challenge','routine'].indexOf(view)>=0?'true':'false');
     document.querySelectorAll('#tabRow .tab').forEach(function(t){ t.setAttribute('tabindex', t.getAttribute('data-view')===view?'0':'-1'); });
     if(push!==false){ try{ history.replaceState(null,'','#'+view); }catch(e){} }
     closeSheet();
+    dirty.global=true;
     renderPass();
     document.dispatchEvent(new CustomEvent('hq-view', {detail:{view:view}}));
   }
@@ -1900,11 +1981,11 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   };
   var sheetThemeEl=$('sheetTheme'); if(sheetThemeEl){ sheetThemeEl.textContent=themeLabel(); sheetThemeEl.addEventListener('click', window.__hqToggleTheme); }
   var themeTop=$('themeBtnTop'); if(themeTop) themeTop.addEventListener('click', window.__hqToggleTheme);
-  (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'today'; })();
+  (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'home'; })();
 
   /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
-  var VIEW_LABEL={today:'Today', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine'};
-  var VIEW_KEYS={'1':'today','2':'dms','3':'follow','4':'magnets','5':'leads','6':'funnel','7':'apps','8':'ads','9':'stripe','0':'routine'};
+  var VIEW_LABEL={home:'Home', traffic:'Traffic', leadflow:'Leads', sales:'Sales', delivery:'Delivery', today:'Daily brief', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine'};
+  var VIEW_KEYS={'1':'home','2':'traffic','3':'leadflow','4':'sales','5':'delivery','6':'apps','7':'content','8':'today'};
   var appEl=$('appRoot');
   function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
   if(read('hqSidebar')==='1') setCollapsed(true);
@@ -1915,6 +1996,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
     var p=HQ.sydNow();
     setText('statusDate', HQ.DAYN[p.dow].slice(0,3)+' '+p.d+' '+HQ.MON[p.m-1]+' · '+HQ.pad(p.h)+':'+HQ.pad(p.min)+' Sydney');
     var m=state.dmMeta, c=HQ.dmCoverage(m), chip=$('statusCoverage');
+    if(chip && !DM_SCAN_OK && PL_VIEWS[currentView]){ chip.hidden=true; chip=null; }
     if(chip){
       if(!m || !m.lastScanAt){ chip.hidden=!state.dmLoaded; chip.className='chip grey'; chip.innerHTML='<i class="dot"></i>DM scan: never ran'; }
       else { var h=hoursSince(m.lastScanAt), bad = c && (c.complete===false || c.skipped), cls = bad ? 'red' : (h>9 ? 'amber' : 'green'); chip.hidden=false; chip.className='chip '+cls; chip.innerHTML='<i class="dot"></i>DM scan '+esc(relTime(m.lastScanAt)||'')+(bad?' · '+(c.skipped?'skipped':'incomplete'):''); }
@@ -1974,6 +2056,7 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   }
   function renderCoverage(){
     var el=$('coverageBanner'); if(!el) return;
+    if(!DM_SCAN_OK && PL_VIEWS[currentView]){ el.hidden=true; return; }
     var m=state.dmMeta, c=HQ.dmCoverage(m), html='', cls='';
     if(m && m.lastScanAt){
       var h=hoursSince(m.lastScanAt);
@@ -4945,12 +5028,14 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
   function boot(client, user, profile){
     isAdmin = !!(profile && profile.role==='admin');
     currentUser = user ? { email:user.email, firstName: (profile && profile.display_name) ? String(profile.display_name).split(/\s+/)[0] : (user.email && /^jordan/i.test(user.email) ? 'Jordan' : null) } : null;
+    $('tabSales').hidden = !isAdmin; var shs=$('sheetSales'); if(shs) shs.hidden=!isAdmin;
     $('tabStripe').hidden = !isAdmin; var ss=$('sheetStripe'); if(ss) ss.hidden=!isAdmin; var gb=$('sbGroupBusiness'); if(gb) gb.hidden=!isAdmin;
     ['tabEmail','sheetEmail'].forEach(function(id){ var el=$(id); if(el) el.hidden=!isAdmin; });
     supaClient = client;
     try{ db = makeSupabaseDb(client); }catch(e){ db=null; }
     if(!db){ showBanner("Live sync isn't available in this view, so changes here won't be saved."); setView(currentView, false); return; }
     subscribe();
+    plLoadDelivery();
     setView(currentView, false);
     if(ageTimer) clearInterval(ageTimer);
     ageTimer=setInterval(function(){ markDirty('dms'); }, 60000); // keep "waiting 3h" ages fresh
@@ -4975,6 +5060,154 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
       head.addEventListener('click', function(){ var now=panel.classList.toggle('collapsed'); applyState(now); store(storeKey, now?'1':'0'); });
     });
   })();
+  /* ---------- Home + the four areas: Traffic, Leads, Sales (admin), Delivery ----------
+     All maths in HQ.computePillars (hq-core.js). DM numbers stay off these pages until Jordan says the DM scan
+     is fixed: flip DM_SCAN_OK to true. The DM tables, scans and the DMs / Follow-ups tabs are untouched. */
+  var DM_SCAN_OK = false;
+  var PL_VIEWS = {home:1, traffic:1, leadflow:1, sales:1, delivery:1};
+  var plPeriod = (function(){ var v=read('hqPeriod'); return v==='7'?7:(v==='month'?'month':30); })();
+  state.deliveryCounts = null;
+  function plData(){
+    var s = Object.assign({}, coreState(), { igAccount:state.igAccount, contentQueue:state.contentQueue, routineCalls:state.routineCalls, deliveryCounts:state.deliveryCounts });
+    var opts = { dmScanOk:DM_SCAN_OK };
+    if(DM_SCAN_OK){ try{ opts.dmsWaiting = HQ.waiting(state.dms, Date.now()).length; }catch(e){} }
+    return HQ.computePillars(s, Date.now(), plPeriod, opts);
+  }
+  async function plLoadDelivery(){
+    if(!supaClient || !supaClient.rpc) return;
+    var R = HQ.pillarRange(HQ.sydDay(Date.now()), plPeriod), want = plPeriod;
+    try{
+      var r = await supaClient.rpc('hq_delivery_counts', { from_day:R.from, to_day:R.to });
+      if(want!==plPeriod) return;
+      state.deliveryCounts = r.error ? null : (r.data || null); state.deliveryError = r.error ? (r.error.message||'error') : null;
+    }catch(e){ state.deliveryCounts=null; state.deliveryError = String(e && e.message || e); }
+    markDirty('pillars');
+  }
+  function plTrend(x, opts){
+    opts = opts || {};
+    if(!x || x.value==null) return '';
+    if(x.change==null) return x.prev==null ? '' : '<small class="pl-flat">same as before</small>';
+    var up = x.change>0, good = opts.lowerIsBetter ? !up : up;
+    if(x.change===0) return '<small class="pl-flat">no change</small>';
+    return '<small class="'+(good?'pl-up':'pl-down')+'">'+(up?'▲ ':'▼ ')+Math.abs(x.change)+'%</small>';
+  }
+  function plVal(v, fmt){ if(v==null) return '<span class="pl-blank">–</span>'; return fmt==='money'?esc(HQ.money(v)):(fmt==='compact'?esc(HQ.compact(v)):(fmt==='pct'?v+'%':esc(num(v, fmt==='dp1'?1:0)))); }
+  function plRow(label, sub, x, opts){
+    opts = opts || {};
+    var val = x && typeof x==='object' ? x.value : x;
+    var right = opts.arrowOnly ? '<span class="go">›</span>' : plVal(val, opts.fmt) + (x && typeof x==='object' ? plTrend(x, opts) : '');
+    var tag = opts.go ? 'button type="button" data-go="'+esc(opts.go)+'"' : (opts.href ? 'a href="'+esc(opts.href)+'" target="_blank" rel="noopener"' : 'div');
+    var close = opts.go ? 'button' : (opts.href ? 'a' : 'div');
+    return '<'+tag+' class="pl-row"><div class="l">'+esc(label)+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><div class="r">'+right+'</div></'+close+'>';
+  }
+  function plSeg(){
+    var html = HQ.PILLAR_PERIODS.map(function(p){ return '<button type="button" data-pl-period="'+p+'" aria-pressed="'+(p===plPeriod?'true':'false')+'">'+(p==='month'?'Month':p+' days')+'</button>'; }).join('');
+    document.querySelectorAll('[data-pl-seg]').forEach(function(el){ el.innerHTML = html; });
+  }
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-pl-period]'); if(!b) return;
+    var v = b.getAttribute('data-pl-period'); plPeriod = v==='month' ? 'month' : +v; store('hqPeriod', String(plPeriod));
+    state.deliveryCounts = null; plLoadDelivery(); markDirty('pillars');
+  });
+  function plCard(view, name, x, sub, foot, admin){
+    var t = foot!=null ? foot : (x && x.change!=null ? '<span class="'+(x.change>=0?'pl-up':'pl-down')+'">'+(x.change>=0?'▲ ':'▼ ')+Math.abs(x.change)+'% vs before</span>' : (x && x.value!=null && x.prev===0 && x.value>0 ? '<span class="pl-up">▲ from 0</span>' : ''));
+    return '<button type="button" class="pl-card" data-go="'+view+'"><span class="n">'+esc(name)+(admin?'<span class="pl-admin">ADMIN</span>':'')+'</span><span class="v">'+plVal(x?x.value:null, view==='sales'?'money':null)+'</span><span class="s">'+esc(sub)+'</span><span class="t">'+t+'</span></button>';
+  }
+  RENDER.home = function(){
+    plSeg(); var d = plData(), L = d.leads, T = d.traffic, S = d.sales, D = d.delivery, html = '';
+    if(d.leak) html += '<div class="pl-leak"><div class="k">Where people drop off · '+esc(d.range.label)+'</div><p>'+esc(d.leak.text)+'</p></div>';
+    html += '<div class="pl-grid">'+
+      plCard('traffic','Traffic', T.headline, 'new followers from posts')+
+      plCard('leadflow','Leads', L.headline, 'applications')+
+      (isAdmin ? plCard('sales','Sales', S.headline, 'cash collected', S.connected.stripe ? null : '<span class="pl-flat">Stripe not connected</span>', true) : '')+
+      plCard('delivery','Delivery', D.headline, 'active clients', D.headline.value==null ? '<span class="pl-flat">'+(state.deliveryError?'couldn’t load':'loading…')+'</span>' : '<span class="pl-flat">'+num(D.churned.value)+' left · '+(D.avgWeeks.value==null?'–':num(D.avgWeeks.value,1))+' wks avg stay</span>')+
+    '</div>';
+    html += '<div class="pl-h2">Do today</div>';
+    html += d.todo.length ? '<div class="pl-list">'+d.todo.map(function(t){ return t.go ? '<button type="button" class="pl-row" data-go="'+esc(t.go)+'"><div class="l">'+esc(t.label)+'</div><div class="r">'+num(t.count)+' <span class="go">›</span></div></button>' : '<div class="pl-row"><div class="l">'+esc(t.label)+'</div><div class="r">'+num(t.count)+'</div></div>'; }).join('')+'</div>'
+      : '<div class="pl-list"><div class="pl-row"><div class="l">Nothing waiting on you.</div></div></div>';
+    html += '<p class="pl-note">Tap a card for the numbers behind it. Everything else is under '+(window.innerWidth<760?'More':'Work and Tools')+'.</p>';
+    setHtml('plHome', html);
+  };
+  RENDER.traffic = function(){
+    plSeg(); var d = plData(), T = d.traffic, acc = T.accountLevel ? null : 'Instagram only gives 7 and 30-day totals';
+    var ig = function(sc){ return sc ? 'https://www.instagram.com/reel/'+encodeURIComponent(sc)+'/' : null; };
+    var html = '<div class="pl-list">'+
+      plRow('New followers', 'from posts published '+d.range.label, T.headline, {go:'analytics'})+
+      plRow('Follower count', T.netFollowers!=null ? (T.netFollowers>=0?'+':'')+num(T.netFollowers)+' '+d.range.label : (T.followersSince?'tracked daily since '+HQ.fmtDay(T.followersSince,'short'):null), T.followersNow)+
+      plRow('Views', 'posts published '+d.range.label, T.views, {fmt:'compact', go:'analytics'})+
+      plRow('Accounts reached', acc || 'whole account', T.reach, {fmt:'compact'})+
+      plRow('Non-follower reach', 'average per post', T.nonFollowerPct, {fmt:'pct'})+
+      plRow('Posts published', null, T.posts, {go:'content'})+
+      plRow('Saves', null, T.saves, {fmt:'compact'})+
+      plRow('Shares', null, T.shares, {fmt:'compact'})+
+      plRow('Likes', null, T.likes, {fmt:'compact'})+
+      plRow('Comments', null, T.comments)+
+      plRow('Story views', T.stories+' '+HQ.plural(T.stories,'story','stories'), T.storyViews)+
+    '</div>';
+    if(T.top) html += '<div class="pl-h2">Best post for followers</div><div class="pl-list">'+plRow(T.top.title||('Post from '+HQ.fmtDay(T.top.day,'short')), (T.top.title?HQ.fmtDay(T.top.day,'short')+' · ':'')+HQ.compact(T.top.views)+' views · followers gained', {value:T.top.follows, prev:null, change:null}, {href:ig(T.top.shortcode)})+'</div>';
+    html += '<div class="pl-h2">Hand-off to Leads</div><div class="pl-list">'+
+      plRow('Profile visits', acc, T.profileVisits)+
+      plRow('Link taps', T.profileVisits.value&&T.linkTaps.value!=null ? HQ.pct(T.linkTaps.value, T.profileVisits.value)+'% of profile visits' : acc, T.linkTaps)+
+      plRow('Form views', 'Typeform', T.formViews, {go:'leadflow'})+
+    '</div><p class="pl-note">Views, saves and likes are the lifetime numbers of posts published in this period. Tap a row for the posts behind it.</p>';
+    setHtml('plTraffic', html);
+  };
+  RENDER.leadflow = function(){
+    plSeg(); var d = plData(), L = d.leads, base = L.formViews.value || 0;
+    function bar(v){ return '<div class="pl-bar"><i style="width:'+(base>0&&v!=null?Math.max(2,Math.min(100,Math.round(v/base*100))):0)+'%"></i></div>'; }
+    function step(title, x, src, drill){
+      return '<div class="pl-step"><div class="row"><span class="tt">'+esc(title)+'</span><span class="vv">'+plVal(x.value)+'</span></div>'+(src?'<div class="src">'+esc(src)+'</div>':'')+bar(x.value)+
+        (drill&&drill.length?'<details><summary>What feeds this</summary>'+drill.map(function(r){ return '<div class="dr"><span>'+esc(r[0])+'</span><span>'+r[1]+'</span></div>'; }).join('')+'</details>':'')+'</div>';
+    }
+    function conv(label, v){ return '<div class="pl-conv">↓ '+esc(label)+' <b>'+(v==null?'<span class="pl-blank">–</span>':v+'%')+'</b></div>'; }
+    var src = Object.keys(L.applications.bySource).sort(function(a,b){ return L.applications.bySource[b]-L.applications.bySource[a]; }).map(function(k){ return [k==='link_in_bio'?'Link in bio':(k==='unknown'?'Unknown source':k.replace(/_/g,' ')), num(L.applications.bySource[k])]; });
+    var html = '<div class="pl-funnel">'+
+      step('Form views', L.formViews, 'Typeform · '+d.range.label, [['Link taps on Instagram', d.traffic.linkTaps.value==null?'–':num(d.traffic.linkTaps.value)], ['Profile visits', d.traffic.profileVisits.value==null?'–':num(d.traffic.profileVisits.value)], ['Before', L.formViews.prev==null?'–':num(L.formViews.prev)]])+
+      conv('view → start', L.rates.viewToStart)+
+      step('Form starts', L.starts, L.starts.note)+
+      conv('view → apply', L.rates.viewToApply)+
+      step('Applications', L.applications, null, src.concat([['Qualified', L.applications.qualified==null?'not marked yet':num(L.applications.qualified)+' of '+num(L.applications.qualifiedOf)], ['Before', L.applications.prev==null?'–':num(L.applications.prev)]]))+
+      conv('apply → booked', L.rates.applyToBooked)+
+      step('Booked calls', L.booked, L.booked.note, [['Cost per booked call', '<span class="pl-blank">needs ad spend</span>']].concat(DM_SCAN_OK&&L.booked.fromDms!=null?[['From DMs', num(L.booked.fromDms)]]:[]))+
+      conv('show-up rate', L.rates.showRate)+
+      step('Showed', L.showed, L.showed.note)+
+    '</div>';
+    html += '<div class="pl-list">'+plRow('Applications to work through', 'opens Applications', null, {go:'apps', arrowOnly:true})+'</div>';
+    html += '<p class="pl-note">Tap “What feeds this” under a step to see where it comes from. Booked calls, show-ups and cost per call fill in once GoHighLevel and ad spend are connected.'+(DM_SCAN_OK?'':' DM numbers are paused while the DM scan is fixed.')+'</p>';
+    setHtml('plLeads', html);
+  };
+  RENDER.sales = function(){
+    plSeg(); if(!isAdmin){ setHtml('plSales','<div class="pl-list"><div class="pl-row"><div class="l">Admin only.</div></div></div>'); return; }
+    var d = plData(), S = d.sales, html = '';
+    if(!S.connected.stripe || !S.connected.ghl) html += '<div class="pl-leak"><div class="k">Not connected yet</div><p>'+(!S.connected.stripe?'Stripe: add a read-only restricted key (rk_live_…) to the Supabase Vault as <b>stripe_restricted_key</b>. ':'')+(!S.connected.ghl?'GoHighLevel: add the token to the Vault as <b>ghl_readonly_token</b>. ':'')+'Until then these rows stay blank; nothing here is guessed.</p></div>';
+    html += '<div class="pl-list">'+
+      plRow('Cash collected', d.period==='month'?'paid invoices this month':'shown for Month', S.headline, {fmt:'money', go:'stripe'})+
+      plRow('Sales closed', null, S.closed)+
+      plRow('Close rate', 'closed ÷ calls held', S.closeRate, {fmt:'pct'})+
+      plRow('Average sale value', null, S.avgSale, {fmt:'money'})+
+      plRow('CAC', 'ad + tool spend ÷ new clients', S.cac, {fmt:'money', lowerIsBetter:true})+
+      plRow('Days from first DM to close', null, S.daysToClose, {lowerIsBetter:true})+
+      plRow('Refunds', null, S.refunds, {fmt:'money', lowerIsBetter:true})+
+    '</div><p class="pl-note">Only admins can see this page.</p>';
+    setHtml('plSales', html);
+  };
+  RENDER.delivery = function(){
+    plSeg(); var d = plData(), D = d.delivery;
+    var html = '<div class="pl-list">'+
+      plRow('Active clients', null, D.headline, {go:isAdmin?'challenge':null})+
+      plRow('Joined', d.range.label, D.joined)+
+      plRow('Left', d.range.label, D.churned, {lowerIsBetter:true})+
+      plRow('Average weeks stayed', 'everyone with a join date', D.avgWeeks, {fmt:'dp1'})+
+      plRow('Check-ins on time', d.range.label, D.checkinsOnTime)+
+      plRow('Check-in reply time', 'not tracked yet', D.checkinReplyTime)+
+      plRow('Monthly recurring', 'needs Stripe', D.mrr, {fmt:'money'})+
+      plRow('Failed payments', 'needs Stripe', D.failedPayments, {lowerIsBetter:true})+
+      plRow('LTV', 'needs Stripe', D.ltv, {fmt:'money'})+
+      plRow('Referrals', 'not tracked yet', D.referrals)+
+    '</div><p class="pl-note">'+(state.deliveryError?'Couldn’t load client counts ('+esc(state.deliveryError)+'). ':'')+'Active clients come from the challenge member list. Money rows fill in once Stripe is connected.</p>';
+    setHtml('plDelivery', html);
+  };
+
   window.__hq = { state:state, setView:setView, renderNow:renderNow, computeToday:function(){ return HQ.computeToday(coreState(), Date.now()); } };
 })();
 </script>
