@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '2.9.0';
+  HQ.VERSION = '3.1.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -456,7 +456,7 @@
     var ads = meta.adsSync || null;
     rows.push(row('Meta Ads sync', ads && ads.lastSyncAt, { schedule: 'daily', staleHours: 30, failed: ads && ads.ok === false ? (ads.error || 'Sync failing.') : null, notConnected: ads ? null : 'Meta Ads connector not added. Ads tab shows how.' }));
     var stp = meta.stripeSync || null;
-    rows.push(row('Stripe sync (revenue)', stp && stp.lastSyncAt, { schedule: 'hourly', staleHours: 3, failed: stp && stp.ok === false ? (stp.error || 'Sync failing.') : null, notConnected: (!stp || stp.connected === false) ? 'Read-only Stripe key not in Vault yet.' : null }));
+    rows.push(row('Stripe sync (revenue)', stp && stp.lastSyncAt, { schedule: 'hourly', staleHours: 3, failed: stp && stp.ok === false && !stp.off ? (stp.error || 'Sync failing.') : null, notConnected: stp && stp.off ? 'Off: payments are moving to Newie.' : ((!stp || stp.connected === false) ? 'Read-only Stripe key not in Vault yet.' : null) }));
     var ghl = meta.ghlSync || null;
     rows.push(row('GoHighLevel pull (calls)', ghl && ghl.lastSyncAt, { schedule: 'hourly', staleHours: 3, failed: ghl && ghl.ok === false ? (ghl.error || 'Sync failing.') : null, notConnected: (!ghl || ghl.connected === false) ? 'No read-only GHL token yet. Answered / booked / showed / closed stay "–".' : null }));
     var order = { red: 0, amber: 1, grey: 2, green: 3 };
@@ -464,6 +464,14 @@
     return rows;
   };
   HQ.dmCoverage = function (dmMeta) { if (!dmMeta || !dmMeta.lastScanAt) return null; return dmMeta.coverage ? dmMeta.coverage : { legacy: true, complete: false }; };
+
+  /* ---------- GoHighLevel day sums (meta/ghlSync.days, written by the ghl-sync function) ---------- */
+  HQ.ghlSum = function (ghl, from, to) {
+    if (!ghl || !ghl.connected || !ghl.days) return null;
+    var o = { booked: 0, held: 0, showed: 0, noShow: 0, unmarked: 0, closed: 0, closeDaysSum: 0, closeDaysN: 0, outreach: 0, replied: 0 };
+    Object.keys(ghl.days).forEach(function (k) { if (k < from || k > to) return; var d = ghl.days[k] || {}; Object.keys(o).forEach(function (f) { if (HQ.isNum(+d[f])) o[f] += +d[f]; }); });
+    return o;
+  };
 
   /* ---------- funnel snapshot (last N days) ---------- */
   // Every stage is {label, value|null, reason} — null means "not measurable yet", and the reason is shown on the page.
@@ -485,7 +493,7 @@
     var won = apps.filter(function (r) { return HQ.outcomeWon(r.outcome); }).length;
     var marked = apps.filter(function (r) { return HQ.outcomeTried(r.outcome); }).length;
     var byHand = marked ? 'marked by hand on the Applications tab (' + marked + ' of ' + apps.length + ' applications have an outcome)' : 'no application in this window has an outcome marked yet; GoHighLevel is not connected';
-    var ghl = state.meta && state.meta.ghlSync && state.meta.ghlSync.connected;
+    var g = HQ.ghlSum(state.meta && state.meta.ghlSync, from, today), ghl = !!g;
     // group = sub-funnel; bars are scaled within a group and a conversion % is only shown inside a group (noConv breaks the chain)
     return { days: days, from: from, to: today, stages: [
       { key: 'reach', group: 'Content', label: 'Reach (post views)', value: igRan ? views : null, reason: igRan ? posts.length + ' post' + (posts.length === 1 ? '' : 's') + ' posted in this window' : 'content scan has not run', noConv: true },
@@ -495,10 +503,10 @@
       { key: 'replied', group: 'DM', label: 'Outbound leads who replied', value: state.dmLoaded ? dmReplied : null, reason: 'first reply received in this window' },
       { key: 'opens', group: 'Application', label: 'Application form opened', value: tf.visits, reason: 'Typeform', noConv: true },
       { key: 'applied', group: 'Application', label: 'Applications', value: tf.completed, reason: 'Typeform' },
-      { key: 'answered', group: 'Call', label: 'Answered call', value: marked ? answered : (ghl ? 0 : null), reason: byHand },
-      { key: 'booked', group: 'Call', label: 'Call booked', value: marked ? booked : (ghl ? 0 : null), reason: byHand },
-      { key: 'showed', group: 'Call', label: 'Showed', value: marked ? showed : (ghl ? 0 : null), reason: byHand },
-      { key: 'closed', group: 'Call', label: 'Signed', value: marked ? won : (ghl ? 0 : null), reason: byHand }
+      { key: 'answered', group: 'Call', label: 'Answered call', value: marked ? answered : null, reason: byHand },
+      { key: 'booked', group: 'Call', label: 'Call booked', value: marked ? booked : (ghl ? g.booked : null), reason: marked ? byHand : (ghl ? 'GoHighLevel sales calendar' : byHand) },
+      { key: 'showed', group: 'Call', label: 'Showed', value: marked ? showed : (ghl && (g.showed + g.noShow) ? g.showed : null), reason: marked ? byHand : (ghl ? (g.unmarked ? g.unmarked + ' call(s) not marked showed / no-show in GHL' : 'GoHighLevel') : byHand) },
+      { key: 'closed', group: 'Call', label: 'Signed', value: marked ? won : (ghl ? g.closed : null), reason: marked ? byHand : (ghl ? 'GoHighLevel: moved to a Closed / Won stage' : byHand) }
     ] };
   };
 
@@ -849,29 +857,38 @@
     var ghl = state.meta && state.meta.ghlSync, ghlOn = !!(ghl && ghl.connected);
     var dmBooked = null;
     if (opts.dmScanOk) dmBooked = (state.daily || []).filter(function (d) { var k = d.date || d.id; return k >= R.from && k <= R.to; }).reduce(function (a, d) { return a + (+d.callsBooked || 0); }, 0);
-    var booked = ghlOn && HQ.isNum(ghl.booked) ? ghl.booked : null;
+    var G = HQ.ghlSum(ghl, R.from, R.to), GP = HQ.ghlSum(ghl, R.prevFrom, R.prevTo);
+    var booked = G ? G.booked : null, marked = G ? G.showed + G.noShow : 0;
+    var showNote = !G ? 'Needs GoHighLevel' : (G.unmarked ? G.unmarked + ' of ' + G.held + ' calls not marked showed / no-show in GHL' : (G.held ? null : 'No sales calls held in this window'));
     var leads = {
       headline: m(apps.length, appsPrev.length, { label: 'applications' }),
       formViews: traffic.formViews,
       starts: m(startsReal ? tf.started : null, startsReal ? tfp.started : null, { note: startsReal ? null : 'Typeform sync only counts finished forms' }),
       applications: m(apps.length, appsPrev.length, { bySource: bySrc, qualified: fitKnown.length ? fitYes : null, qualifiedOf: fitKnown.length }),
-      booked: m(booked, null, { fromDms: dmBooked, note: ghlOn ? null : 'Needs GoHighLevel' }),
-      showed: m(null, null, { note: 'Needs GoHighLevel' }),
+      booked: m(booked, GP ? GP.booked : null, { fromDms: dmBooked, note: ghlOn ? null : 'Needs GoHighLevel', held: G ? G.held : null, upcoming7: ghlOn && HQ.isNum(ghl.upcoming7) ? ghl.upcoming7 : null }),
+      showed: m(G && marked ? G.showed : null, GP && (GP.showed + GP.noShow) ? GP.showed : null, { note: showNote, noShow: G && marked ? G.noShow : null }),
+      outreach: m(G ? G.outreach : null, GP ? GP.outreach : null, { note: ghlOn ? null : 'Needs GoHighLevel' }),
+      replied: m(G ? G.replied : null, GP ? GP.replied : null),
       costPerBooked: m(null, null, { note: 'Needs ad spend' }),
       rates: {
         viewToStart: startsReal ? HQ.pct(tf.started, tf.visits) : null,
         viewToApply: tf.days ? HQ.pct(apps.length, tf.visits) : null,
-        applyToBooked: null, showRate: null
+        applyToBooked: G && apps.length ? HQ.pct(G.booked, apps.length) : null, showRate: G && marked ? HQ.pct(G.showed, marked) : null,
+        replyRate: G && G.outreach ? HQ.pct(G.replied, G.outreach) : null
       }
     };
 
     // --- Sales: admin only; all from Stripe + GHL, blank until they're connected
     var sum = state.stripe && state.stripe.summary, stripeOn = !!(state.meta && state.meta.stripeSync && state.meta.stripeSync.connected && sum);
     var sales = {
-      connected: { stripe: stripeOn, ghl: ghlOn },
+      connected: { stripe: stripeOn, ghl: ghlOn, stripeOff: !!(state.meta && state.meta.stripeSync && state.meta.stripeSync.off) },
       headline: m(null, null, { label: 'cash collected' }),
-      closed: m(stripeOn && period === 'month' && HQ.isNum(sum.newThisMonth) ? sum.newThisMonth : null, null),
-      closeRate: m(null, null), avgSale: m(null, null), cac: m(null, null), daysToClose: m(null, null), refunds: m(null, null)
+      // GHL only knows a sale once a lead is moved to Closed / Won; if nothing in the window was moved or marked, it isn't being kept up to date, so blank, not 0
+      closed: m(G && (G.closed || marked) ? G.closed : null, GP && (GP.closed || GP.showed + GP.noShow) ? GP.closed : null, { note: G && !(G.closed || marked) ? 'No lead moved to Closed in GHL' : null }),
+      closeRate: m(G && G.held && (G.closed || marked) ? HQ.pct(G.closed, G.held) : null, null),
+      avgSale: m(null, null), cac: m(null, null),
+      daysToClose: m(G && G.closeDaysN ? Math.round(G.closeDaysSum / G.closeDaysN * 10) / 10 : null, null),
+      refunds: m(null, null)
     };
     if (stripeOn) {
       var mon = (Array.isArray(sum.revenueByMonth) ? sum.revenueByMonth : []).filter(function (x) { return x && x.month === today.slice(0, 7); })[0];

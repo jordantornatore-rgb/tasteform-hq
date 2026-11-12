@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.0 — 12 Nov 2026 (GoHighLevel connected, Stripe off)
+- New `ghl-sync` edge function (read-only GETs, hourly at :47). Writes per-day counts to meta/ghlSync: sales-call bookings, calls held, showed / no-show, leads moved to Closed / Won, Instagram Leads outreach and replies. No names.
+- Leads: booked calls and show-ups from GHL (show-up rate fills in as calls are marked Showed / No-show), plus an Instagram outreach section.
+- Sales: closes, close rate and days to close from GHL; blank (not 0) while no lead has been moved to Closed.
+- Stripe sync switched off (payments moving to Newie); money rows say "waiting on Newie".
+
 ## 3.0.1 — 12 Nov 2026 (Story links)
 
 - Tools → **Story links**: type the sticker text, pick Lead magnet / Sticker / DM, tap **Add + copy link**. The tracked link (`tasteformcoaching.vercel.app/?utm_source=instagram&utm_medium=story&utm_campaign=<type>&utm_content=<sticker text, normalised>`) is copied and saved to `cta_links`. Each link shows how many people opened the form from it and how many applied (story sessions in `app_sessions`). The bio link (`/apply`) is at the top with Copy.

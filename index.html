@@ -1115,6 +1115,7 @@ button.pl-row:hover{background:var(--surface-2)}
 .pl-step .dr span:last-child{color:var(--text)}
 .pl-conv{display:flex;gap:8px;padding:6px 0 6px 18px;font-size:var(--t-s);color:var(--muted)}
 .pl-note{font-size:var(--t-s);color:var(--muted);margin:0}
+.pl-h{font-size:var(--t-s);font-weight:600;color:var(--muted);margin:4px 2px -6px;text-transform:uppercase;letter-spacing:.04em}
 .pl-funnel{display:flex;flex-direction:column}
 </style>
 </head>
@@ -5198,25 +5199,30 @@ button.pl-row:hover{background:var(--surface-2)}
       conv('view → apply', L.rates.viewToApply)+
       step('Applications', L.applications, null, src.concat([['Qualified', L.applications.qualified==null?'not marked yet':num(L.applications.qualified)+' of '+num(L.applications.qualifiedOf)], ['Before', L.applications.prev==null?'–':num(L.applications.prev)]]))+
       conv('apply → booked', L.rates.applyToBooked)+
-      step('Booked calls', L.booked, L.booked.note, [['Cost per booked call', '<span class="pl-blank">needs ad spend</span>']].concat(DM_SCAN_OK&&L.booked.fromDms!=null?[['From DMs', num(L.booked.fromDms)]]:[]))+
+      step('Booked calls', L.booked, L.booked.note||'GoHighLevel sales calendar · booked in this window', [['Calls held in this window', L.booked.held==null?'–':num(L.booked.held)], ['Calls in the next 7 days', L.booked.upcoming7==null?'–':num(L.booked.upcoming7)], ['Before', L.booked.prev==null?'–':num(L.booked.prev)], ['Cost per booked call', '<span class="pl-blank">needs ad spend</span>']].concat(DM_SCAN_OK&&L.booked.fromDms!=null?[['From DMs', num(L.booked.fromDms)]]:[]))+
       conv('show-up rate', L.rates.showRate)+
-      step('Showed', L.showed, L.showed.note)+
+      step('Showed', L.showed, L.showed.note, L.showed.noShow!=null?[['No-shows', num(L.showed.noShow)]]:null)+
+    '</div>';
+    html += '<h3 class="pl-h">Instagram outreach (GoHighLevel)</h3><div class="pl-list">'+
+      plRow('Conversations started', 'new in the Instagram Leads pipeline', L.outreach)+
+      plRow('Replied', 'moved past Outreach', L.replied)+
+      plRow('Reply rate', 'replied ÷ started', {value:L.rates.replyRate, prev:null}, {fmt:'pct'})+
     '</div>';
     html += '<div class="pl-list">'+plRow('Applications to work through', 'opens Applications', null, {go:'apps', arrowOnly:true})+'</div>';
-    html += '<p class="pl-note">Tap “What feeds this” under a step to see where it comes from. Booked calls, show-ups and cost per call fill in once GoHighLevel and ad spend are connected.'+(DM_SCAN_OK?'':' DM numbers are paused while the DM scan is fixed.')+'</p>';
+    html += '<p class="pl-note">Tap “What feeds this” under a step to see where it comes from. Booked calls and show-ups come from GoHighLevel: mark each sales call Showed or No-show there and the show-up rate fills in. Cost per call needs ad spend.'+(DM_SCAN_OK?'':' DM numbers are paused while the DM scan is fixed.')+'</p>';
     setHtml('plLeads', html);
   };
   RENDER.sales = function(){
     plSeg(); if(!isAdmin){ setHtml('plSales','<div class="pl-list"><div class="pl-row"><div class="l">Admin only.</div></div></div>'); return; }
     var d = plData(), S = d.sales, html = '';
-    if(!S.connected.stripe || !S.connected.ghl) html += '<div class="pl-leak"><div class="k">Not connected yet</div><p>'+(!S.connected.stripe?'Stripe: add a read-only restricted key (rk_live_…) to the Supabase Vault as <b>stripe_restricted_key</b>. ':'')+(!S.connected.ghl?'GoHighLevel: add the token to the Vault as <b>ghl_readonly_token</b>. ':'')+'Until then these rows stay blank; nothing here is guessed.</p></div>';
+    if(!S.connected.stripe || !S.connected.ghl) html += '<div class="pl-leak"><div class="k">Not connected yet</div><p>'+(!S.connected.stripe?(S.connected.stripeOff?'Revenue: waiting on Newie (Stripe is switched off). ':'Stripe: add a read-only restricted key (rk_live_…) to the Supabase Vault as <b>stripe_restricted_key</b>. '):'')+(!S.connected.ghl?'GoHighLevel: add the token to the Vault as <b>ghl_readonly_token</b>. ':'')+'Blank rows stay blank; nothing here is guessed.</p></div>';
     html += '<div class="pl-list">'+
       plRow('Cash collected', d.period==='month'?'paid invoices this month':'shown for Month', S.headline, {fmt:'money', go:'stripe'})+
-      plRow('Sales closed', null, S.closed)+
+      plRow('Sales closed', S.closed.note||'moved to Closed / Won in GHL', S.closed)+
       plRow('Close rate', 'closed ÷ calls held', S.closeRate, {fmt:'pct'})+
       plRow('Average sale value', null, S.avgSale, {fmt:'money'})+
       plRow('CAC', 'ad + tool spend ÷ new clients', S.cac, {fmt:'money', lowerIsBetter:true})+
-      plRow('Days from first DM to close', null, S.daysToClose, {lowerIsBetter:true})+
+      plRow('Days from first contact to close', 'GHL lead created → closed', S.daysToClose, {fmt:'dp1', lowerIsBetter:true})+
       plRow('Refunds', null, S.refunds, {fmt:'money', lowerIsBetter:true})+
     '</div><p class="pl-note">Only admins can see this page.</p>';
     setHtml('plSales', html);
@@ -5230,11 +5236,11 @@ button.pl-row:hover{background:var(--surface-2)}
       plRow('Average weeks stayed', 'everyone with a join date', D.avgWeeks, {fmt:'dp1'})+
       plRow('Check-ins on time', d.range.label, D.checkinsOnTime)+
       plRow('Check-in reply time', 'not tracked yet', D.checkinReplyTime)+
-      plRow('Monthly recurring', 'needs Stripe', D.mrr, {fmt:'money'})+
-      plRow('Failed payments', 'needs Stripe', D.failedPayments, {lowerIsBetter:true})+
-      plRow('LTV', 'needs Stripe', D.ltv, {fmt:'money'})+
+      plRow('Monthly recurring', 'waiting on Newie', D.mrr, {fmt:'money'})+
+      plRow('Failed payments', 'waiting on Newie', D.failedPayments, {lowerIsBetter:true})+
+      plRow('LTV', 'waiting on Newie', D.ltv, {fmt:'money'})+
       plRow('Referrals', 'not tracked yet', D.referrals)+
-    '</div><p class="pl-note">'+(state.deliveryError?'Couldn’t load client counts ('+esc(state.deliveryError)+'). ':'')+'Active clients come from the challenge member list. Money rows fill in once Stripe is connected.</p>';
+    '</div><p class="pl-note">'+(state.deliveryError?'Couldn’t load client counts ('+esc(state.deliveryError)+'). ':'')+'Active clients come from the challenge member list. Money rows fill in once Newie is connected.</p>';
     setHtml('plDelivery', html);
   };
 
