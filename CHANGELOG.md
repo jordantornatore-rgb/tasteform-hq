@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1 — 12 Nov 2026 (Story links)
+
+- Tools → **Story links**: type the sticker text, pick Lead magnet / Sticker / DM, tap **Add + copy link**. The tracked link (`tasteformcoaching.vercel.app/?utm_source=instagram&utm_medium=story&utm_campaign=<type>&utm_content=<sticker text, normalised>`) is copied and saved to `cta_links`. Each link shows how many people opened the form from it and how many applied (story sessions in `app_sessions`). The bio link (`/apply`) is at the top with Copy.
+- `utm_content` uses the same normalisation as `ig_stories.linkStickerLabelNorm`, so a story's sticker joins to its applications.
+- Tests: `node tests/links.test.js`; the mock client now supports `limit()`, `data->a->>b` filters and aliased selects.
+
 ## 3.0.0 — 11 Nov 2026 (Home + four areas)
 
 - New **Home** is the first page: one line on where people drop off between content and the form, four cards (Traffic, Leads, Sales, Delivery), and at most 3 things to do today. One 7 days / 30 days / Month switch for every page, remembered per device.

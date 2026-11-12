@@ -200,6 +200,15 @@ button.kpi:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .seg-filter button{border:none;background:none;color:var(--muted);font-weight:600;font-size:var(--t-s);padding:7px 12px;min-height:34px;border-radius:999px;cursor:pointer;}
 .seg-filter button[aria-pressed="true"]{background:var(--text);color:var(--bg);}
 .seg-filter button:focus-visible{outline:2px solid var(--accent);}
+.sl-make{max-width:520px;}
+.sl-in{font-size:var(--t-m);min-height:var(--tap,44px);width:100%;}
+.sl-msg{font-size:var(--t-xs);color:var(--muted);min-height:16px;}
+.sl-row{display:flex;align-items:center;gap:var(--s3);padding:10px 0;border-top:1px solid var(--border);}
+.sl-row:first-child{border-top:0;padding-top:0;}
+#slList .sl-row:first-child{border-top:1px solid var(--border);padding-top:10px;}
+.sl-l{flex:1;min-width:0;}
+.sl-s{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sl-m{color:var(--muted);font-size:var(--t-xs);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 @media (pointer:coarse){.seg-filter button{min-height:40px;}}
 .range{display:flex;gap:4px;flex-wrap:wrap;}
 .range button{border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;font-size:var(--t-s);font-weight:600;padding:6px 10px;min-height:34px;cursor:pointer;}
@@ -1162,6 +1171,7 @@ button.pl-row:hover{background:var(--surface-2)}
       <button class="tab" role="tab" id="tabLeads" aria-selected="false" aria-controls="viewLeads" data-view="leads"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Warm Leads</span></button>
       <div class="sb-group">Tools</div>
       <button class="tab" role="tab" id="tabFunnel" aria-selected="false" aria-controls="viewFunnel" data-view="funnel"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Funnel</span></button>
+      <button class="tab" role="tab" id="tabLinks" aria-selected="false" aria-controls="viewLinks" data-view="links"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span>Story links</span></button>
       <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg><span>Applications</span><span class="tab-badge" id="appsBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads"><svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M17 8a4 4 0 0 1 0 8"/></svg><span>Ads</span></button>
       <button class="tab" role="tab" id="tabContent" aria-selected="false" aria-controls="viewContent" data-view="content"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5l2 4M14 5l2 4M10 12l4 2.5-4 2.5z"/></svg><span>Content Engine</span></button>
@@ -1688,6 +1698,25 @@ button.pl-row:hover{background:var(--surface-2)}
     <div id="chRoot" style="display:flex;flex-direction:column;gap:var(--s4);"><div class="panel"><div class="empty-state">Loading…</div></div></div>
   </section>
 
+  <!-- ===== STORY LINKS (tracked links for story CTAs) ===== -->
+  <section id="viewLinks" role="tabpanel" aria-labelledby="tabLinks" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="top"><div><h1>Story links</h1><div class="sub">Type the sticker text, pick the CTA, copy the link.</div></div></div>
+    <div class="panel sl-make">
+      <input class="input sl-in" id="slText" type="text" maxlength="60" autocomplete="off" placeholder="Sticker text, e.g. 9-5 fat loss" aria-label="Sticker text">
+      <div class="seg-filter" role="group" aria-label="CTA type" id="slType">
+        <button type="button" data-sltype="lead_magnet" aria-pressed="true">Lead magnet</button>
+        <button type="button" data-sltype="sticker" aria-pressed="false">Sticker</button>
+        <button type="button" data-sltype="dm" aria-pressed="false">DM</button>
+      </div>
+      <button type="button" class="btn primary" id="slAdd" disabled>Add + copy link</button>
+      <div class="sl-msg" id="slMsg" role="status"></div>
+    </div>
+    <div class="panel">
+      <div class="sl-row"><div class="sl-l"><div class="sl-s">Link in bio</div><div class="sl-m mono">tasteformcoaching.vercel.app/apply</div></div><button type="button" class="btn" data-slcopy="https://tasteformcoaching.vercel.app/apply">Copy</button></div>
+      <div id="slList"><div class="empty-state">Loading…</div></div>
+    </div>
+  </section>
+
   <!-- ===== ROUTINE (admin only) ===== -->
   <section id="viewRoutine" role="tabpanel" aria-labelledby="tabRoutine" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div id="routineRoot" style="display:flex;flex-direction:column;gap:var(--s4);">
@@ -1743,6 +1772,7 @@ button.pl-row:hover{background:var(--surface-2)}
       <button class="sheet-btn" data-view="today">Daily brief</button>
       <button class="sheet-btn" data-view="dms">DMs</button>
       <button class="sheet-btn" data-view="follow">Follow-ups</button>
+      <button class="sheet-btn" data-view="links">Story links</button>
       <button class="sheet-btn" data-view="funnel">Funnel (old)</button>
       <button class="sheet-btn" data-view="analytics">Analytics</button>
       <button class="sheet-btn" data-view="leads">Warm Leads</button>
@@ -1917,7 +1947,7 @@ button.pl-row:hover{background:var(--surface-2)}
     today:['dms','daily','contacts','tfResponses','tfDaily','igPosts','igStories','meta','stripe'],
     funnel:['tfResponses','tfDaily','igPosts','igStories','meta','dms','daily','ads'],
     leads:['contacts','meta','dms'], dms:['dms','daily','reviews','contacts','meta'], follow:['dms','meta'], magnets:['dms','meta'],
-    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], analytics:['igPosts','igAccount','meta'], email:['email'], stripe:['stripe','meta'], subs:[], challenge:[], routine:[]
+    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], analytics:['igPosts','igAccount','meta'], email:['email'], stripe:['stripe','meta'], subs:[], challenge:[], routine:[], links:[]
   };
   var dirty = {global:true}, raf = null, currentView = 'home';
   window.__hqRenders = 0; // counted by the perf test
@@ -1935,14 +1965,14 @@ button.pl-row:hover{background:var(--surface-2)}
   Object.keys(VIEW_DEPS).forEach(function(v){ dirty[v]=true; });
 
   /* ---------- views ---------- */
-  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine'};
+  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine', links:'viewLinks'};
   var ADMIN_VIEWS={sales:1, stripe:1, subs:1, routine:1, challenge:1, email:1};
   function setView(view, push){
     if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='home';
     currentView = view;
     Object.keys(VIEWS).forEach(function(k){ var el=$(VIEWS[k]); if(el) el.hidden = k!==view; });
     document.querySelectorAll('[data-view]').forEach(function(b){ b.setAttribute('aria-selected', b.getAttribute('data-view')===view?'true':'false'); });
-    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['traffic','leadflow','sales','delivery','today','dms','follow','funnel','leads','magnets','ads','content','analytics','email','stripe','subs','challenge','routine'].indexOf(view)>=0?'true':'false');
+    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['traffic','leadflow','sales','delivery','today','dms','follow','funnel','leads','magnets','ads','content','analytics','email','stripe','subs','challenge','routine','links'].indexOf(view)>=0?'true':'false');
     document.querySelectorAll('#tabRow .tab').forEach(function(t){ t.setAttribute('tabindex', t.getAttribute('data-view')===view?'0':'-1'); });
     if(push!==false){ try{ history.replaceState(null,'','#'+view); }catch(e){} }
     closeSheet();
@@ -1984,7 +2014,7 @@ button.pl-row:hover{background:var(--surface-2)}
   (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'home'; })();
 
   /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
-  var VIEW_LABEL={home:'Home', traffic:'Traffic', leadflow:'Leads', sales:'Sales', delivery:'Delivery', today:'Daily brief', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine'};
+  var VIEW_LABEL={home:'Home', traffic:'Traffic', leadflow:'Leads', sales:'Sales', delivery:'Delivery', today:'Daily brief', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine', links:'Story links'};
   var VIEW_KEYS={'1':'home','2':'traffic','3':'leadflow','4':'sales','5':'delivery','6':'apps','7':'content','8':'today'};
   var appEl=$('appRoot');
   function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
@@ -5447,6 +5477,75 @@ button.pl-row:hover{background:var(--surface-2)}
   });
   document.addEventListener('tf-auth-signed-out', function(){ state.admin=false; state.days={}; state.calls=null; state.view=null; client=null; if(timer) clearInterval(timer); if(poller) clearInterval(poller); var tab=$('tabRoutine'); if(tab) tab.hidden=true; var sheet=$('sheetRoutine'); if(sheet) sheet.hidden=true; });
   window.__routine={buildBlocks:buildBlocks, weekStats:weekStats, dayStats:dayStats, state:state, render:render};
+})();
+</script>
+<script>
+/* ---------- Story links: tracked links for story CTAs (table cta_links; counts from app_sessions) ----------
+   utm_content = the sticker text normalised the same way the content scan normalises linkStickerLabel
+   (lowercase, anything not a-z/0-9 -> "_"), so HQ can join a story's sticker to the applications it drove. */
+(function(){
+  'use strict';
+  var esc=HQ.esc, BASE='https://tasteformcoaching.vercel.app/';
+  var TYPES={lead_magnet:'Lead magnet', sticker:'Sticker', dm:'DM'};
+  var client=null, type='lead_magnet', links=[], counts={}, loaded=false, poller=null;
+  function $(id){ return document.getElementById(id); }
+  function norm(s){ return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,''); }
+  function build(slug,t){ return BASE+'?utm_source=instagram&utm_medium=story&utm_campaign='+t+'&utm_content='+slug; }
+  function msg(t){ var m=$('slMsg'); if(m) m.textContent=t||''; }
+  function copy(text, btn){
+    var done=function(){ if(!btn) return; var o=btn.textContent; btn.textContent='Copied ✓'; setTimeout(function(){ btn.textContent=o; },1400); };
+    var fb=function(){ var t=document.createElement('textarea'); t.value=text; t.setAttribute('readonly',''); t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t); t.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(t); done(); };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fb); else fb();
+  }
+  function render(){
+    var el=$('slList'); if(!el) return;
+    if(!loaded){ el.innerHTML='<div class="empty-state">Loading…</div>'; return; }
+    if(!links.length){ el.innerHTML='<div class="empty-state">No story links yet. Add one above.</div>'; return; }
+    el.innerHTML=links.map(function(l){
+      var d=l.data||{}, c=counts[l.id]||{o:0,a:0};
+      var when=d.createdAt?new Date(d.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}):'';
+      return '<div class="sl-row"><div class="sl-l"><div class="sl-s">'+esc(d.label||l.id)+'</div><div class="sl-m">'+esc(TYPES[d.type]||d.type||'')+' · '+esc(when)+' · '+c.o+' opened · '+c.a+' applied</div></div><button type="button" class="btn" data-slcopy="'+esc(d.url||'')+'">Copy</button></div>';
+    }).join('');
+  }
+  function load(){
+    if(!client) return;
+    client.from('cta_links').select('*').order('created_at',{ascending:false}).limit(100).then(function(r){
+      if(r.error){ msg("Couldn't load links: "+r.error.message); return; }
+      links=r.data||[]; loaded=true; render();
+    });
+    client.from('app_sessions').select('c:data->utm->>utm_content, s:data->submitted').eq('data->utm->>utm_medium','story').limit(5000).then(function(r){
+      if(r.error) return;
+      var m={}; (r.data||[]).forEach(function(x){ if(!x.c) return; var k=m[x.c]||(m[x.c]={o:0,a:0}); k.o++; if(x.s===true) k.a++; });
+      counts=m; render();
+    });
+  }
+  function add(){
+    var label=($('slText').value||'').trim(), slug=norm(label);
+    if(!slug || !client) return;
+    var url=build(slug,type), btn=$('slAdd'), now=new Date().toISOString();
+    copy(url, btn);
+    var ex=links.find(function(l){ return l.id===slug; });
+    var row={id:slug, data:{label:label, slug:slug, type:type, url:url, createdAt:(ex&&ex.data&&ex.data.createdAt)||now}, updated_at:now};
+    if(ex){ ex.data=row.data; } else { links.unshift(row); }
+    render(); $('slText').value=''; btn.disabled=true;
+    msg('Copied. Put "'+label+'" on the sticker.');
+    client.from('cta_links').upsert(row).then(function(r){ if(r.error) msg("Copied, but didn't save to HQ: "+r.error.message); });
+  }
+  document.addEventListener('input', function(e){ if(e.target && e.target.id==='slText'){ var b=$('slAdd'); if(b) b.disabled=!norm(e.target.value); } });
+  document.addEventListener('keydown', function(e){ if(e.target && e.target.id==='slText' && e.key==='Enter'){ e.preventDefault(); add(); } });
+  document.addEventListener('click', function(e){
+    var t=e.target.closest && e.target.closest('[data-sltype]');
+    if(t){ type=t.getAttribute('data-sltype'); document.querySelectorAll('#slType [data-sltype]').forEach(function(b){ b.setAttribute('aria-pressed', b===t?'true':'false'); }); return; }
+    if(e.target.closest && e.target.closest('#slAdd')){ add(); return; }
+    var c=e.target.closest && e.target.closest('[data-slcopy]'); if(c){ copy(c.getAttribute('data-slcopy'), c); }
+  });
+  document.addEventListener('hq-view', function(ev){ if(ev.detail && ev.detail.view==='links') load(); });
+  document.addEventListener('tf-auth-ready', function(ev){
+    client=ev.detail && ev.detail.supabase; load();
+    if(poller) clearInterval(poller); poller=setInterval(function(){ var v=$('viewLinks'); if(v && !v.hidden) load(); }, 30000);
+  });
+  document.addEventListener('tf-auth-signed-out', function(){ client=null; links=[]; counts={}; loaded=false; if(poller) clearInterval(poller); });
+  window.__storyLinks={norm:norm, build:build};
 })();
 </script>
 <script>
