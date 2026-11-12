@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.0 — 12 Nov 2026 (new look)
+- Whole app reskinned: matte black (flat, no wood gradient or grid lines), graphite cards with hairline borders, no drop shadows, 4–8 px corners instead of pills, brass as the only accent.
+- Anton only for page titles and big numbers; section headings are small wide-tracked labels. Warnings are a hairline card with an accent edge instead of a beige slab.
+- Sidebar: black, outlined TF mark, active page = brass edge + brass icon, shortcut numbers hidden. Phone bar: blurred, active item in brass, items share the width evenly.
+- Light mode follows the same rules on bone instead of beige. Skin lives in one block at the end of the stylesheet ("HQ 4 skin"), so it's easy to tune or roll back.
+
 ## 3.3.0 — 12 Nov 2026 (Time)
 - New **Time** page (admin only; Work → Time, and Time on the phone bar). Tap what you're doing and the clock starts. Tap the next thing and the last one stops, so the day logs with no gaps. Optional "what exactly?" detail.
 - 9 areas, 41 steps: Content, Leads, Sales calls, Onboarding, Check-ins, Responses, Systems & admin, Lifestyle, Sleep.
