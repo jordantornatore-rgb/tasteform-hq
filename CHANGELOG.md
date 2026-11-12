@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.1 — 12 Nov 2026 (polish pass)
+- One segmented-control style everywhere (7 days / 30 days / Month, Day / Week / Buy back, every range switch): small tracked caps, active = raised with a brass underline.
+- Home: plan card with brass label and a 3 px progress line, client count in Anton; Traffic / Leads / Sales / Delivery numbers in Anton at 52 px; Do today counts in Anton with row hover.
+- Frame: date as tracked caps (no monospace), proper light/dark icon (the ◐ glyph rendered broken), quieter account box and sign-out, scan/sync line in small caps. Phone: title truncates, date hidden, scroll padding so nothing hides under the bottom bar.
+
 ## 3.4.0 — 12 Nov 2026 (new look)
 - Whole app reskinned: matte black (flat, no wood gradient or grid lines), graphite cards with hairline borders, no drop shadows, 4–8 px corners instead of pills, brass as the only accent.
 - Anton only for page titles and big numbers; section headings are small wide-tracked labels. Warnings are a hairline card with an accent edge instead of a beige slab.
