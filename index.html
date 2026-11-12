@@ -1140,6 +1140,111 @@ button.pl-row:hover{background:var(--surface-2)}
 .pl-fseg button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:700}
 .pl-h{font-size:var(--t-s);font-weight:600;color:var(--muted);margin:4px 2px -6px;text-transform:uppercase;letter-spacing:.04em}
 .pl-funnel{display:flex;flex-direction:column}
+
+/* ===== time (admin) ===== */
+#viewTime .tm-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+#viewTime .tm-seg{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px;}
+#viewTime .tm-seg button{border:none;background:none;color:var(--muted);font:700 var(--t-s) 'Open Sans',sans-serif;letter-spacing:.05em;text-transform:uppercase;padding:8px 16px;min-height:40px;border-radius:999px;cursor:pointer;}
+#viewTime .tm-seg button[aria-pressed="true"]{background:var(--text);color:var(--bg);}
+.tm-now{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.tm-now.on{border-color:var(--tm-c);}
+.tm-now.on::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--tm-c);}
+.tm-now-l{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
+.tm-now-k{font-size:var(--t-xs);font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);}
+.tm-now.on .tm-now-k{color:var(--tm-c);}
+.tm-now-s{font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:clamp(26px,5vw,40px);line-height:1.05;}
+.tm-now-meta{font-size:var(--t-s);color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.tm-now-r{display:flex;align-items:center;gap:14px;}
+.tm-elapsed{font-family:'Anton',Impact,sans-serif;font-size:clamp(30px,6vw,46px);font-variant-numeric:tabular-nums;line-height:1;}
+.tm-stop{min-height:44px;padding:0 22px;}
+.tm-link{border:none;background:none;color:var(--accent);font:inherit;font-weight:700;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;min-height:28px;}
+.tm-note{border:none;border-bottom:1px dashed var(--border-strong);background:none;color:var(--text);font:inherit;padding:2px 0;min-width:180px;flex:1;outline:none;}
+.tm-note:focus{border-bottom-color:var(--accent);}
+.tm-areas{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+.tm-area,.tm-recent{display:flex;flex-direction:column;gap:8px;}
+.tm-area-h{font-size:var(--t-xs);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px;}
+.tm-area-h i,.tm-step i,.tm-what i,.tm-dot,.tm-pill i{display:inline-block;width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.tm-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.tm-step{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:0 13px;min-height:40px;font:600 13px 'Open Sans',sans-serif;cursor:pointer;transition:transform .08s,border-color .1s;}
+.tm-step:hover{border-color:var(--border-strong);}
+.tm-step:active{transform:scale(.97);}
+.tm-step[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text);}
+.tm-recent .tm-step{min-height:44px;font-size:14px;}
+.tm-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tm-date{font-weight:700;font-size:var(--t-m);min-width:150px;text-align:center;}
+.tm-add{margin-left:auto;}
+#viewTime .r-btn[disabled]{opacity:.35;cursor:default;}
+.tm-strip{position:relative;height:14px;border-radius:6px;background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,transparent 6px 12px);border:1px solid var(--border);overflow:hidden;}
+.tm-strip.tall{height:26px;}
+.tm-strip i{position:absolute;top:0;bottom:0;}
+.tm-ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:-6px;}
+.tm-list{display:flex;flex-direction:column;}
+.tm-row{display:grid;grid-template-columns:130px 1fr auto auto auto;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);}
+.tm-row.gap{color:var(--muted);grid-template-columns:130px 1fr auto auto;}
+.tm-row.gap .tm-what{font-style:italic;}
+.tm-row.live .tm-what{font-weight:700;}
+.tm-t{font-size:var(--t-s);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.tm-what{display:flex;align-items:center;gap:8px;min-width:0;}
+.tm-what span{overflow:hidden;text-overflow:ellipsis;}
+.tm-what em{color:var(--muted);font-style:normal;font-weight:400;}
+.tm-d{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.tm-livetag{font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--good);grid-column:span 2;justify-self:end;}
+.tm-en{display:flex;gap:2px;}
+.tm-en button{border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:8px;min-width:36px;min-height:36px;cursor:pointer;font-size:11px;}
+.tm-en button[data-v="1"][aria-pressed="true"]{background:var(--good-soft);color:var(--good);border-color:var(--good);}
+.tm-en button[data-v="-1"][aria-pressed="true"]{background:var(--crit-soft);color:var(--crit);border-color:var(--crit);}
+.tm-week{display:flex;flex-direction:column;gap:6px;}
+.tm-wday{display:grid;grid-template-columns:64px 1fr;align-items:center;gap:10px;border:none;background:none;color:var(--text);padding:4px 0;cursor:pointer;font:600 var(--t-s) 'Open Sans',sans-serif;text-align:left;min-height:32px;}
+.tm-wday:hover .tm-strip{border-color:var(--border-strong);}
+.tm-wticks{padding-left:74px;margin-top:6px;}
+.tm-share{display:flex;height:12px;border-radius:6px;overflow:hidden;}
+.tm-share i{display:block;height:100%;}
+.tm-table td{vertical-align:middle;}
+.tm-table .tm-arow td{font-weight:700;border-top:2px solid var(--border);}
+.tm-table .tm-dot{margin-right:8px;}
+.tm-sub{padding-left:26px!important;color:var(--text-2);}
+.tm-sub2{font-size:var(--t-xs);color:var(--muted);padding-left:17px;}
+.tm-up{color:var(--good);font-weight:700;}
+.tm-down{color:var(--crit);font-weight:700;}
+.tm-tag{min-width:150px;}
+.tm-tag.t-me{border-color:var(--text);}
+.tm-tag.t-delegate,.tm-tag.t-automate{border-color:var(--good);color:var(--good);}
+.tm-tag.t-cut{border-color:var(--crit);color:var(--crit);}
+#tmSheet{justify-content:center;}
+#tmSheet .sheet-card{max-width:640px;max-height:88vh;overflow-y:auto;gap:var(--s3);}
+@media (min-width:761px){#tmSheet{align-items:center;} #tmSheet .sheet-card{border-radius:var(--r-l);padding-bottom:var(--s4);}}
+.tm-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.tm-form label{display:flex;flex-direction:column;gap:4px;font-size:var(--t-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.tm-form label:first-child,.tm-form .tm-wide{grid-column:1/-1;}
+.tm-form .input{min-height:44px;font-size:15px;text-transform:none;letter-spacing:0;font-weight:500;}
+.tm-sheet-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.tm-sheet-btns .btn{min-height:44px;flex:1;}
+.tm-del{color:var(--crit);}
+.tm-err{color:var(--crit);font-size:var(--t-s);font-weight:600;}
+.tm-err:empty{display:none;}
+.tm-fillgrid{grid-template-columns:1fr;}
+.tm-pill{position:fixed;right:16px;bottom:16px;z-index:45;display:flex;align-items:center;gap:8px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:0 16px;min-height:44px;font:700 var(--t-s) 'Open Sans',sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.18);cursor:pointer;max-width:calc(100vw - 32px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tm-pill.on{color:var(--text);border-color:var(--border-strong);}
+.tm-pill i{background:var(--border-strong);}
+.tm-pill:not(.on) i{background:transparent;border:2px solid var(--muted);}
+@media (max-width:760px){
+  .tm-pill{bottom:calc(76px + env(safe-area-inset-bottom,0));right:12px;}
+  .tm-now{padding:16px;}
+  .tm-now-r{width:100%;justify-content:space-between;}
+  .tm-areas{grid-template-columns:1fr;}
+  .tm-step{min-height:44px;}
+  #viewTime .r-btn,#viewTime .tm-seg button{min-height:44px;}
+  .tm-en button{min-width:44px;min-height:44px;}
+  .tm-row{grid-template-columns:1fr auto auto;grid-template-areas:"what d btn" "t en btn";row-gap:2px;}
+  .tm-row .tm-t{grid-area:t;} .tm-row .tm-what{grid-area:what;} .tm-row .tm-d{grid-area:d;justify-self:end;} .tm-row .tm-en{grid-area:en;justify-self:end;} .tm-row .r-btn{grid-area:btn;} .tm-row .tm-livetag{grid-area:btn;}
+  .tm-row.gap{grid-template-columns:1fr auto auto;grid-template-areas:"what d btn" "t t btn";}
+  .tm-add{margin-left:0;}
+  .tm-date{min-width:0;flex:1;}
+  .tm-wday{grid-template-columns:48px 1fr;}
+  .tm-wticks{padding-left:58px;}
+  .tm-tag{min-width:120px;min-height:44px;}
+  .tm-form{grid-template-columns:1fr 1fr;}
+}
 </style>
 </head>
 <body>
@@ -1189,6 +1294,7 @@ button.pl-row:hover{background:var(--surface-2)}
       <button class="tab" role="tab" id="tabDelivery" aria-selected="false" aria-controls="viewDelivery" data-view="delivery"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span>Delivery</span><kbd>5</kbd></button>
       <button class="tab" role="tab" id="tabScorecard" aria-selected="false" aria-controls="viewScorecard" data-view="scorecard"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 10h16M10 4v16"/></svg><span>Scorecard</span></button>
       <div class="sb-group">Work</div>
+      <button class="tab" role="tab" id="tabTime" aria-selected="false" aria-controls="viewTime" data-view="time" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="7"/><path d="M12 14V10M10 3h4M12 3v4M18 8l1.5-1.5"/></svg><span>Time</span></button>
       <button class="tab" role="tab" id="tabToday" aria-selected="false" aria-controls="viewToday" data-view="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Daily brief</span></button>
             <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>DMs</span><span class="tab-badge" id="dmsBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabFollow" aria-selected="false" aria-controls="viewFollow" data-view="follow"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/></svg><span>Follow-ups</span><span class="tab-badge" id="fuBadge" hidden></span></button>
@@ -1800,14 +1906,28 @@ button.pl-row:hover{background:var(--surface-2)}
     </div>
   </section>
 
+
+  <section id="viewTime" role="tabpanel" aria-labelledby="tabTime" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div id="timeRoot" style="display:flex;flex-direction:column;gap:var(--s4);">
+      <div class="top tm-head"><div><h1>Time</h1><div class="sub">Where your week actually goes. One tap per step, the last one stops itself.</div></div>
+        <div class="tm-seg" role="group" aria-label="View"><button data-tm="tab" data-v="day" aria-pressed="true">Day</button><button data-tm="tab" data-v="week" aria-pressed="false">Week</button><button data-tm="tab" data-v="buy" aria-pressed="false">Buy back</button></div></div>
+      <div id="tmMsg" role="status" class="small muted"></div>
+      <div id="tmNow" class="tm-now"></div>
+      <div class="panel" id="tmGrid"></div>
+      <div id="tmBody" style="display:flex;flex-direction:column;gap:var(--s4);"></div>
+    </div>
+    <div class="sheet" id="tmSheet" hidden role="dialog" aria-label="Edit time"><div class="sheet-card" id="tmSheetCard"></div></div>
+  </section>
   </div><!-- /content -->
   </div><!-- /main -->
 
+  <button type="button" class="tm-pill" id="tmPill" hidden aria-label="Open time tracker"></button>
   <!-- phone bottom bar -->
   <nav class="bottombar" id="bottomBar" aria-label="Sections">
     <button class="bb" data-view="home" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
     <button class="bb" data-view="apps" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg>Apps<span class="tab-badge" id="appsBadgeBb" hidden></span></button>
     <button class="bb" data-view="content" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 10l4 2-4 2z"/></svg>Content</button>
+    <button class="bb" id="bbTime" data-view="time" aria-selected="false" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="7"/><path d="M12 14V10M10 3h4M12 3v4M18 8l1.5-1.5"/></svg>Time</button>
     <button class="bb" id="bbMore" aria-selected="false" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</button>
   </nav>
   <span id="dmsBadgeBb" hidden></span><span id="fuBadgeBb" hidden></span>
@@ -1833,6 +1953,7 @@ button.pl-row:hover{background:var(--surface-2)}
       <button class="sheet-btn" data-view="subs" id="sheetSubs" hidden>Subscriptions</button>
       <button class="sheet-btn" data-view="challenge" id="sheetChallenge" hidden>Challenge <span class="tab-badge" id="chBadgeBb" hidden></span></button>
       <button class="sheet-btn" data-view="routine" id="sheetRoutine" hidden>Routine</button>
+      <button class="sheet-btn" data-view="time" id="sheetTime" hidden>Time</button>
       <button class="sheet-btn" id="sheetTheme">Theme: system</button>
       <button class="sheet-btn" id="sheetSignOut">Sign out</button>
       <button class="btn" id="sheetClose" style="margin-top:4px">Close</button>
@@ -2015,8 +2136,8 @@ button.pl-row:hover{background:var(--surface-2)}
   Object.keys(VIEW_DEPS).forEach(function(v){ dirty[v]=true; });
 
   /* ---------- views ---------- */
-  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', scorecard:'viewScorecard', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine', links:'viewLinks'};
-  var ADMIN_VIEWS={sales:1, stripe:1, subs:1, routine:1, challenge:1, email:1};
+  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', scorecard:'viewScorecard', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine', time:'viewTime', links:'viewLinks'};
+  var ADMIN_VIEWS={sales:1, stripe:1, subs:1, routine:1, time:1, challenge:1, email:1};
   function setView(view, push){
     if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='home';
     currentView = view;
@@ -2064,7 +2185,7 @@ button.pl-row:hover{background:var(--surface-2)}
   (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'home'; })();
 
   /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
-  var VIEW_LABEL={home:'Home', traffic:'Traffic', leadflow:'Leads', sales:'Sales', delivery:'Delivery', scorecard:'Scorecard', today:'Daily brief', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine', links:'Funnel links'};
+  var VIEW_LABEL={home:'Home', traffic:'Traffic', leadflow:'Leads', sales:'Sales', delivery:'Delivery', scorecard:'Scorecard', today:'Daily brief', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine', time:'Time', links:'Funnel links'};
   var VIEW_KEYS={'1':'home','2':'traffic','3':'leadflow','4':'sales','5':'delivery','6':'apps','7':'content','8':'today'};
   var appEl=$('appRoot');
   function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
@@ -5627,6 +5748,320 @@ button.pl-row:hover{background:var(--surface-2)}
   });
   document.addEventListener('tf-auth-signed-out', function(){ state.admin=false; state.days={}; state.calls=null; state.view=null; client=null; if(timer) clearInterval(timer); if(poller) clearInterval(poller); var tab=$('tabRoutine'); if(tab) tab.hidden=true; var sheet=$('sheetRoutine'); if(sheet) sheet.hidden=true; });
   window.__routine={buildBlocks:buildBlocks, weekStats:weekStats, dayStats:dayStats, state:state, render:render};
+})();
+</script>
+<script>
+/* ---------- Time tab (admin only): where every hour of the week goes ----------
+   One tap = "I'm doing this now". The previous step stops at that moment, so the day becomes a gap-free timeline.
+   Storage (meta, admin only by RLS):  time:<local date> {entries:[{id,k,s,e,en,n}]}  ·  timeNow {k,s,n}  ·  timeCfg {tags:{step:tag}, awake}
+   Times are epoch ms; days are the DEVICE's local dates (works the same in Sydney or Bali). Entries never overlap: every insert carves. */
+(function(){
+  'use strict';
+  var esc=HQ.esc;
+  var AREAS=[
+    {k:'content',label:'Content',color:'#C49A6C',steps:[['research','Research & ideas'],['script','Scripting'],['film','Filming'],['edit','Editing / reviewing edits'],['post','Posting & captions'],['stories','Stories']]},
+    {k:'leads',label:'Leads',color:'#7FA36B',steps:[['outreach','Outreach DMs'],['react','Reactivation'],['leadchat','Lead conversations'],['engage','Engagement & comments'],['magnet','Lead magnets']]},
+    {k:'calls',label:'Sales calls',color:'#D9774E',steps:[['callprep','Call prep'],['oncall','On a sales call'],['callfu','Post-call follow-up']]},
+    {k:'onboard',label:'Onboarding',color:'#6FA3B5',steps:[['obcall','Onboarding call'],['obplan','Building the plan'],['obsetup','Setup (app, payment, welcome)']]},
+    {k:'checkins',label:'Check-ins',color:'#B98DB4',steps:[['cireview','Reviewing check-ins'],['cifeedback','Writing feedback / Looms'],['cicall','Check-in calls']]},
+    {k:'responses',label:'Responses',color:'#D6B656',steps:[['clientmsg','Client messages'],['community','Community chat'],['inbox','Email & inbox']]},
+    {k:'systems',label:'Systems & admin',color:'#9A93C9',steps:[['build','Building systems'],['admin','Admin & payments'],['team','VA / setter management'],['learn','Mentor & learning'],['plan','Planning & review']]},
+    {k:'life',label:'Lifestyle',color:'#958A7A',steps:[['gym','Gym'],['meals','Meals & cooking'],['walk','Walk'],['ready','Getting ready'],['travel','Travel / commute'],['social','Partner & social'],['scroll','Phone scrolling'],['downtime','Downtime / TV'],['beach','Beach Treats (other biz)'],['chores','Chores & errands']]},
+    {k:'sleep',label:'Sleep',color:'#55657F',steps:[['sleep','Sleep']]}
+  ];
+  var STEP={}, ORDER=[];
+  AREAS.forEach(function(a){ a.steps.forEach(function(s){ STEP[s[0]]={k:s[0],label:s[1],area:a.k,color:a.color}; ORDER.push(s[0]); }); });
+  var AREA={}; AREAS.forEach(function(a){ AREA[a.k]=a; });
+  var NONBIZ={life:1,sleep:1};
+  var TAGS=[['','Not set'],['me','Keep (only I can)'],['delegate','Delegate'],['automate','Automate'],['cut','Cut']];
+  var DAY=86400000, MIN=60000;
+  var S={admin:false, active:false, client:null, days:{}, now:null, cfg:{tags:{},awake:108}, pending:{}, loaded:false, tab:'day', date:null, wk:0, sheet:null};
+  var poller=null, ticker=null;
+  function $(id){ return document.getElementById(id); }
+  function pad(n){ return (n<10?'0':'')+n; }
+  function nowMs(){ return window.__timeNow ? window.__timeNow() : Date.now(); }
+  function dkey(ms){ var d=new Date(ms); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function dstart(key){ var p=key.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).getTime(); }
+  function dnext(key){ var p=key.split('-'); return new Date(+p[0],+p[1]-1,+p[2]+1).getTime(); }
+  function addD(key,n){ var p=key.split('-'); return dkey(new Date(+p[0],+p[1]-1,+p[2]+n,12).getTime()); }
+  function wkStart(key){ var d=new Date(dstart(key)).getDay(); return addD(key, d===0?-6:1-d); }
+  function clock(ms){ var d=new Date(ms), h=d.getHours(), m=d.getMinutes(); return ((h%12)||12)+':'+pad(m)+(h<12?'am':'pm'); }
+  function hhmm(ms){ var d=new Date(ms); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+  function dur(min){ min=Math.round(min); if(min<60) return min+'m'; var h=Math.floor(min/60), m=min%60; return h+'h'+(m?' '+m+'m':''); }
+  function hrs(min){ return (Math.round(min/6)/10).toFixed(1); }
+  function dayLabel(key){ var d=new Date(dstart(key)+12*3600000); return d.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'}); }
+  function uid(){ return 'e'+nowMs().toString(36)+Math.random().toString(36).slice(2,6); }
+  function day(key){ if(!S.days[key]) S.days[key]={entries:[]}; S.days[key].entries=S.days[key].entries||[]; return S.days[key]; }
+
+  /* ---------- data ---------- */
+  function setMsg(t){ var m=$('tmMsg'); if(m) m.textContent=t||''; }
+  function put(id,data){ S.pending[id]=nowMs(); if(!S.client) return; S.client.from('meta').upsert({id:id, data:data, updated_at:new Date(nowMs()).toISOString()}).then(function(r){ if(r && r.error) setMsg("Couldn't save: "+r.error.message+'. It will retry on your next tap.'); else setMsg(''); }); }
+  function saveDay(key){ var d=day(key); d.entries.sort(function(a,b){return a.s-b.s;}); put('time:'+key, {entries:d.entries}); }
+  function saveNow(){ put('timeNow', S.now||{k:null}); }
+  function saveCfg(){ put('timeCfg', S.cfg); }
+  function fresh(id){ return S.pending[id] && nowMs()-S.pending[id]<15000; }
+  function load(){
+    if(!S.client) return;
+    S.client.from('meta').select('*').like('id','time%').then(function(res){
+      if(res.error){ setMsg("Couldn't load your time: "+res.error.message); return; }
+      (res.data||[]).forEach(function(row){
+        var id=String(row.id); if(fresh(id)) return;
+        if(id.indexOf('time:')===0) S.days[id.slice(5)]=row.data||{entries:[]};
+        else if(id==='timeNow') S.now=(row.data && row.data.k && STEP[row.data.k]) ? row.data : null;
+        else if(id==='timeCfg'){ S.cfg=row.data||{}; S.cfg.tags=S.cfg.tags||{}; if(!S.cfg.awake) S.cfg.awake=108; }
+      });
+      S.loaded=true; render(); pill();
+    });
+  }
+
+  /* remove [s,e) from every entry (splitting where needed), across every day it touches */
+  function carve(s,e,skipId){
+    for(var k=dkey(s); dstart(k)<e; k=addD(k,1)){
+      var d=S.days[k]; if(!d || !d.entries || !d.entries.length) continue;
+      var out=[], changed=false;
+      d.entries.forEach(function(x){
+        if(x.id===skipId || x.e<=s || x.s>=e){ out.push(x); return; }
+        changed=true;
+        if(x.s<s) out.push(Object.assign({},x,{e:s}));
+        if(x.e>e) out.push(Object.assign({},x,{id:x.id+'b',s:e}));
+      });
+      if(changed){ d.entries=out.filter(function(x){ return x.e-x.s>=MIN; }); saveDay(k); }
+    }
+  }
+  /* add [s,e) as step k, split at local midnights */
+  function addEntry(k,s,e,extra){
+    if(e-s<MIN) return;
+    carve(s,e);
+    while(s<e){
+      var key=dkey(s), end=Math.min(e,dnext(key)), x=Object.assign({id:uid(),k:k,s:s,e:end},extra||{});
+      if(end-s>=MIN){ day(key).entries.push(x); saveDay(key); }
+      s=end;
+    }
+  }
+  function closeRunning(at){ if(!S.now) return; var n=S.now; addEntry(n.k, Math.min(n.s,at), at, n.n?{n:n.n}:null); S.now=null; }
+  function start(k){
+    var t=nowMs();
+    if(S.now && S.now.k===k) return;
+    closeRunning(t);
+    S.now={k:k, s:t}; saveNow();
+    var r=recent(); S.cfg.recent=[k].concat(r.filter(function(x){return x!==k;})).slice(0,8); saveCfg();
+  }
+  function stop(){ closeRunning(nowMs()); S.now=null; saveNow(); }
+
+  /* segments for a day: saved entries + the live one, clipped to the day */
+  function segs(key){
+    var a=dstart(key), b=dnext(key), out=(S.days[key]&&S.days[key].entries||[]).filter(function(x){return STEP[x.k];}).map(function(x){ return {id:x.id,k:x.k,s:Math.max(a,x.s),e:Math.min(b,x.e),en:x.en||0,n:x.n||''}; });
+    if(S.now){ var t=nowMs(), s=Math.max(a,S.now.s), e=Math.min(b,t); if(e>s) out.push({id:'live',k:S.now.k,s:s,e:e,en:0,n:S.now.n||'',live:true}); }
+    return out.filter(function(x){return x.e>x.s;}).sort(function(x,y){return x.s-y.s;});
+  }
+  function firstEver(){ var f=Infinity; Object.keys(S.days).forEach(function(k){ (S.days[k].entries||[]).forEach(function(x){ if(x.s<f) f=x.s; }); }); if(S.now && S.now.s<f) f=S.now.s; return f; }
+  function gaps(key, sg){
+    var f=firstEver(); if(f===Infinity) return [];
+    var a=Math.max(dstart(key),f), b=Math.min(dnext(key),nowMs()), out=[], cur=a;
+    sg.forEach(function(x){ if(x.s-cur>=5*MIN && x.s>a) out.push({s:cur,e:x.s}); cur=Math.max(cur,x.e); });
+    if(b-cur>=5*MIN) out.push({s:cur,e:b});
+    return out;
+  }
+  function dayStats(key){
+    var sg=segs(key), st={tot:0, step:{}, area:{}, up:{}, down:{}, sleep:0, biz:0, life:0, untracked:0};
+    sg.forEach(function(x){ var m=(x.e-x.s)/MIN, ar=STEP[x.k].area; st.tot+=m; st.step[x.k]=(st.step[x.k]||0)+m; st.area[ar]=(st.area[ar]||0)+m; if(x.en>0) st.up[x.k]=(st.up[x.k]||0)+m; if(x.en<0) st.down[x.k]=(st.down[x.k]||0)+m; if(ar==='sleep') st.sleep+=m; else if(ar==='life') st.life+=m; else st.biz+=m; });
+    var f=firstEver(), a=Math.max(dstart(key),f), b=Math.min(dnext(key),nowMs());
+    st.untracked = (f===Infinity || b<=a) ? 0 : Math.max(0,(b-a)/MIN - st.tot);
+    st.segs=sg; return st;
+  }
+  function weekStats(ws){
+    var w={days:[], tot:0, step:{}, area:{}, up:{}, down:{}, sleep:0, biz:0, life:0, untracked:0};
+    for(var i=0;i<7;i++){ var k=addD(ws,i), d=dayStats(k); w.days.push({key:k,st:d}); ['tot','sleep','biz','life','untracked'].forEach(function(f){ w[f]+=d[f]; }); ['step','area','up','down'].forEach(function(f){ Object.keys(d[f]).forEach(function(x){ w[f][x]=(w[f][x]||0)+d[f][x]; }); }); }
+    w.awake=w.tot-w.sleep; return w;
+  }
+  function recent(){ return (S.cfg.recent||[]).filter(function(k){ return STEP[k]; }); }
+
+  /* ---------- render ---------- */
+  function strip(sg, key, tall){
+    var a=dstart(key), L=DAY/100, h='';
+    sg.forEach(function(x){ var st=STEP[x.k]; h+='<i style="left:'+((x.s-a)/L).toFixed(3)+'%;width:'+Math.max(0.15,(x.e-x.s)/L).toFixed(3)+'%;background:'+st.color+'" title="'+esc(st.label+' · '+clock(x.s)+'–'+clock(x.e))+'"></i>'; });
+    return '<div class="tm-strip'+(tall?' tall':'')+'">'+h+'</div>';
+  }
+  function ticks(){ return '<div class="tm-ticks"><span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>12am</span></div>'; }
+  function stepBtn(k,cls){ var st=STEP[k], on=S.now&&S.now.k===k; return '<button class="tm-step'+(cls?' '+cls:'')+'" data-tm="go" data-k="'+k+'" aria-pressed="'+(on?'true':'false')+'"><i style="background:'+st.color+'"></i>'+esc(st.label)+'</button>'; }
+  function renderNow(){
+    var c=$('tmNow'); if(!c) return;
+    if(document.activeElement && document.activeElement.id==='tmNote' && S.now) return; // don't wipe what he's typing
+    if(S.now){
+      var st=STEP[S.now.k], ar=AREA[st.area];
+      c.className='tm-now on'; c.style.setProperty('--tm-c', st.color);
+      c.innerHTML='<div class="tm-now-l"><div class="tm-now-k">'+esc(ar.label)+' · now</div><div class="tm-now-s">'+esc(st.label)+'</div>'+
+        '<div class="tm-now-meta">since <button class="tm-link" data-tm="adjust">'+clock(S.now.s)+'</button> · <input class="tm-note" id="tmNote" maxlength="80" placeholder="What exactly? (optional)" value="'+esc(S.now.n||'')+'" aria-label="Detail"></div></div>'+
+        '<div class="tm-now-r"><div class="tm-elapsed" id="tmElapsed">'+dur((nowMs()-S.now.s)/MIN)+'</div><button class="btn tm-stop" data-tm="stop">Stop</button></div>';
+    } else {
+      var key=dkey(nowMs()), g=gaps(key, segs(key)), last=g.length && g[g.length-1].e>=nowMs()-MIN ? g[g.length-1] : null;
+      c.className='tm-now'; c.style.removeProperty('--tm-c');
+      c.innerHTML='<div class="tm-now-l"><div class="tm-now-k">Not tracking</div><div class="tm-now-s">Tap what you’re doing</div><div class="tm-now-meta">'+(last?'Untracked since '+clock(last.s)+' ('+dur((last.e-last.s)/MIN)+') · <button class="tm-link" data-tm="fill" data-s="'+last.s+'" data-e="'+last.e+'">fill it</button>':'One tap starts the clock. Tapping the next thing stops the last one.')+'</div></div>';
+    }
+  }
+  function renderGrid(){
+    var r=recent(), h='';
+    if(r.length) h+='<div class="tm-recent"><div class="tm-area-h">Recent</div><div class="tm-chips">'+r.slice(0,6).map(function(k){ return stepBtn(k); }).join('')+'</div></div>';
+    h+='<div class="tm-areas">';
+    AREAS.forEach(function(a){ h+='<div class="tm-area"><div class="tm-area-h"><i style="background:'+a.color+'"></i>'+esc(a.label)+'</div><div class="tm-chips">'+a.steps.map(function(s){ return stepBtn(s[0]); }).join('')+'</div></div>'; });
+    $('tmGrid').innerHTML=h+'</div>';
+  }
+  function kpi(label,val,note){ return '<div class="kpi"><div class="label">'+esc(label)+'</div><div class="value">'+val+'</div><div class="note">'+(note||'&nbsp;')+'</div></div>'; }
+  function renderDay(){
+    var today=dkey(nowMs()), key=S.date||today, st=dayStats(key), h='';
+    h+='<div class="tm-nav"><button class="r-btn" data-tm="dnav" data-d="-1" aria-label="Previous day">←</button><span class="tm-date">'+esc(dayLabel(key))+(key===today?' · today':'')+'</span><button class="r-btn" data-tm="dnav" data-d="1" aria-label="Next day"'+(key>=today?' disabled':'')+'>→</button>'+(key!==today?'<button class="r-btn" data-tm="dnav" data-d="0">Today</button>':'')+'<button class="r-btn tm-add" data-tm="add">+ Add time</button></div>';
+    h+='<div class="kpis">'+kpi('Business',hrs(st.biz)+'<small> h</small>')+kpi('Lifestyle',hrs(st.life)+'<small> h</small>')+kpi('Sleep',hrs(st.sleep)+'<small> h</small>')+kpi('Untracked',hrs(st.untracked)+'<small> h</small>', st.untracked>=5?'tap a gap below to fill it':'')+'</div>';
+    h+='<div class="panel">'+strip(st.segs,key,true)+ticks();
+    var rows=[], g=gaps(key,st.segs);
+    st.segs.forEach(function(x){ rows.push({t:x.s, html:entryRow(x)}); });
+    g.forEach(function(x){ rows.push({t:x.s, html:'<div class="tm-row gap"><div class="tm-t">'+clock(x.s)+' – '+clock(x.e)+'</div><div class="tm-what">Untracked</div><div class="tm-d">'+dur((x.e-x.s)/MIN)+'</div><button class="r-btn" data-tm="fill" data-s="'+x.s+'" data-e="'+x.e+'">Fill</button></div>'}); });
+    rows.sort(function(a,b){ return b.t-a.t; });
+    h+= rows.length ? '<div class="tm-list">'+rows.map(function(r){return r.html;}).join('')+'</div>' : '<div class="empty-state">Nothing tracked'+(key===today?' yet today. Tap a step above to start.':' on this day.')+'</div>';
+    h+='</div>';
+    $('tmBody').innerHTML=h;
+  }
+  function entryRow(x){
+    var st=STEP[x.k];
+    return '<div class="tm-row'+(x.live?' live':'')+'"><div class="tm-t">'+clock(x.s)+' – '+(x.live?'now':clock(x.e))+'</div>'+
+      '<div class="tm-what"><i style="background:'+st.color+'"></i><span>'+esc(st.label)+(x.n?'<em> · '+esc(x.n)+'</em>':'')+'</span></div><div class="tm-d">'+dur((x.e-x.s)/MIN)+'</div>'+
+      (x.live?'<span class="tm-livetag">LIVE</span>':'<span class="tm-en"><button data-tm="en" data-id="'+esc(x.id)+'" data-v="1" aria-pressed="'+(x.en>0)+'" title="Gave me energy" aria-label="Gave me energy">▲</button><button data-tm="en" data-id="'+esc(x.id)+'" data-v="-1" aria-pressed="'+(x.en<0)+'" title="Drained me" aria-label="Drained me">▼</button></span><button class="r-btn" data-tm="edit" data-id="'+esc(x.id)+'" aria-label="Edit">Edit</button>')+'</div>';
+  }
+  function weekNav(ws){ var cur=wkStart(dkey(nowMs())); return '<div class="tm-nav"><button class="r-btn" data-tm="wnav" data-d="-1" aria-label="Previous week">←</button><span class="tm-date">Week of '+esc(dayLabel(ws))+(ws===cur?' · this week':'')+'</span><button class="r-btn" data-tm="wnav" data-d="1" aria-label="Next week"'+(ws>=cur?' disabled':'')+'>→</button></div>'; }
+  function enCell(k,w){ var u=w.up[k]||0, d=w.down[k]||0; if(!u&&!d) return '<td class="num muted">–</td>'; return '<td class="num">'+(u?'<span class="tm-up">▲'+hrs(u)+'</span>':'')+(u&&d?' ':'')+(d?'<span class="tm-down">▼'+hrs(d)+'</span>':'')+'</td>'; }
+  function renderWeek(){
+    var ws=addD(wkStart(dkey(nowMs())), 7*S.wk), w=weekStats(ws), A=S.cfg.awake||108, h=weekNav(ws);
+    h+='<div class="kpis">'+kpi('Awake hours tracked', hrs(w.awake)+'<small> / '+A+'</small>', Math.round(100*w.awake/60/A)+'% of your '+A+' h')+kpi('Business',hrs(w.biz)+'<small> h</small>', w.awake?Math.round(100*w.biz/w.awake)+'% of awake time':'')+kpi('Sleep',hrs(w.sleep)+'<small> h</small>', w.sleep?hrs(w.sleep/7)+' h a night avg':'')+kpi('Untracked',hrs(w.untracked)+'<small> h</small>', w.untracked>60?'gaps you didn’t log':'')+'</div>';
+    // day strips
+    h+='<div class="panel"><h2>The week, hour by hour</h2><div class="tm-week">';
+    w.days.forEach(function(d){ h+='<button class="tm-wday" data-tm="goto" data-d="'+d.key+'"><span>'+esc(dayLabel(d.key).split(' ')[0])+' '+esc(d.key.slice(8).replace(/^0/,''))+'</span>'+strip(d.st.segs,d.key)+'</button>'; });
+    h+='</div><div class="tm-wticks">'+ticks()+'</div></div>';
+    // where it went
+    var tot=w.tot||1, bar='';
+    AREAS.forEach(function(a){ var m=w.area[a.k]||0; if(m) bar+='<i style="width:'+(100*m/tot).toFixed(2)+'%;background:'+a.color+'" title="'+esc(a.label)+'"></i>'; });
+    h+='<div class="panel"><h2>Where it went</h2>'+(w.tot?'<div class="tm-share">'+bar+'</div>':'')+'<div class="table-wrap"><table class="scores tm-table"><thead><tr><th>Area / step</th><th class="num">Hours</th><th class="num">% awake</th><th class="num">Energy ▲▼ h</th></tr></thead><tbody>';
+    var any=false;
+    AREAS.forEach(function(a){ var m=w.area[a.k]||0; if(!m) return; any=true;
+      h+='<tr class="tm-arow"><td><i class="tm-dot" style="background:'+a.color+'"></i>'+esc(a.label)+'</td><td class="num">'+hrs(m)+'</td><td class="num">'+(a.k==='sleep'||!w.awake?'–':Math.round(100*m/w.awake)+'%')+'</td><td></td></tr>';
+      a.steps.map(function(s){return s[0];}).filter(function(k){return w.step[k];}).sort(function(x,y){return w.step[y]-w.step[x];}).forEach(function(k){ h+='<tr><td class="tm-sub">'+esc(STEP[k].label)+'</td><td class="num">'+hrs(w.step[k])+'</td><td class="num">'+(a.k==='sleep'||!w.awake?'–':Math.round(100*w.step[k]/w.awake)+'%')+'</td>'+enCell(k,w)+'</tr>'; });
+    });
+    h+='</tbody></table></div>'+(any?'':'<div class="empty-state">Nothing tracked this week.</div>')+'</div>';
+    $('tmBody').innerHTML=h;
+  }
+  function renderBuy(){
+    var ws=addD(wkStart(dkey(nowMs())), 7*S.wk), w=weekStats(ws), tags=S.cfg.tags, sum={me:0,delegate:0,automate:0,cut:0,'':0}, h=weekNav(ws);
+    var ks=ORDER.filter(function(k){ return STEP[k].area!=='sleep' && w.step[k]; }).sort(function(x,y){ return w.step[y]-w.step[x]; });
+    ks.forEach(function(k){ sum[tags[k]||'']+=w.step[k]; });
+    var back=sum.delegate+sum.automate+sum.cut;
+    h+='<div class="kpis">'+kpi('Hours you could buy back', hrs(back)+'<small> h</small>', w.biz||w.life?'this week, from your tags':'')+kpi('Delegate',hrs(sum.delegate)+'<small> h</small>')+kpi('Automate',hrs(sum.automate)+'<small> h</small>')+kpi('Cut',hrs(sum.cut)+'<small> h</small>', sum['']?hrs(sum[''])+' h not tagged yet':'')+'</div>';
+    h+='<div class="panel"><h2>Tag every step once</h2><p class="rule">Keep = only you can do it. Delegate = a VA, editor or setter could. Automate = a system could. Cut = stop doing it. Tags stick week to week.</p>';
+    if(!ks.length) h+='<div class="empty-state">Track a few days first. Every step you log shows up here.</div>';
+    else { h+='<div class="table-wrap"><table class="scores tm-table"><thead><tr><th>Step</th><th class="num">Hours</th><th class="num">Energy ▲▼ h</th><th>Tag</th></tr></thead><tbody>';
+      ks.forEach(function(k){ var st=STEP[k]; h+='<tr><td><i class="tm-dot" style="background:'+st.color+'"></i>'+esc(st.label)+'<div class="tm-sub2">'+esc(AREA[st.area].label)+'</div></td><td class="num">'+hrs(w.step[k])+'</td>'+enCell(k,w)+'<td><select class="input tm-tag'+(tags[k]?' t-'+tags[k]:'')+'" data-tm-tag="'+k+'" aria-label="Tag for '+esc(st.label)+'">'+TAGS.map(function(t){ return '<option value="'+t[0]+'"'+((tags[k]||'')===t[0]?' selected':'')+'>'+esc(t[1])+'</option>'; }).join('')+'</select></td></tr>'; });
+      h+='</tbody></table></div>'; }
+    $('tmBody').innerHTML=h+'</div>';
+  }
+  function render(){
+    if(!S.admin || !S.active || !$('tmNow')) return;
+    renderNow(); renderGrid();
+    document.querySelectorAll('#viewTime [data-tm="tab"]').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-v')===S.tab?'true':'false'); });
+    if(S.tab==='week') renderWeek(); else if(S.tab==='buy') renderBuy(); else renderDay();
+    if(!S.loaded) setMsg('Loading…');
+  }
+  function tick(){ var el=$('tmElapsed'); if(el && S.now) el.textContent=dur((nowMs()-S.now.s)/MIN); pill(); }
+  /* the little "now tracking" pill on every other page */
+  function pill(){
+    var p=$('tmPill'); if(!p) return;
+    if(!S.admin || !S.loaded || S.active){ p.hidden=true; return; }
+    p.hidden=false;
+    if(S.now){ var st=STEP[S.now.k]; p.className='tm-pill on'; p.innerHTML='<i style="background:'+st.color+'"></i>'+esc(st.label)+' · '+dur((nowMs()-S.now.s)/MIN); }
+    else { p.className='tm-pill'; p.innerHTML='<i></i>Not tracking'; }
+  }
+
+  /* ---------- sheet (edit / fill / add / adjust) ---------- */
+  function stepSelect(sel){ return '<select class="input" id="tmSStep" aria-label="Step">'+AREAS.map(function(a){ return '<optgroup label="'+esc(a.label)+'">'+a.steps.map(function(s){ return '<option value="'+s[0]+'"'+(s[0]===sel?' selected':'')+'>'+esc(s[1])+'</option>'; }).join('')+'</optgroup>'; }).join('')+'</select>'; }
+  function openSheet(o){
+    S.sheet=o; var c=$('tmSheetCard'), h='';
+    if(o.mode==='fill'){
+      h='<h2>Fill '+clock(o.s)+' – '+clock(o.e)+'</h2><p class="rule">'+dur((o.e-o.s)/MIN)+' untracked. What were you doing?</p><div class="tm-areas tm-fillgrid">'+AREAS.map(function(a){ return '<div class="tm-area"><div class="tm-area-h"><i style="background:'+a.color+'"></i>'+esc(a.label)+'</div><div class="tm-chips">'+a.steps.map(function(s){ return '<button class="tm-step" data-tm="fillk" data-k="'+s[0]+'"><i style="background:'+a.color+'"></i>'+esc(s[1])+'</button>'; }).join('')+'</div></div>'; }).join('')+'</div><p class="rule">Did two things in that gap? Fill it with one, then Edit the times.</p>';
+    } else if(o.mode==='adjust'){
+      h='<h2>When did you start?</h2><p class="rule">Forgot to tap? Set the real start. Anything logged in between is replaced.</p><div class="tm-form"><label>Started at<input class="input" type="time" id="tmSStart" value="'+hhmm(S.now.s)+'"></label></div>';
+    } else {
+      h='<h2>'+(o.mode==='add'?'Add time':'Edit')+'</h2><div class="tm-form"><label>Step'+stepSelect(o.k)+'</label><label>From<input class="input" type="time" id="tmSStart" value="'+hhmm(o.s)+'"></label><label>To<input class="input" type="time" id="tmSEnd" value="'+(o.e>=dnext(o.day)?'00:00':hhmm(o.e))+'"></label><label class="tm-wide">Detail (optional)<input class="input" id="tmSNote" maxlength="80" value="'+esc(o.n||'')+'"></label></div><p class="rule">Times are for '+esc(dayLabel(o.day))+'. To = 00:00 means midnight. Anything else logged in that window is replaced.</p>';
+    }
+    h+='<div id="tmSErr" class="tm-err" role="alert"></div><div class="tm-sheet-btns">'+(o.mode==='fill'?'':'<button class="btn primary" data-tm="ssave">Save</button>')+(o.mode==='edit'?'<button class="btn tm-del" data-tm="sdel">Delete</button>':'')+'<button class="btn" data-tm="sclose">Cancel</button></div>';
+    c.innerHTML=h; $('tmSheet').hidden=false;
+  }
+  function closeSheet(){ S.sheet=null; var s=$('tmSheet'); if(s) s.hidden=true; }
+  function at(dayKey, v){ if(!v) return null; var p=v.split(':'); return dstart(dayKey)+(+p[0]*60 + +p[1])*MIN; }
+  function findEntry(id){ var out=null; Object.keys(S.days).forEach(function(k){ (S.days[k].entries||[]).forEach(function(x){ if(x.id===id) out={day:k,x:x}; }); }); return out; }
+  function removeEntry(id){ var f=findEntry(id); if(!f) return; var d=S.days[f.day]; d.entries=d.entries.filter(function(x){ return x.id!==id; }); saveDay(f.day); }
+  function sheetSave(){
+    var o=S.sheet, err=$('tmSErr'); if(!o) return;
+    if(o.mode==='adjust'){
+      var t=nowMs(), s=at(dkey(t), $('tmSStart').value); if(s==null){ err.textContent='Pick a time.'; return; }
+      if(s>t) s-=DAY;
+      if(s<t-DAY){ err.textContent='That’s more than a day ago. Use Add time instead.'; return; }
+      carve(s,t); S.now.s=s; saveNow(); closeSheet(); render(); return;
+    }
+    var s2=at(o.day,$('tmSStart').value), e2=at(o.day,$('tmSEnd').value);
+    if(s2==null||e2==null){ err.textContent='Fill in both times.'; return; }
+    if(e2<=s2){ if($('tmSEnd').value==='00:00') e2=dnext(o.day); else { err.textContent='“To” has to be after “From”.'; return; } }
+    if(e2>nowMs()+MIN){ err.textContent='That runs into the future.'; return; }
+    if(S.now && e2>S.now.s){ err.textContent='That overlaps what you’re tracking now. Stop it first, or set its start time.'; return; }
+    var extra={}; var n=$('tmSNote').value.trim(); if(n) extra.n=n; if(o.mode==='edit' && o.en) extra.en=o.en;
+    if(o.mode==='edit') removeEntry(o.id);
+    addEntry($('tmSStep').value, s2, e2, extra);
+    closeSheet(); render();
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click', function(e){
+    if(!S.admin) return;
+    if(e.target.closest && e.target.closest('#tmPill')){ location.hash='time'; return; }
+    var el=e.target.closest && e.target.closest('#viewTime [data-tm]'); if(!el) return;
+    var a=el.getAttribute('data-tm'), today=dkey(nowMs());
+    if(a==='go') start(el.getAttribute('data-k'));
+    else if(a==='stop') stop();
+    else if(a==='tab'){ S.tab=el.getAttribute('data-v'); try{ localStorage.setItem('hqTimeTab',S.tab); }catch(x){} }
+    else if(a==='dnav'){ var d=+el.getAttribute('data-d'); S.date = d===0 ? null : addD(S.date||today, d); if(S.date>=today) S.date=null; }
+    else if(a==='wnav'){ S.wk=Math.min(0,S.wk+(+el.getAttribute('data-d'))); }
+    else if(a==='goto'){ var g=el.getAttribute('data-d'); S.date = g>=today?null:g; S.tab='day'; }
+    else if(a==='fill'){ openSheet({mode:'fill', s:+el.getAttribute('data-s'), e:+el.getAttribute('data-e')}); return; }
+    else if(a==='fillk'){ var o=S.sheet; if(o){ addEntry(el.getAttribute('data-k'), o.s, o.e); var r=recent(), k=el.getAttribute('data-k'); S.cfg.recent=[k].concat(r.filter(function(x){return x!==k;})).slice(0,8); saveCfg(); } closeSheet(); }
+    else if(a==='adjust'){ openSheet({mode:'adjust'}); return; }
+    else if(a==='add'){ var key=S.date||today, t=Math.min(nowMs(), dnext(key)), s=Math.max(dstart(key), t-30*MIN); if(S.now && key===today){ t=Math.min(t,S.now.s); s=Math.max(dstart(key),t-30*MIN); } openSheet({mode:'add', day:key, k:recent()[0]||'research', s:s, e:t}); return; }
+    else if(a==='edit'){ var f=findEntry(el.getAttribute('data-id')); if(f) openSheet({mode:'edit', id:f.x.id, day:f.day, k:f.x.k, s:f.x.s, e:f.x.e, n:f.x.n, en:f.x.en}); return; }
+    else if(a==='en'){ var f2=findEntry(el.getAttribute('data-id')), v=+el.getAttribute('data-v'); if(f2){ f2.x.en = f2.x.en===v ? 0 : v; if(!f2.x.en) delete f2.x.en; saveDay(f2.day); } }
+    else if(a==='ssave'){ sheetSave(); return; }
+    else if(a==='sdel'){ if(S.sheet){ removeEntry(S.sheet.id); } closeSheet(); }
+    else if(a==='sclose'){ closeSheet(); return; }
+    render();
+  });
+  document.addEventListener('change', function(e){
+    if(!S.admin) return;
+    var t=e.target;
+    if(t && t.getAttribute && t.getAttribute('data-tm-tag')){ var k=t.getAttribute('data-tm-tag'); if(t.value) S.cfg.tags[k]=t.value; else delete S.cfg.tags[k]; saveCfg(); render(); }
+    else if(t && t.id==='tmNote' && S.now){ var n=t.value.trim(); if(n) S.now.n=n; else delete S.now.n; saveNow(); }
+  });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && S.sheet) closeSheet(); if(e.key==='Enter' && e.target && e.target.id==='tmNote') e.target.blur(); });
+  document.addEventListener('click', function(e){ var s=$('tmSheet'); if(s && e.target===s) closeSheet(); });
+  document.addEventListener('hq-view', function(ev){ S.active = !!(ev.detail && ev.detail.view==='time'); if(S.active){ load(); render(); } pill(); });
+
+  /* ---------- boot ---------- */
+  document.addEventListener('tf-auth-ready', function(ev){
+    var role=ev.detail && ev.detail.profile && ev.detail.profile.role;
+    var show=role==='admin';
+    ['tabTime','bbTime','sheetTime'].forEach(function(id){ var el=$(id); if(el) el.hidden=!show; });
+    var bb=$('bottomBar'); if(bb) bb.classList.toggle('has-time', show);
+    if(!show){ S.admin=false; var root=$('timeRoot'); if(root) root.innerHTML='<div class="panel"><h2>Time</h2><p class="rule">This page is admin only.</p></div>'; return; }
+    S.admin=true; S.client=ev.detail.supabase;
+    try{ var tb=localStorage.getItem('hqTimeTab'); if(tb==='day'||tb==='week'||tb==='buy') S.tab=tb; }catch(x){}
+    S.active = (location.hash||'').replace('#','')==='time';
+    load(); render();
+    poller=setInterval(load,15000); ticker=setInterval(tick,1000);
+  });
+  document.addEventListener('tf-auth-signed-out', function(){ S.admin=false; S.client=null; S.days={}; S.now=null; S.loaded=false; if(poller) clearInterval(poller); if(ticker) clearInterval(ticker); ['tabTime','bbTime','sheetTime','tmPill'].forEach(function(id){ var el=$(id); if(el) el.hidden=true; }); });
+  window.__time={S:S, STEP:STEP, AREAS:AREAS, dayStats:dayStats, weekStats:weekStats, start:start, stop:stop, addEntry:addEntry, render:render, dkey:dkey, wkStart:wkStart, addD:addD};
 })();
 </script>
 <script>

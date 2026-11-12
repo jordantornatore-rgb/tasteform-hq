@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.3.0 — 12 Nov 2026 (Time)
+- New **Time** page (admin only; Work → Time, and Time on the phone bar). Tap what you're doing and the clock starts. Tap the next thing and the last one stops, so the day logs with no gaps. Optional "what exactly?" detail.
+- 9 areas, 41 steps: Content, Leads, Sales calls, Onboarding, Check-ins, Responses, Systems & admin, Lifestyle, Sleep.
+- Day: a 24h strip, every block and every gap of 5+ min ("Untracked · Fill"), ▲/▼ energy per block, Edit / Add time. Edits replace whatever they overlap, so no minute is counted twice. Sleep across midnight splits at 00:00.
+- Week: awake hours tracked out of 108, business / sleep / untracked, one strip per day, hours per area and step with energy.
+- Buy back: tag each step once (Keep / Delegate / Automate / Cut). Shows the hours a week you could buy back.
+- A "now tracking" pill on every other page. Uses the device's local time, so it works in Bali.
+- Data: meta `time:<date>`, `timeNow`, `timeCfg`. Migration `20261112_time_meta_admin_only.sql` makes those rows admin only (needs applying).
+- Tests: `node tests/time.test.js` (76 checks).
+
 ## 3.2.0 — 12 Nov 2026 (2027 Master Plan)
 - Home opens with the plan: this week's main thing (section 10), the key Friday numbers against target, and clients vs the quarter target.
 - New Scorecard page: the 11 Friday measures from section 11, weeks 1 to 13 from 16 Nov, green / red against the plan, "red 3 weeks running" flag, and typed-in hours and long-form.

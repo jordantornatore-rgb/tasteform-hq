@@ -1,7 +1,8 @@
 {
  "name": "TasteForm HQ",
  "short_name": "TasteForm HQ",
- "start_url": "./",
+ "shortcuts":[{"name":"Track time","url":"./#time"}],
+  "start_url": "./",
  "scope": "./",
  "display": "standalone",
  "background_color": "#15110D",
