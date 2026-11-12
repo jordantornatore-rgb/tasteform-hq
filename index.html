@@ -1115,6 +1115,29 @@ button.pl-row:hover{background:var(--surface-2)}
 .pl-step .dr span:last-child{color:var(--text)}
 .pl-conv{display:flex;gap:8px;padding:6px 0 6px 18px;font-size:var(--t-s);color:var(--muted)}
 .pl-note{font-size:var(--t-s);color:var(--muted);margin:0}
+.pl-plan{display:flex;flex-direction:column;gap:var(--s2);text-align:left;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:var(--s4);color:inherit;font:inherit;cursor:pointer;box-shadow:var(--shadow)}
+.pl-plan .k{font-size:var(--t-s);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.pl-plan .m{font-weight:700;font-size:1.05em}
+.pl-plan .go{color:var(--accent);font-size:var(--t-s);font-weight:600}
+.sc-chips{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.sc-chip{border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:var(--t-s)}
+.sc-chip small{color:var(--muted)}
+.sc-chip.sc-good{border-color:var(--good)}.sc-chip.sc-bad{border-color:var(--crit)}
+.sc-prog .row{display:flex;justify-content:space-between;font-size:var(--t-s);color:var(--muted)}
+.sc-flag{margin:0;color:var(--crit);font-size:var(--t-s)}
+.pl-leak .sc-sub{margin:6px 0 0;font-size:var(--t-s);color:var(--muted)}
+.sc-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);max-width:100%}
+.sc-t{border-collapse:collapse;font-size:var(--t-s);min-width:100%}
+.sc-t th,.sc-t td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+.sc-t th[scope=row],.sc-t thead th:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1}
+.sc-t th small{display:block;color:var(--muted);font-weight:400}
+.sc-t .sc-tg{color:var(--muted);white-space:normal;min-width:72px;max-width:96px;text-align:left}
+.sc-t .sc-now{color:var(--accent)}
+.sc-t .sc-good{color:var(--good);font-weight:700}.sc-t .sc-bad{color:var(--crit);font-weight:700}
+.sc-form .input{width:110px;text-align:right}
+.pl-fseg{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.pl-fseg button{border:1px solid var(--border);background:var(--surface);color:inherit;font:inherit;font-size:var(--t-s);border-radius:999px;padding:0 14px;min-height:var(--tap);cursor:pointer}
+.pl-fseg button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:700}
 .pl-h{font-size:var(--t-s);font-weight:600;color:var(--muted);margin:4px 2px -6px;text-transform:uppercase;letter-spacing:.04em}
 .pl-funnel{display:flex;flex-direction:column}
 </style>
@@ -1164,6 +1187,7 @@ button.pl-row:hover{background:var(--surface-2)}
       <button class="tab" role="tab" id="tabLeadflow" aria-selected="false" aria-controls="viewLeadflow" data-view="leadflow"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Leads</span><kbd>3</kbd></button>
       <button class="tab" role="tab" id="tabSales" aria-selected="false" aria-controls="viewSales" data-view="sales" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Sales</span><kbd>4</kbd></button>
       <button class="tab" role="tab" id="tabDelivery" aria-selected="false" aria-controls="viewDelivery" data-view="delivery"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span>Delivery</span><kbd>5</kbd></button>
+      <button class="tab" role="tab" id="tabScorecard" aria-selected="false" aria-controls="viewScorecard" data-view="scorecard"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 10h16M10 4v16"/></svg><span>Scorecard</span></button>
       <div class="sb-group">Work</div>
       <button class="tab" role="tab" id="tabToday" aria-selected="false" aria-controls="viewToday" data-view="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Daily brief</span></button>
             <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>DMs</span><span class="tab-badge" id="dmsBadge" hidden></span></button>
@@ -1172,7 +1196,7 @@ button.pl-row:hover{background:var(--surface-2)}
       <button class="tab" role="tab" id="tabLeads" aria-selected="false" aria-controls="viewLeads" data-view="leads"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Warm Leads</span></button>
       <div class="sb-group">Tools</div>
       <button class="tab" role="tab" id="tabFunnel" aria-selected="false" aria-controls="viewFunnel" data-view="funnel"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Funnel</span></button>
-      <button class="tab" role="tab" id="tabLinks" aria-selected="false" aria-controls="viewLinks" data-view="links"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span>Story links</span></button>
+      <button class="tab" role="tab" id="tabLinks" aria-selected="false" aria-controls="viewLinks" data-view="links"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span>Funnel links</span></button>
       <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg><span>Applications</span><span class="tab-badge" id="appsBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads"><svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M17 8a4 4 0 0 1 0 8"/></svg><span>Ads</span></button>
       <button class="tab" role="tab" id="tabContent" aria-selected="false" aria-controls="viewContent" data-view="content"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5l2 4M14 5l2 4M10 12l4 2.5-4 2.5z"/></svg><span>Content Engine</span></button>
@@ -1221,6 +1245,10 @@ button.pl-row:hover{background:var(--surface-2)}
   <section id="viewDelivery" role="tabpanel" aria-labelledby="tabDelivery" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div class="pl-top"><button type="button" class="pl-back" data-go="home">‹ Home</button><div class="pl-seg" role="group" aria-label="Time period" data-pl-seg></div></div>
     <div id="plDelivery"></div>
+  </section>
+  <section id="viewScorecard" role="tabpanel" aria-labelledby="tabScorecard" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="pl-top"><button type="button" class="pl-back" data-go="home">‹ Home</button><span></span></div>
+    <div id="plScore"></div>
   </section>
   <section id="viewToday" role="tabpanel" aria-labelledby="tabToday" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div class="top">
@@ -1701,7 +1729,27 @@ button.pl-row:hover{background:var(--surface-2)}
 
   <!-- ===== STORY LINKS (tracked links for story CTAs) ===== -->
   <section id="viewLinks" role="tabpanel" aria-labelledby="tabLinks" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
-    <div class="top"><div><h1>Story links</h1><div class="sub">Type the sticker text, pick the CTA, copy the link.</div></div></div>
+    <div class="top"><div><h1>Funnel links</h1><div class="sub">One tagged link per funnel, so HQ knows where every lead came from.</div></div></div>
+    <div class="panel">
+      <h3 class="pl-h" style="margin:0 0 6px">Off-platform and ads</h3>
+      <p class="rule">Pick the funnel, type who or where it's for (e.g. the barber shop, the client who referred them), copy the link. Use a QR code generator on the QR link for posters.</p>
+      <div class="sl-make">
+        <input class="input sl-in" id="flText" type="text" maxlength="60" autocomplete="off" placeholder="Who or where, e.g. ryans barber" aria-label="Who or where">
+        <div class="seg-filter" role="group" aria-label="Funnel" id="flType">
+          <button type="button" data-fltype="qr" aria-pressed="true">QR / poster</button>
+          <button type="button" data-fltype="referral" aria-pressed="false">Referral</button>
+          <button type="button" data-fltype="affiliate" aria-pressed="false">Affiliate</button>
+          <button type="button" data-fltype="collab" aria-pressed="false">Collab</button>
+          <button type="button" data-fltype="email" aria-pressed="false">Email</button>
+          <button type="button" data-fltype="ads_direct" aria-pressed="false">Paid · direct</button>
+          <button type="button" data-fltype="ads_indirect" aria-pressed="false">Paid · indirect</button>
+        </div>
+        <button type="button" class="btn primary" id="flAdd" disabled>Add + copy link</button>
+        <div class="sl-msg" id="flMsg" role="status"></div>
+      </div>
+      <div id="flList"></div>
+    </div>
+    <h2 class="pl-h" style="margin:0">Story CTA</h2>
     <div class="panel sl-make">
       <input class="input sl-in" id="slText" type="text" maxlength="60" autocomplete="off" placeholder="Sticker text, e.g. 9-5 fat loss" aria-label="Sticker text">
       <div class="seg-filter" role="group" aria-label="CTA type" id="slType">
@@ -1770,10 +1818,11 @@ button.pl-row:hover{background:var(--surface-2)}
       <button class="sheet-btn" data-view="leadflow">Leads</button>
       <button class="sheet-btn" data-view="sales" id="sheetSales" hidden>Sales</button>
       <button class="sheet-btn" data-view="delivery">Delivery</button>
+      <button class="sheet-btn" data-view="scorecard">Scorecard</button>
       <button class="sheet-btn" data-view="today">Daily brief</button>
       <button class="sheet-btn" data-view="dms">DMs</button>
       <button class="sheet-btn" data-view="follow">Follow-ups</button>
-      <button class="sheet-btn" data-view="links">Story links</button>
+      <button class="sheet-btn" data-view="links">Funnel links</button>
       <button class="sheet-btn" data-view="funnel">Funnel (old)</button>
       <button class="sheet-btn" data-view="analytics">Analytics</button>
       <button class="sheet-btn" data-view="leads">Warm Leads</button>
@@ -1938,13 +1987,13 @@ button.pl-row:hover{background:var(--surface-2)}
     loaded:{}
   };
   function metaBundle(){
-    return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, ghlSync:state.ghlMeta, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
+    return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, ghlSync:state.ghlMeta, scorecard:state.scorecardMeta, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
   }
   function coreState(){ return { dms:state.dms, daily:state.daily, contacts:state.contacts, tfResponses:state.tfResponses, tfDaily:state.tfDaily, igPosts:state.igPosts, igStories:state.igStories, meta:metaBundle(), stripe:state.stripe.summary?{summary:state.stripe.summary}:null, dmLoaded:state.dmLoaded }; }
 
   /* ---------- render scheduler: only the visible tab + global strips, only when its data changed ---------- */
   var VIEW_DEPS = {
-    home:['pillars'], traffic:['pillars'], leadflow:['pillars'], sales:['pillars'], delivery:['pillars'],
+    home:['pillars'], traffic:['pillars'], leadflow:['pillars'], sales:['pillars'], delivery:['pillars'], scorecard:['pillars'],
     today:['dms','daily','contacts','tfResponses','tfDaily','igPosts','igStories','meta','stripe'],
     funnel:['tfResponses','tfDaily','igPosts','igStories','meta','dms','daily','ads'],
     leads:['contacts','meta','dms'], dms:['dms','daily','reviews','contacts','meta'], follow:['dms','meta'], magnets:['dms','meta'],
@@ -1966,7 +2015,7 @@ button.pl-row:hover{background:var(--surface-2)}
   Object.keys(VIEW_DEPS).forEach(function(v){ dirty[v]=true; });
 
   /* ---------- views ---------- */
-  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine', links:'viewLinks'};
+  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', scorecard:'viewScorecard', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine', links:'viewLinks'};
   var ADMIN_VIEWS={sales:1, stripe:1, subs:1, routine:1, challenge:1, email:1};
   function setView(view, push){
     if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='home';
@@ -2015,7 +2064,7 @@ button.pl-row:hover{background:var(--surface-2)}
   (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'home'; })();
 
   /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
-  var VIEW_LABEL={home:'Home', traffic:'Traffic', leadflow:'Leads', sales:'Sales', delivery:'Delivery', today:'Daily brief', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine', links:'Story links'};
+  var VIEW_LABEL={home:'Home', traffic:'Traffic', leadflow:'Leads', sales:'Sales', delivery:'Delivery', scorecard:'Scorecard', today:'Daily brief', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine', links:'Funnel links'};
   var VIEW_KEYS={'1':'home','2':'traffic','3':'leadflow','4':'sales','5':'delivery','6':'apps','7':'content','8':'today'};
   var appEl=$('appRoot');
   function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
@@ -4986,6 +5035,8 @@ button.pl-row:hover{background:var(--surface-2)}
     doc('meta/autopost', 'content', function(d){ state.contentAutopost=d; state.contentMetaLoaded.autopost=true; });
     doc('meta/posting', 'content', function(d){ state.contentPosting=d; state.contentMetaLoaded.posting=true; });
     doc('meta/goal', 'meta', function(d){ state.goal=d; });
+    doc('meta/scorecard', 'meta', function(d){ state.scorecardMeta=d; });
+    sub(db.collection('app_sessions').limit(5000), 'pillars', 'appSessions');
     doc('meta/ghlSync', 'meta', function(d){ state.ghlMeta=d; });
     doc('meta/routineCalls', 'meta', function(d){ state.routineCalls=d; });
     doc('meta/morningReport', 'meta', function(d){ state.morningReport=d; });
@@ -5095,11 +5146,12 @@ button.pl-row:hover{background:var(--surface-2)}
      All maths in HQ.computePillars (hq-core.js). DM numbers stay off these pages until Jordan says the DM scan
      is fixed: flip DM_SCAN_OK to true. The DM tables, scans and the DMs / Follow-ups tabs are untouched. */
   var DM_SCAN_OK = false;
-  var PL_VIEWS = {home:1, traffic:1, leadflow:1, sales:1, delivery:1};
+  var PL_VIEWS = {home:1, traffic:1, leadflow:1, sales:1, delivery:1, scorecard:1};
   var plPeriod = (function(){ var v=read('hqPeriod'); return v==='7'?7:(v==='month'?'month':30); })();
   state.deliveryCounts = null;
+  function plState(){ return Object.assign({}, coreState(), { igAccount:state.igAccount, contentQueue:state.contentQueue, routineCalls:state.routineCalls, deliveryCounts:state.deliveryCounts, appSessions:state.appSessions||null, adsDaily:state.adsDaily, deliveryByDay:state.deliveryByDay||null }); }
   function plData(){
-    var s = Object.assign({}, coreState(), { igAccount:state.igAccount, contentQueue:state.contentQueue, routineCalls:state.routineCalls, deliveryCounts:state.deliveryCounts });
+    var s = plState();
     var opts = { dmScanOk:DM_SCAN_OK };
     if(DM_SCAN_OK){ try{ opts.dmsWaiting = HQ.waiting(state.dms, Date.now()).length; }catch(e){} }
     return HQ.computePillars(s, Date.now(), plPeriod, opts);
@@ -5112,6 +5164,10 @@ button.pl-row:hover{background:var(--surface-2)}
       if(want!==plPeriod) return;
       state.deliveryCounts = r.error ? null : (r.data || null); state.deliveryError = r.error ? (r.error.message||'error') : null;
     }catch(e){ state.deliveryCounts=null; state.deliveryError = String(e && e.message || e); }
+    try{
+      var b = await supaClient.rpc('hq_delivery_by_day', { from_day:HQ.PLAN.start, to_day:HQ.sydDay(Date.now()) });
+      state.deliveryByDay = b.error ? null : (b.data || {});
+    }catch(e){ state.deliveryByDay = null; }
     markDirty('pillars');
   }
   function plTrend(x, opts){
@@ -5145,12 +5201,12 @@ button.pl-row:hover{background:var(--surface-2)}
     return '<button type="button" class="pl-card" data-go="'+view+'"><span class="n">'+esc(name)+(admin?'<span class="pl-admin">ADMIN</span>':'')+'</span><span class="v">'+plVal(x?x.value:null, view==='sales'?'money':null)+'</span><span class="s">'+esc(sub)+'</span><span class="t">'+t+'</span></button>';
   }
   RENDER.home = function(){
-    plSeg(); var d = plData(), L = d.leads, T = d.traffic, S = d.sales, D = d.delivery, html = '';
+    plSeg(); var d = plData(), L = d.leads, T = d.traffic, S = d.sales, D = d.delivery, html = planCard();
     if(d.leak) html += '<div class="pl-leak"><div class="k">Where people drop off · '+esc(d.range.label)+'</div><p>'+esc(d.leak.text)+'</p></div>';
     html += '<div class="pl-grid">'+
       plCard('traffic','Traffic', T.headline, 'new followers from posts')+
       plCard('leadflow','Leads', L.headline, 'applications')+
-      (isAdmin ? plCard('sales','Sales', S.headline, 'cash collected', S.connected.stripe ? null : '<span class="pl-flat">Stripe not connected</span>', true) : '')+
+      (isAdmin ? plCard('sales','Sales', S.headline, 'cash collected', S.connected.stripe ? null : '<span class="pl-flat">'+(S.connected.stripeOff?'waiting on Newie':'Stripe not connected')+'</span>', true) : '')+
       plCard('delivery','Delivery', D.headline, 'active clients', D.headline.value==null ? '<span class="pl-flat">'+(state.deliveryError?'couldn’t load':'loading…')+'</span>' : '<span class="pl-flat">'+num(D.churned.value)+' left · '+(D.avgWeeks.value==null?'–':num(D.avgWeeks.value,1))+' wks avg stay</span>')+
     '</div>';
     html += '<div class="pl-h2">Do today</div>';
@@ -5184,7 +5240,13 @@ button.pl-row:hover{background:var(--surface-2)}
     setHtml('plTraffic', html);
   };
   RENDER.leadflow = function(){
-    plSeg(); var d = plData(), L = d.leads, base = L.formViews.value || 0;
+    plSeg();
+    if(plFunnel!=='all'){
+      var dd = plData(), FF = HQ.computeFunnels(plState(), Date.now(), plPeriod), xx = FF.funnels[plFunnel];
+      setHtml('plLeads', funnelChips()+funnelSteps(dd, xx, FF.range)+'<p class="pl-note">Only people who came in through a tagged '+esc(HQ.FUNNEL_LABEL[plFunnel])+' link count here. Get the links under Tools → Funnel links.</p>');
+      return;
+    }
+    var d = plData(), L = d.leads, base = L.formViews.value || 0;
     function bar(v){ return '<div class="pl-bar"><i style="width:'+(base>0&&v!=null?Math.max(2,Math.min(100,Math.round(v/base*100))):0)+'%"></i></div>'; }
     function step(title, x, src, drill){
       return '<div class="pl-step"><div class="row"><span class="tt">'+esc(title)+'</span><span class="vv">'+plVal(x.value)+'</span></div>'+(src?'<div class="src">'+esc(src)+'</div>':'')+bar(x.value)+
@@ -5192,7 +5254,7 @@ button.pl-row:hover{background:var(--surface-2)}
     }
     function conv(label, v){ return '<div class="pl-conv">↓ '+esc(label)+' <b>'+(v==null?'<span class="pl-blank">–</span>':v+'%')+'</b></div>'; }
     var src = Object.keys(L.applications.bySource).sort(function(a,b){ return L.applications.bySource[b]-L.applications.bySource[a]; }).map(function(k){ return [k==='link_in_bio'?'Link in bio':(k==='unknown'?'Unknown source':k.replace(/_/g,' ')), num(L.applications.bySource[k])]; });
-    var html = '<div class="pl-funnel">'+
+    var html = funnelChips()+'<div class="pl-funnel">'+
       step('Form views', L.formViews, 'Typeform · '+d.range.label, [['Link taps on Instagram', d.traffic.linkTaps.value==null?'–':num(d.traffic.linkTaps.value)], ['Profile visits', d.traffic.profileVisits.value==null?'–':num(d.traffic.profileVisits.value)], ['Before', L.formViews.prev==null?'–':num(L.formViews.prev)]])+
       conv('view → start', L.rates.viewToStart)+
       step('Form starts', L.starts, L.starts.note)+
@@ -5208,6 +5270,9 @@ button.pl-row:hover{background:var(--surface-2)}
       plRow('Replied', 'moved past Outreach', L.replied)+
       plRow('Reply rate', 'replied ÷ started', {value:L.rates.replyRate, prev:null}, {fmt:'pct'})+
     '</div>';
+    var FA = HQ.computeFunnels(plState(), Date.now(), plPeriod);
+    html += '<h3 class="pl-h">By funnel · '+esc(FA.range.label)+'</h3><div class="pl-list">'+HQ.FUNNELS.map(function(f){ var x=FA.funnels[f.key]; return '<button type="button" class="pl-row" data-pl-funnel="'+f.key+'"><div class="l">'+esc(f.label)+'<small>'+num(x.applications)+' applied · '+(x.booked==null?'–':num(x.booked))+' booked · '+(x.closed==null?'–':num(x.closed))+' sold</small></div><div class="r"><span class="go">›</span></div></button>'; }).join('')+
+      (FA.untagged ? '<div class="pl-row"><div class="l">No tag<small>'+num(FA.untagged)+' applied through an untagged link. Swap in the Funnel links.</small></div></div>' : '')+'</div>';
     html += '<div class="pl-list">'+plRow('Applications to work through', 'opens Applications', null, {go:'apps', arrowOnly:true})+'</div>';
     html += '<p class="pl-note">Tap “What feeds this” under a step to see where it comes from. Booked calls and show-ups come from GoHighLevel: mark each sales call Showed or No-show there and the show-up rate fills in. Cost per call needs ad spend.'+(DM_SCAN_OK?'':' DM numbers are paused while the DM scan is fixed.')+'</p>';
     setHtml('plLeads', html);
@@ -5244,6 +5309,85 @@ button.pl-row:hover{background:var(--surface-2)}
     setHtml('plDelivery', html);
   };
 
+  /* ---------- 2027 Master Plan: scorecard, funnels ---------- */
+  var plFunnel = (function(){ var v=read('hqFunnel'); return /^(all|story|bio|offplatform|paid_direct|paid_indirect)$/.test(v||'') ? v : 'all'; })();
+  function scVal(c, fmt){ if(!c || c.value==null) return '<span class="pl-blank">–</span>'; var v=c.value; return fmt==='money'?esc(HQ.money(v)):(fmt==='pct'?v+'%':esc(num(v))); }
+  function scCell(c, fmt){ return '<td class="sc-c'+(c&&c.status?' sc-'+c.status:'')+'">'+scVal(c, fmt)+'</td>'; }
+  function planCard(){
+    var sc = HQ.scorecard(plState(), Date.now()), w = sc.current, q = sc.quarter, active = state.deliveryCounts && HQ.isNum(state.deliveryCounts.active) ? state.deliveryCounts.active : null;
+    var head = sc.started && w ? 'Week '+w.n+' of 13 · from '+HQ.fmtDay(w.start,'short') : 'Plan starts '+HQ.fmtDay(HQ.PLAN.start,'short');
+    var main = sc.started ? (w && w.main) : HQ.PLAN.mainThing[0];
+    var keys = [['leads','Leads'],['booked','Calls booked'],['showRate','Show rate','pct'],['sales','Sales']];
+    var chips = w ? '<div class="sc-chips">'+keys.map(function(k){ var c=w.cells[k[0]]; return '<span class="sc-chip'+(c&&c.status?' sc-'+c.status:'')+'"><b>'+scVal(c,k[2])+'</b> '+esc(k[1])+' <small>'+esc(c?c.target.text:'')+'</small></span>'; }).join('')+'</div>' : '';
+    var prog = active==null ? '' : '<div class="sc-prog"><div class="row"><span>Clients</span><span><b>'+num(active)+'</b> of '+num(q.clients)+' by '+esc(q.label)+'</span></div><div class="pl-bar"><i style="width:'+Math.min(100,Math.round(active/q.clients*100))+'%"></i></div></div>';
+    var flags = sc.flags.length ? '<p class="sc-flag">Red 3 weeks running: '+esc(sc.flags.map(function(f){ return f.label; }).join(', '))+'. Make it next week’s main thing.</p>' : '';
+    return '<button type="button" class="pl-plan" data-go="scorecard"><span class="k">2027 plan · '+esc(head)+'</span><span class="m">'+esc(main||'')+'</span>'+chips+prog+flags+'<span class="go">Friday scorecard ›</span></button>';
+  }
+  RENDER.scorecard = function(){
+    var sc = HQ.scorecard(plState(), Date.now()), html = '';
+    var active = state.deliveryCounts && HQ.isNum(state.deliveryCounts.active) ? state.deliveryCounts.active : null, q = sc.quarter;
+    html += '<div class="pl-leak"><div class="k">'+(sc.started && sc.current ? 'Week '+sc.current.n+' · main thing' : 'Starts Mon 16 Nov · week 1 main thing')+'</div><p>'+esc((sc.current&&sc.current.main)||HQ.PLAN.mainThing[0])+'</p>'+
+      (active!=null ? '<p class="sc-sub">'+num(active)+' active clients · '+num(q.clients)+' by '+esc(q.label)+' (about '+esc(HQ.money(q.income))+' a month)</p>' : '')+'</div>';
+    if(sc.flags.length) html += '<div class="pl-list"><div class="pl-row"><div class="l">Red 3 weeks running<small>'+esc(sc.flags.map(function(f){ return f.label; }).join(', '))+'. Make it next week’s main thing.</small></div></div></div>';
+    var cols = sc.weeks;
+    html += '<div class="sc-wrap"><table class="sc-t"><thead><tr><th scope="col">Measure</th><th scope="col">Target</th>'+cols.map(function(w){ return '<th scope="col" class="'+(w.state==='current'?'sc-now':'')+'">W'+w.n+'<small>'+esc(HQ.fmtDay(w.start,'dm'))+'</small></th>'; }).join('')+'</tr></thead><tbody>'+
+      HQ.SCORE_ROWS.map(function(r){
+        var tw = (sc.current || cols[0]).start;
+        return '<tr><th scope="row">'+esc(r.label)+(r.manual?' <small>typed in</small>':'')+'</th><td class="sc-tg">'+esc(HQ.planTarget(r.key, tw).text)+'</td>'+cols.map(function(w){ return w.state==='future' ? '<td class="sc-c sc-fut"></td>' : scCell(w.cells[r.key], r.fmt); }).join('')+'</tr>';
+      }).join('')+'</tbody></table></div>';
+    var cw = sc.current, mw = cw && state.scorecardMeta && state.scorecardMeta.weeks && state.scorecardMeta.weeks[cw.start] || {};
+    if(cw) html += '<form class="pl-list sc-form" id="scForm"><div class="pl-row"><div class="l">This week, typed in<small>Week '+cw.n+' · HQ can’t see these</small></div></div>'+
+      '<label class="pl-row"><span class="l">Hours worked</span><input class="input" type="number" min="0" max="120" step="0.5" inputmode="decimal" name="hours" value="'+esc(mw.hours==null?'':mw.hours)+'"></label>'+
+      '<label class="pl-row"><span class="l">Long-form videos out</span><input class="input" type="number" min="0" max="20" step="1" inputmode="numeric" name="longform" value="'+esc(mw.longform==null?'':mw.longform)+'"></label>'+
+      '<div class="pl-row"><span class="l" id="scMsg" role="status"></span><button type="submit" class="btn primary">Save</button></div></form>';
+    html += '<p class="pl-note">Green is on plan, red is off. The current week only turns red for "at most" numbers. Leads = applications plus instant-form leads from ads. Calls, show rate and sales come from GoHighLevel. Right market fit = applicants aged 25 to 40 until the apply page asks about work. Ad cost per client fills in once Meta Ads is connected.</p>';
+    setHtml('plScore', html);
+  };
+  document.addEventListener('submit', async function(ev){
+    if(!ev.target || ev.target.id!=='scForm') return; ev.preventDefault();
+    var sc = HQ.scorecard(plState(), Date.now()), cw = sc.current, m = document.getElementById('scMsg'); if(!cw || !supaClient) return;
+    var f = ev.target, val = function(n){ var v=f.elements[n].value; return v===''?null:+v; };
+    var cur = (state.scorecardMeta && state.scorecardMeta.weeks) || {}, weeks = Object.assign({}, cur);
+    weeks[cw.start] = Object.assign({}, cur[cw.start]||{}, { hours:val('hours'), longform:val('longform'), updatedAt:new Date().toISOString() });
+    if(m) m.textContent='Saving…';
+    var r = await supaClient.from('meta').upsert({ id:'scorecard', data:Object.assign({}, state.scorecardMeta||{}, { weeks:weeks }), updated_at:new Date().toISOString() });
+    if(m) m.textContent = r.error ? 'Couldn’t save: '+r.error.message : 'Saved.';
+    if(!r.error){ state.scorecardMeta = Object.assign({}, state.scorecardMeta||{}, { weeks:weeks }); }
+  });
+  function funnelChips(){
+    var opts = [['all','All']].concat(HQ.FUNNELS.map(function(f){ return [f.key, f.label.replace('Paid ads · ','Paid · ')]; }));
+    return '<div class="pl-fseg" role="group" aria-label="Funnel">'+opts.map(function(o){ return '<button type="button" data-pl-funnel="'+o[0]+'" aria-pressed="'+(o[0]===plFunnel?'true':'false')+'">'+esc(o[1])+'</button>'; }).join('')+'</div>';
+  }
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-pl-funnel]'); if(!b) return;
+    plFunnel = b.getAttribute('data-pl-funnel'); store('hqFunnel', plFunnel); markDirty('pillars');
+  });
+  function funnelSteps(F, x, R){
+    var base = null;
+    function step(title, v, src, drill, fmt){ if(base==null && HQ.isNum(v) && v>0) base=v;
+      return '<div class="pl-step"><div class="row"><span class="tt">'+esc(title)+'</span><span class="vv">'+(v==null?'<span class="pl-blank">–</span>':(fmt==='money'?esc(HQ.money(v)):esc(num(v))))+'</span></div>'+(src?'<div class="src">'+esc(src)+'</div>':'')+
+        (fmt==='money'?'':'<div class="pl-bar"><i style="width:'+(base>0&&HQ.isNum(v)?Math.max(2,Math.min(100,Math.round(v/base*100))):0)+'%"></i></div>')+
+        (drill&&drill.length?'<details><summary>What feeds this</summary>'+drill.map(function(r){ return '<div class="dr"><span>'+esc(r[0])+'</span><span>'+r[1]+'</span></div>'; }).join('')+'</details>':'')+'</div>'; }
+    function conv(label, a, b){ var v = HQ.isNum(a)&&HQ.isNum(b)&&b>0 ? Math.round(a/b*100) : null; return '<div class="pl-conv">↓ '+esc(label)+' <b>'+(v==null?'<span class="pl-blank">–</span>':v+'%')+'</b></div>'; }
+    var h = '<div class="pl-funnel">', k = x.key, I = x.inputs || {};
+    if(k==='story') h += step('Story views', I.views, I.stories+' '+HQ.plural(I.stories,'story','stories')+' posted · '+R.label, [['Link sticker taps', I.linkTaps==null?'–':num(I.linkTaps)], ['Sticker taps', I.stickerTaps==null?'–':num(I.stickerTaps)], ['Replies', I.replies==null?'–':num(I.replies)]])+conv('view → opened form', x.opened, I.views);
+    if(k==='bio'){ var T = F.traffic; h += step('Profile visits', T.profileVisits.value, T.profileVisits.value==null?'Instagram gives 7 and 30-day totals only':'Instagram · '+R.label, [['Link taps', T.linkTaps.value==null?'–':num(T.linkTaps.value)]])+conv('visit → opened form', x.opened, T.profileVisits.value); }
+    if(k==='paid_direct') h += step('Ad spend', I.spend, I.spend==null?'Meta Ads not connected':'all campaigns · '+R.label, [['Link clicks', I.clicks==null?'–':num(I.clicks)], ['Cost per client', I.costPerClient==null?'–':esc(HQ.money(I.costPerClient))+' (plan: $250 max)']], 'money')+
+      step('Instant-form leads', I.instantForms, 'GoHighLevel ad pipelines (Fast Track: instant form → DM → setter)');
+    if(k==='paid_indirect') h += '<div class="pl-step"><div class="row"><span class="tt">Free training → emails → VSL</span><span class="vv"><span class="pl-blank">–</span></span></div><div class="src">Compounding Track gets built in Q2 2027. Ads that send people to the training or VSL use the "Paid · indirect" link from Funnel links.</div></div>';
+    h += step('Opened the apply form', x.opened, 'apply page'+(k==='bio'||k==='all'?' + Typeform':'')+' · '+R.label)+
+      conv('apply page: opened → started', x.started, x.openedApply)+
+      step('Started', x.started, 'apply page only (live since 11 Nov)')+
+      conv('opened → applied', x.applications, x.opened)+
+      step('Applied', x.applications, null, (k==='offplatform'?Object.keys(x.byMedium||{}).map(function(m){ return [m, num(x.byMedium[m])]; }):[]).concat([['Right market fit (25 to 40)', x.inMarket==null?'not asked yet':x.inMarket+'% of '+num(x.inMarketOf)]]))+
+      conv('applied → booked', x.booked, x.applications)+
+      step('Calls booked', x.booked, 'GoHighLevel sales calendar')+
+      conv('show rate (plan 70%+)', x.showed, x.held)+
+      step('Showed', x.showed, x.held&&x.showed==null?num(x.held)+' held, none marked showed / no-show yet':null)+
+      conv('show → close', x.closed, x.showed)+
+      step('Sales', x.closed, 'moved to Closed / Won in GoHighLevel');
+    return h+'</div>';
+  }
   window.__hq = { state:state, setView:setView, renderNow:renderNow, computeToday:function(){ return HQ.computeToday(coreState(), Date.now()); } };
 })();
 </script>
@@ -5497,17 +5641,30 @@ button.pl-row:hover{background:var(--surface-2)}
   function $(id){ return document.getElementById(id); }
   function norm(s){ return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,''); }
   function build(slug,t){ return BASE+'?utm_source=instagram&utm_medium=story&utm_campaign='+t+'&utm_content='+slug; }
+  // off-platform + ads: [utm_source, utm_medium, utm_campaign, label]; HQ.funnelOf reads utm_medium / utm_campaign
+  var FL={qr:['offline','qr','poster','QR / poster'], referral:['client','referral','referral','Referral'], affiliate:['affiliate','affiliate','affiliate','Affiliate'], collab:['partner','collab','collab','Collab'], email:['newsletter','email','email','Email'], ads_direct:['meta','paid','fasttrack','Paid · direct'], ads_indirect:['meta','paid','compounding','Paid · indirect']};
+  var flType='qr';
+  function buildF(slug,t){ var f=FL[t]; return BASE+'apply?utm_source='+f[0]+'&utm_medium='+f[1]+'&utm_campaign='+f[2]+'&utm_content='+slug; }
   function msg(t){ var m=$('slMsg'); if(m) m.textContent=t||''; }
   function copy(text, btn){
     var done=function(){ if(!btn) return; var o=btn.textContent; btn.textContent='Copied ✓'; setTimeout(function(){ btn.textContent=o; },1400); };
     var fb=function(){ var t=document.createElement('textarea'); t.value=text; t.setAttribute('readonly',''); t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t); t.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(t); done(); };
     if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fb); else fb();
   }
+  function renderF(){
+    var el=$('flList'); if(!el) return;
+    var rows=links.filter(function(l){ return l.data && l.data.funnelLink; });
+    el.innerHTML=rows.length ? rows.map(function(l){ var d=l.data, f=FL[d.type]||[], c=counts[(f[1]||'')+':'+d.slug]||{o:0,a:0};
+      return '<div class="sl-row"><div class="sl-l"><div class="sl-s">'+esc(d.label||l.id)+'</div><div class="sl-m">'+esc(f[3]||d.type)+' · '+c.o+' opened · '+c.a+' applied</div></div><button type="button" class="btn" data-slcopy="'+esc(d.url||'')+'">Copy</button></div>'; }).join('')
+      : '<div class="empty-state">No off-platform or ad links yet.</div>';
+  }
   function render(){
+    renderF();
     var el=$('slList'); if(!el) return;
     if(!loaded){ el.innerHTML='<div class="empty-state">Loading…</div>'; return; }
-    if(!links.length){ el.innerHTML='<div class="empty-state">No story links yet. Add one above.</div>'; return; }
-    el.innerHTML=links.map(function(l){
+    var story=links.filter(function(l){ return !(l.data && l.data.funnelLink); });
+    if(!story.length){ el.innerHTML='<div class="empty-state">No story links yet. Add one above.</div>'; return; }
+    el.innerHTML=story.map(function(l){
       var d=l.data||{}, c=counts[l.id]||{o:0,a:0};
       var when=d.createdAt?new Date(d.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}):'';
       return '<div class="sl-row"><div class="sl-l"><div class="sl-s">'+esc(d.label||l.id)+'</div><div class="sl-m">'+esc(TYPES[d.type]||d.type||'')+' · '+esc(when)+' · '+c.o+' opened · '+c.a+' applied</div></div><button type="button" class="btn" data-slcopy="'+esc(d.url||'')+'">Copy</button></div>';
@@ -5519,9 +5676,9 @@ button.pl-row:hover{background:var(--surface-2)}
       if(r.error){ msg("Couldn't load links: "+r.error.message); return; }
       links=r.data||[]; loaded=true; render();
     });
-    client.from('app_sessions').select('c:data->utm->>utm_content, s:data->submitted').eq('data->utm->>utm_medium','story').limit(5000).then(function(r){
+    client.from('app_sessions').select('c:data->utm->>utm_content, md:data->utm->>utm_medium, s:data->submitted').limit(5000).then(function(r){
       if(r.error) return;
-      var m={}; (r.data||[]).forEach(function(x){ if(!x.c) return; var k=m[x.c]||(m[x.c]={o:0,a:0}); k.o++; if(x.s===true) k.a++; });
+      var m={}; (r.data||[]).forEach(function(x){ if(!x.c) return; var key=x.md==='story'?x.c:(x.md||'')+':'+x.c; var k=m[key]||(m[key]={o:0,a:0}); k.o++; if(x.s===true) k.a++; });
       counts=m; render();
     });
   }
@@ -5537,6 +5694,25 @@ button.pl-row:hover{background:var(--surface-2)}
     msg('Copied. Put "'+label+'" on the sticker.');
     client.from('cta_links').upsert(row).then(function(r){ if(r.error) msg("Copied, but didn't save to HQ: "+r.error.message); });
   }
+  function addF(){
+    var label=($('flText').value||'').trim(), slug=norm(label);
+    if(!slug || !client) return;
+    var url=buildF(slug,flType), btn=$('flAdd'), now=new Date().toISOString(), id=flType+'__'+slug;
+    copy(url, btn);
+    var ex=links.find(function(l){ return l.id===id; });
+    var row={id:id, data:{label:label, slug:slug, type:flType, url:url, funnelLink:true, createdAt:(ex&&ex.data&&ex.data.createdAt)||now}, updated_at:now};
+    if(ex){ ex.data=row.data; } else { links.unshift(row); }
+    render(); $('flText').value=''; btn.disabled=true;
+    var fm=$('flMsg'); if(fm) fm.textContent='Copied the '+FL[flType][3]+' link for "'+label+'".';
+    client.from('cta_links').upsert(row).then(function(r){ if(r.error && fm) fm.textContent="Copied, but didn't save to HQ: "+r.error.message; });
+  }
+  document.addEventListener('input', function(e){ if(e.target && e.target.id==='flText'){ var b=$('flAdd'); if(b) b.disabled=!norm(e.target.value); } });
+  document.addEventListener('keydown', function(e){ if(e.target && e.target.id==='flText' && e.key==='Enter'){ e.preventDefault(); addF(); } });
+  document.addEventListener('click', function(e){
+    var t=e.target.closest && e.target.closest('[data-fltype]');
+    if(t){ flType=t.getAttribute('data-fltype'); document.querySelectorAll('#flType [data-fltype]').forEach(function(b){ b.setAttribute('aria-pressed', b===t?'true':'false'); }); return; }
+    if(e.target.closest && e.target.closest('#flAdd')) addF();
+  });
   document.addEventListener('input', function(e){ if(e.target && e.target.id==='slText'){ var b=$('slAdd'); if(b) b.disabled=!norm(e.target.value); } });
   document.addEventListener('keydown', function(e){ if(e.target && e.target.id==='slText' && e.key==='Enter'){ e.preventDefault(); add(); } });
   document.addEventListener('click', function(e){
@@ -5551,7 +5727,7 @@ button.pl-row:hover{background:var(--surface-2)}
     if(poller) clearInterval(poller); poller=setInterval(function(){ var v=$('viewLinks'); if(v && !v.hidden) load(); }, 30000);
   });
   document.addEventListener('tf-auth-signed-out', function(){ client=null; links=[]; counts={}; loaded=false; if(poller) clearInterval(poller); });
-  window.__storyLinks={norm:norm, build:build};
+  window.__storyLinks={norm:norm, build:build, buildF:buildF};
 })();
 </script>
 <script>

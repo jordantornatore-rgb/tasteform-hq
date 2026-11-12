@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.2.0 — 12 Nov 2026 (2027 Master Plan)
+- Home opens with the plan: this week's main thing (section 10), the key Friday numbers against target, and clients vs the quarter target.
+- New Scorecard page: the 11 Friday measures from section 11, weeks 1 to 13 from 16 Nov, green / red against the plan, "red 3 weeks running" flag, and typed-in hours and long-form.
+- Leads: switch between All, Story CTA, Link in bio, Off-platform, Paid direct and Paid indirect. Each funnel runs from its first touch to sales.
+- Applications now include the new apply page (one per person, test entries dropped).
+- ghl-sync splits booked / showed / sold by funnel, matched on email or phone inside the function, and counts instant-form leads from the ad pipelines.
+- Story links is now Funnel links: tagged links for QR / poster, referral, affiliate, collab, email and both paid funnels.
+- New RPC hq_delivery_by_day (joined / left per day, counts only).
+
 ## 3.1.0 — 12 Nov 2026 (GoHighLevel connected, Stripe off)
 - New `ghl-sync` edge function (read-only GETs, hourly at :47). Writes per-day counts to meta/ghlSync: sales-call bookings, calls held, showed / no-show, leads moved to Closed / Won, Instagram Leads outreach and replies. No names.
 - Leads: booked calls and show-ups from GHL (show-up rate fills in as calls are marked Showed / No-show), plus an Instagram outreach section.

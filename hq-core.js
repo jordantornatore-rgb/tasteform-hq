@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.1.0';
+  HQ.VERSION = '3.2.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -468,7 +468,7 @@
   /* ---------- GoHighLevel day sums (meta/ghlSync.days, written by the ghl-sync function) ---------- */
   HQ.ghlSum = function (ghl, from, to) {
     if (!ghl || !ghl.connected || !ghl.days) return null;
-    var o = { booked: 0, held: 0, showed: 0, noShow: 0, unmarked: 0, closed: 0, closeDaysSum: 0, closeDaysN: 0, outreach: 0, replied: 0 };
+    var o = { booked: 0, held: 0, showed: 0, noShow: 0, unmarked: 0, closed: 0, closeDaysSum: 0, closeDaysN: 0, outreach: 0, replied: 0, paidLeads: 0 };
     Object.keys(ghl.days).forEach(function (k) { if (k < from || k > to) return; var d = ghl.days[k] || {}; Object.keys(o).forEach(function (f) { if (HQ.isNum(+d[f])) o[f] += +d[f]; }); });
     return o;
   };
@@ -848,8 +848,11 @@
     };
 
     // --- Leads: form views -> starts -> applications -> booked -> showed
-    var apps = HQ.appsInRange(state.tfResponses, R.from, R.to), appsPrev = HQ.appsInRange(state.tfResponses, R.prevFrom, R.prevTo);
-    var bySrc = {}; apps.forEach(function (r) { var s = r.source || 'unknown'; bySrc[s] = (bySrc[s] || 0) + 1; });
+    var apps = HQ.appsInRange(state.tfResponses, R.from, R.to);
+    // every application (apply page + Typeform, one per person), counted by funnel
+    var allApps = HQ.allApplications(state), inWin = function (a, b) { return allApps.filter(function (x) { return x.day >= a && x.day <= b; }); };
+    var appsAll = inWin(R.from, R.to), appsPrev = inWin(R.prevFrom, R.prevTo);
+    var bySrc = {}; appsAll.forEach(function (r) { var s = HQ.FUNNEL_LABEL[r.funnel] || r.funnel; bySrc[s] = (bySrc[s] || 0) + 1; });
     var fitKnown = apps.filter(function (r) { return r.fit === true || r.fit === false || r.fit === 'fit' || r.fit === 'not_fit'; });
     var fitYes = fitKnown.filter(function (r) { return r.fit === true || r.fit === 'fit'; }).length;
     // Typeform's daily sync writes started == completed (it only sees finished forms), so starts stay blank until it reads partial responses.
@@ -861,10 +864,10 @@
     var booked = G ? G.booked : null, marked = G ? G.showed + G.noShow : 0;
     var showNote = !G ? 'Needs GoHighLevel' : (G.unmarked ? G.unmarked + ' of ' + G.held + ' calls not marked showed / no-show in GHL' : (G.held ? null : 'No sales calls held in this window'));
     var leads = {
-      headline: m(apps.length, appsPrev.length, { label: 'applications' }),
+      headline: m(appsAll.length, appsPrev.length, { label: 'applications' }),
       formViews: traffic.formViews,
       starts: m(startsReal ? tf.started : null, startsReal ? tfp.started : null, { note: startsReal ? null : 'Typeform sync only counts finished forms' }),
-      applications: m(apps.length, appsPrev.length, { bySource: bySrc, qualified: fitKnown.length ? fitYes : null, qualifiedOf: fitKnown.length }),
+      applications: m(appsAll.length, appsPrev.length, { bySource: bySrc, qualified: fitKnown.length ? fitYes : null, qualifiedOf: fitKnown.length }),
       booked: m(booked, GP ? GP.booked : null, { fromDms: dmBooked, note: ghlOn ? null : 'Needs GoHighLevel', held: G ? G.held : null, upcoming7: ghlOn && HQ.isNum(ghl.upcoming7) ? ghl.upcoming7 : null }),
       showed: m(G && marked ? G.showed : null, GP && (GP.showed + GP.noShow) ? GP.showed : null, { note: showNote, noShow: G && marked ? G.noShow : null }),
       outreach: m(G ? G.outreach : null, GP ? GP.outreach : null, { note: ghlOn ? null : 'Needs GoHighLevel' }),
@@ -873,7 +876,7 @@
       rates: {
         viewToStart: startsReal ? HQ.pct(tf.started, tf.visits) : null,
         viewToApply: tf.days ? HQ.pct(apps.length, tf.visits) : null,
-        applyToBooked: G && apps.length ? HQ.pct(G.booked, apps.length) : null, showRate: G && marked ? HQ.pct(G.showed, marked) : null,
+        applyToBooked: G && appsAll.length ? HQ.pct(G.booked, appsAll.length) : null, showRate: G && marked ? HQ.pct(G.showed, marked) : null,
         replyRate: G && G.outreach ? HQ.pct(G.replied, G.outreach) : null
       }
     };
@@ -912,9 +915,9 @@
     // --- the one line at the top: where people drop out between content and a call (facts only, no targets yet)
     var leak = null, reach = traffic.reach.value, taps = traffic.linkTaps.value, fv = traffic.formViews.value;
     if (HQ.isNum(reach) && HQ.isNum(taps) && reach > 0) {
-      leak = { text: HQ.num(taps) + ' of ' + HQ.compact(reach) + ' people reached tapped your link' + (HQ.isNum(fv) ? ', ' + HQ.num(fv) + ' opened the form' : '') + ' and ' + HQ.num(apps.length) + ' applied.', stage: 'traffic-to-form' };
+      leak = { text: HQ.num(taps) + ' of ' + HQ.compact(reach) + ' people reached tapped your link' + (HQ.isNum(fv) ? ', ' + HQ.num(fv) + ' opened the form' : '') + ' and ' + HQ.num(appsAll.length) + ' applied.', stage: 'traffic-to-form' };
     } else if (HQ.isNum(fv) && fv > 0) {
-      leak = { text: HQ.num(fv) + ' people opened the form and ' + HQ.num(apps.length) + ' applied (' + (HQ.pct(apps.length, fv) || 0) + '%).', stage: 'form' };
+      leak = { text: HQ.num(fv) + ' people opened the form and ' + HQ.num(appsAll.length) + ' applied.', stage: 'form' };
     }
 
     // --- Do today: at most 3 things
@@ -936,6 +939,222 @@
     if (a >= 1e4) return Math.round(v / 1e3) + 'k';
     if (a >= 1e3) return (Math.round(v / 100) / 10).toString().replace(/\.0$/, '') + 'k';
     return HQ.num(v);
+  };
+
+
+  /* ---------- 2027 Master Plan: funnels, targets and the Friday scorecard ----------
+     Funnel = how a person first reached the apply page (or Typeform), read from the link's utm tags.
+     Keep HQ.funnelOf in step with funnelOf() in supabase/functions/ghl-sync/index.ts. */
+  HQ.FUNNELS = [
+    { key: 'story', label: 'Story CTA' },
+    { key: 'bio', label: 'Link in bio' },
+    { key: 'offplatform', label: 'Off-platform' },
+    { key: 'paid_direct', label: 'Paid ads · direct' },
+    { key: 'paid_indirect', label: 'Paid ads · indirect' }
+  ];
+  HQ.FUNNEL_LABEL = { story: 'Story CTA', bio: 'Link in bio', offplatform: 'Off-platform', paid_direct: 'Paid ads · direct', paid_indirect: 'Paid ads · indirect', dm_outreach: 'DM outreach', unknown: 'No tag' };
+  HQ.funnelOf = function (utm, source) {
+    var u = utm || {};
+    var m = String(u.utm_medium || '').toLowerCase(), s = String(u.utm_source || '').toLowerCase();
+    var c = String(u.utm_content || source || '').toLowerCase(), camp = String(u.utm_campaign || '').toLowerCase();
+    if (/test/.test(c)) return 'test';
+    if (m === 'story') return 'story';
+    if (m === 'bio' || c === 'link_in_bio') return 'bio';
+    if (/^(paid|ads?|cpc|paid_social)$/.test(m) || /^(fb|facebook|meta)(_?ads?)?$/.test(s)) return /(vsl|training|email|youtube|compounding|indirect)/.test(camp + ' ' + c) ? 'paid_indirect' : 'paid_direct';
+    if (/^(offline|qr|poster|referral|affiliate|collab|email|partner)$/.test(m)) return 'offplatform';
+    return 'unknown';
+  };
+  // the corporate man: age 25 to 40 (the apply page asks age; the work question isn't on it yet)
+  HQ.ageInMarket = function (age) {
+    var a = String(age || '').replace(/[‒-―−]/g, '-').trim();
+    if (!a) return null;
+    return /^(25-30|31-35|36-40)$/.test(a);
+  };
+
+  // Every application, apply page and Typeform together, one per person (first one wins), test entries dropped.
+  HQ.allApplications = function (state) {
+    var out = [];
+    (state.appSessions || []).forEach(function (r) {
+      var d = r.data || r; if (!d.submitted) return;
+      var ct = d.contact || {}, at = d.submittedAt || d.lastSeenAt || d.firstSeenAt;
+      out.push({ id: 'a:' + (r.id || ''), at: at, day: at ? HQ.sydDay(at) : null, funnel: HQ.funnelOf(d.utm), medium: (d.utm && d.utm.utm_medium) || null, inMarket: HQ.ageInMarket(d.answers && d.answers.age), email: ct.email, phone: ct.phoneE164 || ct.phone, from: 'apply' });
+    });
+    (state.tfResponses || []).forEach(function (r) {
+      var at = r.submittedAt;
+      out.push({ id: 't:' + r.id, at: at, day: at ? HQ.sydDay(at) : null, funnel: HQ.funnelOf(r.utm, r.source), medium: (r.utm && r.utm.utm_medium) || null, inMarket: null, email: r.email, phone: r.phone, from: 'typeform' });
+    });
+    out.sort(function (a, b) { return String(a.at || '').localeCompare(String(b.at || '')); });
+    var seen = {};
+    return out.filter(function (a) {
+      if (a.funnel === 'test' || !a.day) return false;
+      var keys = [a.email ? String(a.email).trim().toLowerCase() : null, a.phone ? String(a.phone).replace(/\D/g, '').slice(-9) : null].filter(function (k) { return k && k.length > 3; });
+      var dup = keys.some(function (k) { return seen[k]; });
+      keys.forEach(function (k) { seen[k] = 1; });
+      return !dup;
+    });
+  };
+  // apply-page visits (opened / started / submitted) per funnel, test entries dropped
+  HQ.applySessions = function (state, from, to) {
+    var o = {};
+    (state.appSessions || []).forEach(function (r) {
+      var d = r.data || r, at = d.firstSeenAt; if (!at) return;
+      var day = HQ.sydDay(at); if (day < from || day > to) return;
+      var f = HQ.funnelOf(d.utm); if (f === 'test') return;
+      var x = o[f] || (o[f] = { opened: 0, started: 0, submitted: 0 });
+      x.opened++; if (d.steps && d.steps.start) x.started++; if (d.submitted) x.submitted++;
+    });
+    return o;
+  };
+  HQ.ghlFunnelSum = function (ghl, from, to) {
+    if (!ghl || !ghl.connected || !ghl.days) return null;
+    var o = {};
+    Object.keys(ghl.days).forEach(function (k) {
+      if (k < from || k > to) return; var bf = (ghl.days[k] || {}).byFunnel || {};
+      Object.keys(bf).forEach(function (f) { var x = o[f] || (o[f] = { booked: 0, held: 0, showed: 0, noShow: 0, closed: 0 }); Object.keys(x).forEach(function (g) { if (HQ.isNum(+bf[f][g])) x[g] += +bf[f][g]; }); });
+    });
+    return o;
+  };
+  HQ.adsSum = function (adsDaily, from, to) {
+    var o = { days: 0, spend: 0, impressions: 0, linkClicks: 0, results: 0 };
+    (adsDaily || []).forEach(function (r) { var k = r.date || r.id; if (!HQ.isDayKey(k) || k < from || k > to) return; o.days++; ['spend', 'impressions', 'linkClicks', 'results'].forEach(function (f) { if (HQ.isNum(+r[f])) o[f] += +r[f]; }); });
+    return o.days ? o : null;
+  };
+
+  // Funnel view for the Leads page: one entry per funnel plus "all"
+  HQ.computeFunnels = function (state, now, period) {
+    var today = HQ.sydDay(now == null ? Date.now() : now), R = HQ.pillarRange(today, period);
+    var apps = HQ.allApplications(state).filter(function (a) { return a.day >= R.from && a.day <= R.to; });
+    var ses = HQ.applySessions(state, R.from, R.to);
+    var ghl = state.meta && state.meta.ghlSync, G = HQ.ghlFunnelSum(ghl, R.from, R.to), g0 = HQ.ghlSum(ghl, R.from, R.to);
+    // Typeform form opens by tag (old form, still live alongside the apply page)
+    var tfOpen = {}; (state.tfDaily || []).forEach(function (d) { var k = d.date || d.id; if (!HQ.isDayKey(k) || k < R.from || k > R.to) return; var bs = d.bySource || {}; Object.keys(bs).forEach(function (s) { var f = HQ.funnelOf(null, s); if (f !== 'test') tfOpen[f] = (tfOpen[f] || 0) + (+bs[s].visits || 0); }); });
+    var ads = HQ.adsSum(state.adsDaily, R.from, R.to);
+    var stories = (state.igStories || []).filter(function (s) { var d = s.postedAtDate ? HQ.sydDay(s.postedAtDate) : null; return d && d >= R.from && d <= R.to; });
+    var sumS = function (f) { var have = false, t = 0; stories.forEach(function (s) { if (HQ.isNum(s[f])) { have = true; t += s[f]; } }); return have ? t : null; };
+    var keys = HQ.FUNNELS.map(function (f) { return f.key; }).concat(['dm_outreach', 'unknown']);
+    var out = {};
+    keys.forEach(function (k) {
+      var a = apps.filter(function (x) { return x.funnel === k; }), s = ses[k] || null, gg = G && G[k] || null;
+      var fit = a.filter(function (x) { return x.inMarket != null; });
+      out[k] = {
+        key: k, label: HQ.FUNNEL_LABEL[k],
+        opened: (s || tfOpen[k] != null || state.appSessions) ? (s ? s.opened : 0) + (tfOpen[k] || 0) : null,
+        started: s ? s.started : null, openedApply: s ? s.opened : (state.appSessions ? 0 : null),
+        applications: a.length,
+        inMarket: fit.length ? HQ.pct(fit.filter(function (x) { return x.inMarket; }).length, fit.length) : null, inMarketOf: fit.length,
+        booked: G ? (gg ? gg.booked : 0) : null, held: G ? (gg ? gg.held : 0) : null,
+        showed: G && gg && (gg.showed + gg.noShow) ? gg.showed : null, noShow: G && gg ? gg.noShow : null,
+        closed: G ? (gg ? gg.closed : 0) : null,
+        byMedium: a.reduce(function (o, x) { var m = x.medium || 'untagged'; o[m] = (o[m] || 0) + 1; return o; }, {})
+      };
+    });
+    // funnel-specific inputs
+    out.story.inputs = { stories: stories.length, views: sumS('views'), linkTaps: sumS('linkClicks'), stickerTaps: sumS('stickerTaps'), replies: sumS('replies') };
+    out.paid_direct.inputs = { spend: ads ? ads.spend : null, clicks: ads ? ads.linkClicks : null, instantForms: g0 ? g0.paidLeads || 0 : null };
+    out.paid_indirect.inputs = { spend: ads ? ads.spend : null };
+    var paidClosed = (out.paid_direct.closed || 0) + (out.paid_indirect.closed || 0);
+    out.paid_direct.inputs.costPerClient = ads && paidClosed ? Math.round(ads.spend / paidClosed) : null;
+    var all = { key: 'all', label: 'All funnels', applications: apps.length, opened: 0, started: null, booked: g0 ? g0.booked : null, held: g0 ? g0.held : null, showed: g0 && (g0.showed + g0.noShow) ? g0.showed : null, noShow: g0 ? g0.noShow : null, closed: g0 ? g0.closed : null };
+    keys.forEach(function (k) { all.opened += out[k].opened || 0; if (out[k].started != null) all.started = (all.started || 0) + out[k].started; });
+    var fitAll = apps.filter(function (x) { return x.inMarket != null; });
+    all.inMarket = fitAll.length ? HQ.pct(fitAll.filter(function (x) { return x.inMarket; }).length, fitAll.length) : null; all.inMarketOf = fitAll.length;
+    out.all = all;
+    return { range: R, funnels: out, ghl: !!G, ads: !!ads, untagged: out.unknown.applications };
+  };
+
+  /* ---------- the plan's numbers (2027 Master Plan, sections 1, 3, 10, 11) ---------- */
+  HQ.PLAN = {
+    start: '2026-11-16', weeks: 13,
+    quarters: [
+      { end: '2026-12-31', label: 'Dec 2026', clients: 14, income: 7000, salesMonth: 3, leadsMonth: 15, fit: null, churnMax: 10, adBudget: 750 },
+      { end: '2027-03-31', label: 'Mar 2027', clients: 23, income: 13000, salesMonth: 5, leadsMonth: 25, fit: 50, churnMax: 7, adBudget: 1250 },
+      { end: '2027-06-30', label: 'Jun 2027', clients: 34, income: 20000, salesMonth: 6, leadsMonth: 30, fit: 70, churnMax: 6, adBudget: 1500 },
+      { end: '2027-09-30', label: 'Sep 2027', clients: 48, income: 28000, salesMonth: 7, leadsMonth: 35, fit: 70, churnMax: 6, adBudget: 1750 },
+      { end: '2027-12-31', label: 'Dec 2027', clients: 60, income: 35000, salesMonth: 7, leadsMonth: 35, fit: 70, churnMax: 6, adBudget: 1750 }
+    ],
+    mainThing: ['Bio, highlights and pinned posts changed to the corporate man', 'Pre-call form live, work question first', 'Ads back on: 3 angles naming the corporate man', 'Weekly group call starts: Friday night, for fun', 'First long-form out, second by 28 Dec', 'Delivery only. Check-ins as normal', 'Delivery only. Check-ins as normal', 'Editor starts', 'Market check: your setter’s last 50 leads, tagged by job', 'First collab locked in', 'Filming day: long-form, plus static and B-roll for 3 ad angles', 'Fast Track live, budget set from the sales target', '90 day review: scorecard against the plan']
+  };
+  HQ.planQuarter = function (day) { var q = HQ.PLAN.quarters; for (var i = 0; i < q.length; i++) if (day <= q[i].end) return q[i]; return q[q.length - 1]; };
+  // weekly targets; dir 'min' = at least, 'max' = at most, 'range' = between
+  HQ.planTarget = function (key, weekStart) {
+    var q3 = weekStart >= '2027-07-01';
+    switch (key) {
+      case 'leads': return { dir: 'min', v: q3 ? 8 : 4, text: (q3 ? 8 : 4) + '+' };
+      case 'booked': return { dir: 'min', v: q3 ? 4 : 2, text: (q3 ? 4 : 2) + '+' };
+      case 'showRate': return { dir: 'min', v: 70, text: '70%+' };
+      case 'sales': return { dir: 'min', v: q3 ? 2 : 1, text: (q3 ? 2 : 1) + '+' };
+      case 'lost': return { dir: 'max', v: 0, text: 'under 1' };
+      case 'adCost': return { dir: 'max', v: 250, text: '$250 max' };
+      case 'referrals': return { dir: 'none', text: '5% of clients a month' };
+      case 'longform': return weekStart >= '2027-01-01' ? { dir: 'min', v: 1, text: '1 a week' } : { dir: 'none', text: 'from January' };
+      case 'hours': return { dir: 'max', v: weekStart >= '2027-10-01' ? 45 : 50, text: (weekStart >= '2027-10-01' ? 45 : 50) + ' max' };
+      case 'followers': return { dir: 'range', lo: 70, hi: 105, text: '70 to 105' };
+      case 'fit': return weekStart >= '2027-06-01' ? { dir: 'min', v: 70, text: '70%+' } : (weekStart >= '2027-01-01' ? { dir: 'min', v: 50, text: '50% by March' } : { dir: 'none', text: '50% by March' });
+    }
+    return { dir: 'none', text: '' };
+  };
+  HQ.SCORE_ROWS = [
+    { key: 'leads', label: 'Leads' }, { key: 'booked', label: 'Calls booked' }, { key: 'showRate', label: 'Show rate', fmt: 'pct' },
+    { key: 'sales', label: 'Sales' }, { key: 'lost', label: 'Clients lost' }, { key: 'adCost', label: 'Ad cost per client', fmt: 'money' },
+    { key: 'referrals', label: 'Referrals' }, { key: 'longform', label: 'Long-form videos', manual: true }, { key: 'hours', label: 'Your hours', manual: true },
+    { key: 'followers', label: 'New followers' }, { key: 'fit', label: 'Right market fit', fmt: 'pct' }
+  ];
+  HQ.scoreStatus = function (t, v) {
+    if (v == null || !t || t.dir === 'none') return null;
+    if (t.dir === 'min') return v >= t.v ? 'good' : 'bad';
+    if (t.dir === 'max') return v <= t.v ? 'good' : 'bad';
+    if (t.dir === 'range') return v >= t.lo ? 'good' : 'bad'; // over 105 is fine
+    return null;
+  };
+  HQ.scorecard = function (state, now) {
+    var today = HQ.sydDay(now == null ? Date.now() : now), P = HQ.PLAN;
+    var meta = state.meta || {}, ghl = meta.ghlSync, manual = (meta.scorecard && meta.scorecard.weeks) || {};
+    var apps = HQ.allApplications(state);
+    var byDayAcc = {}; (state.igAccount || []).forEach(function (r) { var k = r.date || r.id; if (HQ.isDayKey(k) && HQ.isNum(r.followers)) byDayAcc[k] = r.followers; });
+    var dl = state.deliveryByDay || null;
+    var weeks = [];
+    for (var i = 0; i < P.weeks; i++) {
+      var ws = HQ.addDays(P.start, i * 7), we = HQ.addDays(ws, 6);
+      var state_ = ws > today ? 'future' : (we >= today ? 'current' : 'done');
+      var w = { n: i + 1, start: ws, end: we, state: state_, main: P.mainThing[i] || null, cells: {} };
+      if (state_ !== 'future') {
+        var to = we < today ? we : today;
+        var a = apps.filter(function (x) { return x.day >= ws && x.day <= to; });
+        var g = HQ.ghlSum(ghl, ws, to), gf = HQ.ghlFunnelSum(ghl, ws, to), ads = HQ.adsSum(state.adsDaily, ws, to);
+        var paidSales = gf ? ((gf.paid_direct && gf.paid_direct.closed) || 0) + ((gf.paid_indirect && gf.paid_indirect.closed) || 0) : 0;
+        var lost = null; if (dl) { lost = 0; Object.keys(dl).forEach(function (k) { if (k >= ws && k <= to) lost += +dl[k].left || 0; }); }
+        var f0 = byDayAcc[HQ.addDays(ws, -1)], f1 = null; for (var j = 0; j < 3 && f1 == null; j++) { var kk = HQ.addDays(to, -j); if (kk >= ws && byDayAcc[kk] != null) f1 = byDayAcc[kk]; }
+        var fit = a.filter(function (x) { return x.inMarket != null; });
+        var mw = manual[ws] || {};
+        var v = {
+          leads: a.length + (g ? g.paidLeads || 0 : 0),
+          booked: g ? g.booked : null,
+          showRate: g && (g.showed + g.noShow) ? HQ.pct(g.showed, g.showed + g.noShow) : null,
+          sales: g && (g.closed || g.showed + g.noShow) ? g.closed : null,
+          lost: lost,
+          adCost: ads && paidSales ? Math.round(ads.spend / paidSales) : null,
+          referrals: a.filter(function (x) { return String(x.medium || '').toLowerCase() === 'referral'; }).length,
+          longform: HQ.isNum(+mw.longform) && mw.longform !== '' && mw.longform != null ? +mw.longform : null,
+          hours: HQ.isNum(+mw.hours) && mw.hours !== '' && mw.hours != null ? +mw.hours : null,
+          followers: f0 != null && f1 != null ? f1 - f0 : null,
+          fit: fit.length ? HQ.pct(fit.filter(function (x) { return x.inMarket; }).length, fit.length) : null
+        };
+        HQ.SCORE_ROWS.forEach(function (r) {
+          var t = HQ.planTarget(r.key, ws), val = v[r.key];
+          w.cells[r.key] = { value: val, target: t, status: state_ === 'current' && t.dir === 'min' && HQ.scoreStatus(t, val) === 'bad' ? null : HQ.scoreStatus(t, val) };
+        });
+      }
+      weeks.push(w);
+    }
+    // three red weeks in a row (finished weeks only) makes it next week's main thing
+    var flags = [];
+    HQ.SCORE_ROWS.forEach(function (r) {
+      var streak = 0; for (var i = weeks.length - 1; i >= 0; i--) { var w = weeks[i]; if (w.state !== 'done') continue; if (w.cells[r.key] && w.cells[r.key].status === 'bad') streak++; else break; }
+      if (streak >= 3) flags.push({ key: r.key, label: r.label, weeks: streak });
+    });
+    var cur = weeks.filter(function (w) { return w.state === 'current'; })[0] || null;
+    var q = HQ.planQuarter(today);
+    return { today: today, weeks: weeks, current: cur, flags: flags, started: today >= P.start, quarter: q, nextWeek: weeks.filter(function (w) { return w.state === 'future'; })[0] || null };
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = HQ;

@@ -24,13 +24,17 @@ function synthetic() {
   for (let i = 0; i < 9; i++) tfr.push({ id: 'r' + i, data: { submittedAt: addDays(TODAY, -(i * 6)) + 'T03:00:00Z', source: i % 3 ? 'link_in_bio' : 'unknown', fit: null } });
   return {
     ig_posts: posts, ig_account_daily: acc, tf_daily: tfd, tf_responses: tfr,
-    ig_stories: [{ id: 's1', data: { postedAtDate: addDays(TODAY, -2) + 'T10:00:00+11:00', views: 140 } }],
+    ig_stories: [{ id: 's1', data: { postedAtDate: addDays(TODAY, -2) + 'T10:00:00+11:00', views: 140, linkClicks: 6 } }],
+    app_sessions: [
+      ['story', 'nine_to_five', true, '31\u201335'], ['story', 'nine_to_five', false, null], ['bio', 'link_in_bio', true, '18\u201324'],
+      ['referral', 'nik', true, '25\u201330'], ['bio', 'link_in_bio', false, null], [null, 'claude_test', true, '25\u201330']
+    ].map((x, i) => ({ id: 'as' + i, data: { firstSeenAt: addDays(TODAY, -i) + 'T01:00:00Z', submitted: x[2] || undefined, submittedAt: x[2] ? addDays(TODAY, -i) + 'T01:05:00Z' : undefined, steps: x[2] ? { open: 1, start: 1, submitted: 1 } : { open: 1 }, answers: x[3] ? { age: x[3] } : {}, utm: x[0] ? { utm_medium: x[0], utm_content: x[1] } : { utm_content: x[1] } } })),
     content_queue: [{ id: 'q1', data: { status: 'awaiting_approval' } }, { id: 'q2', data: { status: 'to_film' } }],
-    meta: [{ id: 'ghlSync', data: { connected: false } }, { id: 'stripeSync', data: { connected: false } }, { id: 'routineCalls', data: { dates: { [TODAY]: { count: 1 }, [addDays(TODAY, 1)]: { count: 4 } } } }]
+    meta: [{ id: 'ghlSync', data: { connected: true, upcoming7: 1, days: { [addDays(TODAY, -3)]: { booked: 2, held: 1, showed: 1, noShow: 0, unmarked: 0, closed: 1, closeDaysN: 1, closeDaysSum: 12, outreach: 5, replied: 2, paidLeads: 1, byFunnel: { story: { booked: 1, held: 1, showed: 1, noShow: 0, closed: 1 }, unknown: { booked: 1, held: 0, showed: 0, noShow: 0, closed: 0 } } } } } }, { id: 'stripeSync', data: { connected: false } }, { id: 'routineCalls', data: { dates: { [TODAY]: { count: 1 }, [addDays(TODAY, 1)]: { count: 4 } } } }]
   };
 }
 const DELIVERY = { active: 13, joined: 14, left: 3, avgWeeks: 1.1, withJoinDate: 14, checkinsOnTime: 3 };
-const BASE = { dm_threads: [], dm_daily: [], contacts: [], tf_responses: [], tf_daily: [], ig_stories: [], posts: [], script_reviews: [], content_queue: [], meta: [] };
+const BASE = { cta_links: [], app_sessions: [], dm_threads: [], dm_daily: [], contacts: [], tf_responses: [], tf_daily: [], ig_stories: [], posts: [], script_reviews: [], content_queue: [], meta: [] };
 function serve() { return new Promise(res => { const srv = http.createServer((req, r) => { let p = decodeURIComponent(req.url.split('?')[0]); if (p === '/') p = '/index.html'; const f = path.join(ROOT, p); if (!f.startsWith(ROOT) || !fs.existsSync(f)) { r.writeHead(404); return r.end(); } r.writeHead(200, { 'content-type': f.endsWith('.js') ? 'application/javascript' : (f.endsWith('.html') ? 'text/html' : 'application/octet-stream') }); fs.createReadStream(f).pipe(r); }).listen(0, '127.0.0.1', () => res({ srv, url: 'http://127.0.0.1:' + srv.address().port })); }); }
 const mockSrc = fs.readFileSync(path.join(__dirname, 'mock-supabase.js'), 'utf8');
 let passed = 0, failed = 0;
@@ -45,7 +49,7 @@ async function open(browser, url, { width, dark, role, fx, hash }) {
     (function(){ try{ localStorage.setItem('hqTheme','${dark ? 'dark' : 'light'}'); localStorage.removeItem('hqPeriod'); }catch(e){} var fixedNow=${Date.parse(NOW)}; var RealDate=Date;
       function MockDate(){ if(arguments.length) return new (Function.prototype.bind.apply(RealDate,[null].concat([].slice.call(arguments))))(); return new RealDate(fixedNow); }
       MockDate.now=function(){ return fixedNow; }; MockDate.parse=RealDate.parse; MockDate.UTC=RealDate.UTC; MockDate.prototype=RealDate.prototype; window.Date=MockDate;
-      var c=makeMockClient(${JSON.stringify(fx)}, { rpc:{ hq_delivery_counts:${JSON.stringify(DELIVERY)} } }); window.__mock=c;
+      var c=makeMockClient(${JSON.stringify(fx)}, { rpc:{ hq_delivery_counts:${JSON.stringify(DELIVERY)}, hq_delivery_by_day:{} } }); window.__mock=c;
       window.__HQ_TEST={ client:c, user:{id:'u1', email:'x@example.com'}, profile:{role:'${role}', display_name:'T'} };
     })();` });
   await page.goto(url + '/index.html' + (hash || ''), { waitUntil: 'load' });
@@ -53,8 +57,24 @@ async function open(browser, url, { width, dark, role, fx, hash }) {
   await page.waitForTimeout(300);
   return { context, page, log };
 }
-const VIEWS = [['home', 'viewHome'], ['traffic', 'viewTraffic'], ['leadflow', 'viewLeadflow'], ['sales', 'viewSales'], ['delivery', 'viewDelivery']];
+const VIEWS = [['home', 'viewHome'], ['traffic', 'viewTraffic'], ['leadflow', 'viewLeadflow'], ['sales', 'viewSales'], ['delivery', 'viewDelivery'], ['scorecard', 'viewScorecard'], ['links', 'viewLinks']];
+const FUNNEL_KEYS = ['story', 'bio', 'offplatform', 'paid_direct', 'paid_indirect', 'all'];
 (async () => {
+  // scorecard maths, no browser
+  const HQ = require(path.join(ROOT, 'hq-core.js'));
+  const ghl = { connected: true, days: { '2026-11-17': { booked: 3, held: 2, showed: 1, noShow: 1, closed: 1, paidLeads: 2, byFunnel: {} }, '2026-11-24': { booked: 1, held: 0, showed: 0, noShow: 0, closed: 0, paidLeads: 0 } } };
+  const scState = { meta: { ghlSync: ghl, scorecard: { weeks: { '2026-11-16': { hours: 48, longform: 0 } } } }, tfResponses: [{ id: 't1', submittedAt: '2026-11-18T01:00:00Z', source: 'link_in_bio' }], appSessions: [{ id: 'a1', submitted: true, submittedAt: '2026-11-19T01:00:00Z', firstSeenAt: '2026-11-19T00:59:00Z', utm: { utm_medium: 'referral', utm_content: 'nik' }, answers: { age: '31\u201335' } }], igAccount: [{ date: '2026-11-15', followers: 1000 }, { date: '2026-11-22', followers: 1080 }], deliveryByDay: { '2026-11-20': { joined: 1, left: 1 } } };
+  const sc = HQ.scorecard(scState, Date.parse('2026-11-25T03:00:00Z'));
+  const w1 = sc.weeks[0].cells;
+  check('scorecard: week 1 done, week 2 current', () => { assert.strictEqual(sc.weeks[0].state, 'done'); assert.strictEqual(sc.weeks[1].state, 'current'); assert.strictEqual(sc.current.n, 2); });
+  check('scorecard: leads = applications + instant forms', () => assert.strictEqual(w1.leads.value, 4));
+  check('scorecard: booked / show rate / sales', () => { assert.strictEqual(w1.booked.value, 3); assert.strictEqual(w1.showRate.value, 50); assert.strictEqual(w1.showRate.status, 'bad'); assert.strictEqual(w1.sales.value, 1); assert.strictEqual(w1.sales.status, 'good'); });
+  check('scorecard: clients lost from delivery by day', () => { assert.strictEqual(w1.lost.value, 1); assert.strictEqual(w1.lost.status, 'bad'); });
+  check('scorecard: referrals, typed-in hours, followers, fit', () => { assert.strictEqual(w1.referrals.value, 1); assert.strictEqual(w1.hours.value, 48); assert.strictEqual(w1.hours.status, 'good'); assert.strictEqual(w1.followers.value, 80); assert.strictEqual(w1.fit.value, 100); });
+  check('scorecard: ad cost blank without Meta Ads', () => assert.strictEqual(w1.adCost.value, null));
+  check('scorecard: current week not red for at-least targets', () => assert.strictEqual(sc.weeks[1].cells.sales.status, null));
+  check('funnelOf: tags', () => { assert.strictEqual(HQ.funnelOf({ utm_medium: 'paid', utm_campaign: 'compounding' }), 'paid_indirect'); assert.strictEqual(HQ.funnelOf({ utm_medium: 'paid', utm_campaign: 'fasttrack' }), 'paid_direct'); assert.strictEqual(HQ.funnelOf({ utm_medium: 'qr' }), 'offplatform'); assert.strictEqual(HQ.funnelOf(null, 'link_in_bio'), 'bio'); assert.strictEqual(HQ.funnelOf({ utm_content: 'claude_test' }), 'test'); });
+  check('allApplications: one per person', () => assert.strictEqual(HQ.allApplications({ tfResponses: [{ id: 'x', submittedAt: '2026-11-01T00:00:00Z', email: 'A@b.co' }], appSessions: [{ id: 'y', submitted: true, submittedAt: '2026-11-02T00:00:00Z', contact: { email: 'a@b.co' } }] }).length, 1));
   const { srv, url } = await serve();
   const browser = await pw.chromium.launch(process.env.HQ_CHROME ? { executablePath: process.env.HQ_CHROME } : {});
   const sets = [['synthetic', Object.assign({}, BASE, synthetic())]];
@@ -85,11 +105,19 @@ const VIEWS = [['home', 'viewHome'], ['traffic', 'viewTraffic'], ['leadflow', 'v
           check(`${label} ${per} ${v}: tap targets`, () => assert.deepStrictEqual(small, []));
         }
         if (SHOTS && per === '30') await page.screenshot({ path: path.join(SHOTS, `${name}-${width}${dark ? '-dark' : ''}-${role}-${v}.png`), fullPage: true });
+        if (v === 'leadflow') for (const fk of FUNNEL_KEYS) {
+          await page.click(`#viewLeadflow [data-pl-funnel="${fk}"]`); await page.waitForTimeout(80);
+          const ft = await page.evaluate(() => document.getElementById('plLeads').innerText);
+          check(`${label} ${per} funnel ${fk}: no NaN/undefined/null`, () => assert.ok(!/\bNaN\b|undefined|\bnull\b|Infinity|\[object/.test(ft), (ft.match(/.{0,40}(NaN|undefined|null|Infinity|\[object).{0,40}/) || [''])[0]));
+          if (width < 500) { const ov = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth); check(`${label} ${per} funnel ${fk}: no horizontal scroll`, () => assert.ok(ov <= 1, 'overflow ' + ov)); }
+          if (SHOTS && per === '30' && fk !== 'all') await page.screenshot({ path: path.join(SHOTS, `${name}-${width}${dark ? '-dark' : ''}-${role}-funnel-${fk}.png`), fullPage: true });
+        }
       }
       // independent count: applications in the window
       const n = per === 'month' ? null : +per, from = n ? addDays(TODAY, -(n - 1)) : TODAY.slice(0, 8) + '01';
       const syd = iso => new Date(new Date(iso).getTime()).toLocaleDateString('en-CA', { timeZone: 'Australia/Sydney' });
-      const exp = (fx.tf_responses || []).filter(r => r.data.submittedAt && syd(r.data.submittedAt) >= from && syd(r.data.submittedAt) <= TODAY).length;
+      const inWin = iso => iso && syd(iso) >= from && syd(iso) <= TODAY;
+      const exp = (fx.tf_responses || []).filter(r => inWin(r.data.submittedAt)).length + (fx.app_sessions || []).filter(r => r.data.submitted && !/test/.test((r.data.utm || {}).utm_content || '') && inWin(r.data.submittedAt)).length;
       await page.evaluate(() => window.__hq.setView('home')); await page.waitForTimeout(60);
       const got = await page.evaluate(() => document.querySelectorAll('#plHome .pl-card .v')[1].textContent.replace(/[^0-9]/g, ''));
       check(`${label} ${per}: applications card = independent count`, () => assert.strictEqual(+got, exp));
