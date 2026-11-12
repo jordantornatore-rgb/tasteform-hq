@@ -6,6 +6,8 @@
 //   from(t).upsert({id, data, updated_at})        -> promise {error:null}
 // Rows are {id, data, updated_at}. Loaded into the page by the Playwright tests; never touches the network.
 (function (root) {
+  // 'data->utm->>utm_content' style paths (-> keeps JSON, ->> gives text)
+  function jpath(r, path) { var parts = String(path).split(/->>?/), x = r; for (var i = 0; i < parts.length; i++) { if (x == null) return null; x = x[parts[i]]; } if (/->>[^>]*$/.test(path) && x != null && typeof x !== 'string') x = JSON.stringify(x); return x === undefined ? null : x; }
   function clone(x) { return x == null ? x : JSON.parse(JSON.stringify(x)); }
   function makeMockClient(fixtures, opts) {
     opts = opts || {};
@@ -13,10 +15,11 @@
     Object.keys(fixtures || {}).forEach(function (t) { tables[t] = (fixtures[t] || []).map(function (r) { return { id: r.id, data: r.data, updated_at: r.updated_at || '2026-10-21T00:00:00Z' }; }); });
     var stats = { selects: 0, upserts: 0 };
     function from(t) {
-      var filters = [], single = false, rng = null, ord = null, del = false;
+      var filters = [], single = false, rng = null, ord = null, del = false, proj = null;
       var q = {
-        select: function () { return q; },
-        eq: function (c, v) { var m = /^data->>(\w+)$/.exec(c); filters.push(m ? function (r) { var x = r.data && r.data[m[1]]; return x != null && String(x) === String(v); } : function (r) { return r[c] === v; }); return q; },
+        select: function (cols) { if (cols && cols !== '*') proj = String(cols).split(',').map(function (c) { c = c.trim(); var i = c.indexOf(':'); return i > 0 ? [c.slice(0, i), c.slice(i + 1)] : [c, c]; }); return q; },
+        limit: function () { return q; },
+        eq: function (c, v) { var m = /^data->>(\w+)$/.exec(c); filters.push(m ? function (r) { var x = r.data && r.data[m[1]]; return x != null && String(x) === String(v); } : /^data->/.test(c) ? function (r) { var x = jpath(r, c); return x != null && String(x) === String(v); } : function (r) { return r[c] === v; }); return q; },
         like: function (c, p) { var re = new RegExp('^' + String(p).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/%/g, '.*') + '$'); filters.push(function (r) { return re.test(String(r[c])); }); return q; },
         maybeSingle: function () { single = true; return q; },
         order: function (c) { ord = c; return q; },
@@ -28,6 +31,7 @@
           var rows = (tables[t] || []).filter(function (r) { return filters.every(function (f) { return f(r); }); });
           if (ord) rows = rows.slice().sort(function (x, y) { return String(x[ord]).localeCompare(String(y[ord])); });
           if (rng) rows = rows.slice(rng[0], rng[1] + 1);
+          if (proj) rows = rows.map(function (r) { var o = {}; proj.forEach(function (p) { o[p[0]] = jpath(r, p[1]); }); return o; });
           var out = single ? (rows[0] ? clone(rows[0]) : null) : rows.map(clone);
           return Promise.resolve({ data: out, error: null }).then(res, rej);
         },
