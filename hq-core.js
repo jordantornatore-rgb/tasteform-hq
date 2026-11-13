@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.5.0';
+  HQ.VERSION = '3.6.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -1220,6 +1220,60 @@
     if (haveAds && ads.other) totalCost = (totalCost || 0) + Math.round(ads.other);
     return { month: ym, from: B.from, to: to, costsIn: !!costMonth, haveAds: haveAds, unassignedAds: Math.round(ads.other), shared: costMonth ? (+costMonth.shared || 0) : null,
       ghl: !!G, funnels: out, total: { cost: costMonth ? totalCost : null, clients: totalClients, cac: costMonth && totalClients ? Math.round(totalCost / totalClients) : null } };
+  };
+
+  /* ---------- Lead list: who reached out and hasn't had a proper chance yet ----------
+     Rows come from hq_leads (ghl-leads edge function, hourly, admin only). Clients and lost leads are never flagged.
+     Only leads with something in the last 90 days are checked, so old cold contacts don't flood the list. */
+  // country from the number: +61 AU, +64 NZ, +44 UK, +1 US / Canada (all kept). Local 04… numbers are Australian.
+  HQ.leadCountry = function (phone) {
+    var raw = String(phone || '').trim(); if (!raw) return null;
+    var d = raw.replace(/[^\d+]/g, '');
+    if (/^00/.test(d)) d = '+' + d.slice(2);
+    if (d.charAt(0) !== '+') { var n = d.replace(/\D/g, ''); if (/^0[2-478]\d{8}$/.test(n) || /^4\d{8}$/.test(n)) return 'AU'; if (/^61\d{9}$/.test(n)) return 'AU'; return null; }
+    if (/^\+61/.test(d)) return 'AU'; if (/^\+64/.test(d)) return 'NZ'; if (/^\+44/.test(d)) return 'UK'; if (/^\+1/.test(d)) return 'US/CA';
+    return 'other';
+  };
+  HQ.LEAD_REASONS = {
+    waiting: { label: 'Messaged you, no reply', order: 1 },
+    noshow: { label: 'Missed the call, not rebooked', order: 2 },
+    applied: { label: 'Applied, no call booked', order: 3 },
+    untouched: { label: 'No message from you yet', order: 4 },
+    quiet: { label: 'You messaged, no reply since', order: 5 }
+  };
+  HQ.leadView = function (row, now) {
+    var d = row.data || row, t = now == null ? Date.now() : now, H = 3600000;
+    var at = function (s) { var x = Date.parse(s || ''); return isNaN(x) ? null : x; };
+    var apps = d.applications || [], calls = d.calls || [], conv = d.conv || null, opps = d.opps || [];
+    var applied = apps.length ? at(apps[0].at) : null;
+    var lastApp = apps.length ? at(apps[apps.length - 1].at) : null;
+    var live = calls.filter(function (c) { return c.status !== 'cancelled' && c.status !== 'invalid'; });
+    var lastCall = calls.length ? calls[calls.length - 1] : null;
+    var upcoming = live.some(function (c) { return at(c.start) > t; });
+    var salesOpp = opps.filter(function (o) { return !/cookbook/i.test(o.pipeline || ''); });
+    var inbound = conv && conv.lastDir === 'inbound', lastMsg = conv ? at(conv.lastAt) : null;
+    var isLead = !!(apps.length || calls.length || salesOpp.length || inbound);
+    var times = [at(d.added), applied, lastApp, lastMsg, lastCall ? at(lastCall.start) : null].concat(salesOpp.map(function (o) { return at(o.moved) || at(o.created); })).filter(function (x) { return x != null; });
+    var lastTouch = times.length ? Math.max.apply(null, times) : null;
+    var v = { id: row.id, name: d.name || d.email || d.phone || 'No name', email: d.email || null, phone: d.phone || null, country: HQ.leadCountry(d.phone), funnel: d.funnel || 'unknown',
+      status: d.status || 'open', isLead: isLead, nurture: !!d.nurture, applied: applied, lastTouch: lastTouch, lastMsg: lastMsg, lastDir: conv ? conv.lastDir : null,
+      calls: calls.length, upcoming: upcoming, stage: salesOpp.length ? (salesOpp[salesOpp.length - 1].stage || null) : null, reason: null, since: null };
+    if (!isLead || v.status !== 'open' || lastTouch == null || t - lastTouch > 90 * 24 * H) return v;
+    var lastNoShow = lastCall && (lastCall.status === 'noshow' || lastCall.status === 'cancelled') && at(lastCall.start) < t;
+    if (inbound && lastMsg != null && t - lastMsg > 12 * H) { v.reason = 'waiting'; v.since = lastMsg; }
+    else if (lastNoShow && !upcoming) { v.reason = 'noshow'; v.since = at(lastCall.start); }
+    else if (applied != null && !live.some(function (c) { return at(c.booked || c.start) >= applied - H; }) && t - lastApp > 24 * H) { v.reason = 'applied'; v.since = lastApp; }
+    else if (!conv && !calls.length && d.convOk !== false && lastTouch != null && t - lastTouch > 24 * H) { v.reason = 'untouched'; v.since = lastTouch; }
+    else if (conv && conv.lastDir === 'outbound' && !upcoming && lastMsg != null && t - lastMsg > 3 * 24 * H) { v.reason = 'quiet'; v.since = lastMsg; }
+    return v;
+  };
+  HQ.leadBoard = function (rows, now) {
+    var all = (rows || []).map(function (r) { return HQ.leadView(r, now); });
+    var follow = all.filter(function (v) { return v.reason; }).sort(function (a, b) { return (HQ.LEAD_REASONS[a.reason].order - HQ.LEAD_REASONS[b.reason].order) || (a.since - b.since); });
+    var byReason = {}; follow.forEach(function (v) { byReason[v.reason] = (byReason[v.reason] || 0) + 1; });
+    var noNurture = all.filter(function (v) { return v.isLead && v.status === 'open' && !v.nurture && (v.email || v.phone) && v.country !== 'other'; });
+    var outside = all.filter(function (v) { return v.country === 'other'; });
+    return { all: all, leads: all.filter(function (v) { return v.isLead; }), follow: follow, byReason: byReason, noNurture: noNurture, outside: outside };
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = HQ;

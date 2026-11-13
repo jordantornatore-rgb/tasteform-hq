@@ -30,7 +30,13 @@ function synthetic() {
       ['referral', 'nik', true, '25\u201330'], ['bio', 'link_in_bio', false, null], [null, 'claude_test', true, '25\u201330']
     ].map((x, i) => ({ id: 'as' + i, data: { firstSeenAt: addDays(TODAY, -i) + 'T01:00:00Z', submitted: x[2] || undefined, submittedAt: x[2] ? addDays(TODAY, -i) + 'T01:05:00Z' : undefined, steps: x[2] ? { open: 1, start: 1, submitted: 1 } : { open: 1 }, answers: x[3] ? { age: x[3] } : {}, utm: x[0] ? { utm_medium: x[0], utm_content: x[1] } : { utm_content: x[1] } } })),
     content_queue: [{ id: 'q1', data: { status: 'awaiting_approval' } }, { id: 'q2', data: { status: 'to_film' } }],
-    meta: [{ id: 'ghlSync', data: { connected: true, upcoming7: 1, days: { [addDays(TODAY, -3)]: { booked: 2, held: 1, showed: 1, noShow: 0, unmarked: 0, closed: 1, closeDaysN: 1, closeDaysSum: 12, outreach: 5, replied: 2, paidLeads: 1, byFunnel: { story: { booked: 1, held: 1, showed: 1, noShow: 0, closed: 1 }, unknown: { booked: 1, held: 0, showed: 0, noShow: 0, closed: 0 } } } } } }, { id: 'stripeSync', data: { connected: false } }, { id: 'routineCalls', data: { dates: { [TODAY]: { count: 1 }, [addDays(TODAY, 1)]: { count: 4 } } } }]
+    hq_leads: [
+      { id: 'L1', data: { name: 'Sam Waiting', email: 's@x.co', phone: '+61400000001', funnel: 'story', applications: [{ at: addDays(TODAY, -5) + 'T01:00:00Z', funnel: 'story' }], calls: [{ start: addDays(TODAY, -3) + 'T01:00:00Z', booked: addDays(TODAY, -5) + 'T02:00:00Z', status: 'showed' }], opps: [], conv: { lastAt: addDays(TODAY, -2) + 'T01:00:00Z', lastDir: 'inbound' }, status: 'open', nurture: true, convOk: true } },
+      { id: 'L2', data: { name: 'Pat Applied', email: 'p@x.co', phone: '+64210000002', funnel: 'bio', applications: [{ at: addDays(TODAY, -4) + 'T01:00:00Z', funnel: 'bio' }], calls: [], opps: [], conv: { lastAt: addDays(TODAY, -4) + 'T02:00:00Z', lastDir: 'outbound' }, status: 'open', nurture: false, convOk: true } },
+      { id: 'L3', data: { name: 'Far Away', phone: '+919800000003', funnel: 'unknown', applications: [], calls: [], opps: [{ pipeline: 'Instagram Leads', stage: 'Outreach', created: addDays(TODAY, -6) + 'T01:00:00Z' }], conv: null, status: 'open', nurture: false, convOk: true } },
+      { id: 'L4', data: { name: 'Cleo Client', email: 'c@x.co', funnel: 'story', applications: [{ at: addDays(TODAY, -20) + 'T01:00:00Z', funnel: 'story' }], calls: [], opps: [{ pipeline: 'Sales', stage: 'Closed', status: 'won' }], conv: { lastAt: addDays(TODAY, -9) + 'T01:00:00Z', lastDir: 'inbound' }, status: 'client', nurture: false, convOk: true } }
+    ],
+    meta: [{ id: 'ghlSync', data: { connected: true, upcoming7: 1, days: { [addDays(TODAY, -3)]: { booked: 2, held: 1, showed: 1, noShow: 0, unmarked: 0, closed: 1, closeDaysN: 1, closeDaysSum: 12, outreach: 5, replied: 2, paidLeads: 1, byFunnel: { story: { booked: 1, held: 1, showed: 1, noShow: 0, closed: 1 }, unknown: { booked: 1, held: 0, showed: 0, noShow: 0, closed: 0 } } } } } }, { id: 'stripeSync', data: { connected: false } }, { id: 'ghlLeads', data: { connected: true, ok: true, lastSyncAt: NOW, complete: true, conversations: true } }, { id: 'routineCalls', data: { dates: { [TODAY]: { count: 1 }, [addDays(TODAY, 1)]: { count: 4 } } } }]
   };
 }
 const DELIVERY = { active: 13, joined: 14, left: 3, avgWeeks: 1.1, withJoinDate: 14, checkinsOnTime: 3 };
@@ -57,7 +63,7 @@ async function open(browser, url, { width, dark, role, fx, hash }) {
   await page.waitForTimeout(300);
   return { context, page, log };
 }
-const VIEWS = [['home', 'viewHome'], ['traffic', 'viewTraffic'], ['leadflow', 'viewLeadflow'], ['sales', 'viewSales'], ['delivery', 'viewDelivery'], ['scorecard', 'viewScorecard'], ['links', 'viewLinks']];
+const VIEWS = [['home', 'viewHome'], ['traffic', 'viewTraffic'], ['leadflow', 'viewLeadflow'], ['people', 'viewPeople'], ['sales', 'viewSales'], ['delivery', 'viewDelivery'], ['scorecard', 'viewScorecard'], ['links', 'viewLinks']];
 const FUNNEL_KEYS = ['story', 'bio', 'offplatform', 'paid_direct', 'paid_indirect', 'all'];
 (async () => {
   // scorecard maths, no browser
@@ -84,6 +90,20 @@ const FUNNEL_KEYS = ['story', 'bio', 'offplatform', 'paid_direct', 'paid_indirec
   check('cac: per lead counts instant forms', () => assert.strictEqual(cac.funnels.paid_direct.perLead, 150));
   check('cac: blank without costs or ads', () => { const c = HQ.computeCac({ meta: { ghlSync: cacGhl }, appSessions: [] }, Date.parse('2026-11-20T03:00:00Z'), '2026-11'); assert.strictEqual(c.total.cac, null); assert.strictEqual(c.funnels.story.cac, null); assert.strictEqual(c.funnels.paid_direct.cac, null); });
   check('adFunnelOf', () => { assert.strictEqual(HQ.adFunnelOf('Fast Track - A2'), 'paid_direct'); assert.strictEqual(HQ.adFunnelOf('fasttrack'), 'paid_direct'); assert.strictEqual(HQ.adFunnelOf('Compounding VSL'), 'paid_indirect'); assert.strictEqual(HQ.adFunnelOf('Retarget'), null); });
+  // Lead list rules, no browser
+  const LN = Date.parse('2026-11-11T02:00:00Z'), lrow = (d) => ({ id: 'x', data: Object.assign({ applications: [], calls: [], opps: [], conv: null, status: 'open', convOk: true }, d) });
+  check('lead: messaged you, no reply', () => assert.strictEqual(HQ.leadView(lrow({ conv: { lastAt: '2026-11-10T01:00:00Z', lastDir: 'inbound' } }), LN).reason, 'waiting'));
+  check('lead: inbound under 12h not flagged', () => assert.strictEqual(HQ.leadView(lrow({ conv: { lastAt: '2026-11-11T00:00:00Z', lastDir: 'inbound' } }), LN).reason, null));
+  check('lead: applied, no call', () => assert.strictEqual(HQ.leadView(lrow({ applications: [{ at: '2026-11-08T01:00:00Z' }], conv: { lastAt: '2026-11-08T02:00:00Z', lastDir: 'outbound' } }), LN).reason, 'applied'));
+  check('lead: applied and booked = fine', () => assert.strictEqual(HQ.leadView(lrow({ applications: [{ at: '2026-11-08T01:00:00Z' }], calls: [{ start: '2026-11-14T01:00:00Z', booked: '2026-11-08T03:00:00Z', status: 'confirmed' }], conv: { lastAt: '2026-11-08T02:00:00Z', lastDir: 'outbound' } }), LN).reason, null));
+  check('lead: no-show not rebooked', () => assert.strictEqual(HQ.leadView(lrow({ calls: [{ start: '2026-11-09T01:00:00Z', booked: '2026-11-05T01:00:00Z', status: 'noshow' }], conv: { lastAt: '2026-11-09T02:00:00Z', lastDir: 'outbound' } }), LN).reason, 'noshow'));
+  check('lead: no message yet', () => assert.strictEqual(HQ.leadView(lrow({ opps: [{ pipeline: 'Instagram Leads', created: '2026-11-08T01:00:00Z' }] }), LN).reason, 'untouched'));
+  check('lead: you messaged 3+ days ago', () => assert.strictEqual(HQ.leadView(lrow({ opps: [{ pipeline: 'Instagram Leads', created: '2026-11-01T01:00:00Z' }], conv: { lastAt: '2026-11-06T01:00:00Z', lastDir: 'outbound' } }), LN).reason, 'quiet'));
+  check('lead: clients and 90-day-old leads not flagged', () => { assert.strictEqual(HQ.leadView(lrow({ status: 'client', conv: { lastAt: '2026-11-01T01:00:00Z', lastDir: 'inbound' } }), LN).reason, null); assert.strictEqual(HQ.leadView(lrow({ conv: { lastAt: '2026-07-01T01:00:00Z', lastDir: 'inbound' } }), LN).reason, null); });
+  check('lead: not a lead = cookbook only', () => assert.strictEqual(HQ.leadView(lrow({ opps: [{ pipeline: 'Cookbook', created: '2026-11-08T01:00:00Z' }] }), LN).isLead, false));
+  check('lead: country', () => { assert.deepStrictEqual(['+61 412 345 678', '0412345678', '+64 21 1', '+44 7700', '+1 212 555', '+91 98', ''].map(HQ.leadCountry), ['AU', 'AU', 'NZ', 'UK', 'US/CA', 'other', null]); });
+  const LB = HQ.leadBoard([lrow({ name: 'A', phone: '+919800', email: 'a@x', opps: [{ pipeline: 'Sales', created: '2026-11-08T01:00:00Z' }] }), lrow({ name: 'B', phone: '+15550000', opps: [{ pipeline: 'Sales', created: '2026-11-08T01:00:00Z' }] }), lrow({ name: 'C', email: 'c@x', nurture: true, opps: [{ pipeline: 'Sales', created: '2026-11-08T01:00:00Z' }] })], LN);
+  check('leadBoard: outside market keeps +1, nurture list skips foreign + already in', () => { assert.deepStrictEqual(LB.outside.map(v => v.name), ['A']); assert.deepStrictEqual(LB.noNurture.map(v => v.name), ['B']); });
   check('funnelOf: tags', () => { assert.strictEqual(HQ.funnelOf({ utm_medium: 'paid', utm_campaign: 'compounding' }), 'paid_indirect'); assert.strictEqual(HQ.funnelOf({ utm_medium: 'paid', utm_campaign: 'fasttrack' }), 'paid_direct'); assert.strictEqual(HQ.funnelOf({ utm_medium: 'qr' }), 'offplatform'); assert.strictEqual(HQ.funnelOf(null, 'link_in_bio'), 'bio'); assert.strictEqual(HQ.funnelOf({ utm_content: 'claude_test' }), 'test'); });
   check('allApplications: one per person', () => assert.strictEqual(HQ.allApplications({ tfResponses: [{ id: 'x', submittedAt: '2026-11-01T00:00:00Z', email: 'A@b.co' }], appSessions: [{ id: 'y', submitted: true, submittedAt: '2026-11-02T00:00:00Z', contact: { email: 'a@b.co' } }] }).length, 1));
   const { srv, url } = await serve();
@@ -105,8 +125,9 @@ const FUNNEL_KEYS = ['story', 'bio', 'offplatform', 'paid_direct', 'paid_indirec
       for (const [v, id] of VIEWS) {
         await page.evaluate(v => window.__hq.setView(v), v); await page.waitForTimeout(80);
         const shown = await page.evaluate(id => ({ hidden: document.getElementById(id).hidden, txt: document.getElementById(id).innerText }), id);
-        if (v === 'sales' && role !== 'admin') { check(`${label} ${per}: sales refused`, () => assert.ok(shown.hidden)); continue; }
+        if ((v === 'sales' || v === 'people') && role !== 'admin') { check(`${label} ${per}: ${v} refused`, () => assert.ok(shown.hidden)); continue; }
         check(`${label} ${per} ${v}: shown`, () => assert.ok(!shown.hidden));
+        if (v === 'people') check(`${label} ${per} people: follow-up list`, () => assert.ok(/Sam Waiting/.test(shown.txt) && /Pat Applied/.test(shown.txt) && !/Cleo Client/.test(shown.txt), shown.txt.slice(0, 600)));
         if (v === 'sales') check(`${label} ${per} sales: CAC by funnel + work-back`, () => assert.ok(/Cost per client \(CAC\)/i.test(shown.txt) && /Most you can pay per step/i.test(shown.txt) && /\$50/.test(shown.txt), shown.txt.slice(-600)));
         check(`${label} ${per} ${v}: no NaN/undefined/null`, () => assert.ok(!/\bNaN\b|undefined|\bnull\b|Infinity|\[object/.test(shown.txt), (shown.txt.match(/.{0,40}(NaN|undefined|null|Infinity|\[object).{0,40}/) || [''])[0]));
         check(`${label} ${per} ${v}: no DM numbers while the scan is off`, () => assert.ok(!/DMs waiting|From DMs|New conversations/.test(shown.txt)));

@@ -1,6 +1,13 @@
 # Changelog
 
 
+
+## 3.6.0 — Lead list from GoHighLevel (13 Nov 2026)
+- New admin-only Lead list (Leads → Needs follow-up, or Overview → Lead list): every GHL contact with funnel, applications, sales calls, stage, last message and nurture.
+- Follow up tab: people who reached out in the last 90 days and are waiting: messaged you with no reply (12h+), missed the call and not rebooked, applied with no call booked, no message from you yet, or you messaged 3+ days ago with no reply since. Clients and lost leads left out. Tap opens them in GHL.
+- Not in nurture tab (open leads with email or number, no nurture tag or pipeline) and Outside market tab (numbers not +61, +64, +44 or +1).
+- supabase/functions/ghl-leads (read-only GHL pull, hourly) writes public.hq_leads (admin-only RLS, migration 20261113_hq_leads.sql) and meta/ghlLeads. Needs deploying + a cron job.
+
 ## 3.5.0 — CAC by funnel (13 Nov 2026)
 - Sales page: cost per client for each funnel and for all funnels, by month (last 6). Costs from meta/costs (Claude fills it from the month-end bank statement, no editor cost); ad spend from Meta campaigns named fasttrack / compounding; clients from GHL Closed / Won by funnel.
 - Works back from the plan's $250 max per client: the most each paid funnel can pay per showed call, booked call and lead, on the plan's rates (50% close, 70% show, 5 leads a sale) until there are 5 of his own in the last 90 days.
