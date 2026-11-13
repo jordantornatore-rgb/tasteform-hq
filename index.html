@@ -2690,7 +2690,7 @@ table.scores td{border-color:var(--border);}
   });
 
   /* ---------- DMS ---------- */
-  var stageIdx=HQ.stageIdx, isMagnetOnly=HQ.isMagnetOnly, isUnverified=HQ.isUnverified, funnelOf=HQ.funnelOf, isApproxTime=HQ.isApproxTime;
+  var stageIdx=HQ.stageIdx, isMagnetOnly=HQ.isMagnetOnly, isUnverified=HQ.isUnverified, funnelOf=HQ.dmFunnelOf, isApproxTime=HQ.isApproxTime;
   function srcChip(d){ return d.source==='manychat_comment' ? '<span class="src-chip" title="Came in through a recipe-comment automation">ManyChat</span>' : (d.tab==='general' ? '<span class="src-chip" title="Thread sits in your General inbox">General</span>' : ''); }
   function funnelChip(d){ var f=funnelOf(d); return f==='magnet' ? '<span class="chip stage">Lead magnet</span>' : (f==='unread' ? '<span class="chip stage" title="Seen in the inbox list only. The scan hasn’t opened this chat yet, so there’s no link and no funnel.">Not read yet</span>' : ''); }
   function directionLabel(d){ return d.direction==='inbound'?'Inbound':(d.direction==='outbound'?'Outbound':'Unknown (unread)'); }

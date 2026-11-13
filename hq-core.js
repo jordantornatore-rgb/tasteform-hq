@@ -172,7 +172,7 @@
   HQ.isMagnetOnly = function (d) { return !!d && d.opener === 'magnet_delivery'; };
   // "pending-" placeholders made from the inbox preview: no thread link, opener guessed → outside both funnels
   HQ.isUnverified = function (d) { return !!d && /^pending-/i.test(d.id || '') && !d.threadId; };
-  HQ.funnelOf = function (d) { return HQ.isUnverified(d) ? 'unread' : (HQ.isMagnetOnly(d) ? 'magnet' : 'outbound'); };
+  HQ.dmFunnelOf = function (d) { return HQ.isUnverified(d) ? 'unread' : (HQ.isMagnetOnly(d) ? 'magnet' : 'outbound'); };
   HQ.openerGroupOf = function (d) { return HQ.OPENER_GROUPS[d && d.opener] || 'traditional'; };
   HQ.isApproxTime = function (d) { return !!(d && (d.unread || d.timesExact === false)); };
   HQ.isOutboundOpener = function (d) { return !!d && d.direction === 'outbound' && d.opener !== 'magnet_delivery'; };
@@ -183,8 +183,8 @@
   HQ.firstName = function (d) { var n = String((d && (d.displayName || d.username)) || '').trim().split(/\s+/)[0] || ''; return n.replace(/[^\w'-]/g, '') || 'mate'; };
 
   HQ.leads = function (dms) { return (dms || []).filter(HQ.isLead); };
-  HQ.outboundLeads = function (dms) { return HQ.leads(dms).filter(function (d) { return HQ.funnelOf(d) === 'outbound'; }); };
-  HQ.magnetLeads = function (dms) { return HQ.leads(dms).filter(function (d) { return HQ.funnelOf(d) === 'magnet'; }); };
+  HQ.outboundLeads = function (dms) { return HQ.leads(dms).filter(function (d) { return HQ.dmFunnelOf(d) === 'outbound'; }); };
+  HQ.magnetLeads = function (dms) { return HQ.leads(dms).filter(function (d) { return HQ.dmFunnelOf(d) === 'magnet'; }); };
   HQ.unreadLeads = function (dms) { return HQ.leads(dms).filter(HQ.isUnverified); };
 
   // Everyone whose last message is unanswered — every funnel, because anyone waiting needs a reply.
