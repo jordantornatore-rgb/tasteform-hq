@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.9.0 — 14 Nov 2026 (The business in four numbers)
+
+- Home leads with the business made simple: **1 · Seen** (views on posts published), **2 · Leads** (applications + ad instant-form leads, the same count as the Friday scorecard), **3 · Cost per client** (paid ads since 1 Jan vs the $250 max), **4 · Staying** (active clients, average stay, LTV). One line under them: LTV ÷ CAC and cash collected.
+- "Leads" now means applications plus ad form leads everywhere (Home, Scorecard); the Leads page shows the ad form leads under Applications.
+- Do today adds the two data jobs that blank numbers: sales calls to mark Showed / No-show in GoHighLevel, and new Stripe payers to move to Closed / Won.
+- Sales: "Sales closed" says how many new payers Stripe saw; CAC by funnel lists ad spend whose campaign name has no funnel.
+- Working numbers (13 Nov): LTV $2,275 (4.2 months × $125/wk), paid-ads CAC $1,074 ($5,370 Meta spend since 1 Jan ÷ 5 clients). Delivery's average stay uses them until real 1FIT start dates exist; Joined stays blank; Overdue payments match Revenue.
+
 ## 3.7.1 — 13 Nov 2026 (Music on voice-only versions)
 
 - Versions the new system builds have **no music in the file** (`voiceOnly: true` on the variant, with `originalPreviewUrl` = the voice-only file). On those, the Sound editor now shows **▶ Preview with my video**: it plays that version with the song underneath, live, using the part of the song in the box and the volume slider.

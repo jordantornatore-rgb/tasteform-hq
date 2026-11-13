@@ -16,12 +16,13 @@ check('scorecard long-form from YouTube', () => assert.strictEqual(sc.current.ce
 sc = HQ.scorecard(Object.assign({}, base, { meta: { youtubeSync: yt, scorecard: { weeks: { '2026-11-16': { longform: 5 } } } } }), now);
 check('typed-in long-form still wins', () => assert.strictEqual(sc.current.cells.longform.value, 5));
 check('long-form row no longer marked typed-in', () => assert.ok(!HQ.SCORE_ROWS.find(r => r.key === 'longform').manual));
-const st = { meta: { stripeSync: { connected: true } }, stripe: { summary: { mrr: 1872, risks: [1, 2], avgLifetimeValue: 1587, refundedTotal: 50, revenueByMonth: [] } },
+const st = { meta: { stripeSync: { connected: true } }, stripe: { summary: { mrr: 1872, risks: [1, 2], avgLifetimeValue: 1587, refundedTotal: 50, revenueByMonth: [] }, customers: [{ status: 'Overdue', nextDue: '2026-11-10' }, { status: 'Overdue', nextDue: '2026-11-11', in1Fit: true }, { status: 'Overdue', nextDue: '2026-11-09', in1Fit: false }, { status: 'Active', nextDue: '2026-11-20' }] },
   stripeDaily: [{ date: '2026-11-15', amount: 400, payments: 1, newClients: 0 }, { date: '2026-11-18', amount: 442, payments: 1, newClients: 1 }, { date: '2026-11-05', amount: 100, payments: 1, newClients: 0 }],
   tfResponses: [], tfDaily: [], igPosts: [], appSessions: [] };
 const P = HQ.computePillars(st, now, 7);
 check('cash collected = Stripe payments in the window', () => assert.strictEqual(P.sales.headline.value, 842));
 check('payments and first-time payers counted', () => { assert.strictEqual(P.sales.payments.value, 2); assert.strictEqual(P.sales.newPayers.value, 1); });
+// overdue = current 1FIT clients past their usual date (the Revenue page's Overdue box), not every unpaid invoice
 check('delivery money rows from Stripe', () => { assert.strictEqual(P.delivery.mrr.value, 1872); assert.strictEqual(P.delivery.failedPayments.value, 2); assert.strictEqual(P.delivery.ltv.value, 1587); });
 check('refunds all time passed through', () => assert.strictEqual(P.sales.refundsAllTime, 50));
 console.log(`tracking: ${passed} passed, ${failed} failed`);

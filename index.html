@@ -2141,7 +2141,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.8.0"></script>
+<script src="hq-core.js?v=3.9.0"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -5580,15 +5580,21 @@ table.scores td{border-color:var(--border);}
   }
   RENDER.home = function(){
     plSeg(); var d = plData(), L = d.leads, T = d.traffic, S = d.sales, D = d.delivery, html = planCard();
-    if(d.leak) html += '<div class="pl-leak"><div class="k">Where people drop off · '+esc(d.range.label)+'</div><p>'+esc(d.leak.text)+'</p></div>';
-    html += '<div class="pl-grid">'+
-      plCard('traffic','Traffic', T.headline, T.netSince ? 'net new followers since '+(HQ.fmtDay(T.netSince,'short')||T.netSince) : 'net new followers')+
-      plCard('leadflow','Leads', L.headline, 'applications')+
-      (isAdmin ? plCard('sales','Sales', S.headline, 'cash collected', S.connected.stripe ? null : '<span class="pl-flat">'+(S.connected.stripeOff?'waiting on Newie':'Stripe not connected')+'</span>', true) : '')+
-      plCard('delivery','Delivery', D.headline, 'active clients', D.headline.value==null ? '<span class="pl-flat">'+(state.deliveryError?'couldn’t load':'loading…')+'</span>' : '<span class="pl-flat">'+num(D.churned.value)+' left · '+(D.avgWeeks.value==null?'–':num(D.avgWeeks.value,1))+' wks avg stay</span>')+
+    // the business in four numbers: seen → leads → cost per client → staying
+    var X = d.simple || {};
+    var card = function(view, name, valHtml, sub, foot, admin){ return '<button type="button" class="pl-card" data-go="'+view+'"><span class="n">'+esc(name)+(admin?'<span class="pl-admin">ADMIN</span>':'')+'</span><span class="v">'+valHtml+'</span><span class="s">'+esc(sub)+'</span><span class="t">'+foot+'</span></button>'; };
+    var flat = function(t){ return '<span class="pl-flat">'+esc(t)+'</span>'; };
+    html += '<div class="pl-h2">The business · '+esc(d.range.label)+'</div><div class="pl-grid pl-simple">'+
+      card('traffic','1 · Seen', plVal(X.seen?X.seen.value:null,'compact'), 'views on posts published', T.headline.value==null?'':flat((T.headline.value>=0?'+':'')+num(T.headline.value)+' followers'+(T.netSince?' since '+(HQ.fmtDay(T.netSince,'short')||T.netSince):''))) +
+      card('leadflow','2 · Leads', plVal(L.headline.value), 'applications + ad form leads', X.viewsPerLead ? flat('1 lead per '+HQ.compact(X.viewsPerLead)+' views') : plTrend(L.headline)) +
+      (isAdmin ? card('sales','3 · Cost per client', '<span class="'+(X.cac!=null&&X.cac<=X.cacTarget?'cac-ok':'cac-over')+'">'+plVal(X.cac,'money')+'</span>', 'paid ads since 1 Jan · '+HQ.money(X.cacTarget)+' max', flat(X.adSpend!=null?HQ.money(X.adSpend)+' ad spend this period':'no ad spend this period'), false) : '') +
+      card('delivery','4 · Staying', plVal(X.active), 'active clients', D.headline.value==null ? flat(state.deliveryError?'couldn’t load':'loading…') : flat(X.stayMonths+' months avg · LTV '+HQ.money(X.ltv)+' · '+num(X.left)+' left')) +
     '</div>';
+    if(isAdmin && X.ratio!=null) html += '<p class="pl-note pl-simple-note">Each client is worth '+esc(HQ.money(X.ltv))+' and costs '+esc(HQ.money(X.cac))+' from ads: '+esc(X.ratio+'×')+' back. At the '+esc(HQ.money(X.cacTarget))+' target it would be '+esc(Math.round(X.ltv/X.cacTarget*10)/10+'×')+'.'+(S.headline.value!=null?' Cash collected '+esc(d.range.label)+': '+esc(HQ.money(S.headline.value))+'.':'')+'</p>';
+    if(d.leak) html += '<div class="pl-leak"><div class="k">Where people drop off · '+esc(d.range.label)+'</div><p>'+esc(d.leak.text)+'</p></div>';
+    var todos = d.todo.filter(function(t){ return !t.admin || isAdmin; });
     html += '<div class="pl-h2">Do today</div>';
-    html += d.todo.length ? '<div class="pl-list">'+d.todo.map(function(t){ return t.go ? '<button type="button" class="pl-row" data-go="'+esc(t.go)+'"><div class="l">'+esc(t.label)+'</div><div class="r">'+num(t.count)+' <span class="go">›</span></div></button>' : '<div class="pl-row"><div class="l">'+esc(t.label)+'</div><div class="r">'+num(t.count)+'</div></div>'; }).join('')+'</div>'
+    html += todos.length ? '<div class="pl-list">'+todos.map(function(t){ return t.go ? '<button type="button" class="pl-row" data-go="'+esc(t.go)+'"><div class="l">'+esc(t.label)+'</div><div class="r">'+num(t.count)+' <span class="go">›</span></div></button>' : '<div class="pl-row"><div class="l">'+esc(t.label)+'</div><div class="r">'+num(t.count)+'</div></div>'; }).join('')+'</div>'
       : '<div class="pl-list"><div class="pl-row"><div class="l">Nothing waiting on you.</div></div></div>';
     html += '<p class="pl-note">Tap a card for the numbers behind it. Everything else is under '+(window.innerWidth<760?'More':'Work and Tools')+'.</p>';
     setHtml('plHome', html);
@@ -5638,7 +5644,7 @@ table.scores td{border-color:var(--border);}
       conv('view → start', L.rates.viewToStart)+
       step('Form starts', L.starts, L.starts.note)+
       conv('view → apply', L.rates.viewToApply)+
-      step('Applications', L.applications, null, src.concat([['Qualified', L.applications.qualified==null?'not marked yet':num(L.applications.qualified)+' of '+num(L.applications.qualifiedOf)], ['Before', L.applications.prev==null?'–':num(L.applications.prev)]]))+
+      step('Applications', L.applications, null, src.concat([['Qualified', L.applications.qualified==null?'not marked yet':num(L.applications.qualified)+' of '+num(L.applications.qualifiedOf)], ['Before', L.applications.prev==null?'–':num(L.applications.prev)], ['Plus ad instant-form leads (counted on Home and the Scorecard)', L.paidLeads&&L.paidLeads.value!=null?num(L.paidLeads.value):'–']]))+
       conv('apply → booked', L.rates.applyToBooked)+
       step('Booked calls', L.booked, L.booked.note||'GoHighLevel sales calendar · booked in this window', [['Calls held in this window', L.booked.held==null?'–':num(L.booked.held)], ['Calls in the next 7 days', L.booked.upcoming7==null?'–':num(L.booked.upcoming7)], ['Before', L.booked.prev==null?'–':num(L.booked.prev)], ['Cost per booked call', '<span class="pl-blank">needs ad spend</span>']].concat(DM_SCAN_OK&&L.booked.fromDms!=null?[['From DMs', num(L.booked.fromDms)]]:[]))+
       conv('show-up rate', L.rates.showRate)+
@@ -5663,7 +5669,7 @@ table.scores td{border-color:var(--border);}
     if(!S.connected.stripe || !S.connected.ghl) html += '<div class="pl-leak"><div class="k">Not connected yet</div><p>'+(!S.connected.stripe?(S.connected.stripeOff?'Revenue: waiting on Newie (Stripe is switched off). ':'Stripe: add a read-only restricted key (rk_live_…) to the Supabase Vault as <b>stripe_restricted_key</b>. '):'')+(!S.connected.ghl?'GoHighLevel: add the token to the Vault as <b>ghl_readonly_token</b>. ':'')+'Blank rows stay blank; nothing here is guessed.</p></div>';
     html += '<div class="pl-list">'+
       plRow('Cash collected', S.payments?'every Stripe payment · '+num(S.payments.value)+' payments, '+num(S.newPayers.value)+' first-time':'every Stripe payment', S.headline, {fmt:'money', go:'stripe'})+
-      plRow('Sales closed', S.closed.note||'moved to Closed / Won in GHL', S.closed)+
+      plRow('Sales closed', (S.closed.note||'moved to Closed / Won in GHL')+(S.newPayers&&S.newPayers.value&&S.newPayers.value>(S.closed.value||0)?' · Stripe has '+num(S.newPayers.value)+' new paying '+HQ.plural(S.newPayers.value,'client')+' in this window':''), S.closed)+
       plRow('Close rate', 'closed ÷ calls held', S.closeRate, {fmt:'pct'})+
       plRow('Average sale value', null, S.avgSale, {fmt:'money'})+
       plRow('Days from first contact to close', 'GHL lead created → closed', S.daysToClose, {fmt:'dp1', lowerIsBetter:true})+
@@ -5713,6 +5719,7 @@ table.scores td{border-color:var(--border);}
         var sub = [ x.cost==null ? (x.paid?'ad spend not in yet':'costs not in yet') : HQ.money(x.cost)+' spent', x.clients==null ? 'clients not tracked yet' : num(x.clients)+' client'+(x.clients===1?'':'s') ];
         if(x.target) sub.push('target '+HQ.money(x.target)+' max');
         return '<div class="pl-row"><div class="l">'+esc(x.label)+'<small>'+esc(sub.join(' · '))+'</small></div><div class="r"><b>'+vs(x.cac, x.target)+'</b></div></div>'; }).join('')+
+      (C.unassignedAds ? '<div class="pl-row"><div class="l">Ads with no funnel in the name<small>'+esc(HQ.money(C.unassignedAds)+' spent · name campaigns “fasttrack” or “compounding” to place it')+'</small></div><div class="r"><b>'+money(C.unassignedAds)+'</b></div></div>' : '')+
     '</div>';
     // work back from the target, for the two paid funnels
     html += '<h3 class="pl-h">Most you can pay per step · $'+HQ.CAC_PLAN.target+' a client</h3>';

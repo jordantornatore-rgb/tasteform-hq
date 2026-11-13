@@ -118,7 +118,7 @@ const FUNNEL_KEYS = ['story', 'bio', 'offplatform', 'paid_direct', 'paid_indirec
     const first = await page.evaluate(() => !document.getElementById('viewHome').hidden);
     check(`${label}: Home is the first page`, () => assert.ok(first));
     const cards = await page.evaluate(() => [...document.querySelectorAll('#plHome .pl-card .n')].map(e => e.firstChild.textContent));
-    check(`${label}: cards`, () => assert.deepStrictEqual(cards, role === 'admin' ? ['Traffic', 'Leads', 'Sales', 'Delivery'] : ['Traffic', 'Leads', 'Delivery']));
+    check(`${label}: cards`, () => assert.deepStrictEqual(cards, role === 'admin' ? ['1 · Seen', '2 · Leads', '3 · Cost per client', '4 · Staying'] : ['1 · Seen', '2 · Leads', '4 · Staying']));
     const todo = await page.evaluate(() => document.querySelectorAll('#plHome .pl-list .pl-row').length);
     check(`${label}: at most 3 to-dos`, () => assert.ok(todo >= 1 && todo <= 3, String(todo)));
     for (const per of ['7', '30', 'month']) {
@@ -153,10 +153,11 @@ const FUNNEL_KEYS = ['story', 'bio', 'offplatform', 'paid_direct', 'paid_indirec
       const n = per === 'month' ? null : +per, from = n ? addDays(TODAY, -(n - 1)) : TODAY.slice(0, 8) + '01';
       const syd = iso => new Date(new Date(iso).getTime()).toLocaleDateString('en-CA', { timeZone: 'Australia/Sydney' });
       const inWin = iso => iso && syd(iso) >= from && syd(iso) <= TODAY;
-      const exp = (fx.tf_responses || []).filter(r => inWin(r.data.submittedAt)).length + (fx.app_sessions || []).filter(r => r.data.submitted && !/test/.test((r.data.utm || {}).utm_content || '') && inWin(r.data.submittedAt)).length;
+      const exp = (fx.tf_responses || []).filter(r => inWin(r.data.submittedAt)).length + (fx.app_sessions || []).filter(r => r.data.submitted && !/test/.test((r.data.utm || {}).utm_content || '') && inWin(r.data.submittedAt)).length
+        + (() => { const g = ((fx.meta || []).find(r => r.id === 'ghlSync') || {}).data; let t = 0; if (g && g.days) for (const [k, v] of Object.entries(g.days)) if (k >= from && k <= TODAY) t += v.paidLeads || 0; return t; })();
       await page.evaluate(() => window.__hq.setView('home')); await page.waitForTimeout(60);
       const got = await page.evaluate(() => document.querySelectorAll('#plHome .pl-card .v')[1].textContent.replace(/[^0-9]/g, ''));
-      check(`${label} ${per}: applications card = independent count`, () => assert.strictEqual(+got, exp));
+      check(`${label} ${per}: leads card = applications + ad form leads`, () => assert.strictEqual(+got, exp));
     }
     // a card opens its page; the Delivery numbers come from the RPC
     await page.evaluate(() => window.__hq.setView('home')); await page.click('#plHome .pl-card[data-go="delivery"]'); await page.waitForTimeout(80);

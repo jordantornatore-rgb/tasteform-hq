@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.8.0';
+  HQ.VERSION = '3.9.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -887,8 +887,12 @@
     var G = HQ.ghlSum(ghl, R.from, R.to), GP = HQ.ghlSum(ghl, R.prevFrom, R.prevTo);
     var booked = G ? G.booked : null, marked = G ? G.showed + G.noShow : 0;
     var showNote = !G ? 'Needs GoHighLevel' : (G.unmarked ? G.unmarked + ' of ' + G.held + ' calls not marked showed / no-show in GHL' : (G.held ? null : 'No sales calls held in this window'));
+    // a lead = an application (apply page or Typeform) or an instant-form lead from the ads, the same count the
+    // Friday scorecard uses
+    var paidL = G ? G.paidLeads || 0 : 0, paidLP = GP ? GP.paidLeads || 0 : 0;
     var leads = {
-      headline: m(appsAll.length, appsPrev.length, { label: 'applications' }),
+      headline: m(appsAll.length + paidL, appsPrev.length + paidLP, { label: 'leads', apps: appsAll.length, paid: paidL }),
+      paidLeads: m(G ? paidL : null, GP ? paidLP : null),
       formViews: traffic.formViews,
       starts: m(startsReal ? tf.started : null, startsReal ? tfp.started : null, { note: startsReal ? null : 'Typeform sync only counts finished forms' }),
       applications: m(appsAll.length, appsPrev.length, { bySource: bySrc, qualified: fitKnown.length ? fitYes : null, qualifiedOf: fitKnown.length }),
@@ -968,9 +972,25 @@
     var rc = state.routineCalls && state.routineCalls.dates, calls = null;
     if (rc) { calls = 0; HQ.dayRange(today, HQ.addDays(today, 6)).forEach(function (d) { if (rc[d] && HQ.isNum(rc[d].count)) calls += rc[d].count; }); }
     if (opts.dmScanOk && opts.dmsWaiting) todo.unshift({ key: 'dms', label: 'DMs waiting on you', count: opts.dmsWaiting, go: 'dms' });
+    // data jobs that keep the numbers honest: unmarked sales calls blank the show rate, unclosed wins blank sales and CAC
+    if (G && G.unmarked) todo.splice(1, 0, { key: 'mark', label: 'Sales calls to mark Showed / No-show in GoHighLevel', count: G.unmarked, go: 'leadflow' });
+    var np = sales.newPayers && sales.newPayers.value, gc = G ? G.closed || 0 : 0;
+    if (HQ.isNum(np) && np > gc) todo.splice(1, 0, { key: 'close', label: 'New paying clients to move to Closed / Won in GoHighLevel', count: np - gc, go: 'sales', admin: true });
     if (calls) todo.push({ key: 'calls', label: 'Calls in the next 7 days', count: calls, go: null });
 
-    return { today: today, range: R, period: period, traffic: traffic, leads: leads, sales: sales, delivery: delivery, leak: leak, todo: todo.slice(0, 3) };
+    // --- the business in four numbers (13 Nov 2026, "make the business simple"): people see the content, some become
+    // leads, each client costs something to get, and they stay a while. Cost and stay use the working numbers
+    // (HQ.UNIT_ECON) until real 1FIT start dates and closed sales in GoHighLevel can replace them.
+    var U = HQ.unitEcon(), adsW = HQ.adsSum(state.adsDaily, R.from, R.to);
+    var simple = {
+      seen: traffic.views, newFollowers: traffic.headline.value,
+      leads: leads.headline, viewsPerLead: HQ.isNum(traffic.views.value) && leads.headline.value ? Math.round(traffic.views.value / leads.headline.value) : null,
+      cac: U.cac, cacTarget: HQ.CAC_PLAN.target, adSpend: adsW ? Math.round(adsW.spend) : null,
+      active: delivery.headline.value, left: delivery.churned.value, stayMonths: U.months, ltv: U.ltv, ratio: U.ratio,
+      cash: sales.headline.value
+    };
+
+    return { today: today, range: R, period: period, traffic: traffic, leads: leads, sales: sales, delivery: delivery, leak: leak, simple: simple, todo: todo.slice(0, 3) };
   };
   HQ.compact = function (v) {
     if (!HQ.isNum(v)) return '–'; var a = Math.abs(v);
