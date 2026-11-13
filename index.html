@@ -2141,7 +2141,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.9.2"></script>
+<script src="hq-core.js?v=3.9.3"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -5593,9 +5593,9 @@ table.scores td{border-color:var(--border);}
     var flat = function(t){ return '<span class="pl-flat">'+esc(t)+'</span>'; };
     html += '<div class="pl-h2">The business · '+esc(d.range.label)+'</div><div class="pl-grid pl-simple">'+
       card('traffic','1 · Seen', plVal(X.seen?X.seen.value:null,'compact'), 'views on posts published', T.headline.value==null?'':flat((T.headline.value>=0?'+':'')+num(T.headline.value)+' followers'+(T.netSince?' since '+(HQ.fmtDay(T.netSince,'short')||T.netSince):''))) +
-      card('leadflow','2 · Leads', plVal(L.headline.value), 'applications + ad form leads', X.viewsPerLead ? flat('1 lead per '+HQ.compact(X.viewsPerLead)+' views') : plTrend(L.headline)) +
+      card('leadflow','2 · Leads', plVal(L.headline.value), 'applications + ad form leads'+(X.plan?' · plan '+X.plan.leadsMonth+' a month':''), X.viewsPerLead ? flat('1 lead per '+HQ.compact(X.viewsPerLead)+' views') : plTrend(L.headline)) +
       (isAdmin ? card('sales','3 · Cost per client', '<span class="'+(X.cac!=null&&X.cac<=X.cacTarget?'cac-ok':'cac-over')+'">'+plVal(X.cac,'money')+'</span>', 'paid ads since 1 Jan · '+HQ.money(X.cacTarget)+' max', flat(X.adSpend!=null?HQ.money(X.adSpend)+' ad spend this period':'no ad spend this period'), false) : '') +
-      card('delivery','4 · Staying', plVal(X.active), 'active clients', D.headline.value==null ? flat(state.deliveryError?'couldn’t load':'loading…') : flat(X.stayMonths+' months avg · LTV '+HQ.money(X.ltv)+' · '+num(X.left)+' left')) +
+      card('delivery','4 · Staying', plVal(X.active), 'active clients · stay '+X.stayMonths+' months avg', D.headline.value==null ? flat(state.deliveryError?'couldn’t load':'loading…') : flat(num(X.left)+' left'+(X.churnPct!=null?' · '+X.churnPct+'% churn, plan '+X.plan.churnMax+'% max':''))) +
     '</div>';
     if(isAdmin && X.ratio!=null) html += '<p class="pl-note pl-simple-note">Each client is worth '+esc(HQ.money(X.ltv))+' and costs '+esc(HQ.money(X.cac))+' from ads: '+esc(X.ratio+'×')+' back. At the '+esc(HQ.money(X.cacTarget))+' target it would be '+esc(Math.round(X.ltv/X.cacTarget*10)/10+'×')+'.'+(S.headline.value!=null?' Cash collected '+esc(d.range.label)+': '+esc(HQ.money(S.headline.value))+'.':'')+'</p>';
     if(d.leak) html += '<div class="pl-leak"><div class="k">Where people drop off · '+esc(d.range.label)+'</div><p>'+esc(d.leak.text)+'</p></div>';
@@ -5692,6 +5692,7 @@ table.scores td{border-color:var(--border);}
       plRow('Active clients', null, D.headline, {go:isAdmin?'challenge':null})+
       plRow('Joined', (HQ.UNIT_ECON||{}).realJoinDates ? d.range.label : 'needs real 1FIT start dates', D.joined)+
       plRow('Left', d.range.label, D.churned, {lowerIsBetter:true})+
+      plRow('Churn', 'left ÷ clients at the start of '+d.range.label+' · plan '+HQ.planQuarter(d.today).churnMax+'% a month max', D.churnPct, {fmt:'pct', lowerIsBetter:true})+
       plRow('Average weeks stayed', (HQ.UNIT_ECON||{}).realJoinDates ? 'everyone with a join date' : 'working number: '+(HQ.UNIT_ECON||{retentionMonths:4.2}).retentionMonths+' months', D.avgWeeks, {fmt:'dp1'})+
       plRow('Check-ins on time', d.range.label, D.checkinsOnTime)+
       plRow('Check-in reply time', 'not tracked yet', D.checkinReplyTime)+

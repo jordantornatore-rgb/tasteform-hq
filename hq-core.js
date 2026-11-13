@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.9.2';
+  HQ.VERSION = '3.9.3';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -991,6 +991,12 @@
       active: delivery.headline.value, left: delivery.churned.value, stayMonths: U.months, ltv: U.ltv, ratio: U.ratio,
       cash: sales.headline.value
     };
+    // churn = clients who left in the window ÷ clients at its start (active now + those who left); the plan's measure
+    var act = delivery.headline.value, lft = delivery.churned.value;
+    delivery.churnPct = { value: HQ.isNum(act) && HQ.isNum(lft) && act + lft > 0 ? Math.round(lft / (act + lft) * 100) : null, prev: null, change: null };
+    simple.churnPct = delivery.churnPct.value;
+    var pq = HQ.planQuarter(today);
+    simple.plan = { leadsMonth: pq.leadsMonth, churnMax: pq.churnMax, clients: pq.clients, label: pq.label, followersDay: '10 to 15' };
 
     return { today: today, range: R, period: period, traffic: traffic, leads: leads, sales: sales, delivery: delivery, leak: leak, simple: simple, todo: todo.slice(0, 3) };
   };
