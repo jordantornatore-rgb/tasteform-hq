@@ -5364,7 +5364,7 @@ table.scores td{border-color:var(--border);}
     doc('meta/goal', 'meta', function(d){ state.goal=d; });
     doc('meta/scorecard', 'meta', function(d){ state.scorecardMeta=d; });
     doc('meta/costs', 'meta', function(d){ state.costsMeta=d; });
-    if(isAdmin){ sub(db.collection('hq_leads'), 'people', 'hqLeads'); doc('meta/ghlLeads', 'meta', function(d){ state.ghlLeadsMeta=d; }); }
+    if(false&&isAdmin){ sub(db.collection('hq_leads'), 'people', 'hqLeads'); doc('meta/ghlLeads', 'meta', function(d){ state.ghlLeadsMeta=d; }); }
     sub(db.collection('app_sessions').limit(5000), 'pillars', 'appSessions');
     doc('meta/ghlSync', 'meta', function(d){ state.ghlMeta=d; });
     doc('meta/routineCalls', 'meta', function(d){ state.routineCalls=d; });
@@ -5441,7 +5441,7 @@ table.scores td{border-color:var(--border);}
     isAdmin = !!(profile && profile.role==='admin');
     currentUser = user ? { email:user.email, firstName: (profile && profile.display_name) ? String(profile.display_name).split(/\s+/)[0] : (user.email && /^jordan/i.test(user.email) ? 'Jordan' : null) } : null;
     $('tabSales').hidden = !isAdmin; var shs=$('sheetSales'); if(shs) shs.hidden=!isAdmin;
-    $('tabPeople').hidden = !isAdmin; var shp=$('sheetPeople'); if(shp) shp.hidden=!isAdmin;
+    /* Lead list parked 13 Nov 2026: leads live in GHL until Jordan asks for it */ var LEADLIST_ON=false; $('tabPeople').hidden = !(isAdmin&&LEADLIST_ON); var shp=$('sheetPeople'); if(shp) shp.hidden=!(isAdmin&&LEADLIST_ON);
     $('tabStripe').hidden = !isAdmin; var ss=$('sheetStripe'); if(ss) ss.hidden=!isAdmin; var gb=$('sbGroupBusiness'); if(gb) gb.hidden=!isAdmin;
     ['tabEmail','sheetEmail'].forEach(function(id){ var el=$(id); if(el) el.hidden=!isAdmin; });
     supaClient = client;
@@ -5618,7 +5618,7 @@ table.scores td{border-color:var(--border);}
     html += '<h3 class="pl-h">By funnel · '+esc(FA.range.label)+'</h3><div class="pl-list">'+HQ.FUNNELS.map(function(f){ var x=FA.funnels[f.key]; return '<button type="button" class="pl-row" data-pl-funnel="'+f.key+'"><div class="l">'+esc(f.label)+'<small>'+num(x.applications)+' applied · '+(x.booked==null?'–':num(x.booked))+' booked · '+(x.closed==null?'–':num(x.closed))+' sold</small></div><div class="r"><span class="go">›</span></div></button>'; }).join('')+
       (FA.untagged ? '<div class="pl-row"><div class="l">No tag<small>'+num(FA.untagged)+' applied through an untagged link. Swap in the Funnel links.</small></div></div>' : '')+'</div>';
     var LB = isAdmin && state.hqLeads ? HQ.leadBoard(state.hqLeads, Date.now()) : null;
-    html += '<div class="pl-list">'+(isAdmin?plRow('Needs follow-up', LB ? 'people who reached out and are waiting on you' : 'Lead list from GoHighLevel', {value:LB?LB.follow.length:null, prev:null}, {go:'people', lowerIsBetter:true}):'')+plRow('Applications to work through', 'opens Applications', null, {go:'apps', arrowOnly:true})+'</div>';
+    html += '<div class="pl-list">'+(false&&isAdmin?plRow('Needs follow-up', LB ? 'people who reached out and are waiting on you' : 'Lead list from GoHighLevel', {value:LB?LB.follow.length:null, prev:null}, {go:'people', lowerIsBetter:true}):'')+plRow('Applications to work through', 'opens Applications', null, {go:'apps', arrowOnly:true})+'</div>';
     html += '<p class="pl-note">Tap “What feeds this” under a step to see where it comes from. Booked calls and show-ups come from GoHighLevel: mark each sales call Showed or No-show there and the show-up rate fills in. Cost per call needs ad spend.'+(DM_SCAN_OK?'':' DM numbers are paused while the DM scan is fixed.')+'</p>';
     setHtml('plLeads', html);
   };

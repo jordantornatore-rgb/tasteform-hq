@@ -128,7 +128,8 @@ const FUNNEL_KEYS = ['story', 'bio', 'offplatform', 'paid_direct', 'paid_indirec
         const shown = await page.evaluate(id => ({ hidden: document.getElementById(id).hidden, txt: document.getElementById(id).innerText }), id);
         if ((v === 'sales' || v === 'people') && role !== 'admin') { check(`${label} ${per}: ${v} refused`, () => assert.ok(shown.hidden)); continue; }
         check(`${label} ${per} ${v}: shown`, () => assert.ok(!shown.hidden));
-        if (v === 'people') check(`${label} ${per} people: follow-up list`, () => assert.ok(/Sam Waiting/.test(shown.txt) && /Pat Applied/.test(shown.txt) && !/Cleo Client/.test(shown.txt), shown.txt.slice(0, 600)));
+        // Lead list parked 13 Nov 2026 (leads live in GHL); re-enable with LEADLIST_ON in index.html
+        if (false && v === 'people') check(`${label} ${per} people: follow-up list`, () => assert.ok(/Sam Waiting/.test(shown.txt) && /Pat Applied/.test(shown.txt) && !/Cleo Client/.test(shown.txt), shown.txt.slice(0, 600)));
         if (v === 'sales') check(`${label} ${per} sales: CAC by funnel + work-back`, () => assert.ok(/Cost per client \(CAC\)/i.test(shown.txt) && /Most you can pay per step/i.test(shown.txt) && /\$50/.test(shown.txt), shown.txt.slice(-600)));
         check(`${label} ${per} ${v}: no NaN/undefined/null`, () => assert.ok(!/\bNaN\b|undefined|\bnull\b|Infinity|\[object/.test(shown.txt), (shown.txt.match(/.{0,40}(NaN|undefined|null|Infinity|\[object).{0,40}/) || [''])[0]));
         check(`${label} ${per} ${v}: no DM numbers while the scan is off`, () => assert.ok(!/DMs waiting|From DMs|New conversations/.test(shown.txt)));
