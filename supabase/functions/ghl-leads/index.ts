@@ -163,7 +163,7 @@ async function run() {
     const won = sales.some((o) => o.status === "won" || CLOSED(o.stage || ""));
     const lost = !won && sales.length > 0 && sales.every((o) => o.status === "lost" || o.status === "abandoned" || /lost|not closed|disqualif|not a fit/i.test(o.stage || ""));
     const tags: string[] = Array.isArray(c.tags) ? c.tags.map(String) : [];
-    const nurture = tags.some((t) => /nurtur/i.test(t)) || opps.some((o) => /nurtur/i.test((o.pipeline || "") + " " + (o.stage || "")));
+    const nurture = tags.some((t) => /nu(r)?tur/i.test(t)) || opps.some((o) => /nu(r)?tur/i.test((o.pipeline || "") + " " + (o.stage || "")));
     let funnel = myApps.length ? myApps[0].funnel : null;
     if (!funnel) { const p = sales.map((o) => o.pipeline || "").join(" "); funnel = /ad form|paid lead/i.test(p) ? "paid_direct" : (/instagram/i.test(p) ? "dm_outreach" : "unknown"); }
     const calls = (callsBy.get(c.id) || []).sort((a, b) => String(a.start).localeCompare(String(b.start)));
