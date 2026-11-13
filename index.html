@@ -5677,13 +5677,13 @@ table.scores td{border-color:var(--border);}
     plSeg(); var d = plData(), D = d.delivery;
     var html = '<div class="pl-list">'+
       plRow('Active clients', null, D.headline, {go:isAdmin?'challenge':null})+
-      plRow('Joined', d.range.label, D.joined)+
+      plRow('Joined', HQ.UNIT_ECON.realJoinDates ? d.range.label : 'needs real 1FIT start dates', D.joined)+
       plRow('Left', d.range.label, D.churned, {lowerIsBetter:true})+
-      plRow('Average weeks stayed', 'everyone with a join date', D.avgWeeks, {fmt:'dp1'})+
+      plRow('Average weeks stayed', HQ.UNIT_ECON.realJoinDates ? 'everyone with a join date' : 'working number: '+HQ.UNIT_ECON.retentionMonths+' months', D.avgWeeks, {fmt:'dp1'})+
       plRow('Check-ins on time', d.range.label, D.checkinsOnTime)+
       plRow('Check-in reply time', 'not tracked yet', D.checkinReplyTime)+
       plRow('Monthly recurring', 'Stripe subscriptions (Newie later)', D.mrr, {fmt:'money', go:isAdmin?'stripe':null})+
-      plRow('Failed payments', 'failed or past due in Stripe', D.failedPayments, {lowerIsBetter:true, go:isAdmin?'stripe':null})+
+      plRow('Overdue payments', 'clients in 1FIT past their usual date', D.failedPayments, {lowerIsBetter:true, go:isAdmin?'stripe':null})+
       (function(){ var U=HQ.unitEcon(); return plRow('LTV (working number)', U.months+' months kept × '+HQ.money(U.price)+' a week', {value:U.ltv, prev:null}, {fmt:'money'}); })()+
       plRow('Paid per client so far', 'average paid per client, all of Stripe', D.ltv, {fmt:'money', go:isAdmin?'stripe':null})+
       plRow('Referrals', 'applications through a referral link', D.referrals)+

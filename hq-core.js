@@ -936,13 +936,18 @@
     var dc = state.deliveryCounts || null;
     var delivery = {
       headline: m(dc && HQ.isNum(dc.active) ? dc.active : null, null, { label: 'active clients' }),
-      churned: m(dc ? dc.left : null, null), joined: m(dc ? dc.joined : null, null),
-      avgWeeks: m(dc && dc.avgWeeks != null ? +dc.avgWeeks : null, null),
+      // challenge_members.joinedAt is the day the daily 1FIT scan first saw someone (most on its first run), not when
+      // they started coaching, so "joined" and the average stay from it are wrong. Joined stays blank and the stay
+      // is the working number until real 1FIT start dates are filled in (HQ.UNIT_ECON.realJoinDates).
+      churned: m(dc ? dc.left : null, null), joined: m(dc && HQ.UNIT_ECON.realJoinDates ? dc.joined : null, null),
+      avgWeeks: m(HQ.UNIT_ECON.realJoinDates ? (dc && dc.avgWeeks != null ? +dc.avgWeeks : null) : HQ.unitEcon().weeks, null),
       checkinsOnTime: m(dc ? dc.checkinsOnTime : null, null),
       checkinReplyTime: m(null, null),
       referrals: m(appsAll.filter(function (x) { return String(x.medium || '').toLowerCase() === 'referral'; }).length, appsPrev ? appsPrev.filter(function (x) { return String(x.medium || '').toLowerCase() === 'referral'; }).length : null),
       mrr: m(stripeOn && HQ.isNum(sum.mrr) ? sum.mrr : null, null),
-      failedPayments: m(stripeOn && Array.isArray(sum.risks) ? sum.risks.length : null, null),
+      // same count as the Revenue page's Overdue box: current 1FIT clients past their usual payment date
+      // (sum.risks also holds every unpaid Stripe invoice of the last 400 days, past clients included)
+      failedPayments: m(stripeOn && Array.isArray(state.stripe.customers) ? state.stripe.customers.filter(function (c) { return c && c.status === 'Overdue' && c.in1Fit !== false && c.nextDue; }).length : null, null),
       ltv: m(stripeOn && HQ.isNum(sum.avgLifetimeValue) ? sum.avgLifetimeValue : null, null)
     };
 
@@ -1211,7 +1216,7 @@
   // Working numbers Jordan set on 13 Nov 2026, used until 1FIT / Stripe / Newie history replaces them.
   // LTV = 4.2 months kept x $125 a week (pre price rise). Old CAC = Meta spend since 1 Jan 2026 (both ad accounts,
   // read in Ads Manager; earlier spend is sunk) / clients who came from ads (Ben R, Aaron A, Sami E, Laini G, Charbel Y).
-  HQ.UNIT_ECON = { retentionMonths: 4.2, pricePerWeek: 125, set: '2026-11-13',
+  HQ.UNIT_ECON = { retentionMonths: 4.2, pricePerWeek: 125, set: '2026-11-13', realJoinDates: false,
     baseline: { from: '2026-01-01', to: '2026-11-13', adSpend: 5370, clients: 5 } };
   HQ.unitEcon = function () {
     var U = HQ.UNIT_ECON, b = U.baseline;
