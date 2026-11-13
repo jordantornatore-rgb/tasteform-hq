@@ -2281,11 +2281,11 @@ table.scores td{border-color:var(--border);}
   function metaBundle(){
     return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, ghlSync:state.ghlMeta, youtubeSync:state.youtubeMeta||null, scorecard:state.scorecardMeta, costs:state.costsMeta||null, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
   }
-  function coreState(){ return { dms:state.dms, daily:state.daily, contacts:state.contacts, tfResponses:state.tfResponses, tfDaily:state.tfDaily, igPosts:state.igPosts, igStories:state.igStories, meta:metaBundle(), stripe:state.stripe.summary?{summary:state.stripe.summary}:null, dmLoaded:state.dmLoaded }; }
+  function coreState(){ return { dms:state.dms, daily:state.daily, contacts:state.contacts, tfResponses:state.tfResponses, tfDaily:state.tfDaily, igPosts:state.igPosts, igStories:state.igStories, meta:metaBundle(), stripe:state.stripe.summary?{summary:state.stripe.summary, customers:isAdmin?(state.stripe.customers||null):null}:null, dmLoaded:state.dmLoaded }; }
 
   /* ---------- render scheduler: only the visible tab + global strips, only when its data changed ---------- */
   var VIEW_DEPS = {
-    home:['pillars'], traffic:['pillars'], leadflow:['pillars'], sales:['pillars','meta','ads'], delivery:['pillars'], scorecard:['pillars'], people:['people','meta'],
+    home:['pillars'], traffic:['pillars'], leadflow:['pillars'], sales:['pillars','meta','ads'], delivery:['pillars','stripe'], scorecard:['pillars'], people:['people','meta'],
     today:['dms','daily','contacts','tfResponses','tfDaily','igPosts','igStories','meta','stripe'],
     funnel:['tfResponses','tfDaily','igPosts','igStories','meta','dms','daily','ads'],
     leads:['contacts','meta','dms'], dms:['dms','daily','reviews','contacts','meta'], follow:['dms','meta'], magnets:['dms','meta'],
