@@ -6000,7 +6000,7 @@ table.scores td{border-color:var(--border);}
 /* ---------- Time tab (admin only): where every hour of the week goes ----------
    One tap = "I'm doing this now". The previous step stops at that moment, so the day becomes a gap-free timeline.
    Storage (meta, admin only by RLS):  time:<local date> {entries:[{id,k,s,e,en,n}]}  ·  timeNow {k,s,n}  ·  timeCfg {tags:{step:tag}, awake}
-   Times are epoch ms; days are the DEVICE's local dates (works the same in Sydney or Bali). Entries never overlap: every insert carves. */
+   Times are epoch ms; days and clock times are SYDNEY's (HQ.TZ), whatever the device's clock says (Jordan, from Bali, 13 Nov 2026). Entries never overlap: every insert carves. */
 (function(){
   'use strict';
   var esc=HQ.esc;
@@ -6026,16 +6026,16 @@ table.scores td{border-color:var(--border);}
   function $(id){ return document.getElementById(id); }
   function pad(n){ return (n<10?'0':'')+n; }
   function nowMs(){ return window.__timeNow ? window.__timeNow() : Date.now(); }
-  function dkey(ms){ var d=new Date(ms); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
-  function dstart(key){ var p=key.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).getTime(); }
-  function dnext(key){ var p=key.split('-'); return new Date(+p[0],+p[1]-1,+p[2]+1).getTime(); }
-  function addD(key,n){ var p=key.split('-'); return dkey(new Date(+p[0],+p[1]-1,+p[2]+n,12).getTime()); }
-  function wkStart(key){ var d=new Date(dstart(key)).getDay(); return addD(key, d===0?-6:1-d); }
-  function clock(ms){ var d=new Date(ms), h=d.getHours(), m=d.getMinutes(); return ((h%12)||12)+':'+pad(m)+(h<12?'am':'pm'); }
-  function hhmm(ms){ var d=new Date(ms); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+  function dkey(ms){ return HQ.sydDay(ms); }
+  function dstart(key){ return HQ.sydMidnight(key); }
+  function dnext(key){ return HQ.sydMidnight(HQ.addDays(key,1)); }
+  function addD(key,n){ return HQ.addDays(key,n); }
+  function wkStart(key){ return HQ.weekStart(key); }
+  function clock(ms){ var p=HQ.sydParts(ms); return ((p.h%12)||12)+':'+pad(p.min)+(p.h<12?'am':'pm'); }
+  function hhmm(ms){ var p=HQ.sydParts(ms); return pad(p.h)+':'+pad(p.min); }
   function dur(min){ min=Math.round(min); if(min<60) return min+'m'; var h=Math.floor(min/60), m=min%60; return h+'h'+(m?' '+m+'m':''); }
   function hrs(min){ return (Math.round(min/6)/10).toFixed(1); }
-  function dayLabel(key){ var d=new Date(dstart(key)+12*3600000); return d.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'}); }
+  function dayLabel(key){ return HQ.fmtDay(key,'wd'); }
   function uid(){ return 'e'+nowMs().toString(36)+Math.random().toString(36).slice(2,6); }
   function day(key){ if(!S.days[key]) S.days[key]={entries:[]}; S.days[key].entries=S.days[key].entries||[]; return S.days[key]; }
 

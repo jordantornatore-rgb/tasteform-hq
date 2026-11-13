@@ -2,6 +2,9 @@
 
 
 
+## 3.6.1 — Time page on Sydney time (13 Nov 2026)
+- The Time page now uses Sydney days and clock times, whatever the phone's clock says (it followed the device before, so in Bali it logged Bali time). Every other page was already on Sydney time.
+
 ## 3.6.0 — Lead list from GoHighLevel (13 Nov 2026)
 - New admin-only Lead list (Leads → Needs follow-up, or Overview → Lead list): every GHL contact with funnel, applications, sales calls, stage, last message and nurture.
 - Follow up tab: people who reached out in the last 90 days and are waiting: messaged you with no reply (12h+), missed the call and not rebooked, applied with no call booked, no message from you yet, or you messaged 3+ days ago with no reply since. Clients and lost leads left out. Tap opens them in GHL.

@@ -1,4 +1,4 @@
-// Playwright tests for the Time tab, on MOCK data (no network). Device timezone = Bali (UTC+8).
+// Playwright tests for the Time tab, on MOCK data (no network). Device timezone = Bali (UTC+8); the page must show Sydney (AEDT, UTC+11).
 //   node tests/time.test.js [--shots dir]
 // Checks: admin only; one tap starts a step and stops the last; gaps show and fill; sleep across midnight splits at 00:00;
 // edit / delete / adjust-start carve so nothing is counted twice; week totals against an independent sum; buy-back tags;
@@ -14,7 +14,7 @@ const args = process.argv.slice(2);
 const SHOTS = args.includes('--shots') ? args[args.indexOf('--shots') + 1] : null;
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 const TZ = 'Asia/Makassar';
-const L = (d, hm) => Date.parse(`${d}T${hm}:00+08:00`); // local Bali time -> ms
+const L = (d, hm) => Date.parse(`${d}T${hm}:00+11:00`); // Sydney time (AEDT) -> ms; the device is in Bali
 const START = L('2026-11-12', '08:00');
 const FX = { meta: [], dm_threads: [], dm_daily: [], contacts: [], tf_responses: [], tf_daily: [], ig_posts: [], ig_stories: [] };
 function serve() { return new Promise(res => { const srv = http.createServer((req, r) => { let p = decodeURIComponent(req.url.split('?')[0]); if (p === '/') p = '/index.html'; const f = path.join(ROOT, p); if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); r.end(); return; } r.writeHead(200, { 'Content-Type': { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript' }[path.extname(f)] || 'application/octet-stream' }); r.end(fs.readFileSync(f)); }); srv.listen(0, '127.0.0.1', () => res({ srv, url: `http://127.0.0.1:${srv.address().port}` })); }); }
