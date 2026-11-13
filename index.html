@@ -2141,7 +2141,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.9.0"></script>
+<script src="hq-core.js?v=3.9.1"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -5691,6 +5691,8 @@ table.scores td{border-color:var(--border);}
       plRow('Monthly recurring', 'Stripe subscriptions (Newie later)', D.mrr, {fmt:'money', go:isAdmin?'stripe':null})+
       plRow('Overdue payments', 'clients in 1FIT past their usual date', D.failedPayments, {lowerIsBetter:true, go:isAdmin?'stripe':null})+
       (function(){ if(!HQ.unitEcon) return ''; var U=HQ.unitEcon(); return plRow('LTV (working number)', U.months+' months kept × '+HQ.money(U.price)+' a week', {value:U.ltv, prev:null}, {fmt:'money'}); })()+
+      (D.pastStay ? plRow('Past clients stayed', 'Stripe, first to last payment · '+num(D.pastStay.n)+' past clients · median '+num(D.pastStay.medianMonths,1)+' months', {value:D.pastStay.avgMonths, prev:null}, {fmt:'dp1', go:isAdmin?'stripe':null})+
+        plRow('Paid per past client', 'Stripe: what a client who left really paid in total', {value:D.pastStay.avgPaid, prev:null}, {fmt:'money', go:isAdmin?'stripe':null}) : '')+
       plRow('Paid per client so far', 'average paid per client, all of Stripe', D.ltv, {fmt:'money', go:isAdmin?'stripe':null})+
       plRow('Referrals', 'applications through a referral link', D.referrals)+
     '</div><p class="pl-note">'+(state.deliveryError?'Couldn’t load client counts ('+esc(state.deliveryError)+'). ':'')+'Active clients come from 1FIT’s active list (checked daily). Money rows come from Stripe until Newie is connected.</p>';

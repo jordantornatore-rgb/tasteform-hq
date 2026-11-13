@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.9.0';
+  HQ.VERSION = '3.9.1';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -952,7 +952,9 @@
       // same count as the Revenue page's Overdue box: current 1FIT clients past their usual payment date
       // (sum.risks also holds every unpaid Stripe invoice of the last 400 days, past clients included)
       failedPayments: m(stripeOn && Array.isArray(state.stripe.customers) ? state.stripe.customers.filter(function (c) { return c && c.status === 'Overdue' && c.in1Fit !== false && c.nextDue; }).length : null, null),
-      ltv: m(stripeOn && HQ.isNum(sum.avgLifetimeValue) ? sum.avgLifetimeValue : null, null)
+      ltv: m(stripeOn && HQ.isNum(sum.avgLifetimeValue) ? sum.avgLifetimeValue : null, null),
+      // what past clients really did, from Stripe (first to last payment plus one usual gap); checks the working numbers
+      pastStay: HQ.stripeRetention(stripeOn ? state.stripe.customers : null)
     };
 
     // --- the one line at the top: where people drop out between content and a call (facts only, no targets yet)
@@ -1238,6 +1240,23 @@
   // read in Ads Manager; earlier spend is sunk) / clients who came from ads (Ben R, Aaron A, Sami E, Laini G, Charbel Y).
   HQ.UNIT_ECON = { retentionMonths: 4.2, pricePerWeek: 125, set: '2026-11-13', realJoinDates: false,
     baseline: { from: '2026-01-01', to: '2026-11-13', adSpend: 5370, clients: 5 } };
+  // Past clients in Stripe (status "Past client": paid before, no longer in 1FIT): how long they paid for and what
+  // they paid in total. Stay = first to last payment plus one usual gap between payments (a month with one payment).
+  HQ.stripeRetention = function (customers) {
+    if (!Array.isArray(customers)) return null;
+    var D = 86400000, rows = customers.filter(function (c) { return c && c.status === 'Past client' && c.firstPaid && c.lastPaid && HQ.isNum(c.totalPaid); });
+    if (!rows.length) return null;
+    var months = rows.map(function (c) {
+      var a = Date.parse(c.firstPaid), b = Date.parse(c.lastPaid), n = +c.paymentsCount || 1;
+      if (isNaN(a) || isNaN(b)) return null;
+      var gap = n > 1 ? (b - a) / (n - 1) : 30.44 * D;
+      return ((b - a) + gap) / (30.44 * D);
+    }).filter(function (x) { return x != null; });
+    var sorted = months.slice().sort(function (x, y) { return x - y; });
+    var paid = rows.reduce(function (t, c) { return t + c.totalPaid; }, 0);
+    return { n: months.length, avgMonths: Math.round(months.reduce(function (t, x) { return t + x; }, 0) / months.length * 10) / 10,
+      medianMonths: Math.round(sorted[Math.floor(sorted.length / 2)] * 10) / 10, avgPaid: Math.round(paid / rows.length) };
+  };
   HQ.unitEcon = function () {
     var U = HQ.UNIT_ECON, b = U.baseline;
     var weeks = Math.round(U.retentionMonths * 52 / 12 * 10) / 10, ltv = Math.round(weeks * U.pricePerWeek);

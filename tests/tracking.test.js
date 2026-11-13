@@ -25,5 +25,16 @@ check('payments and first-time payers counted', () => { assert.strictEqual(P.sal
 // overdue = current 1FIT clients past their usual date (the Revenue page's Overdue box), not every unpaid invoice
 check('delivery money rows from Stripe', () => { assert.strictEqual(P.delivery.mrr.value, 1872); assert.strictEqual(P.delivery.failedPayments.value, 2); assert.strictEqual(P.delivery.ltv.value, 1587); });
 check('refunds all time passed through', () => assert.strictEqual(P.sales.refundsAllTime, 50));
+
+// past-client stay and spend from Stripe (checks the working 4.2 months / LTV)
+{
+  const R = HQ.stripeRetention([
+    { status: 'Past client', firstPaid: '2026-01-01', lastPaid: '2026-03-02', paymentsCount: 3, totalPaid: 1500 },
+    { status: 'Past client', firstPaid: '2026-05-01', lastPaid: '2026-05-01', paymentsCount: 1, totalPaid: 500 },
+    { status: 'Active', firstPaid: '2025-01-01', lastPaid: '2026-11-01', paymentsCount: 22, totalPaid: 9000 }
+  ]);
+  check('stripe retention: past clients only, stay = first to last + one gap', () => { assert.strictEqual(R.n, 2); assert.strictEqual(R.avgPaid, 1000); assert.ok(R.avgMonths > 1.9 && R.avgMonths < 2.1, String(R.avgMonths)); });
+  check('stripe retention: null without data', () => assert.strictEqual(HQ.stripeRetention(null), null));
+}
 console.log(`tracking: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
