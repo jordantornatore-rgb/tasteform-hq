@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.7.1 — 13 Nov 2026 (Music on voice-only versions)
+
+- Versions the new system builds have **no music in the file** (`voiceOnly: true` on the variant, with `originalPreviewUrl` = the voice-only file). On those, the Sound editor now shows **▶ Preview with my video**: it plays that version with the song underneath, live, using the part of the song in the box and the volume slider.
+- Which version it plays: the one you picked to post, else the winner, else the one you last watched in Phone preview, else the main version; with none of those, the newest version with no music (the note under the picker says which). A picked version that already has music gets no live preview, so the music is never doubled. `video.spare` / `video.retired` are never previewed.
+- Note under the picker: "This version has no music yet. Pick a song and press Save; the Mac mixes it in within about 20 minutes." Phone preview tabs mark versions with **no music yet**.
+- On Save, the Mac's next run mixes the song (your volume and start, voice at 100) into every voice-only version and uploads the mix as that version's posting file; the voice-only file is kept for later changes (tasteform-video `scripts/autopost/voiceonly.mjs`).
+- Tests: `node tests/sound-preview.test.js` (24 checks, mock data).
+
 ## 3.7.0 — 13 Nov 2026 (Time per client + Tell Claude)
 
 - **Time per client.** Client steps (onboarding call / plan / setup, reviewing check-ins, feedback / Looms, check-in calls, client messages) ask "who for?" with your active 1FIT clients, plus "Several / general". The client rides on the block (`c`, `cn`), shows in the day list, and can be changed in Edit or added to any block. Switching client on the same step starts a new block.

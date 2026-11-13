@@ -3798,8 +3798,8 @@ table.scores td{border-color:var(--border);}
       var cur=q.sound&&q.sound.bankId?String(q.sound.bankId):'', vol=q.sound&&HQ.isNum(q.sound.musicVolume)?Math.min(30,q.sound.musicVolume):(q.sound&&HQ.isNum(q.sound.musicSoundVolume)?Math.min(30,q.sound.musicSoundVolume):10);
       body='<div class="ce-sndhead"><span class="ce-k" style="margin:0">Sound</span><label class="ce-toggle"><input type="checkbox" data-ce-sndgroup'+(ceSndGrouped()?' checked':'')+'> Group by video type</label></div><select class="input" data-ce-f="soundId" aria-label="Sound">'+ceSoundOptions(cur, ceSndGrouped())+'</select><div class="f-note" data-ce-sndwhen>'+esc(ceSoundWhen(cur))+'</div><label>Music volume <output data-ce-volout>'+vol+'</output><input type="range" min="0" max="30" step="1" value="'+vol+'" data-ce-f="volume" aria-label="Music volume"></label>'+
         (function(){ var curS=bank.find(function(x){ return String(x.id)===cur; }), st=q.sound&&HQ.isNum(q.sound.startS)?q.sound.startS:(curS&&HQ.isNum(curS.partS)?curS.partS:0); return ceWaveHtml(curS, st, ceVideoLen(q)); })()+
-        '<div class="acts"><button type="button" class="btn small" data-ce-snd="track">▶ Play this part</button>'+(q.video&&(q.video.originalPreviewUrl)?'<button type="button" class="btn small" data-ce-snd="mix">▶ Preview with my video</button>':'')+'<button type="button" class="btn small" data-ce-snd="stop">■ Stop</button></div><div data-ce-sndplay></div>'+
-        '<div class="f-note">Mixed into the video file; your voice stays at 100. Talking heads: 8–12. Drag the box along the song to pick the part (like Instagram), listen, then Save: the video re-renders with it. The dashed line marks the chorus (or Instagram’s part of the song).'+(q.video&&q.video.originalPreviewUrl?'':' "Preview with my video" appears on finished edits you add yourself.')+'</div>';
+        (function(){ var src=ceSoundSource(q), live=!!(src&&!src.baked&&(src.url||src.path)); return ceSoundSourceNote(q, src)+'<div class="acts"><button type="button" class="btn small" data-ce-snd="track">▶ Play this part</button>'+(live?'<button type="button" class="btn small" data-ce-snd="mix">▶ Preview with my video</button>':'')+'<button type="button" class="btn small" data-ce-snd="stop">■ Stop</button></div><div data-ce-sndplay></div>'+
+        '<div class="f-note">Mixed into the video file; your voice stays at 100. Talking heads: 8–12. Drag the box along the song to pick the part (like Instagram), listen, then Save: the video re-renders with it. The dashed line marks the chorus (or Instagram’s part of the song).'+(src?'':' "Preview with my video" appears on finished edits you add yourself and on versions built with no music.')+'</div>'; })();
     }
     else if(section==='platforms'){ var have=cePlatforms(q); body='<div class="ce-chips">'+['INSTAGRAM','TIKTOK','YOUTUBE','LINKEDIN'].map(function(pl){ return '<label class="chip grey" style="min-height:36px;cursor:pointer"><input type="checkbox" data-ce-pl="'+pl+'"'+(have.indexOf(pl)>=0?' checked':'')+'> '+esc(CE_PLATFORM_SHORT[pl])+'</label>'; }).join('')+'</div><div class="f-note">TikTok posts once it is connected in Outstand.</div>'; }
     return '<div class="ce-editor" data-ce-editor="'+section+'">'+body+acts+'</div>';
@@ -4094,7 +4094,7 @@ table.scores td{border-color:var(--border);}
       var wk=t.closest('[data-cewk]'); if(wk){ var d=parseInt(wk.getAttribute('data-cewk'),10); ceWeekOffset = d===0 ? 0 : ceWeekOffset+d; renderNow('content'); return; }
       var cw=t.closest('[data-cecal]'); if(cw){ var d2=parseInt(cw.getAttribute('data-cecal'),10); ceCalOffset = d2===0 ? 0 : ceCalOffset+d2; renderNow('content'); return; }
       var pl=t.closest('[data-ce-play]'); if(pl){ if(ceDrag.moved) return; ceStopHover(); ceCloseOverlays(); ceOpenId=null; ceEdit=null; cePreview={id:pl.getAttribute('data-ce-play'), v:null, force:true}; ceRenderSheet(); return; }
-      var pv=t.closest('[data-ce-pv]'); if(pv&&cePreview){ cePreview.v=pv.getAttribute('data-ce-pv'); cePreview.force=true; ceRenderSheet(); return; }
+      var pv=t.closest('[data-ce-pv]'); if(pv&&cePreview){ cePreview.v=pv.getAttribute('data-ce-pv'); ceLastPv[cePreview.id]=cePreview.v; cePreview.force=true; ceRenderSheet(); return; }
       var mo=t.closest('[data-ce-more]'); if(mo&&cePreview){ cePreview.more=true; cePreview.force=true; ceRenderSheet(); return; }
       var snb=t.closest('[data-ce-snd]'); if(snb){ ceSndPlay(snb.getAttribute('data-ce-snd'), snb); return; }
       var igp=t.closest('[data-ce-igpart]'); if(igp){ var ww=igp.closest('.ce-wave-wrap'); ceWaveSet(ww, parseFloat(igp.getAttribute('data-ce-igpart'))||0); return; }
@@ -4828,7 +4828,7 @@ table.scores td{border-color:var(--border);}
     var curVer=vars.find(function(x){ return x.v===cur; })||{};
     var cap=ceText(curVer.caption || q.caption), at=cePostAtMs(q);
     var html='<div class="ce-sheet-head"><div><div class="ce-chips">'+ceStatusChip(q.status,q)+cePlatformChips(q)+'</div><h2 style="margin-top:6px">'+esc(ceText(q.title)||'Untitled')+'</h2></div><button type="button" class="icon-btn" data-ce="close" aria-label="Close" id="ceSheetClose">✕</button></div><div class="ce-phone">';
-    if(vars.length>1) html+='<div class="ce-vtabs" role="tablist" aria-label="Versions">'+vars.map(function(x){ var t=trials.find(function(tt){ return tt.v===x.v; })||{}, m=t.metrics; return '<button type="button" role="tab" class="ce-vtab" data-ce-pv="'+esc(x.v)+'" aria-selected="'+(x.v===cur?'true':'false')+'"><b>'+esc(x.v)+(win&&win.v===x.v?' 🏆':'')+'</b><span>'+esc(ceText(x.diff)||'–')+'</span>'+(m&&HQ.isNum(m.views)?'<span class="n">'+num(m.views)+' views</span>':'')+'</button>'; }).join('')+'</div>';
+    if(vars.length>1) html+='<div class="ce-vtabs" role="tablist" aria-label="Versions">'+vars.map(function(x){ var t=trials.find(function(tt){ return tt.v===x.v; })||{}, m=t.metrics; return '<button type="button" role="tab" class="ce-vtab" data-ce-pv="'+esc(x.v)+'" aria-selected="'+(x.v===cur?'true':'false')+'"><b>'+esc(x.v)+(win&&win.v===x.v?' 🏆':'')+'</b><span>'+esc(ceText(x.diff)||'–')+'</span>'+(ceIsVoiceOnly(x)&&!(x.mixedSound&&x.mixedSound.key)?'<span class="n">no music yet</span>':'')+(m&&HQ.isNum(m.views)?'<span class="n">'+num(m.views)+' views</span>':'')+'</button>'; }).join('')+'</div>';
     var vtag=ceVideoTag(q, vars.length?cur:null, 'ce-phone-video');
     html+='<div class="ce-phone-frame">'+(vtag||'<div class="ce-phone-empty">'+(['needs_script','to_film','filmed','editing'].indexOf(q.status)>=0?'Not edited yet · '+esc(ceStatusLabel(q.status)):'No preview uploaded')+'</div>')+'</div>';
     html+='<div class="ce-phone-user"><span class="av" aria-hidden="true">J</span><b>jordantornatore</b></div>';
@@ -5200,6 +5200,32 @@ table.scores td{border-color:var(--border);}
 
   /* --- Sound picker: hear the song from the chosen point, or your video with the song underneath (live, before saving) --- */
   var ceSnd={audio:null, video:null, timer:null, mode:null};
+  // Which video "Preview with my video" plays the song under. Voice-only versions (pipeline builds with no music in the
+  // file: variant.voiceOnly + originalPreviewUrl) use the version he picked (winner pick, winner, last tab watched in Phone
+  // preview, else the main version) when that one is voice-only; a picked version that already has music gets no live
+  // preview (it would double the music). No pick: the newest voice-only version. Finished edits he added keep video.originalPreviewUrl.
+  var ceLastPv={};
+  function ceIsVoiceOnly(x){ return !!(x && x.voiceOnly===true && (x.originalPreviewUrl || x.voiceOnlyStoragePath)); }
+  function ceSoundSource(q){
+    var vid=(q&&q.video)||{}, vars=Array.isArray(vid.variants)?vid.variants:[], voice=vars.filter(ceIsVoiceOnly);
+    if(!voice.length) return vid.originalPreviewUrl ? {url:vid.originalPreviewUrl, v:null, why:'edit'} : null;
+    var find=function(v){ return v ? vars.find(function(x){ return x.v===v; })||null : null; };
+    var mk=function(x, why){ return {url:x.originalPreviewUrl||null, path:x.originalPreviewUrl?null:x.voiceOnlyStoragePath, v:x.v, why:why, ver:x, voice:voice}; };
+    var picks=[[(q.winnerPlan||{}).pick,'picked'],[(q.winner||{}).v,'winner'],[ceLastPv[q.id],'watched']];
+    for(var i=0;i<picks.length;i++){ var x=find(picks[i][0]); if(!x) continue; return ceIsVoiceOnly(x) ? mk(x, picks[i][1]) : {baked:x, why:picks[i][1], voice:voice}; }
+    var bet=vars.find(function(x){ return x.bet; })||vars.find(function(x){ return vid.previewUrl && x.mediaUrl===vid.previewUrl; }); if(ceIsVoiceOnly(bet)) return mk(bet, 'main'); // video.spare / video.retired are never previewed
+    var newest=voice.slice().sort(function(a,b){ return String(b.v).localeCompare(String(a.v), 'en', {numeric:true}); })[0];
+    return mk(newest, 'newest');
+  }
+  function ceVoiceList(voice){ var vs=voice.map(function(x){ return x.v; }); return vs.length>3 ? vs[0]+'–'+vs[vs.length-1] : vs.join(', '); }
+  function ceSoundSourceNote(q, src){
+    if(!src || src.why==='edit') return '';
+    var whyTxt={picked:'the version you picked to post', winner:'the winning version', watched:'the version you last watched', main:'the main version', newest:'the newest version with no music'};
+    if(src.baked) return '<div class="f-note" data-ce-sndsrc>'+esc(src.baked.v)+' ('+esc(whyTxt[src.why]||'your pick')+') already has music in it, so there\u2019s no live preview for it. Open \u25b6 Phone preview and tap one of '+esc(ceVoiceList(src.voice))+' to hear songs under that one. Saving a song still adds it to '+esc(ceVoiceList(src.voice))+'.</div>';
+    var x=src.ver, m=x.mixedSound;
+    var head=m&&m.key ? esc(x.v)+' has '+esc(m.bankId?m.title:'no music')+' from your last save. Pick a song and press Save to change it; the Mac mixes it in within about 20 minutes.' : 'This version has no music yet. Pick a song and press Save; the Mac mixes it in within about 20 minutes.';
+    return '<div class="f-note" data-ce-sndsrc>'+head+' "Preview with my video" plays '+esc(x.v)+' ('+esc(whyTxt[src.why])+')'+(src.voice.length>1?'. The song goes into every version with no music ('+esc(ceVoiceList(src.voice))+')':'')+(((q.video||{}).variants||[]).some(function(y){ return !ceIsVoiceOnly(y); })?'; the older versions keep their own music':'')+'.</div>';
+  }
   // "Trial reel?" dropdown: Yes = trial every version as soon as it's approved, the best one posts to everyone 72 h later.
   function ceTrialPicker(q){
     var c=q.trialChoice==='on'||q.trialChoice==='off'?q.trialChoice:'', vs=(q.video&&Array.isArray(q.video.variants))?q.video.variants.length:0;
@@ -5323,12 +5349,12 @@ table.scores td{border-color:var(--border);}
       var wr=root.querySelector('.ce-wave-wrap'), win=Math.min(parseFloat(wr&&wr.getAttribute('data-win'))||30, dur), began=Date.now();
       if(mode==='track'){ a.volume=1; a.currentTime=st; await a.play(); box.innerHTML='<div class="f-note">Playing the part in the box on repeat (full volume, so you can hear it). Drag the box while it plays.</div>';
         ceSnd.timer=setInterval(function(){ var sr=root.querySelector('[data-ce-f="start"]'), ns=parseFloat(sr&&sr.value)||0; if(ns!==st){ st=ns; a.currentTime=st; } if(a.currentTime>=st+win||a.ended){ a.currentTime=st; a.play().catch(function(){}); } ceWaveHead(wr, a.currentTime-st); if(Date.now()-began>180000) ceSndStop(); }, 100); return; }
-      var q=ceFindSlot(ceOpenId), v=document.createElement('video'); v.className='ce-video'; v.controls=true; v.setAttribute('playsinline',''); v.setAttribute('data-ce-sndvideo',''); v.src=q.video.originalPreviewUrl; box.innerHTML=''; box.appendChild(v); ceSnd.video=v; a.volume=Math.min(1,vol);
+      var q=ceFindSlot(ceOpenId), src=ceSoundSource(q); if(!src||src.baked||!(src.url||src.path)){ box.innerHTML='<div class="f-note">This version already has music in it.</div>'; ceSndStop(); return; } var v=document.createElement('video'); v.className='ce-video'; v.controls=true; v.setAttribute('playsinline',''); v.setAttribute('data-ce-sndvideo',''); if(src.v) v.setAttribute('data-ce-sndv', src.v); v.src=src.url||await ceSignedPreview(src.path); box.innerHTML=''; box.appendChild(v); ceSnd.video=v; a.volume=Math.min(1,vol);
       var sync=function(force){ var want=(st+v.currentTime)%dur; if(force||Math.abs(a.currentTime-want)>0.25) a.currentTime=want; };
       v.addEventListener('play', function(){ sync(true); a.play().catch(function(){}); }); v.addEventListener('pause', function(){ a.pause(); }); v.addEventListener('seeked', function(){ sync(true); }); v.addEventListener('ended', function(){ a.pause(); });
       ceSnd.timer=setInterval(function(){ if(!v.paused) sync(false); var vr=root.querySelector('[data-ce-f="volume"]'), sr=root.querySelector('[data-ce-f="start"]'); if(vr) a.volume=Math.min(1,(parseInt(vr.value,10)||0)/100); if(sr && parseFloat(sr.value)!==st){ st=parseFloat(sr.value)||0; sync(true); } ceWaveHead(wr, v.currentTime); }, 150);
       await v.play().catch(function(){});
-      var note=document.createElement('div'); note.className='f-note'; note.textContent='Your video with the song underneath, as it will be mixed. Drag the box or the volume while it plays.'; box.appendChild(note);
+      var note=document.createElement('div'); note.className='f-note'; note.textContent=(src.v?src.v+' (no music in it) ':'Your video ')+'with the song underneath, as it will be mixed. Drag the box or the volume while it plays.'; box.appendChild(note);
     }catch(e){ box.innerHTML='<div class="ce-note">Couldn’t play it: '+esc(e.message||String(e))+'</div>'; ceSndStop(); }
   }
 
