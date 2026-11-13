@@ -3214,7 +3214,7 @@ table.scores td{border-color:var(--border);}
       anKpi('Reels + posts', num(a.cur.posts), a.change.posts, vs)+
       anKpi('Views', num(a.cur.views), a.change.views, vs, a.cur.posts && a.cur.viewsHave<a.cur.posts ? a.cur.viewsHave+' of '+a.cur.posts+' posts have views' : '')+
       anKpi('Accounts reached', num(ac.reached), acc.change.reached, acc.cur?(acc.prev?vs:'comparison builds from 4 Nov'):accNote, acc.cur?'Instagram\'s count, last '+a.period+' days':'')+
-      anKpi('Net followers', acc.netFollowers==null?'–':(acc.netFollowers>0?'+':'')+num(acc.netFollowers), null, acc.netFollowers==null?(acc.followers!=null?'counting daily from 4 Nov':accNote):(acc.followers!=null?num(acc.followers)+' followers now':''))+
+      anKpi('Net followers', acc.netFollowers==null?'–':(acc.netFollowers>0?'+':'')+num(acc.netFollowers), acc.netPartial?null:HQ.pctChange(acc.netFollowers, acc.netPrev), acc.netFollowers==null?(acc.followers!=null?'needs two mornings of counts':accNote):(acc.netPartial?'since '+(HQ.fmtDay(acc.netFrom,'short')||acc.netFrom)+' (tracking start)':(acc.netPrev!=null?vs:'')), acc.followers!=null?num(acc.followers)+' followers now':'')+
       anKpi('Engagement / 1K views', a.cur.engPer1k==null?'–':num(a.cur.engPer1k,1), a.change.engPer1k, vs, 'likes, comments, saves, shares')+
       anKpi('Typical reel', num(a.cur.typicalReel), a.change.typicalReel, vs, a.cur.reels? 'median views of '+a.cur.reels+' '+HQ.plural(a.cur.reels,'reel') : 'no reels this window')+
       anKpi('Watch time', anDur(a.cur.watchTimeSec), a.change.watchTimeSec, a.cur.watchHave?vs:'not shown on Instagram web', a.cur.watchHave && a.cur.watchHave<a.cur.reels ? a.cur.watchHave+' of '+a.cur.reels+' reels' : (a.cur.avgWatchSec!=null?'avg '+anDur(a.cur.avgWatchSec)+' per view':''))+
@@ -3304,7 +3304,7 @@ table.scores td{border-color:var(--border);}
     var none=!acc.cur && acc.followers==null;
     h+='<div class="kpis an-kpis">'+
       anKpi('Followers', num(acc.followers), null, acc.followersDay?'read '+(HQ.fmtDay(acc.followersDay,'short')||acc.followersDay):'from tonight\'s scan')+
-      anKpi('Net followers', acc.netFollowers==null?'–':(acc.netFollowers>0?'+':'')+num(acc.netFollowers), null, 'last '+a.period+' days')+
+      anKpi('Net followers', acc.netFollowers==null?'–':(acc.netFollowers>0?'+':'')+num(acc.netFollowers), acc.netPartial?null:HQ.pctChange(acc.netFollowers, acc.netPrev), acc.netPartial?'since '+(HQ.fmtDay(acc.netFrom,'short')||acc.netFrom)+' (tracking start)':'last '+a.period+' days', acc.netFrom&&acc.netTo?'count '+(HQ.fmtDay(acc.netFrom,'short')||'')+' → '+(HQ.fmtDay(acc.netTo,'short')||''):'')+
       anKpi('Follows', num(ac.follows), acc.change.follows, acc.cur&&ac.follows==null?'not shown on Instagram web':(acc.cur?vs:'from tonight\'s scan'))+
       anKpi('Unfollows', num(ac.unfollows), acc.change.unfollows, acc.cur&&ac.unfollows==null?'not shown on Instagram web':(acc.cur?vs:'from tonight\'s scan'), '', true)+
       '</div>';
@@ -5490,7 +5490,7 @@ table.scores td{border-color:var(--border);}
     plSeg(); var d = plData(), L = d.leads, T = d.traffic, S = d.sales, D = d.delivery, html = planCard();
     if(d.leak) html += '<div class="pl-leak"><div class="k">Where people drop off · '+esc(d.range.label)+'</div><p>'+esc(d.leak.text)+'</p></div>';
     html += '<div class="pl-grid">'+
-      plCard('traffic','Traffic', T.headline, 'new followers from posts')+
+      plCard('traffic','Traffic', T.headline, T.netSince ? 'net new followers since '+(HQ.fmtDay(T.netSince,'short')||T.netSince) : 'net new followers')+
       plCard('leadflow','Leads', L.headline, 'applications')+
       (isAdmin ? plCard('sales','Sales', S.headline, 'cash collected', S.connected.stripe ? null : '<span class="pl-flat">'+(S.connected.stripeOff?'waiting on Newie':'Stripe not connected')+'</span>', true) : '')+
       plCard('delivery','Delivery', D.headline, 'active clients', D.headline.value==null ? '<span class="pl-flat">'+(state.deliveryError?'couldn’t load':'loading…')+'</span>' : '<span class="pl-flat">'+num(D.churned.value)+' left · '+(D.avgWeeks.value==null?'–':num(D.avgWeeks.value,1))+' wks avg stay</span>')+
@@ -5505,8 +5505,9 @@ table.scores td{border-color:var(--border);}
     plSeg(); var d = plData(), T = d.traffic, acc = T.accountLevel ? null : 'Instagram only gives 7 and 30-day totals';
     var ig = function(sc){ return sc ? 'https://www.instagram.com/reel/'+encodeURIComponent(sc)+'/' : null; };
     var html = '<div class="pl-list">'+
-      plRow('New followers', 'from posts published '+d.range.label, T.headline, {go:'analytics'})+
-      plRow('Follower count', T.netFollowers!=null ? (T.netFollowers>=0?'+':'')+num(T.netFollowers)+' '+d.range.label : (T.followersSince?'tracked daily since '+HQ.fmtDay(T.followersSince,'short'):null), T.followersNow)+
+      plRow('Net new followers', T.netSince ? 'since '+(HQ.fmtDay(T.netSince,'short')||T.netSince)+' (tracking started then)' : 'follower count change, '+d.range.label, T.headline, {go:'analytics'})+
+      plRow('Follower count', 'read each morning from your profile', T.followersNow)+
+      plRow('Follows credited to posts', 'only what Instagram ties to a post published '+d.range.label, T.postFollows, {go:'analytics'})+
       plRow('Views', 'posts published '+d.range.label, T.views, {fmt:'compact', go:'analytics'})+
       plRow('Accounts reached', acc || 'whole account', T.reach, {fmt:'compact'})+
       plRow('Non-follower reach', 'average per post', T.nonFollowerPct, {fmt:'pct'})+

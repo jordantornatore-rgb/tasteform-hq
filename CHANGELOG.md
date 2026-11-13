@@ -2,6 +2,10 @@
 
 
 
+## 3.6.2 — Follower growth fixed (13 Nov 2026)
+- Traffic card and Traffic page now show **net new followers from your follower count** (read each morning), not the handful of follows Instagram credits to individual posts. Those are still listed separately as "Follows credited to posts".
+- `HQ.followerChange`: exact count difference between the morning before the window and the latest reading; tolerates missed mornings; when tracking started inside the window it says "since 4 Nov" instead of pretending it covers the whole period. Used by Analytics (Overview + Audience) too, with a comparison to the previous window once there's data for it.
+
 ## 3.6.1 — Time page on Sydney time (13 Nov 2026)
 - The Time page now uses Sydney days and clock times, whatever the phone's clock says (it followed the device before, so in Bali it logged Bali time). Every other page was already on Sydney time.
 

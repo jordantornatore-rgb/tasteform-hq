@@ -262,5 +262,14 @@ test('Instagram analytics: windows, deltas, medians, account rows, scatter fallb
   assert.strictEqual(c.scatter.yKey, 'avgWatchSec'); assert.strictEqual(c.cur.watchTimeSec, 200); assert.strictEqual(c.cur.watchHave, 2);
 });
 
+test('follower change: exact window, gaps, tracking started mid-window', () => {
+  const by = {}; [['2026-11-04', 7860], ['2026-11-06', 7909], ['2026-11-12', 8009]].forEach(([d, f]) => { by[d] = { followers: f }; });
+  const w7 = HQ.followerChange(by, '2026-11-07', '2026-11-13');
+  assert.strictEqual(w7.net, 100); assert.strictEqual(w7.startDay, '2026-11-06'); assert.strictEqual(w7.endDay, '2026-11-12'); assert.strictEqual(w7.partial, false);
+  const w30 = HQ.followerChange(by, '2026-10-15', '2026-11-13');
+  assert.strictEqual(w30.net, 149); assert.strictEqual(w30.partial, true); assert.strictEqual(w30.startDay, '2026-11-04');
+  assert.strictEqual(HQ.followerChange({}, '2026-11-07', '2026-11-13').net, null);
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

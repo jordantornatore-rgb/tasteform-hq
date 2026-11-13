@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.6.1';
+  HQ.VERSION = '3.6.2';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -735,6 +735,24 @@
       avgWatchSec: avgW.length ? Math.round(avgW.reduce(function (a, p) { return a + p.avgWatchSec; }, 0) / avgW.length * 10) / 10 : null, avgWatchHave: avgW.length
     };
   }
+
+  /* Follower change between two days from the profile follower count read each morning (exact).
+     End = the latest reading on or up to 2 days before `to`; start = the reading on the day before `from`
+     (or up to 3 days earlier). If tracking began inside the window, start = the first reading and `partial` is true,
+     so the dashboard says "since <day>" instead of passing a shorter period off as the full one. */
+  HQ.followerChange = function (byDay, from, to) {
+    var endDay = null, startDay = null, i;
+    for (i = 0; i < 3 && !endDay; i++) { var e = HQ.addDays(to, -i); if (byDay[e] && HQ.isNum(byDay[e].followers)) endDay = e; }
+    for (i = 1; i <= 4 && !startDay; i++) { var b = HQ.addDays(from, -i); if (byDay[b] && HQ.isNum(byDay[b].followers)) startDay = b; }
+    var partial = false;
+    if (!startDay) {
+      var inside = Object.keys(byDay).filter(function (k) { return k >= from && k <= to && HQ.isNum(byDay[k].followers); }).sort();
+      if (inside.length) { startDay = inside[0]; partial = true; }
+    }
+    if (!endDay || !startDay || startDay >= endDay) return { net: null, startDay: startDay, endDay: endDay, partial: partial };
+    return { net: byDay[endDay].followers - byDay[startDay].followers, startDay: startDay, endDay: endDay, partial: partial,
+      startFollowers: byDay[startDay].followers, endFollowers: byDay[endDay].followers };
+  };
   // accountDaily rows: {id/date: 'YYYY-MM-DD', followers, p7:{reached,views,follows,unfollows,interactions}, p30:{...}, p90:{...}}
   HQ.igAnalytics = function (posts, accountDaily, today, periodDays) {
     var N = HQ.IG_PERIODS.indexOf(periodDays) >= 0 ? periodDays : 30;
@@ -763,7 +781,10 @@
     var fEnd = null, fEndDay = null; for (var j = 0; j < 3 && fEnd == null; j++) { var ek = HQ.addDays(today, -j); if (byDay[ek] && HQ.isNum(byDay[ek].followers)) { fEnd = byDay[ek].followers; fEndDay = ek; } }
     var startKey = HQ.addDays(curFrom, -1), fStart = byDay[startKey] && HQ.isNum(byDay[startKey].followers) ? byDay[startKey].followers : null;
     account.followers = fEnd; account.followersDay = fEndDay;
-    account.netFollowers = fEnd != null && fStart != null ? fEnd - fStart : (accNow && HQ.isNum(accNow.follows) && HQ.isNum(accNow.unfollows) ? accNow.follows - accNow.unfollows : null);
+    var fc = HQ.followerChange(byDay, curFrom, today);
+    account.netFollowers = fc.net; account.netFrom = fc.startDay; account.netTo = fc.endDay; account.netPartial = fc.partial;
+    if (account.netFollowers == null && accNow && HQ.isNum(accNow.follows) && HQ.isNum(accNow.unfollows)) account.netFollowers = accNow.follows - accNow.unfollows;
+    var fcp = HQ.followerChange(byDay, prevFrom, prevTo); account.netPrev = fcp.partial ? null : fcp.net;
     // daily net change series (only days whose previous day was also read)
     var netSeries = HQ.dayRange(curFrom, today).map(function (d) {
       var a = byDay[HQ.addDays(d, -1)], b = byDay[d];
@@ -832,10 +853,13 @@
     var fStartRow = byDay[HQ.addDays(R.from, -1)], fStart = fStartRow && HQ.isNum(fStartRow.followers) ? fStartRow.followers : null;
     var accDays = Object.keys(byDay).sort();
     var tf = HQ.tfSum(state.tfDaily, R.from, R.to), tfp = HQ.tfSum(state.tfDaily, R.prevFrom, R.prevTo);
+    var fc = HQ.followerChange(byDay, R.from, R.to), fcp = HQ.followerChange(byDay, R.prevFrom, R.prevTo);
     var top = curPosts.filter(function (p) { return HQ.isNum(p.follows); }).sort(function (a, b) { return b.follows - a.follows; })[0] || null;
     var traffic = {
-      headline: m(cs.follows, ps.follows, { label: 'new followers from posts' }),
-      followersNow: fEnd, netFollowers: fEnd != null && fStart != null ? fEnd - fStart : null, followersSince: accDays[0] || null,
+      // headline = real follower growth from the daily follower count; post-credited follows are only the ones Instagram ties to a post
+      headline: m(fc.net, fcp.partial ? null : fcp.net, { label: 'net new followers', since: fc.partial ? fc.startDay : null, from: fc.startDay, to: fc.endDay }),
+      postFollows: m(cs.follows, ps.follows, { label: 'follows credited to posts' }),
+      followersNow: fEnd, netFollowers: fc.net, netSince: fc.partial ? fc.startDay : null, followersSince: accDays[0] || null,
       views: m(cs.views, ps.views), reach: m(A('reached'), AP('reached')), accountViews: m(A('views'), AP('views')),
       accountLevel: !!pk,
       nonFollowerPct: nf.length ? Math.round(nf.reduce(function (a, p) { return a + p.viewersNonFollowersPct; }, 0) / nf.length) : null,
