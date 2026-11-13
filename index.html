@@ -2141,7 +2141,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.9.1"></script>
+<script src="hq-core.js?v=3.9.2"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -2422,6 +2422,9 @@ table.scores td{border-color:var(--border);}
     var fu = HQ.followUps(state.dms, Date.now(), false), mfu = HQ.followUps(state.dms, Date.now(), true);
     var waiting = HQ.waiting(state.dms), unworked = HQ.appsUnworked(state.tfResponses, Date.now(), 14);
     function badge(id, n){ var el=$(id); if(!el) return; el.hidden=!n; el.textContent=n; }
+    // DM-scan counts (follow-ups, magnets, DMs waiting) stay off the sidebar while the DM scan is paused (DM_SCAN_OK): they
+    // are built on a scan that is weeks old and shouted 238 / 211 overdue. The pages still open with their notes.
+    if(!DM_SCAN_OK){ fu = { due: 0 }; mfu = { due: 0 }; waiting = []; }
     badge('fuBadge', fu.due); badge('fuBadgeBb', fu.due); badge('magBadge', mfu.due); badge('magBadgeBb', mfu.due);
     badge('appsBadge', unworked.length); badge('appsBadgeBb', unworked.length);
     badge('dmsBadge', waiting.length); badge('dmsBadgeBb', waiting.length);
@@ -2454,7 +2457,8 @@ table.scores td{border-color:var(--border);}
     var greet = syd.h<12?'Morning':(syd.h<17?'Afternoon':'Evening');
     setText('todayGreeting', greet+(currentUser && currentUser.firstName ? ', '+currentUser.firstName : ''));
     var bits=[];
-    if(t.dmReady){ bits.push(t.counts.waiting?t.counts.waiting+' repl'+(t.counts.waiting===1?'y':'ies')+' waiting':'no replies waiting'); bits.push(t.counts.followUpsDue?t.counts.followUpsDue+' follow-up'+(t.counts.followUpsDue===1?'':'s')+' due':'no follow-ups due'); }
+    if(!DM_SCAN_OK) bits.push('DM numbers paused while the DM scan is fixed');
+    else if(t.dmReady){ bits.push(t.counts.waiting?t.counts.waiting+' repl'+(t.counts.waiting===1?'y':'ies')+' waiting':'no replies waiting'); bits.push(t.counts.followUpsDue?t.counts.followUpsDue+' follow-up'+(t.counts.followUpsDue===1?'':'s')+' due':'no follow-ups due'); }
     else bits.push('waiting for the first DM scan');
     if(t.counts.callsToday) bits.push(t.counts.callsToday+' call'+(t.counts.callsToday===1?'':'s')+' tonight');
     setText('todaySub', t.dateLabel+' · '+bits.join(' · '));
@@ -2481,6 +2485,9 @@ table.scores td{border-color:var(--border);}
         '<label class="field"><b>Close rate % <span class="est">estimate</span></b><input class="input" type="number" min="1" max="100" step="1" name="closeRate" value="'+Math.round((gd.closeRate||0)*100)+'"></label>'+
         '<button type="submit" class="btn primary">Save</button><span class="f-note" id="goalStatus">'+(g.currentSource==='stripe'?'Stripe overrides the typed recurring figure.':'Stripe will replace the typed figure once connected.')+'</span></form>';
     }
+    // 14 Nov 2026: the old $10K-by-31-Dec goal (typed estimates: $450 a client, 40% show, 70% close) contradicted the
+    // 2027 Master Plan, so the brief shows the same plan card as Home. meta/goal is untouched; delete this line to bring it back.
+    if(typeof planCard==='function') html = planCard();
     setHtml('goalStrip', html);
     var gf=$('goalForm'); if(gf) gf.addEventListener('submit', saveGoal);
 
