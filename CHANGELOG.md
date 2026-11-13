@@ -1,63 +1,12 @@
 # Changelog
 
+## 3.0.2 — 13 Nov 2026 (Revenue: every client payment)
 
-
-## 3.6.2 — Follower growth fixed (13 Nov 2026)
-- Traffic card and Traffic page now show **net new followers from your follower count** (read each morning), not the handful of follows Instagram credits to individual posts. Those are still listed separately as "Follows credited to posts".
-- `HQ.followerChange`: exact count difference between the morning before the window and the latest reading; tolerates missed mornings; when tracking started inside the window it says "since 4 Nov" instead of pretending it covers the whole period. Used by Analytics (Overview + Audience) too, with a comparison to the previous window once there's data for it.
-
-## 3.6.1 — Time page on Sydney time (13 Nov 2026)
-- The Time page now uses Sydney days and clock times, whatever the phone's clock says (it followed the device before, so in Bali it logged Bali time). Every other page was already on Sydney time.
-
-## 3.6.0 — Lead list from GoHighLevel (13 Nov 2026)
-- New admin-only Lead list (Leads → Needs follow-up, or Overview → Lead list): every GHL contact with funnel, applications, sales calls, stage, last message and nurture.
-- Follow up tab: people who reached out in the last 90 days and are waiting: messaged you with no reply (12h+), missed the call and not rebooked, applied with no call booked, no message from you yet, or you messaged 3+ days ago with no reply since. Clients and lost leads left out. Tap opens them in GHL.
-- Not in nurture tab (open leads with email or number, no nurture tag or pipeline) and Outside market tab (numbers not +61, +64, +44 or +1).
-- supabase/functions/ghl-leads (read-only GHL pull, hourly) writes public.hq_leads (admin-only RLS, migration 20261113_hq_leads.sql) and meta/ghlLeads. Needs deploying + a cron job.
-
-## 3.5.0 — CAC by funnel (13 Nov 2026)
-- Sales page: cost per client for each funnel and for all funnels, by month (last 6). Costs from meta/costs (Claude fills it from the month-end bank statement, no editor cost); ad spend from Meta campaigns named fasttrack / compounding; clients from GHL Closed / Won by funnel.
-- Works back from the plan's $250 max per client: the most each paid funnel can pay per showed call, booked call and lead, on the plan's rates (50% close, 70% show, 5 leads a sale) until there are 5 of his own in the last 90 days.
-- meta/costs added to the admin-only migration (still to apply).
-
-## 3.4.2 — 13 Nov 2026 (scorecard hours from Time)
-- Scorecard "Your hours" now comes from the Time page (every area except Lifestyle and Sleep, per plan week). Typing a number in still overrides it.
-
-## 3.4.1 — 12 Nov 2026 (polish pass)
-- One segmented-control style everywhere (7 days / 30 days / Month, Day / Week / Buy back, every range switch): small tracked caps, active = raised with a brass underline.
-- Home: plan card with brass label and a 3 px progress line, client count in Anton; Traffic / Leads / Sales / Delivery numbers in Anton at 52 px; Do today counts in Anton with row hover.
-- Frame: date as tracked caps (no monospace), proper light/dark icon (the ◐ glyph rendered broken), quieter account box and sign-out, scan/sync line in small caps. Phone: title truncates, date hidden, scroll padding so nothing hides under the bottom bar.
-
-## 3.4.0 — 12 Nov 2026 (new look)
-- Whole app reskinned: matte black (flat, no wood gradient or grid lines), graphite cards with hairline borders, no drop shadows, 4–8 px corners instead of pills, brass as the only accent.
-- Anton only for page titles and big numbers; section headings are small wide-tracked labels. Warnings are a hairline card with an accent edge instead of a beige slab.
-- Sidebar: black, outlined TF mark, active page = brass edge + brass icon, shortcut numbers hidden. Phone bar: blurred, active item in brass, items share the width evenly.
-- Light mode follows the same rules on bone instead of beige. Skin lives in one block at the end of the stylesheet ("HQ 4 skin"), so it's easy to tune or roll back.
-
-## 3.3.0 — 12 Nov 2026 (Time)
-- New **Time** page (admin only; Work → Time, and Time on the phone bar). Tap what you're doing and the clock starts. Tap the next thing and the last one stops, so the day logs with no gaps. Optional "what exactly?" detail.
-- 9 areas, 41 steps: Content, Leads, Sales calls, Onboarding, Check-ins, Responses, Systems & admin, Lifestyle, Sleep.
-- Day: a 24h strip, every block and every gap of 5+ min ("Untracked · Fill"), ▲/▼ energy per block, Edit / Add time. Edits replace whatever they overlap, so no minute is counted twice. Sleep across midnight splits at 00:00.
-- Week: awake hours tracked out of 108, business / sleep / untracked, one strip per day, hours per area and step with energy.
-- Buy back: tag each step once (Keep / Delegate / Automate / Cut). Shows the hours a week you could buy back.
-- A "now tracking" pill on every other page. Uses the device's local time, so it works in Bali.
-- Data: meta `time:<date>`, `timeNow`, `timeCfg`. Migration `20261112_time_meta_admin_only.sql` makes those rows admin only (needs applying).
-- Tests: `node tests/time.test.js` (76 checks).
-
-## 3.2.0 — 12 Nov 2026 (2027 Master Plan)
-- Home opens with the plan: this week's main thing (section 10), the key Friday numbers against target, and clients vs the quarter target.
-- New Scorecard page: the 11 Friday measures from section 11, weeks 1 to 13 from 16 Nov, green / red against the plan, "red 3 weeks running" flag, and typed-in hours and long-form.
-- Leads: switch between All, Story CTA, Link in bio, Off-platform, Paid direct and Paid indirect. Each funnel runs from its first touch to sales.
-- Applications now include the new apply page (one per person, test entries dropped).
-- ghl-sync splits booked / showed / sold by funnel, matched on email or phone inside the function, and counts instant-form leads from the ad pipelines.
-- Story links is now Funnel links: tagged links for QR / poster, referral, affiliate, collab, email and both paid funnels.
-- New RPC hq_delivery_by_day (joined / left per day, counts only).
-
-## 3.1.0 — 12 Nov 2026 (GoHighLevel connected, Stripe off)
-- New `ghl-sync` edge function (read-only GETs, hourly at :47). Writes per-day counts to meta/ghlSync: sales-call bookings, calls held, showed / no-show, leads moved to Closed / Won, Instagram Leads outreach and replies. No names.
-- Leads: booked calls and show-ups from GHL (show-up rate fills in as calls are marked Showed / No-show), plus an Instagram outreach section.
-- Sales: closes, close rate and days to close from GHL; blank (not 0) while no lead has been moved to Closed.
-- Stripe sync switched off (payments moving to Newie); money rows say "waiting on Newie".
+- **Revenue** now reads every successful Stripe payment (subscriptions, payment links, paid-in-full, one-offs), not just subscriptions. Stripe records for the same person (same email or name) are merged into one client.
+- Top: **expected in the next 30 days** (exact dates from live subscriptions, otherwise last payment + their usual rhythm, labelled "expected"), plus what's overdue. KPIs: paying clients now, overdue, lifetime revenue, subscription MRR.
+- **Next payments** list (overdue first), **Paid in full** list, revenue by month from all payments net of refunds, and a **Clients** table with status (Active / Overdue / New / Paid in full / Stopped paying / One-off), rhythm, usual amount, total paid, client since, last paid, next payment. Tap a name for every payment.
+- Sync: `stripe-sync` writes `stripe_customers` (admin-only) hourly; rhythm uses the last 5 gaps, amount the last 3 payments, 3 days' grace before "Overdue".
+- Tests: `node tests/revenue.test.js`.
 
 ## 3.0.1 — 12 Nov 2026 (Story links)
 
