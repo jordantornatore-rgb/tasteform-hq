@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.9.3';
+  HQ.VERSION = '3.9.4';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */

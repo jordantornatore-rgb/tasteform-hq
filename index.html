@@ -2141,7 +2141,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.9.3"></script>
+<script src="hq-core.js?v=3.9.4"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -2492,6 +2492,8 @@ table.scores td{border-color:var(--border);}
     var gf=$('goalForm'); if(gf) gf.addEventListener('submit', saveGoal);
 
     // actions
+    // DM-scan actions (replies, follow-ups, magnets) are off while the DM scan is paused: weeks-old data
+    if(!DM_SCAN_OK) t.actions = t.actions.filter(function(a){ return ['replies','followups','magnets'].indexOf(a.key)<0; });
     setHtml('todayActions', t.actions.length ? t.actions.map(function(a,i){
       return '<button type="button" class="act '+urgencyCls(a.urgency)+'" data-go="'+esc(a.go)+'"><span class="n">'+(i+1)+'</span><div class="act-main"><div class="act-title">'+esc(a.title)+'</div><div class="act-why">'+esc(a.why)+'</div></div><span class="arrow" aria-hidden="true">→</span></button>';
     }).join('') : '<div class="empty-state">'+(t.dmReady?'Nothing waiting on you right now. Go post a story.':'Fills in once the DM scan and Typeform sync have run.')+'</div>');
