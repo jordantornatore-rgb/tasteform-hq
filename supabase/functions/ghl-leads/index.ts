@@ -38,6 +38,8 @@ function funnelOf(utm: Record<string, string> | null, source?: string | null): s
   if (/^(offline|qr|poster|referral|affiliate|collab|email|partner)$/.test(m)) return "offplatform";
   return "unknown";
 }
+// Typeform is only used at the barbershop since 12 Nov 2026: untagged Typeform from then on = off-platform (same as HQ.typeformFunnel)
+const typeformFunnel = (utm: Record<string, string> | null, source: string | null | undefined, at: string) => { const f = funnelOf(utm, source); return f === "unknown" && at >= "2026-11-12" ? "offplatform" : f; };
 const normEmail = (e: unknown) => { const v = String(e || "").trim().toLowerCase(); return v.includes("@") ? v : null; };
 const normPhone = (p: unknown) => { const d = String(p || "").replace(/\D/g, ""); return d.length >= 8 ? d.slice(-9) : null; };
 
@@ -61,7 +63,7 @@ async function applications(): Promise<Map<string, App[]>> {
   }
   for (const r of await page("tf_responses")) {
     const d = r.data || {};
-    all.push({ at: String(d.submittedAt || ""), funnel: funnelOf(d.utm, d.source), from: "typeform", keys: [normEmail(d.email), normPhone(d.phone)].filter(Boolean) as string[] });
+    all.push({ at: String(d.submittedAt || ""), funnel: typeformFunnel(d.utm, d.source, String(d.submittedAt || "")), from: "typeform", keys: [normEmail(d.email), normPhone(d.phone)].filter(Boolean) as string[] });
   }
   all.sort((a, b) => a.at.localeCompare(b.at));
   const map = new Map<string, App[]>();

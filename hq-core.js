@@ -988,6 +988,12 @@
     if (/^(offline|qr|poster|referral|affiliate|collab|email|partner)$/.test(m)) return 'offplatform';
     return 'unknown';
   };
+  // Typeform is only used at the barbershop since the tagged apply page went live (12 Nov 2026), so an untagged Typeform from then on is off-platform.
+  HQ.TYPEFORM_OFFLINE_FROM = '2026-11-12';
+  HQ.typeformFunnel = function (utm, source, at) {
+    var f = HQ.funnelOf(utm, source);
+    return f === 'unknown' && String(at || '') >= HQ.TYPEFORM_OFFLINE_FROM ? 'offplatform' : f;
+  };
   // the corporate man: age 25 to 40 (the apply page asks age; the work question isn't on it yet)
   HQ.ageInMarket = function (age) {
     var a = String(age || '').replace(/[‒-―−]/g, '-').trim();
@@ -1005,7 +1011,7 @@
     });
     (state.tfResponses || []).forEach(function (r) {
       var at = r.submittedAt;
-      out.push({ id: 't:' + r.id, at: at, day: at ? HQ.sydDay(at) : null, funnel: HQ.funnelOf(r.utm, r.source), medium: (r.utm && r.utm.utm_medium) || null, inMarket: null, email: r.email, phone: r.phone, from: 'typeform' });
+      out.push({ id: 't:' + r.id, at: at, day: at ? HQ.sydDay(at) : null, funnel: HQ.typeformFunnel(r.utm, r.source, at), medium: (r.utm && r.utm.utm_medium) || null, inMarket: null, email: r.email, phone: r.phone, from: 'typeform' });
     });
     out.sort(function (a, b) { return String(a.at || '').localeCompare(String(b.at || '')); });
     var seen = {};
