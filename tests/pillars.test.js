@@ -73,6 +73,17 @@ const FUNNEL_KEYS = ['story', 'bio', 'offplatform', 'paid_direct', 'paid_indirec
   check('scorecard: referrals, typed-in hours, followers, fit', () => { assert.strictEqual(w1.referrals.value, 1); assert.strictEqual(w1.hours.value, 48); assert.strictEqual(w1.hours.status, 'good'); assert.strictEqual(w1.followers.value, 80); assert.strictEqual(w1.fit.value, 100); });
   check('scorecard: ad cost blank without Meta Ads', () => assert.strictEqual(w1.adCost.value, null));
   check('scorecard: current week not red for at-least targets', () => assert.strictEqual(sc.weeks[1].cells.sales.status, null));
+  // CAC maths, no browser
+  const cacGhl = { connected: true, days: { '2026-11-05': { booked: 4, showed: 3, noShow: 1, closed: 2, paidLeads: 2, byFunnel: { paid_direct: { booked: 3, held: 2, showed: 2, noShow: 1, closed: 1 }, story: { booked: 1, held: 1, showed: 1, noShow: 0, closed: 1 } } } } };
+  const cacState = { meta: { ghlSync: cacGhl, costs: { months: { '2026-11': { byFunnel: { story: 20 }, shared: 100 } } } }, adsCampaigns: [{ name: 'TF FastTrack angle 1', daily: { '2026-11-03': { spend: 300 }, '2026-10-30': { spend: 999 } } }, { name: 'Boost', daily: { '2026-11-04': { spend: 50 } } }], appSessions: [] };
+  const cac = HQ.computeCac(cacState, Date.parse('2026-11-20T03:00:00Z'), '2026-11');
+  check('cac: ad spend split by campaign name, this month only', () => { assert.strictEqual(cac.funnels.paid_direct.adSpend, 300); assert.strictEqual(cac.funnels.paid_indirect.adSpend, 0); assert.strictEqual(cac.unassignedAds, 50); });
+  check('cac: per funnel = cost / clients', () => { assert.strictEqual(cac.funnels.paid_direct.cac, 300); assert.strictEqual(cac.funnels.story.cac, 20); assert.strictEqual(cac.funnels.bio.cac, null); });
+  check('cac: all funnels includes shared + unassigned ads', () => { assert.strictEqual(cac.total.cost, 470); assert.strictEqual(cac.total.clients, 2); assert.strictEqual(cac.total.cac, 235); });
+  check('cac: work back from $250 on plan rates', () => { const b = cac.funnels.paid_direct.back; assert.strictEqual(b.showed, 125); assert.strictEqual(b.booked, 88); assert.strictEqual(b.lead, 50); assert.strictEqual(b.rates.close.own, false); });
+  check('cac: per lead counts instant forms', () => assert.strictEqual(cac.funnels.paid_direct.perLead, 150));
+  check('cac: blank without costs or ads', () => { const c = HQ.computeCac({ meta: { ghlSync: cacGhl }, appSessions: [] }, Date.parse('2026-11-20T03:00:00Z'), '2026-11'); assert.strictEqual(c.total.cac, null); assert.strictEqual(c.funnels.story.cac, null); assert.strictEqual(c.funnels.paid_direct.cac, null); });
+  check('adFunnelOf', () => { assert.strictEqual(HQ.adFunnelOf('Fast Track - A2'), 'paid_direct'); assert.strictEqual(HQ.adFunnelOf('fasttrack'), 'paid_direct'); assert.strictEqual(HQ.adFunnelOf('Compounding VSL'), 'paid_indirect'); assert.strictEqual(HQ.adFunnelOf('Retarget'), null); });
   check('funnelOf: tags', () => { assert.strictEqual(HQ.funnelOf({ utm_medium: 'paid', utm_campaign: 'compounding' }), 'paid_indirect'); assert.strictEqual(HQ.funnelOf({ utm_medium: 'paid', utm_campaign: 'fasttrack' }), 'paid_direct'); assert.strictEqual(HQ.funnelOf({ utm_medium: 'qr' }), 'offplatform'); assert.strictEqual(HQ.funnelOf(null, 'link_in_bio'), 'bio'); assert.strictEqual(HQ.funnelOf({ utm_content: 'claude_test' }), 'test'); });
   check('allApplications: one per person', () => assert.strictEqual(HQ.allApplications({ tfResponses: [{ id: 'x', submittedAt: '2026-11-01T00:00:00Z', email: 'A@b.co' }], appSessions: [{ id: 'y', submitted: true, submittedAt: '2026-11-02T00:00:00Z', contact: { email: 'a@b.co' } }] }).length, 1));
   const { srv, url } = await serve();
@@ -96,6 +107,7 @@ const FUNNEL_KEYS = ['story', 'bio', 'offplatform', 'paid_direct', 'paid_indirec
         const shown = await page.evaluate(id => ({ hidden: document.getElementById(id).hidden, txt: document.getElementById(id).innerText }), id);
         if (v === 'sales' && role !== 'admin') { check(`${label} ${per}: sales refused`, () => assert.ok(shown.hidden)); continue; }
         check(`${label} ${per} ${v}: shown`, () => assert.ok(!shown.hidden));
+        if (v === 'sales') check(`${label} ${per} sales: CAC by funnel + work-back`, () => assert.ok(/Cost per client \(CAC\)/i.test(shown.txt) && /Most you can pay per step/i.test(shown.txt) && /\$50/.test(shown.txt), shown.txt.slice(-600)));
         check(`${label} ${per} ${v}: no NaN/undefined/null`, () => assert.ok(!/\bNaN\b|undefined|\bnull\b|Infinity|\[object/.test(shown.txt), (shown.txt.match(/.{0,40}(NaN|undefined|null|Infinity|\[object).{0,40}/) || [''])[0]));
         check(`${label} ${per} ${v}: no DM numbers while the scan is off`, () => assert.ok(!/DMs waiting|From DMs|New conversations/.test(shown.txt)));
         if (width < 500) {

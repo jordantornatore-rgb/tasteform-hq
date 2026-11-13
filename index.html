@@ -1135,7 +1135,8 @@ button.pl-row:hover{background:var(--surface-2)}
 .sc-t .sc-now{color:var(--accent)}
 .sc-t .sc-good{color:var(--good);font-weight:700}.sc-t .sc-bad{color:var(--crit);font-weight:700}
 .sc-form .input{width:110px;text-align:right}
-.pl-fseg{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.cac-ok{color:var(--good,#1a7f37)} .cac-over{color:var(--bad,#c62828)} .cac-head .l{font-weight:700} .cac-months{margin:6px 0 8px}
+  .pl-fseg{display:flex;flex-wrap:wrap;gap:var(--s2)}
 .pl-fseg button{border:1px solid var(--border);background:var(--surface);color:inherit;font:inherit;font-size:var(--t-s);border-radius:var(--r-pill);padding:0 14px;min-height:var(--tap);cursor:pointer}
 .pl-fseg button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:700}
 .pl-h{font-size:var(--t-s);font-weight:600;color:var(--muted);margin:4px 2px -6px;text-transform:uppercase;letter-spacing:.04em}
@@ -2249,13 +2250,13 @@ table.scores td{border-color:var(--border);}
     loaded:{}
   };
   function metaBundle(){
-    return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, ghlSync:state.ghlMeta, scorecard:state.scorecardMeta, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
+    return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, ghlSync:state.ghlMeta, scorecard:state.scorecardMeta, costs:state.costsMeta||null, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
   }
   function coreState(){ return { dms:state.dms, daily:state.daily, contacts:state.contacts, tfResponses:state.tfResponses, tfDaily:state.tfDaily, igPosts:state.igPosts, igStories:state.igStories, meta:metaBundle(), stripe:state.stripe.summary?{summary:state.stripe.summary}:null, dmLoaded:state.dmLoaded }; }
 
   /* ---------- render scheduler: only the visible tab + global strips, only when its data changed ---------- */
   var VIEW_DEPS = {
-    home:['pillars'], traffic:['pillars'], leadflow:['pillars'], sales:['pillars'], delivery:['pillars'], scorecard:['pillars'],
+    home:['pillars'], traffic:['pillars'], leadflow:['pillars'], sales:['pillars','meta','ads'], delivery:['pillars'], scorecard:['pillars'],
     today:['dms','daily','contacts','tfResponses','tfDaily','igPosts','igStories','meta','stripe'],
     funnel:['tfResponses','tfDaily','igPosts','igStories','meta','dms','daily','ads'],
     leads:['contacts','meta','dms'], dms:['dms','daily','reviews','contacts','meta'], follow:['dms','meta'], magnets:['dms','meta'],
@@ -5298,6 +5299,7 @@ table.scores td{border-color:var(--border);}
     doc('meta/posting', 'content', function(d){ state.contentPosting=d; state.contentMetaLoaded.posting=true; });
     doc('meta/goal', 'meta', function(d){ state.goal=d; });
     doc('meta/scorecard', 'meta', function(d){ state.scorecardMeta=d; });
+    doc('meta/costs', 'meta', function(d){ state.costsMeta=d; });
     sub(db.collection('app_sessions').limit(5000), 'pillars', 'appSessions');
     doc('meta/ghlSync', 'meta', function(d){ state.ghlMeta=d; });
     doc('meta/routineCalls', 'meta', function(d){ state.routineCalls=d; });
@@ -5560,10 +5562,11 @@ table.scores td{border-color:var(--border);}
       plRow('Sales closed', S.closed.note||'moved to Closed / Won in GHL', S.closed)+
       plRow('Close rate', 'closed ÷ calls held', S.closeRate, {fmt:'pct'})+
       plRow('Average sale value', null, S.avgSale, {fmt:'money'})+
-      plRow('CAC', 'ad + tool spend ÷ new clients', S.cac, {fmt:'money', lowerIsBetter:true})+
       plRow('Days from first contact to close', 'GHL lead created → closed', S.daysToClose, {fmt:'dp1', lowerIsBetter:true})+
       plRow('Refunds', null, S.refunds, {fmt:'money', lowerIsBetter:true})+
-    '</div><p class="pl-note">Only admins can see this page.</p>';
+    '</div>';
+    html += cacSection();
+    html += '<p class="pl-note">Only admins can see this page.</p>';
     setHtml('plSales', html);
   };
   RENDER.delivery = function(){
@@ -5582,6 +5585,43 @@ table.scores td{border-color:var(--border);}
     '</div><p class="pl-note">'+(state.deliveryError?'Couldn’t load client counts ('+esc(state.deliveryError)+'). ':'')+'Active clients come from the challenge member list. Money rows fill in once Newie is connected.</p>';
     setHtml('plDelivery', html);
   };
+
+  /* ---------- CAC per funnel + the most each step can cost (Sales page) ---------- */
+  var cacMonth = (function(){ var v=read('hqCacMonth'); return /^\d{4}-\d{2}$/.test(v||'') ? v : null; })();
+  function cacSection(){
+    var today = HQ.sydDay(Date.now()), cur = today.slice(0,7), months = [];
+    for(var i=0;i<6;i++){ var d=new Date(Date.UTC(+cur.slice(0,4), +cur.slice(5,7)-1-i, 1)); months.push(d.toISOString().slice(0,7)); }
+    var ym = cacMonth && months.indexOf(cacMonth)>=0 ? cacMonth : cur;
+    var C = HQ.computeCac(plState(), Date.now(), ym);
+    var mName = function(m){ return new Date(Date.UTC(+m.slice(0,4), +m.slice(5,7)-1, 1)).toLocaleString('en-AU',{month:'short', timeZone:'UTC'}); };
+    var money = function(v){ return v==null ? '<span class="pl-blank">–</span>' : esc(HQ.money(v)); };
+    var vs = function(actual, max){ if(actual==null || max==null) return money(actual); return '<span class="'+(actual<=max?'cac-ok':'cac-over')+'">'+money(actual)+'</span>'; };
+    var html = '<h3 class="pl-h">Cost per client (CAC) · by funnel</h3><div class="pl-seg cac-months">'+months.slice().reverse().map(function(m){ return '<button type="button" data-cac-month="'+m+'"" aria-pressed="'+(m===ym)+'">'+esc(mName(m))+'</button>'; }).join('')+'</div>';
+    html += '<div class="pl-list">'+plRow('All funnels', C.costsIn ? 'every cost this month ÷ new clients' : 'needs this month’s costs', {value:C.total.cac, prev:null}, {fmt:'money', lowerIsBetter:true})+
+      HQ.FUNNELS.concat([{key:'dm_outreach'}]).map(function(f){ var x=C.funnels[f.key];
+        var sub = [ x.cost==null ? (x.paid?'ad spend not in yet':'costs not in yet') : HQ.money(x.cost)+' spent', x.clients==null ? 'clients not tracked yet' : num(x.clients)+' client'+(x.clients===1?'':'s') ];
+        if(x.target) sub.push('target '+HQ.money(x.target)+' max');
+        return '<div class="pl-row"><div class="l">'+esc(x.label)+'<small>'+esc(sub.join(' · '))+'</small></div><div class="r"><b>'+vs(x.cac, x.target)+'</b></div></div>'; }).join('')+
+    '</div>';
+    // work back from the target, for the two paid funnels
+    html += '<h3 class="pl-h">Most you can pay per step · $'+HQ.CAC_PLAN.target+' a client</h3>';
+    html += ['paid_direct','paid_indirect'].map(function(k){ var x=C.funnels[k], b=x.back, R=b.rates;
+      var src = function(r){ return r.own ? '' : ' <small>plan</small>'; };
+      return '<div class="pl-list"><div class="pl-row cac-head"><div class="l">'+esc(x.label)+'</div><div class="r"><small>max · actual</small></div></div>'+
+        '<div class="pl-row"><div class="l">Per client</div><div class="r">'+money(b.sale)+' · '+vs(x.cac, b.sale)+'</div></div>'+
+        '<div class="pl-row"><div class="l">Per call that shows<small>closes '+R.close.v+'%'+src(R.close)+'</small></div><div class="r">'+money(b.showed)+' · '+vs(x.perShowed, b.showed)+'</div></div>'+
+        '<div class="pl-row"><div class="l">Per booked call<small>'+R.show.v+'% show'+src(R.show)+'</small></div><div class="r">'+money(b.booked)+' · '+vs(x.perBooked, b.booked)+'</div></div>'+
+        '<div class="pl-row"><div class="l">Per lead<small>'+R.book.v+'% book a call'+src(R.book)+'</small></div><div class="r">'+money(b.lead)+' · '+vs(x.perLead, b.lead)+'</div></div></div>';
+    }).join('');
+    var notes = [];
+    if(!C.costsIn) notes.push('Costs go in when you send your month-end bank statement.');
+    if(!C.haveAds) notes.push('Ad spend comes once Meta Ads is connected.');
+    else if(C.unassignedAds) notes.push(HQ.money(C.unassignedAds)+' of ad spend has no “fasttrack” or “compounding” in the campaign name.');
+    notes.push('“plan” = the plan’s rate until you have your own.');
+    html += '<p class="pl-note">'+esc(notes.join(' '))+'</p>';
+    return html;
+  }
+  document.addEventListener('click', function(ev){ var b=ev.target.closest && ev.target.closest('button[data-cac-month]'); if(!b) return; cacMonth=b.getAttribute('data-cac-month'); store('hqCacMonth', cacMonth); renderNow('sales'); });
 
   /* ---------- 2027 Master Plan: scorecard, funnels ---------- */
   var plFunnel = (function(){ var v=read('hqFunnel'); return /^(all|story|bio|offplatform|paid_direct|paid_indirect)$/.test(v||'') ? v : 'all'; })();

@@ -1,5 +1,11 @@
 # Changelog
 
+
+## 3.5.0 — CAC by funnel (13 Nov 2026)
+- Sales page: cost per client for each funnel and for all funnels, by month (last 6). Costs from meta/costs (Claude fills it from the month-end bank statement, no editor cost); ad spend from Meta campaigns named fasttrack / compounding; clients from GHL Closed / Won by funnel.
+- Works back from the plan's $250 max per client: the most each paid funnel can pay per showed call, booked call and lead, on the plan's rates (50% close, 70% show, 5 leads a sale) until there are 5 of his own in the last 90 days.
+- meta/costs added to the admin-only migration (still to apply).
+
 ## 3.4.2 — 13 Nov 2026 (scorecard hours from Time)
 - Scorecard "Your hours" now comes from the Time page (every area except Lifestyle and Sleep, per plan week). Typing a number in still overrides it.
 

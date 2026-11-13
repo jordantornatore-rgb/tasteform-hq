@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.2.0';
+  HQ.VERSION = '3.5.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -1155,6 +1155,71 @@
     var cur = weeks.filter(function (w) { return w.state === 'current'; })[0] || null;
     var q = HQ.planQuarter(today);
     return { today: today, weeks: weeks, current: cur, flags: flags, started: today >= P.start, quarter: q, nextWeek: weeks.filter(function (w) { return w.state === 'future'; })[0] || null };
+  };
+
+  /* ---------- CAC per funnel, and working back from the plan's target ----------
+     Costs live in meta/costs: { months: { 'YYYY-MM': { byFunnel: { story: 0, bio: 0, offplatform: 120, ... }, shared: 300, items: [...] } } },
+     written by Claude from Jordan's month-end bank statement (no editor cost). Ad spend comes from the Meta sync:
+     campaigns named "fasttrack" go to Paid ads · direct, "compounding" to Paid ads · indirect.
+     Clients = GHL leads moved to Closed / Won in that month, by funnel. Blank until both halves exist. */
+  HQ.CAC_PLAN = { target: 250, closeRate: 50, showRate: 70, leadToSale: 20 }; // plan: $250 max ad cost per client, 50%+ show to close, 70%+ show rate, 5 leads make a sale
+  HQ.adFunnelOf = function (name) {
+    var n = String(name || '').toLowerCase();
+    if (/fast\s*-?_?track/.test(n)) return 'paid_direct';
+    if (/compounding/.test(n)) return 'paid_indirect';
+    return null;
+  };
+  HQ.monthBounds = function (ym) {
+    var from = ym + '-01', d = new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 0));
+    return { from: from, to: ym + '-' + String(d.getUTCDate()).padStart(2, '0') };
+  };
+  HQ.computeCac = function (state, now, ym) {
+    var today = HQ.sydDay(now == null ? Date.now() : now);
+    ym = ym || today.slice(0, 7);
+    var B = HQ.monthBounds(ym), to = B.to < today ? B.to : today;
+    var meta = state.meta || {}, ghl = meta.ghlSync;
+    var costMonth = meta.costs && meta.costs.months && meta.costs.months[ym] || null;
+    var G = HQ.ghlFunnelSum(ghl, B.from, to);
+    // ad spend by funnel from campaign names; spend we can't place stays "ads, no funnel in the name"
+    var ads = { paid_direct: 0, paid_indirect: 0, other: 0 }, haveAds = false;
+    (state.adsCampaigns || []).forEach(function (c) {
+      var f = HQ.adFunnelOf(c.name), daily = c.daily || {};
+      Object.keys(daily).forEach(function (k) { if (k < B.from || k > to) return; var sp = +(daily[k] && daily[k].spend); if (!HQ.isNum(sp)) return; haveAds = true; ads[f || 'other'] += sp; });
+    });
+    if (!haveAds) { var tot = HQ.adsSum(state.adsDaily, B.from, to); if (tot) { haveAds = true; ads.other = tot.spend; } }
+    // the funnel's own conversion rates over the last 90 days, if there's enough to go on; otherwise the plan's
+    var r90 = HQ.ghlFunnelSum(ghl, HQ.addDays(today, -89), today), apps90 = HQ.allApplications(state).filter(function (a) { return a.day >= HQ.addDays(today, -89); });
+    var apps = HQ.allApplications(state).filter(function (a) { return a.day >= B.from && a.day <= to; });
+    var gAll = HQ.ghlSum(ghl, B.from, to);
+    var P = HQ.CAC_PLAN, planBook = Math.round(P.leadToSale / (P.closeRate / 100 * P.showRate / 100));
+    var out = {}, totalCost = costMonth ? (+costMonth.shared || 0) : null, totalClients = G ? 0 : null;
+    var keys = HQ.FUNNELS.map(function (f) { return f.key; }).concat(['dm_outreach', 'unknown']);
+    keys.forEach(function (k) {
+      var g = G && G[k] || null, paid = k === 'paid_direct' || k === 'paid_indirect';
+      var adSpend = paid && haveAds ? Math.round(ads[k]) : null;
+      var listed = costMonth ? (+((costMonth.byFunnel || {})[k]) || 0) : null;
+      var cost = listed == null && adSpend == null ? null : (listed || 0) + (adSpend || 0);
+      var clients = G ? (g ? g.closed : 0) : null;
+      var leads = apps.filter(function (a) { return a.funnel === k; }).length + (k === 'paid_direct' && gAll ? gAll.paidLeads || 0 : 0);
+      var booked = G ? (g ? g.booked : 0) : null, showed = g && (g.showed + g.noShow) ? g.showed : null;
+      // rates: own numbers when the 90 days hold at least 5 of the step's denominator
+      var q = r90 && r90[k] || null, l90 = apps90.filter(function (a) { return a.funnel === k; }).length;
+      var rate = function (n, d, plan) { return d >= 5 ? { v: HQ.pct(n, d), own: true } : { v: plan, own: false }; };
+      var rc = rate(q ? q.closed : 0, q ? q.showed : 0, P.closeRate), rs = rate(q ? q.showed : 0, q ? q.showed + q.noShow : 0, P.showRate), rb = rate(q ? q.booked : 0, l90, Math.min(100, planBook));
+      var target = paid ? P.target : null, back = null;
+      if (target) {
+        var perShow = target * rc.v / 100, perBook = perShow * rs.v / 100, perLead = perBook * rb.v / 100;
+        back = { sale: target, showed: Math.round(perShow), booked: Math.round(perBook), lead: Math.round(perLead), rates: { close: rc, show: rs, book: rb } };
+      }
+      var per = function (n) { return cost != null && n ? Math.round(cost / n) : null; };
+      out[k] = { key: k, label: HQ.FUNNEL_LABEL[k], paid: paid, adSpend: adSpend, listed: listed, cost: cost, clients: clients, leads: leads, booked: booked, showed: showed,
+        cac: per(clients), perLead: per(leads), perBooked: per(booked), perShowed: per(showed), target: target, back: back };
+      if (cost != null) totalCost = (totalCost || 0) + cost;
+      if (G) totalClients += clients || 0;
+    });
+    if (haveAds && ads.other) totalCost = (totalCost || 0) + Math.round(ads.other);
+    return { month: ym, from: B.from, to: to, costsIn: !!costMonth, haveAds: haveAds, unassignedAds: Math.round(ads.other), shared: costMonth ? (+costMonth.shared || 0) : null,
+      ghl: !!G, funnels: out, total: { cost: costMonth ? totalCost : null, clients: totalClients, cac: costMonth && totalClients ? Math.round(totalCost / totalClients) : null } };
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = HQ;
