@@ -1096,7 +1096,7 @@
   HQ.SCORE_ROWS = [
     { key: 'leads', label: 'Leads' }, { key: 'booked', label: 'Calls booked' }, { key: 'showRate', label: 'Show rate', fmt: 'pct' },
     { key: 'sales', label: 'Sales' }, { key: 'lost', label: 'Clients lost' }, { key: 'adCost', label: 'Ad cost per client', fmt: 'money' },
-    { key: 'referrals', label: 'Referrals' }, { key: 'longform', label: 'Long-form videos', manual: true }, { key: 'hours', label: 'Your hours', manual: true },
+    { key: 'referrals', label: 'Referrals' }, { key: 'longform', label: 'Long-form videos', manual: true }, { key: 'hours', label: 'Your hours', note: 'from the Time page' },
     { key: 'followers', label: 'New followers' }, { key: 'fit', label: 'Right market fit', fmt: 'pct' }
   ];
   HQ.scoreStatus = function (t, v) {
@@ -1135,7 +1135,7 @@
           adCost: ads && paidSales ? Math.round(ads.spend / paidSales) : null,
           referrals: a.filter(function (x) { return String(x.medium || '').toLowerCase() === 'referral'; }).length,
           longform: HQ.isNum(+mw.longform) && mw.longform !== '' && mw.longform != null ? +mw.longform : null,
-          hours: HQ.isNum(+mw.hours) && mw.hours !== '' && mw.hours != null ? +mw.hours : null,
+          hours: mw.hours != null && mw.hours !== '' && HQ.isNum(+mw.hours) ? +mw.hours : (state.timeHours && HQ.isNum(state.timeHours[ws]) ? state.timeHours[ws] : null),
           followers: f0 != null && f1 != null ? f1 - f0 : null,
           fit: fit.length ? HQ.pct(fit.filter(function (x) { return x.inMarket; }).length, fit.length) : null
         };

@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.4.2 — 13 Nov 2026 (scorecard hours from Time)
+- Scorecard "Your hours" now comes from the Time page (every area except Lifestyle and Sleep, per plan week). Typing a number in still overrides it.
+
 ## 3.4.1 — 12 Nov 2026 (polish pass)
 - One segmented-control style everywhere (7 days / 30 days / Month, Day / Week / Buy back, every range switch): small tracked caps, active = raised with a brass underline.
 - Home: plan card with brass label and a 3 px progress line, client count in Anton; Traffic / Leads / Sales / Delivery numbers in Anton at 52 px; Do today counts in Anton with row hover.

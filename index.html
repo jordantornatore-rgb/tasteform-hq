@@ -5411,7 +5411,19 @@ table.scores td{border-color:var(--border);}
   var PL_VIEWS = {home:1, traffic:1, leadflow:1, sales:1, delivery:1, scorecard:1};
   var plPeriod = (function(){ var v=read('hqPeriod'); return v==='7'?7:(v==='month'?'month':30); })();
   state.deliveryCounts = null;
-  function plState(){ return Object.assign({}, coreState(), { igAccount:state.igAccount, contentQueue:state.contentQueue, routineCalls:state.routineCalls, deliveryCounts:state.deliveryCounts, appSessions:state.appSessions||null, adsDaily:state.adsDaily, deliveryByDay:state.deliveryByDay||null }); }
+  // business hours per scorecard week from the Time page (lifestyle and sleep left out); null until Time has loaded
+  function plTimeHours(){
+    var T = window.__time; if(!T || !T.S || !T.S.loaded) return null;
+    var out = {};
+    for(var i=0;i<HQ.PLAN.weeks;i++){
+      var ws = HQ.addDays(HQ.PLAN.start, i*7), min = 0, any = false;
+      for(var j=0;j<7;j++){ var k = HQ.addDays(ws, j); if(!T.S.days[k]) continue; any = true; var st = T.dayStats(k); Object.keys(st.area||{}).forEach(function(a){ if(a!=='life' && a!=='sleep') min += st.area[a]; }); }
+      if(any) out[ws] = Math.round(min/6)/10;
+    }
+    return out;
+  }
+  document.addEventListener('hq-time-changed', function(){ markDirty('pillars'); });
+  function plState(){ return Object.assign({}, coreState(), { timeHours:plTimeHours(), igAccount:state.igAccount, contentQueue:state.contentQueue, routineCalls:state.routineCalls, deliveryCounts:state.deliveryCounts, appSessions:state.appSessions||null, adsDaily:state.adsDaily, deliveryByDay:state.deliveryByDay||null }); }
   function plData(){
     var s = plState();
     var opts = { dmScanOk:DM_SCAN_OK };
@@ -5595,11 +5607,11 @@ table.scores td{border-color:var(--border);}
     html += '<div class="sc-wrap"><table class="sc-t"><thead><tr><th scope="col">Measure</th><th scope="col">Target</th>'+cols.map(function(w){ return '<th scope="col" class="'+(w.state==='current'?'sc-now':'')+'">W'+w.n+'<small>'+esc(HQ.fmtDay(w.start,'dm'))+'</small></th>'; }).join('')+'</tr></thead><tbody>'+
       HQ.SCORE_ROWS.map(function(r){
         var tw = (sc.current || cols[0]).start;
-        return '<tr><th scope="row">'+esc(r.label)+(r.manual?' <small>typed in</small>':'')+'</th><td class="sc-tg">'+esc(HQ.planTarget(r.key, tw).text)+'</td>'+cols.map(function(w){ return w.state==='future' ? '<td class="sc-c sc-fut"></td>' : scCell(w.cells[r.key], r.fmt); }).join('')+'</tr>';
+        return '<tr><th scope="row">'+esc(r.label)+(r.manual?' <small>typed in</small>':(r.note?' <small>'+esc(r.note)+'</small>':''))+'</th><td class="sc-tg">'+esc(HQ.planTarget(r.key, tw).text)+'</td>'+cols.map(function(w){ return w.state==='future' ? '<td class="sc-c sc-fut"></td>' : scCell(w.cells[r.key], r.fmt); }).join('')+'</tr>';
       }).join('')+'</tbody></table></div>';
     var cw = sc.current, mw = cw && state.scorecardMeta && state.scorecardMeta.weeks && state.scorecardMeta.weeks[cw.start] || {};
-    if(cw) html += '<form class="pl-list sc-form" id="scForm"><div class="pl-row"><div class="l">This week, typed in<small>Week '+cw.n+' · HQ can’t see these</small></div></div>'+
-      '<label class="pl-row"><span class="l">Hours worked</span><input class="input" type="number" min="0" max="120" step="0.5" inputmode="decimal" name="hours" value="'+esc(mw.hours==null?'':mw.hours)+'"></label>'+
+    if(cw) html += '<form class="pl-list sc-form" id="scForm"><div class="pl-row"><div class="l">This week, typed in<small>Week '+cw.n+'</small></div></div>'+
+      '<label class="pl-row"><span class="l">Hours worked<small>leave blank to use the Time page</small></span><input class="input" type="number" min="0" max="120" step="0.5" inputmode="decimal" name="hours" value="'+esc(mw.hours==null?'':mw.hours)+'"></label>'+
       '<label class="pl-row"><span class="l">Long-form videos out</span><input class="input" type="number" min="0" max="20" step="1" inputmode="numeric" name="longform" value="'+esc(mw.longform==null?'':mw.longform)+'"></label>'+
       '<div class="pl-row"><span class="l" id="scMsg" role="status"></span><button type="submit" class="btn primary">Save</button></div></form>';
     html += '<p class="pl-note">Green is on plan, red is off. The current week only turns red for "at most" numbers. Leads = applications plus instant-form leads from ads. Calls, show rate and sales come from GoHighLevel. Right market fit = applicants aged 25 to 40 until the apply page asks about work. Ad cost per client fills in once Meta Ads is connected.</p>';
@@ -5937,7 +5949,7 @@ table.scores td{border-color:var(--border);}
   /* ---------- data ---------- */
   function setMsg(t){ var m=$('tmMsg'); if(m) m.textContent=t||''; }
   function put(id,data){ S.pending[id]=nowMs(); if(!S.client) return; S.client.from('meta').upsert({id:id, data:data, updated_at:new Date(nowMs()).toISOString()}).then(function(r){ if(r && r.error) setMsg("Couldn't save: "+r.error.message+'. It will retry on your next tap.'); else setMsg(''); }); }
-  function saveDay(key){ var d=day(key); d.entries.sort(function(a,b){return a.s-b.s;}); put('time:'+key, {entries:d.entries}); }
+  function saveDay(key){ var d=day(key); d.entries.sort(function(a,b){return a.s-b.s;}); put('time:'+key, {entries:d.entries}); try{ document.dispatchEvent(new CustomEvent('hq-time-changed')); }catch(e){} }
   function saveNow(){ put('timeNow', S.now||{k:null}); }
   function saveCfg(){ put('timeCfg', S.cfg); }
   function fresh(id){ return S.pending[id] && nowMs()-S.pending[id]<15000; }
@@ -5951,7 +5963,7 @@ table.scores td{border-color:var(--border);}
         else if(id==='timeNow') S.now=(row.data && row.data.k && STEP[row.data.k]) ? row.data : null;
         else if(id==='timeCfg'){ S.cfg=row.data||{}; S.cfg.tags=S.cfg.tags||{}; if(!S.cfg.awake) S.cfg.awake=108; }
       });
-      S.loaded=true; render(); pill();
+      S.loaded=true; render(); pill(); try{ document.dispatchEvent(new CustomEvent('hq-time-changed')); }catch(e){}
     });
   }
 
