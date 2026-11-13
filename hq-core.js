@@ -921,6 +921,15 @@
       var mon = (Array.isArray(sum.revenueByMonth) ? sum.revenueByMonth : []).filter(function (x) { return x && x.month === today.slice(0, 7); })[0];
       if (period === 'month' && mon && HQ.isNum(mon.amount)) sales.headline.value = mon.amount;
       sales.currency = sum.currency || 'AUD';
+      // any window: every successful Stripe payment by Sydney day (stripe_daily), net of refunds
+      var sd = Array.isArray(state.stripeDaily) ? state.stripeDaily : null;
+      if (sd && sd.length) {
+        var cash = function (a, b) { var t = 0, n = 0, nc = 0; sd.forEach(function (r) { var d = r.date || r.id; if (d >= a && d <= b) { t += +r.amount || 0; n += +r.payments || 0; nc += +r.newClients || 0; } }); return { t: Math.round(t * 100) / 100, n: n, nc: nc }; };
+        var c0 = cash(R.from, R.to), c1 = cash(R.prevFrom, R.prevTo);
+        sales.headline = m(c0.t, c1.t, { label: 'cash collected' });
+        sales.payments = m(c0.n, c1.n); sales.newPayers = m(c0.nc, c1.nc);
+      }
+      if (HQ.isNum(sum.refundedTotal)) sales.refundsAllTime = sum.refundedTotal;
     }
 
     // --- Delivery: client counts arrive from hq_delivery_counts (names stay admin only); money rows need Stripe
@@ -930,10 +939,11 @@
       churned: m(dc ? dc.left : null, null), joined: m(dc ? dc.joined : null, null),
       avgWeeks: m(dc && dc.avgWeeks != null ? +dc.avgWeeks : null, null),
       checkinsOnTime: m(dc ? dc.checkinsOnTime : null, null),
-      checkinReplyTime: m(null, null), referrals: m(null, null),
+      checkinReplyTime: m(null, null),
+      referrals: m(appsAll.filter(function (x) { return String(x.medium || '').toLowerCase() === 'referral'; }).length, appsPrev ? appsPrev.filter(function (x) { return String(x.medium || '').toLowerCase() === 'referral'; }).length : null),
       mrr: m(stripeOn && HQ.isNum(sum.mrr) ? sum.mrr : null, null),
       failedPayments: m(stripeOn && Array.isArray(sum.risks) ? sum.risks.length : null, null),
-      ltv: m(null, null)
+      ltv: m(stripeOn && HQ.isNum(sum.avgLifetimeValue) ? sum.avgLifetimeValue : null, null)
     };
 
     // --- the one line at the top: where people drop out between content and a call (facts only, no targets yet)
@@ -1126,7 +1136,7 @@
   HQ.SCORE_ROWS = [
     { key: 'leads', label: 'Leads' }, { key: 'booked', label: 'Calls booked' }, { key: 'showRate', label: 'Show rate', fmt: 'pct' },
     { key: 'sales', label: 'Sales' }, { key: 'lost', label: 'Clients lost' }, { key: 'adCost', label: 'Ad cost per client', fmt: 'money' },
-    { key: 'referrals', label: 'Referrals' }, { key: 'longform', label: 'Long-form videos', manual: true }, { key: 'hours', label: 'Your hours', note: 'from the Time page' },
+    { key: 'referrals', label: 'Referrals' }, { key: 'longform', label: 'Long-form videos', note: 'from YouTube' }, { key: 'hours', label: 'Your hours', note: 'from the Time page' },
     { key: 'followers', label: 'New followers' }, { key: 'fit', label: 'Right market fit', fmt: 'pct' }
   ];
   HQ.scoreStatus = function (t, v) {
@@ -1135,6 +1145,11 @@
     if (t.dir === 'max') return v <= t.v ? 'good' : 'bad';
     if (t.dir === 'range') return v >= t.lo ? 'good' : 'bad'; // over 105 is fine
     return null;
+  };
+  // long-form YouTube uploads (Videos tab, Shorts excluded) dated in [from, to]; null until the sync has run once
+  HQ.youtubeLongIn = function (yt, from, to) {
+    if (!yt || !yt.lastSyncAt || !yt.videos) return null;
+    return Object.keys(yt.videos).filter(function (k) { var d = yt.videos[k] && yt.videos[k].day; return d && d >= from && d <= to; }).length;
   };
   HQ.scorecard = function (state, now) {
     var today = HQ.sydDay(now == null ? Date.now() : now), P = HQ.PLAN;
@@ -1164,7 +1179,7 @@
           lost: lost,
           adCost: ads && paidSales ? Math.round(ads.spend / paidSales) : null,
           referrals: a.filter(function (x) { return String(x.medium || '').toLowerCase() === 'referral'; }).length,
-          longform: HQ.isNum(+mw.longform) && mw.longform !== '' && mw.longform != null ? +mw.longform : null,
+          longform: HQ.isNum(+mw.longform) && mw.longform !== '' && mw.longform != null ? +mw.longform : HQ.youtubeLongIn(meta.youtubeSync, ws, to),
           hours: mw.hours != null && mw.hours !== '' && HQ.isNum(+mw.hours) ? +mw.hours : (state.timeHours && HQ.isNum(state.timeHours[ws]) ? state.timeHours[ws] : null),
           followers: f0 != null && f1 != null ? f1 - f0 : null,
           fit: fit.length ? HQ.pct(fit.filter(function (x) { return x.inMarket; }).length, fit.length) : null

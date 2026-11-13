@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.7.0 — 13 Nov 2026 (Time per client + Tell Claude)
+
+- **Time per client.** Client steps (onboarding call / plan / setup, reviewing check-ins, feedback / Looms, check-in calls, client messages) ask "who for?" with your active 1FIT clients, plus "Several / general". The client rides on the block (`c`, `cn`), shows in the day list, and can be changed in Edit or added to any block. Switching client on the same step starts a new block.
+- New **Clients** tab: hours per client this week, average a week over the last 4 weeks, split by area, what they pay a month (Stripe) and **$ per hour** of your time. Affiliates show as free. Client-step time with no name is counted separately.
+- **Tell Claude** box on the Time page: type or dictate what you did; it goes to `meta/timeInbox` and Claude logs it at the 2-hourly check-in (a scheduled task, 7:44am–9:44pm Sydney, that also pushes you "untracked since …"). You can reply to that check-in by voice.
+- `public.time_log(entries)` (migration `20261113_time_log.sql`) writes blocks the same way the page does (carves overlaps, splits at Sydney midnight, keeps the live timer right), so Claude never double-counts.
+- Tests: `node tests/time-clients.test.js` (26 checks); `tests/time.test.js` still 76/76.
+
+## 3.6.6 — 13 Nov 2026 (everything tracked)
+
+- **Long-form videos** on the Scorecard now come from YouTube automatically: new `youtube-sync` (hourly at :29, public pages only) reads @JordanTornatore's Videos tab, so Shorts are left out, and keeps every long-form video in `meta/youtubeSync`. Typing a number still overrides it.
+- **Sales → Cash collected** works for any window (7 / 30 days / month) from every Stripe payment, with the number of payments and first-time payers. Refunds show Stripe's all-time total.
+- **Delivery**: Monthly recurring, Failed payments and LTV come from Stripe (were "waiting on Newie"); Referrals = applications through a referral funnel link.
+- Tests: `node tests/tracking.test.js`.
+
 ## 3.6.5 — 13 Nov 2026 (Free affiliate clients)
 
 - Revenue: active 1FIT clients on free coaching show as **Free (affiliate)**, not "not paying". Adim Hamid, George Paps and Yohana Sime are marked (Jordan, 13 Nov).

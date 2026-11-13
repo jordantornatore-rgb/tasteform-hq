@@ -1162,6 +1162,13 @@ a.pl-row{text-decoration:none}
 #viewTime .tm-seg{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;}
 #viewTime .tm-seg button{border:none;background:none;color:var(--muted);font:700 var(--t-s) 'Open Sans',sans-serif;letter-spacing:.05em;text-transform:uppercase;padding:8px 16px;min-height:40px;border-radius:var(--r-pill);cursor:pointer;}
 #viewTime .tm-seg button[aria-pressed="true"]{background:var(--text);color:var(--bg);}
+.tm-tell textarea{width:100%;min-height:64px;resize:vertical;font:inherit;font-size:var(--t-s);}
+.tm-tell .tm-tell-row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:8px;}
+.tm-tell-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:var(--t-xs);}
+.tm-tell-item{display:flex;gap:8px;align-items:flex-start;color:var(--muted);}
+.tm-tell-item b{color:var(--text);font-weight:600;}
+.tm-who{color:var(--muted);font-weight:500;}
+.tm-clients{display:flex;flex-wrap:wrap;gap:6px;}
 .tm-now{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
 .tm-now.on{border-color:var(--tm-c);}
 .tm-now.on::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--tm-c);}
@@ -2072,9 +2079,10 @@ table.scores td{border-color:var(--border);}
   <section id="viewTime" role="tabpanel" aria-labelledby="tabTime" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div id="timeRoot" style="display:flex;flex-direction:column;gap:var(--s4);">
       <div class="top tm-head"><div><h1>Time</h1><div class="sub">Where your week actually goes. One tap per step, the last one stops itself.</div></div>
-        <div class="tm-seg" role="group" aria-label="View"><button data-tm="tab" data-v="day" aria-pressed="true">Day</button><button data-tm="tab" data-v="week" aria-pressed="false">Week</button><button data-tm="tab" data-v="buy" aria-pressed="false">Buy back</button></div></div>
+        <div class="tm-seg" role="group" aria-label="View"><button data-tm="tab" data-v="day" aria-pressed="true">Day</button><button data-tm="tab" data-v="week" aria-pressed="false">Week</button><button data-tm="tab" data-v="clients" aria-pressed="false">Clients</button><button data-tm="tab" data-v="buy" aria-pressed="false">Buy back</button></div></div>
       <div id="tmMsg" role="status" class="small muted"></div>
       <div id="tmNow" class="tm-now"></div>
+      <div class="panel tm-tell" id="tmTell"></div>
       <div class="panel" id="tmGrid"></div>
       <div id="tmBody" style="display:flex;flex-direction:column;gap:var(--s4);"></div>
     </div>
@@ -2271,7 +2279,7 @@ table.scores td{border-color:var(--border);}
     loaded:{}
   };
   function metaBundle(){
-    return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, ghlSync:state.ghlMeta, scorecard:state.scorecardMeta, costs:state.costsMeta||null, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
+    return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, ghlSync:state.ghlMeta, youtubeSync:state.youtubeMeta||null, scorecard:state.scorecardMeta, costs:state.costsMeta||null, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
   }
   function coreState(){ return { dms:state.dms, daily:state.daily, contacts:state.contacts, tfResponses:state.tfResponses, tfDaily:state.tfDaily, igPosts:state.igPosts, igStories:state.igStories, meta:metaBundle(), stripe:state.stripe.summary?{summary:state.stripe.summary}:null, dmLoaded:state.dmLoaded }; }
 
@@ -5367,6 +5375,7 @@ table.scores td{border-color:var(--border);}
     if(false&&isAdmin){ sub(db.collection('hq_leads'), 'people', 'hqLeads'); doc('meta/ghlLeads', 'meta', function(d){ state.ghlLeadsMeta=d; }); }
     sub(db.collection('app_sessions').limit(5000), 'pillars', 'appSessions');
     doc('meta/ghlSync', 'meta', function(d){ state.ghlMeta=d; });
+    doc('meta/youtubeSync', 'meta', function(d){ state.youtubeMeta=d; });
     doc('meta/routineCalls', 'meta', function(d){ state.routineCalls=d; });
     doc('meta/morningReport', 'meta', function(d){ state.morningReport=d; });
     doc('meta/stripeSync', 'meta', function(d){ state.stripe.meta=d; });
@@ -5492,7 +5501,7 @@ table.scores td{border-color:var(--border);}
     return out;
   }
   document.addEventListener('hq-time-changed', function(){ markDirty('pillars'); });
-  function plState(){ return Object.assign({}, coreState(), { timeHours:plTimeHours(), igAccount:state.igAccount, contentQueue:state.contentQueue, routineCalls:state.routineCalls, deliveryCounts:state.deliveryCounts, appSessions:state.appSessions||null, adsDaily:state.adsDaily, deliveryByDay:state.deliveryByDay||null }); }
+  function plState(){ return Object.assign({}, coreState(), { timeHours:plTimeHours(), igAccount:state.igAccount, contentQueue:state.contentQueue, routineCalls:state.routineCalls, deliveryCounts:state.deliveryCounts, appSessions:state.appSessions||null, adsDaily:state.adsDaily, deliveryByDay:state.deliveryByDay||null, stripeDaily:isAdmin?(state.stripe.daily||null):null }); }
   function plData(){
     var s = plState();
     var opts = { dmScanOk:DM_SCAN_OK };
@@ -5627,12 +5636,12 @@ table.scores td{border-color:var(--border);}
     var d = plData(), S = d.sales, html = '';
     if(!S.connected.stripe || !S.connected.ghl) html += '<div class="pl-leak"><div class="k">Not connected yet</div><p>'+(!S.connected.stripe?(S.connected.stripeOff?'Revenue: waiting on Newie (Stripe is switched off). ':'Stripe: add a read-only restricted key (rk_live_…) to the Supabase Vault as <b>stripe_restricted_key</b>. '):'')+(!S.connected.ghl?'GoHighLevel: add the token to the Vault as <b>ghl_readonly_token</b>. ':'')+'Blank rows stay blank; nothing here is guessed.</p></div>';
     html += '<div class="pl-list">'+
-      plRow('Cash collected', d.period==='month'?'paid invoices this month':'shown for Month', S.headline, {fmt:'money', go:'stripe'})+
+      plRow('Cash collected', S.payments?'every Stripe payment · '+num(S.payments.value)+' payments, '+num(S.newPayers.value)+' first-time':'every Stripe payment', S.headline, {fmt:'money', go:'stripe'})+
       plRow('Sales closed', S.closed.note||'moved to Closed / Won in GHL', S.closed)+
       plRow('Close rate', 'closed ÷ calls held', S.closeRate, {fmt:'pct'})+
       plRow('Average sale value', null, S.avgSale, {fmt:'money'})+
       plRow('Days from first contact to close', 'GHL lead created → closed', S.daysToClose, {fmt:'dp1', lowerIsBetter:true})+
-      plRow('Refunds', null, S.refunds, {fmt:'money', lowerIsBetter:true})+
+      plRow('Refunds', S.refundsAllTime!=null?HQ.money(S.refundsAllTime)+' refunded in Stripe all time':null, S.refunds, {fmt:'money', lowerIsBetter:true})+
     '</div>';
     html += cacSection();
     html += '<p class="pl-note">Only admins can see this page.</p>';
@@ -5647,11 +5656,11 @@ table.scores td{border-color:var(--border);}
       plRow('Average weeks stayed', 'everyone with a join date', D.avgWeeks, {fmt:'dp1'})+
       plRow('Check-ins on time', d.range.label, D.checkinsOnTime)+
       plRow('Check-in reply time', 'not tracked yet', D.checkinReplyTime)+
-      plRow('Monthly recurring', 'waiting on Newie', D.mrr, {fmt:'money'})+
-      plRow('Failed payments', 'waiting on Newie', D.failedPayments, {lowerIsBetter:true})+
-      plRow('LTV', 'waiting on Newie', D.ltv, {fmt:'money'})+
-      plRow('Referrals', 'not tracked yet', D.referrals)+
-    '</div><p class="pl-note">'+(state.deliveryError?'Couldn’t load client counts ('+esc(state.deliveryError)+'). ':'')+'Active clients come from the challenge member list. Money rows fill in once Newie is connected.</p>';
+      plRow('Monthly recurring', 'Stripe subscriptions (Newie later)', D.mrr, {fmt:'money', go:isAdmin?'stripe':null})+
+      plRow('Failed payments', 'failed or past due in Stripe', D.failedPayments, {lowerIsBetter:true, go:isAdmin?'stripe':null})+
+      plRow('LTV', 'average paid per client, all of Stripe', D.ltv, {fmt:'money', go:isAdmin?'stripe':null})+
+      plRow('Referrals', 'applications through a referral link', D.referrals)+
+    '</div><p class="pl-note">'+(state.deliveryError?'Couldn’t load client counts ('+esc(state.deliveryError)+'). ':'')+'Active clients come from 1FIT’s active list (checked daily). Money rows come from Stripe until Newie is connected.</p>';
     setHtml('plDelivery', html);
   };
 
@@ -5763,9 +5772,9 @@ table.scores td{border-color:var(--border);}
     var cw = sc.current, mw = cw && state.scorecardMeta && state.scorecardMeta.weeks && state.scorecardMeta.weeks[cw.start] || {};
     if(cw) html += '<form class="pl-list sc-form" id="scForm"><div class="pl-row"><div class="l">This week, typed in<small>Week '+cw.n+'</small></div></div>'+
       '<label class="pl-row"><span class="l">Hours worked<small>leave blank to use the Time page</small></span><input class="input" type="number" min="0" max="120" step="0.5" inputmode="decimal" name="hours" value="'+esc(mw.hours==null?'':mw.hours)+'"></label>'+
-      '<label class="pl-row"><span class="l">Long-form videos out</span><input class="input" type="number" min="0" max="20" step="1" inputmode="numeric" name="longform" value="'+esc(mw.longform==null?'':mw.longform)+'"></label>'+
+      '<label class="pl-row"><span class="l">Long-form videos out<small>leave blank to use YouTube'+(state.youtubeMeta&&state.youtubeMeta.lastSyncAt?' (checked '+esc(relTime(state.youtubeMeta.lastSyncAt)||'hourly')+')':'')+'</small></span><input class="input" type="number" min="0" max="20" step="1" inputmode="numeric" name="longform" value="'+esc(mw.longform==null?'':mw.longform)+'"></label>'+
       '<div class="pl-row"><span class="l" id="scMsg" role="status"></span><button type="submit" class="btn primary">Save</button></div></form>';
-    html += '<p class="pl-note">Green is on plan, red is off. The current week only turns red for "at most" numbers. Leads = applications plus instant-form leads from ads. Calls, show rate and sales come from GoHighLevel. Right market fit = applicants aged 25 to 40 until the apply page asks about work. Ad cost per client fills in once Meta Ads is connected.</p>';
+    html += '<p class="pl-note">Green is on plan, red is off. The current week only turns red for "at most" numbers. Leads = applications plus instant-form leads from ads. Calls, show rate and sales come from GoHighLevel. Right market fit = applicants aged 25 to 40 until the apply page asks about work. Ad cost per client = Meta ad spend ÷ sales from the two paid funnels. Long-form = videos on your YouTube Videos tab (Shorts left out), checked hourly.</p>';
     setHtml('plScore', html);
   };
   document.addEventListener('submit', async function(ev){
@@ -6057,7 +6066,8 @@ table.scores td{border-color:var(--border);}
 <script>
 /* ---------- Time tab (admin only): where every hour of the week goes ----------
    One tap = "I'm doing this now". The previous step stops at that moment, so the day becomes a gap-free timeline.
-   Storage (meta, admin only by RLS):  time:<local date> {entries:[{id,k,s,e,en,n}]}  ·  timeNow {k,s,n}  ·  timeCfg {tags:{step:tag}, awake}
+   Storage (meta, admin only by RLS):  time:<Sydney date> {entries:[{id,k,s,e,en,n,c,cn,src}]} (c = challenge_members id, cn = name)  ·  timeNow {k,s,n,c,cn}  ·  timeCfg {tags:{step:tag}, awake}  ·  timeInbox {items:[{id,at,text,status,result}]} for Claude
+   Claude logs with public.time_log(entries) (supabase/migrations/20261113_time_log.sql), which carves the same way addEntry does.
    Times are epoch ms; days and clock times are SYDNEY's (HQ.TZ), whatever the device's clock says (Jordan, from Bali, 13 Nov 2026). Entries never overlap: every insert carves. */
 (function(){
   'use strict';
@@ -6077,9 +6087,11 @@ table.scores td{border-color:var(--border);}
   AREAS.forEach(function(a){ a.steps.forEach(function(s){ STEP[s[0]]={k:s[0],label:s[1],area:a.k,color:a.color}; ORDER.push(s[0]); }); });
   var AREA={}; AREAS.forEach(function(a){ AREA[a.k]=a; });
   var NONBIZ={life:1,sleep:1};
+  // steps done for one client: tapping them asks "who for?" so time per client adds up (Jordan, 13 Nov 2026)
+  var CLIENT_STEPS={obcall:1,obplan:1,obsetup:1,cireview:1,cifeedback:1,cicall:1,clientmsg:1};
   var TAGS=[['','Not set'],['me','Keep (only I can)'],['delegate','Delegate'],['automate','Automate'],['cut','Cut']];
   var DAY=86400000, MIN=60000;
-  var S={admin:false, active:false, client:null, days:{}, now:null, cfg:{tags:{},awake:108}, pending:{}, loaded:false, tab:'day', date:null, wk:0, sheet:null};
+  var S={admin:false, active:false, client:null, days:{}, now:null, cfg:{tags:{},awake:108}, pending:{}, loaded:false, tab:'day', date:null, wk:0, sheet:null, roster:[], value:{}, inbox:{items:[]}};
   var poller=null, ticker=null;
   function $(id){ return document.getElementById(id); }
   function pad(n){ return (n<10?'0':'')+n; }
@@ -6113,10 +6125,25 @@ table.scores td{border-color:var(--border);}
         if(id.indexOf('time:')===0) S.days[id.slice(5)]=row.data||{entries:[]};
         else if(id==='timeNow') S.now=(row.data && row.data.k && STEP[row.data.k]) ? row.data : null;
         else if(id==='timeCfg'){ S.cfg=row.data||{}; S.cfg.tags=S.cfg.tags||{}; if(!S.cfg.awake) S.cfg.awake=108; }
+        else if(id==='timeInbox'){ S.inbox=row.data||{items:[]}; S.inbox.items=S.inbox.items||[]; }
       });
       S.loaded=true; render(); pill(); try{ document.dispatchEvent(new CustomEvent('hq-time-changed')); }catch(e){}
     });
+    // active clients from 1FIT (challenge_members) and what each is worth a month (stripe_customers)
+    S.client.from('challenge_members').select('id,data').then(function(res){
+      if(res.error) return;
+      S.roster=(res.data||[]).filter(function(r){ return r.data && r.data.active===true && !/tornatore|montojo/i.test(r.data.name||''); })
+        .map(function(r){ return {id:r.id, name:r.data.name||r.id, free:r.data.billing==='affiliate'||r.data.billing==='free'}; })
+        .sort(function(a,b){ return a.name.localeCompare(b.name); });
+      render();
+    });
+    S.client.from('stripe_customers').select('id,data').then(function(res){
+      if(res.error) return; var v={};
+      (res.data||[]).forEach(function(r){ var d=r.data||{}; if(d.memberId) v[d.memberId]={monthly:d.monthlyEquivalent, status:d.status}; });
+      S.value=v; if(S.tab==='clients') render();
+    });
   }
+  function clientName(c){ if(!c) return ''; var m=S.roster.filter(function(r){ return r.id===c; })[0]; return m?m.name:c; }
 
   /* remove [s,e) from every entry (splitting where needed), across every day it touches */
   function carve(s,e,skipId){
@@ -6142,20 +6169,20 @@ table.scores td{border-color:var(--border);}
       s=end;
     }
   }
-  function closeRunning(at){ if(!S.now) return; var n=S.now; addEntry(n.k, Math.min(n.s,at), at, n.n?{n:n.n}:null); S.now=null; }
-  function start(k){
+  function closeRunning(at){ if(!S.now) return; var n=S.now, x={}; if(n.n) x.n=n.n; if(n.c){ x.c=n.c; x.cn=n.cn||clientName(n.c); } addEntry(n.k, Math.min(n.s,at), at, x); S.now=null; }
+  function start(k, c){
     var t=nowMs();
-    if(S.now && S.now.k===k) return;
+    if(S.now && S.now.k===k && (S.now.c||'')===(c||'')) return;
     closeRunning(t);
-    S.now={k:k, s:t}; saveNow();
+    S.now={k:k, s:t}; if(c){ S.now.c=c; S.now.cn=clientName(c); } saveNow();
     var r=recent(); S.cfg.recent=[k].concat(r.filter(function(x){return x!==k;})).slice(0,8); saveCfg();
   }
   function stop(){ closeRunning(nowMs()); S.now=null; saveNow(); }
 
   /* segments for a day: saved entries + the live one, clipped to the day */
   function segs(key){
-    var a=dstart(key), b=dnext(key), out=(S.days[key]&&S.days[key].entries||[]).filter(function(x){return STEP[x.k];}).map(function(x){ return {id:x.id,k:x.k,s:Math.max(a,x.s),e:Math.min(b,x.e),en:x.en||0,n:x.n||''}; });
-    if(S.now){ var t=nowMs(), s=Math.max(a,S.now.s), e=Math.min(b,t); if(e>s) out.push({id:'live',k:S.now.k,s:s,e:e,en:0,n:S.now.n||'',live:true}); }
+    var a=dstart(key), b=dnext(key), out=(S.days[key]&&S.days[key].entries||[]).filter(function(x){return STEP[x.k];}).map(function(x){ return {id:x.id,k:x.k,s:Math.max(a,x.s),e:Math.min(b,x.e),en:x.en||0,n:x.n||'',c:x.c||'',cn:x.cn||''}; });
+    if(S.now){ var t=nowMs(), s=Math.max(a,S.now.s), e=Math.min(b,t); if(e>s) out.push({id:'live',k:S.now.k,s:s,e:e,en:0,n:S.now.n||'',c:S.now.c||'',cn:S.now.cn||'',live:true}); }
     return out.filter(function(x){return x.e>x.s;}).sort(function(x,y){return x.s-y.s;});
   }
   function firstEver(){ var f=Infinity; Object.keys(S.days).forEach(function(k){ (S.days[k].entries||[]).forEach(function(x){ if(x.s<f) f=x.s; }); }); if(S.now && S.now.s<f) f=S.now.s; return f; }
@@ -6194,7 +6221,7 @@ table.scores td{border-color:var(--border);}
     if(S.now){
       var st=STEP[S.now.k], ar=AREA[st.area];
       c.className='tm-now on'; c.style.setProperty('--tm-c', st.color);
-      c.innerHTML='<div class="tm-now-l"><div class="tm-now-k">'+esc(ar.label)+' · now</div><div class="tm-now-s">'+esc(st.label)+'</div>'+
+      c.innerHTML='<div class="tm-now-l"><div class="tm-now-k">'+esc(ar.label)+' · now</div><div class="tm-now-s">'+esc(st.label)+(S.now.c?' <span class="tm-who">· '+esc(S.now.cn||clientName(S.now.c))+'</span>':'')+'</div>'+
         '<div class="tm-now-meta">since <button class="tm-link" data-tm="adjust">'+clock(S.now.s)+'</button> · <input class="tm-note" id="tmNote" maxlength="80" placeholder="What exactly? (optional)" value="'+esc(S.now.n||'')+'" aria-label="Detail"></div></div>'+
         '<div class="tm-now-r"><div class="tm-elapsed" id="tmElapsed">'+dur((nowMs()-S.now.s)/MIN)+'</div><button class="btn tm-stop" data-tm="stop">Stop</button></div>';
     } else {
@@ -6227,7 +6254,7 @@ table.scores td{border-color:var(--border);}
   function entryRow(x){
     var st=STEP[x.k];
     return '<div class="tm-row'+(x.live?' live':'')+'"><div class="tm-t">'+clock(x.s)+' – '+(x.live?'now':clock(x.e))+'</div>'+
-      '<div class="tm-what"><i style="background:'+st.color+'"></i><span>'+esc(st.label)+(x.n?'<em> · '+esc(x.n)+'</em>':'')+'</span></div><div class="tm-d">'+dur((x.e-x.s)/MIN)+'</div>'+
+      '<div class="tm-what"><i style="background:'+st.color+'"></i><span>'+esc(st.label)+(x.c?' <span class="tm-who">· '+esc(x.cn||clientName(x.c))+'</span>':'')+(x.n?'<em> · '+esc(x.n)+'</em>':'')+'</span></div><div class="tm-d">'+dur((x.e-x.s)/MIN)+'</div>'+
       (x.live?'<span class="tm-livetag">LIVE</span>':'<span class="tm-en"><button data-tm="en" data-id="'+esc(x.id)+'" data-v="1" aria-pressed="'+(x.en>0)+'" title="Gave me energy" aria-label="Gave me energy">▲</button><button data-tm="en" data-id="'+esc(x.id)+'" data-v="-1" aria-pressed="'+(x.en<0)+'" title="Drained me" aria-label="Drained me">▼</button></span><button class="r-btn" data-tm="edit" data-id="'+esc(x.id)+'" aria-label="Edit">Edit</button>')+'</div>';
   }
   function weekNav(ws){ var cur=wkStart(dkey(nowMs())); return '<div class="tm-nav"><button class="r-btn" data-tm="wnav" data-d="-1" aria-label="Previous week">←</button><span class="tm-date">Week of '+esc(dayLabel(ws))+(ws===cur?' · this week':'')+'</span><button class="r-btn" data-tm="wnav" data-d="1" aria-label="Next week"'+(ws>=cur?' disabled':'')+'>→</button></div>'; }
@@ -6251,6 +6278,39 @@ table.scores td{border-color:var(--border);}
     h+='</tbody></table></div>'+(any?'':'<div class="empty-state">Nothing tracked this week.</div>')+'</div>';
     $('tmBody').innerHTML=h;
   }
+  /* "Tell Claude": type or dictate what you did; Claude turns it into blocks (every 2 hours, or straight away in chat) */
+  function renderTell(){
+    var c=$('tmTell'); if(!c) return;
+    if(document.activeElement && document.activeElement.id==='tmTellText') return; // don't wipe what he's typing
+    var items=(S.inbox.items||[]).slice(-4).reverse();
+    c.innerHTML='<div class="tm-area-h">Tell Claude what you did</div>'+
+      '<textarea class="input" id="tmTellText" placeholder="e.g. 9 to 10:30 edited the Bali reel, then 20 min on Dom’s check-in and 15 min replying to Jack and Sami" aria-label="What did you do?"></textarea>'+
+      '<div class="tm-tell-row"><span class="f-note">Use your phone’s mic to talk it. Claude logs it into the day at the next 2-hourly check-in.</span><button class="btn primary" data-tm="tell">Send</button></div>'+
+      (items.length?'<div class="tm-tell-list">'+items.map(function(x){ return '<div class="tm-tell-item"><span>'+(x.status==='done'?'✓':'…')+'</span><div><b>'+esc(clock(x.at))+'</b> '+esc(String(x.text).slice(0,140))+(x.result?'<div>'+esc(x.result)+'</div>':(x.status==='done'?'':'<div>waiting for Claude</div>'))+'</div></div>'; }).join('')+'</div>':'');
+  }
+  function tellSend(){
+    var t=$('tmTellText'), v=t&&t.value.trim(); if(!v) return;
+    var items=(S.inbox.items||[]).slice(-50); items.push({id:uid(), at:nowMs(), text:v, status:'new'});
+    S.inbox={items:items}; put('timeInbox', S.inbox); t.value=''; t.blur(); setMsg('Sent. Claude will log it at the next check-in.'); render();
+  }
+  /* time per client: client steps tagged with a 1FIT client, against what they pay */
+  function renderClients(){
+    var ws=addD(wkStart(dkey(nowMs())), 7*S.wk), h=weekNav(ws), per={}, untagged=0, tot=0;
+    function scan(from, n, into){ for(var i=0;i<n;i++){ var k=addD(from,i); segs(k).forEach(function(x){ var st=STEP[x.k]; if(!CLIENT_STEPS[x.k] && !x.c) return; var m=(x.e-x.s)/MIN; if(!x.c){ if(into===per) untagged+=m; return; } var r=(into[x.c]=into[x.c]||{tot:0, area:{}}); r.tot+=m; r.area[st.area]=(r.area[st.area]||0)+m; if(into===per) tot+=m; }); } }
+    scan(ws, 7, per);
+    var four={}; scan(addD(ws,-21), 28, four);
+    var ids=Object.keys(per).concat(S.roster.map(function(r){ return r.id; })).filter(function(v,i,a){ return a.indexOf(v)===i; });
+    ids.sort(function(a,b){ return ((per[b]||{}).tot||0)-((per[a]||{}).tot||0) || clientName(a).localeCompare(clientName(b)); });
+    h+='<div class="kpis">'+kpi('Client time this week', hrs(tot)+'<small> h</small>', Object.keys(per).length+' clients')+kpi('Not tagged to a client', hrs(untagged)+'<small> h</small>', untagged?'client steps with no name':'')+kpi('Average per client', Object.keys(per).length?hrs(tot/Object.keys(per).length)+'<small> h</small>':'–', 'this week')+'</div>';
+    h+='<div class="panel"><h2>Time per client</h2><p class="rule">Onboarding, check-ins, client messages and anything else you tag with a client. $/hour = what they pay a month ÷ your hours on them a month (last 4 weeks).</p>';
+    h+='<div class="table-wrap"><table class="scores tm-table"><thead><tr><th>Client</th><th class="num">This week</th><th class="num">Avg / week</th><th class="num">$ a month</th><th class="num">$ / hour</th></tr></thead><tbody>';
+    ids.forEach(function(id){ var w=per[id]||{tot:0,area:{}}, f=four[id]||{tot:0}, v=S.value[id]||{}, r=S.roster.filter(function(x){ return x.id===id; })[0];
+      var mo=r&&r.free?0:(HQ.isNum(v.monthly)?v.monthly:null), perWeek=f.tot/4, ph=(mo!=null && perWeek>0)?mo/(perWeek/60*4.345):null;
+      var split=Object.keys(w.area).sort(function(a,b){ return w.area[b]-w.area[a]; }).map(function(a){ return AREA[a].label+' '+hrs(w.area[a]); }).join(' · ');
+      h+='<tr><td class="op-name">'+esc(clientName(id))+(split?'<div class="tm-sub2">'+esc(split)+'</div>':'')+'</td><td class="num">'+(w.tot?hrs(w.tot)+' h':'<span class="muted">–</span>')+'</td><td class="num">'+(f.tot?hrs(perWeek)+' h':'<span class="muted">–</span>')+'</td><td class="num">'+(r&&r.free?'free':(mo!=null?esc(HQ.money(mo)):'<span class="muted">–</span>'))+'</td><td class="num">'+(ph!=null?esc(HQ.money(ph)):'<span class="muted">–</span>')+'</td></tr>'; });
+    h+='</tbody></table></div>'+(ids.length?'':'<div class="empty-state">No clients yet.</div>')+'</div>';
+    $('tmBody').innerHTML=h;
+  }
   function renderBuy(){
     var ws=addD(wkStart(dkey(nowMs())), 7*S.wk), w=weekStats(ws), tags=S.cfg.tags, sum={me:0,delegate:0,automate:0,cut:0,'':0}, h=weekNav(ws);
     var ks=ORDER.filter(function(k){ return STEP[k].area!=='sleep' && w.step[k]; }).sort(function(x,y){ return w.step[y]-w.step[x]; });
@@ -6266,9 +6326,9 @@ table.scores td{border-color:var(--border);}
   }
   function render(){
     if(!S.admin || !S.active || !$('tmNow')) return;
-    renderNow(); renderGrid();
+    renderNow(); renderTell(); renderGrid();
     document.querySelectorAll('#viewTime [data-tm="tab"]').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-v')===S.tab?'true':'false'); });
-    if(S.tab==='week') renderWeek(); else if(S.tab==='buy') renderBuy(); else renderDay();
+    if(S.tab==='week') renderWeek(); else if(S.tab==='buy') renderBuy(); else if(S.tab==='clients') renderClients(); else renderDay();
     if(!S.loaded) setMsg('Loading…');
   }
   function tick(){ var el=$('tmElapsed'); if(el && S.now) el.textContent=dur((nowMs()-S.now.s)/MIN); pill(); }
@@ -6283,16 +6343,19 @@ table.scores td{border-color:var(--border);}
 
   /* ---------- sheet (edit / fill / add / adjust) ---------- */
   function stepSelect(sel){ return '<select class="input" id="tmSStep" aria-label="Step">'+AREAS.map(function(a){ return '<optgroup label="'+esc(a.label)+'">'+a.steps.map(function(s){ return '<option value="'+s[0]+'"'+(s[0]===sel?' selected':'')+'>'+esc(s[1])+'</option>'; }).join('')+'</optgroup>'; }).join('')+'</select>'; }
+  function clientSelect(sel){ var opts=S.roster.slice(); if(sel && !opts.some(function(r){ return r.id===sel; })) opts.push({id:sel, name:clientName(sel)}); return '<select class="input" id="tmSClient" aria-label="Client"><option value="">None / several</option>'+opts.map(function(r){ return '<option value="'+esc(r.id)+'"'+(r.id===sel?' selected':'')+'>'+esc(r.name)+'</option>'; }).join('')+'</select>'; }
   function openSheet(o){
     S.sheet=o; var c=$('tmSheetCard'), h='';
-    if(o.mode==='fill'){
+    if(o.mode==='client'){
+      h='<h2>'+esc(STEP[o.k].label)+': who for?</h2><p class="rule">So your time per client adds up. Pick “Several” for a batch.</p><div class="tm-clients">'+S.roster.map(function(r){ return '<button class="tm-step" data-tm="pickc" data-c="'+esc(r.id)+'"><i style="background:'+STEP[o.k].color+'"></i>'+esc(r.name)+'</button>'; }).join('')+'<button class="tm-step" data-tm="pickc" data-c=""><i></i>Several / general</button></div>';
+    } else if(o.mode==='fill'){
       h='<h2>Fill '+clock(o.s)+' – '+clock(o.e)+'</h2><p class="rule">'+dur((o.e-o.s)/MIN)+' untracked. What were you doing?</p><div class="tm-areas tm-fillgrid">'+AREAS.map(function(a){ return '<div class="tm-area"><div class="tm-area-h"><i style="background:'+a.color+'"></i>'+esc(a.label)+'</div><div class="tm-chips">'+a.steps.map(function(s){ return '<button class="tm-step" data-tm="fillk" data-k="'+s[0]+'"><i style="background:'+a.color+'"></i>'+esc(s[1])+'</button>'; }).join('')+'</div></div>'; }).join('')+'</div><p class="rule">Did two things in that gap? Fill it with one, then Edit the times.</p>';
     } else if(o.mode==='adjust'){
       h='<h2>When did you start?</h2><p class="rule">Forgot to tap? Set the real start. Anything logged in between is replaced.</p><div class="tm-form"><label>Started at<input class="input" type="time" id="tmSStart" value="'+hhmm(S.now.s)+'"></label></div>';
     } else {
-      h='<h2>'+(o.mode==='add'?'Add time':'Edit')+'</h2><div class="tm-form"><label>Step'+stepSelect(o.k)+'</label><label>From<input class="input" type="time" id="tmSStart" value="'+hhmm(o.s)+'"></label><label>To<input class="input" type="time" id="tmSEnd" value="'+(o.e>=dnext(o.day)?'00:00':hhmm(o.e))+'"></label><label class="tm-wide">Detail (optional)<input class="input" id="tmSNote" maxlength="80" value="'+esc(o.n||'')+'"></label></div><p class="rule">Times are for '+esc(dayLabel(o.day))+'. To = 00:00 means midnight. Anything else logged in that window is replaced.</p>';
+      h='<h2>'+(o.mode==='add'?'Add time':'Edit')+'</h2><div class="tm-form"><label>Step'+stepSelect(o.k)+'</label><label>From<input class="input" type="time" id="tmSStart" value="'+hhmm(o.s)+'"></label><label>To<input class="input" type="time" id="tmSEnd" value="'+(o.e>=dnext(o.day)?'00:00':hhmm(o.e))+'"></label><label class="tm-wide">Client (optional)'+clientSelect(o.c)+'</label><label class="tm-wide">Detail (optional)<input class="input" id="tmSNote" maxlength="80" value="'+esc(o.n||'')+'"></label></div><p class="rule">Times are for '+esc(dayLabel(o.day))+'. To = 00:00 means midnight. Anything else logged in that window is replaced.</p>';
     }
-    h+='<div id="tmSErr" class="tm-err" role="alert"></div><div class="tm-sheet-btns">'+(o.mode==='fill'?'':'<button class="btn primary" data-tm="ssave">Save</button>')+(o.mode==='edit'?'<button class="btn tm-del" data-tm="sdel">Delete</button>':'')+'<button class="btn" data-tm="sclose">Cancel</button></div>';
+    h+='<div id="tmSErr" class="tm-err" role="alert"></div><div class="tm-sheet-btns">'+(o.mode==='fill'||o.mode==='client'?'':'<button class="btn primary" data-tm="ssave">Save</button>')+(o.mode==='edit'?'<button class="btn tm-del" data-tm="sdel">Delete</button>':'')+'<button class="btn" data-tm="sclose">Cancel</button></div>';
     c.innerHTML=h; $('tmSheet').hidden=false;
   }
   function closeSheet(){ S.sheet=null; var s=$('tmSheet'); if(s) s.hidden=true; }
@@ -6313,6 +6376,7 @@ table.scores td{border-color:var(--border);}
     if(e2>nowMs()+MIN){ err.textContent='That runs into the future.'; return; }
     if(S.now && e2>S.now.s){ err.textContent='That overlaps what you’re tracking now. Stop it first, or set its start time.'; return; }
     var extra={}; var n=$('tmSNote').value.trim(); if(n) extra.n=n; if(o.mode==='edit' && o.en) extra.en=o.en;
+    var cv=$('tmSClient') && $('tmSClient').value; if(cv){ extra.c=cv; extra.cn=clientName(cv); }
     if(o.mode==='edit') removeEntry(o.id);
     addEntry($('tmSStep').value, s2, e2, extra);
     closeSheet(); render();
@@ -6324,17 +6388,20 @@ table.scores td{border-color:var(--border);}
     if(e.target.closest && e.target.closest('#tmPill')){ location.hash='time'; return; }
     var el=e.target.closest && e.target.closest('#viewTime [data-tm]'); if(!el) return;
     var a=el.getAttribute('data-tm'), today=dkey(nowMs());
-    if(a==='go') start(el.getAttribute('data-k'));
+    if(a==='go'){ var gk=el.getAttribute('data-k'); if(CLIENT_STEPS[gk] && S.roster.length){ openSheet({mode:'client', k:gk}); return; } start(gk); }
+    else if(a==='pickc'){ var o0=S.sheet, cc=el.getAttribute('data-c')||null; if(o0){ if(o0.s!=null){ var xx={}; if(cc){ xx.c=cc; xx.cn=clientName(cc); } addEntry(o0.k, o0.s, o0.e, xx); } else start(o0.k, cc); } closeSheet(); }
+    else if(a==='tell'){ tellSend(); return; }
     else if(a==='stop') stop();
     else if(a==='tab'){ S.tab=el.getAttribute('data-v'); try{ localStorage.setItem('hqTimeTab',S.tab); }catch(x){} }
     else if(a==='dnav'){ var d=+el.getAttribute('data-d'); S.date = d===0 ? null : addD(S.date||today, d); if(S.date>=today) S.date=null; }
     else if(a==='wnav'){ S.wk=Math.min(0,S.wk+(+el.getAttribute('data-d'))); }
     else if(a==='goto'){ var g=el.getAttribute('data-d'); S.date = g>=today?null:g; S.tab='day'; }
     else if(a==='fill'){ openSheet({mode:'fill', s:+el.getAttribute('data-s'), e:+el.getAttribute('data-e')}); return; }
+    else if(a==='fillk' && CLIENT_STEPS[el.getAttribute('data-k')] && S.roster.length && S.sheet){ openSheet({mode:'client', k:el.getAttribute('data-k'), s:S.sheet.s, e:S.sheet.e}); return; }
     else if(a==='fillk'){ var o=S.sheet; if(o){ addEntry(el.getAttribute('data-k'), o.s, o.e); var r=recent(), k=el.getAttribute('data-k'); S.cfg.recent=[k].concat(r.filter(function(x){return x!==k;})).slice(0,8); saveCfg(); } closeSheet(); }
     else if(a==='adjust'){ openSheet({mode:'adjust'}); return; }
     else if(a==='add'){ var key=S.date||today, t=Math.min(nowMs(), dnext(key)), s=Math.max(dstart(key), t-30*MIN); if(S.now && key===today){ t=Math.min(t,S.now.s); s=Math.max(dstart(key),t-30*MIN); } openSheet({mode:'add', day:key, k:recent()[0]||'research', s:s, e:t}); return; }
-    else if(a==='edit'){ var f=findEntry(el.getAttribute('data-id')); if(f) openSheet({mode:'edit', id:f.x.id, day:f.day, k:f.x.k, s:f.x.s, e:f.x.e, n:f.x.n, en:f.x.en}); return; }
+    else if(a==='edit'){ var f=findEntry(el.getAttribute('data-id')); if(f) openSheet({mode:'edit', id:f.x.id, day:f.day, k:f.x.k, s:f.x.s, e:f.x.e, n:f.x.n, en:f.x.en, c:f.x.c}); return; }
     else if(a==='en'){ var f2=findEntry(el.getAttribute('data-id')), v=+el.getAttribute('data-v'); if(f2){ f2.x.en = f2.x.en===v ? 0 : v; if(!f2.x.en) delete f2.x.en; saveDay(f2.day); } }
     else if(a==='ssave'){ sheetSave(); return; }
     else if(a==='sdel'){ if(S.sheet){ removeEntry(S.sheet.id); } closeSheet(); }
@@ -6359,13 +6426,13 @@ table.scores td{border-color:var(--border);}
     var bb=$('bottomBar'); if(bb) bb.classList.toggle('has-time', show);
     if(!show){ S.admin=false; var root=$('timeRoot'); if(root) root.innerHTML='<div class="panel"><h2>Time</h2><p class="rule">This page is admin only.</p></div>'; return; }
     S.admin=true; S.client=ev.detail.supabase;
-    try{ var tb=localStorage.getItem('hqTimeTab'); if(tb==='day'||tb==='week'||tb==='buy') S.tab=tb; }catch(x){}
+    try{ var tb=localStorage.getItem('hqTimeTab'); if(tb==='day'||tb==='week'||tb==='buy'||tb==='clients') S.tab=tb; }catch(x){}
     S.active = (location.hash||'').replace('#','')==='time';
     load(); render();
     poller=setInterval(load,15000); ticker=setInterval(tick,1000);
   });
   document.addEventListener('tf-auth-signed-out', function(){ S.admin=false; S.client=null; S.days={}; S.now=null; S.loaded=false; if(poller) clearInterval(poller); if(ticker) clearInterval(ticker); ['tabTime','bbTime','sheetTime','tmPill'].forEach(function(id){ var el=$(id); if(el) el.hidden=true; }); });
-  window.__time={S:S, STEP:STEP, AREAS:AREAS, dayStats:dayStats, weekStats:weekStats, start:start, stop:stop, addEntry:addEntry, render:render, dkey:dkey, wkStart:wkStart, addD:addD};
+  window.__time={S:S, CLIENT_STEPS:CLIENT_STEPS, renderClients:renderClients, tellSend:tellSend, STEP:STEP, AREAS:AREAS, dayStats:dayStats, weekStats:weekStats, start:start, stop:stop, addEntry:addEntry, render:render, dkey:dkey, wkStart:wkStart, addD:addD};
 })();
 </script>
 <script>
