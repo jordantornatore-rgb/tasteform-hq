@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.6.4 — 13 Nov 2026 (Revenue checks 1FIT)
+
+- **1FIT decides who's a client.** Revenue now compares Stripe with 1FIT's active client list (refreshed daily by the challenge scan into `challenge_members`). Matching: email, then name, then close email/name (e.g. "Haydar Aldaghiree" = "Hayda Alda").
+- Someone who left 1FIT is a **Past client** (shows "left 1FIT <date>" or "not in 1FIT") and is taken out of next payments, overdue and the 30-day figure. Active 1FIT clients with no Stripe payments show as **Not paying on Stripe**.
+- Top card is now **Clients in 1FIT** (paying on Stripe vs not). Client filters: In 1FIT / Not on Stripe / Past clients / One-off / All. Failed Stripe payments from people no longer in 1FIT are marked.
+
 ## 3.6.3 — 13 Nov 2026 (Revenue: every client payment)
 
 - **Revenue** now reads every successful Stripe payment (subscriptions, payment links, paid-in-full, one-offs), not just subscriptions. Stripe records for the same person (same email or name) are merged into one client.
