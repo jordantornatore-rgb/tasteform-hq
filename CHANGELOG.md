@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.6.5 — 13 Nov 2026 (Free affiliate clients)
+
+- Revenue: active 1FIT clients on free coaching show as **Free (affiliate)**, not "not paying". Adim Hamid, George Paps and Yohana Sime are marked (Jordan, 13 Nov).
+- A **Mark free (affiliate)** button on anyone "Not paying on Stripe" (Undo on Free rows). It saves `billing: affiliate` on their `challenge_members` row, so the hourly Stripe sync and the daily 1FIT check both keep it.
+- Top card: "N paying on Stripe · N free (affiliate) · N not paying". New **Free** filter.
+
 ## 3.6.4 — 13 Nov 2026 (Revenue checks 1FIT)
 
 - **1FIT decides who's a client.** Revenue now compares Stripe with 1FIT's active client list (refreshed daily by the challenge scan into `challenge_members`). Matching: email, then name, then close email/name (e.g. "Haydar Aldaghiree" = "Hayda Alda").
