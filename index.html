@@ -5684,7 +5684,8 @@ table.scores td{border-color:var(--border);}
       plRow('Check-in reply time', 'not tracked yet', D.checkinReplyTime)+
       plRow('Monthly recurring', 'Stripe subscriptions (Newie later)', D.mrr, {fmt:'money', go:isAdmin?'stripe':null})+
       plRow('Failed payments', 'failed or past due in Stripe', D.failedPayments, {lowerIsBetter:true, go:isAdmin?'stripe':null})+
-      plRow('LTV', 'average paid per client, all of Stripe', D.ltv, {fmt:'money', go:isAdmin?'stripe':null})+
+      (function(){ var U=HQ.unitEcon(); return plRow('LTV (working number)', U.months+' months kept × '+HQ.money(U.price)+' a week', {value:U.ltv, prev:null}, {fmt:'money'}); })()+
+      plRow('Paid per client so far', 'average paid per client, all of Stripe', D.ltv, {fmt:'money', go:isAdmin?'stripe':null})+
       plRow('Referrals', 'applications through a referral link', D.referrals)+
     '</div><p class="pl-note">'+(state.deliveryError?'Couldn’t load client counts ('+esc(state.deliveryError)+'). ':'')+'Active clients come from 1FIT’s active list (checked daily). Money rows come from Stripe until Newie is connected.</p>';
     setHtml('plDelivery', html);
@@ -5700,7 +5701,13 @@ table.scores td{border-color:var(--border);}
     var mName = function(m){ return new Date(Date.UTC(+m.slice(0,4), +m.slice(5,7)-1, 1)).toLocaleString('en-AU',{month:'short', timeZone:'UTC'}); };
     var money = function(v){ return v==null ? '<span class="pl-blank">–</span>' : esc(HQ.money(v)); };
     var vs = function(actual, max){ if(actual==null || max==null) return money(actual); return '<span class="'+(actual<=max?'cac-ok':'cac-over')+'">'+money(actual)+'</span>'; };
-    var html = '<h3 class="pl-h">Cost per client (CAC) · by funnel</h3><div class="pl-seg cac-months">'+months.slice().reverse().map(function(m){ return '<button type="button" data-cac-month="'+m+'"" aria-pressed="'+(m===ym)+'">'+esc(mName(m))+'</button>'; }).join('')+'</div>';
+    var U = HQ.unitEcon();
+    var html = '<h3 class="pl-h">Where you stand · since 1 Jan</h3><div class="pl-list">'+
+      '<div class="pl-row"><div class="l">Paid ads CAC<small>'+esc(HQ.money(U.adSpend)+' Meta spend ÷ '+U.clients+' clients from ads · target '+HQ.money(HQ.CAC_PLAN.target)+' max')+'</small></div><div class="r"><b>'+vs(U.cac, HQ.CAC_PLAN.target)+'</b></div></div>'+
+      '<div class="pl-row"><div class="l">LTV<small>'+esc(U.months+' months kept × '+HQ.money(U.price)+' a week')+'</small></div><div class="r"><b>'+money(U.ltv)+'</b></div></div>'+
+      '<div class="pl-row"><div class="l">LTV ÷ CAC<small>'+esc('at the $'+HQ.CAC_PLAN.target+' target it would be '+U.planRatio+'×')+'</small></div><div class="r"><b>'+esc(U.ratio+'×')+'</b></div></div>'+
+    '</div><p class="pl-note">Working numbers from 13 Nov. New 1FIT, Stripe and Meta data will replace them.</p>';
+    html += '<h3 class="pl-h">Cost per client (CAC) · by funnel</h3><div class="pl-seg cac-months">'+months.slice().reverse().map(function(m){ return '<button type="button" data-cac-month="'+m+'"" aria-pressed="'+(m===ym)+'">'+esc(mName(m))+'</button>'; }).join('')+'</div>';
     html += '<div class="pl-list">'+plRow('All funnels', C.costsIn ? 'every cost this month ÷ new clients' : 'needs this month’s costs', {value:C.total.cac, prev:null}, {fmt:'money', lowerIsBetter:true})+
       HQ.FUNNELS.concat([{key:'dm_outreach'}]).map(function(f){ var x=C.funnels[f.key];
         var sub = [ x.cost==null ? (x.paid?'ad spend not in yet':'costs not in yet') : HQ.money(x.cost)+' spent', x.clients==null ? 'clients not tracked yet' : num(x.clients)+' client'+(x.clients===1?'':'s') ];

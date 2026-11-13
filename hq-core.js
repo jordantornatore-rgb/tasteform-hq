@@ -1208,6 +1208,18 @@
      campaigns named "fasttrack" go to Paid ads · direct, "compounding" to Paid ads · indirect.
      Clients = GHL leads moved to Closed / Won in that month, by funnel. Blank until both halves exist. */
   HQ.CAC_PLAN = { target: 250, closeRate: 50, showRate: 70, leadToSale: 20 }; // plan: $250 max ad cost per client, 50%+ show to close, 70%+ show rate, 5 leads make a sale
+  // Working numbers Jordan set on 13 Nov 2026, used until 1FIT / Stripe / Newie history replaces them.
+  // LTV = 4.2 months kept x $125 a week (pre price rise). Old CAC = Meta spend since 1 Jan 2026 (both ad accounts,
+  // read in Ads Manager; earlier spend is sunk) / clients who came from ads (Ben R, Aaron A, Sami E, Laini G, Charbel Y).
+  HQ.UNIT_ECON = { retentionMonths: 4.2, pricePerWeek: 125, set: '2026-11-13',
+    baseline: { from: '2026-01-01', to: '2026-11-13', adSpend: 5370, clients: 5 } };
+  HQ.unitEcon = function () {
+    var U = HQ.UNIT_ECON, b = U.baseline;
+    var weeks = Math.round(U.retentionMonths * 52 / 12 * 10) / 10, ltv = Math.round(weeks * U.pricePerWeek);
+    var cac = b.clients ? Math.round(b.adSpend / b.clients) : null;
+    return { months: U.retentionMonths, weeks: weeks, price: U.pricePerWeek, ltv: ltv, cac: cac, adSpend: b.adSpend, clients: b.clients,
+      from: b.from, to: b.to, ratio: cac ? Math.round(ltv / cac * 10) / 10 : null, planRatio: Math.round(ltv / HQ.CAC_PLAN.target * 10) / 10 };
+  };
   HQ.adFunnelOf = function (name) {
     var n = String(name || '').toLowerCase();
     if (/fast\s*-?_?track/.test(n)) return 'paid_direct';
