@@ -69,5 +69,10 @@ check('refunds all time passed through', () => assert.strictEqual(P.sales.refund
   check('new clients a month from first payments in 90 days, no one-offs', () => assert.strictEqual(HQ.newClientsPerMonth([{ firstPaid: '2026-10-01', status: 'Active' }, { firstPaid: '2026-11-01', status: 'One-off' }, { firstPaid: '2026-09-01', status: 'Past client' }, { firstPaid: '2026-01-01', status: 'Active' }], '2026-11-14'), 0.7));
   check('weekly buckets: 13 Monday weeks', () => { const w = HQ.weekly('2026-11-14', 13, () => 1); assert.strictEqual(w.length, 13); assert.strictEqual(w[12].week, '2026-11-09'); });
 }
+{
+  const st = { meta: { stripeSync: { connected: true }, ghlSync: { connected: true, days: { '2026-11-10': { booked: 6, held: 10, showed: 6, noShow: 4, unmarked: 0, closed: 4 } } } }, stripe: { summary: { revenueByMonth: [] }, customers: [{ status: 'Past client', firstPaid: '2026-01-01', lastPaid: '2026-05-01', paymentsCount: 18, totalPaid: 2250 }] }, deliveryCounts: { active: 10, left: 4 }, tfResponses: [], tfDaily: [], igPosts: [], appSessions: [] };
+  const P = HQ.computePillars(st, Date.parse('2026-11-14T03:00:00Z'), 30);
+  check('biggest leak: no-shows x close rate x gross profit', () => { const L = P.simple.biggestLeak; assert.ok(L && L.amount > 0, JSON.stringify(L)); assert.ok(['noshow', 'churn'].indexOf(L.k) >= 0, L.k); });
+}
 console.log(`tracking: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

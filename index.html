@@ -1109,6 +1109,10 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
 .pl-so-row{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--border)}.pl-so-row:first-of-type{border-top:0}
 .pl-so-row>b{font-size:var(--t-s);color:var(--crit);min-width:14px}.pl-so-row p{margin:0;font-size:var(--t-m)}.pl-so-row p.nx{color:var(--muted);font-size:var(--t-s);margin-top:2px}
 .pl-so.ok p{margin:0}
+.pl-bigleak{display:block;width:100%;text-align:left;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--crit);border-radius:var(--r-l);padding:var(--s4);margin-bottom:var(--s3);cursor:pointer}
+.pl-bigleak .k{display:block;font-size:var(--t-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--crit);font-weight:700}
+.pl-bigleak .v{display:block;font-size:28px;font-weight:750;margin-top:4px}.pl-bigleak .v small{font-size:var(--t-s);color:var(--muted);font-weight:500}
+.pl-bigleak .s{display:block;font-size:var(--t-m);margin-top:2px}.pl-bigleak .nx{display:block;font-size:var(--t-s);color:var(--muted);margin-top:4px}
 .pl-stale{display:block;width:100%;text-align:left;font:inherit;color:var(--text);background:var(--warn-soft);border:1px solid var(--warn);border-radius:var(--r-l);padding:12px var(--s4);margin-bottom:var(--s3);cursor:pointer;min-height:44px}
 .pl-spark{display:block;margin-top:6px;color:var(--muted)}
 .pl-ceil{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:0;margin-top:4px}
@@ -2178,7 +2182,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.13.0"></script>
+<script src="hq-core.js?v=3.14.0"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -5641,6 +5645,8 @@ table.scores td{border-color:var(--border);}
     var so = (X.soWhat||[]).filter(function(x){ return isAdmin || x.k!=='cac'; });
     if(so.length) html += '<div class="pl-so"><div class="k">What matters now</div>'+so.map(function(x,i){ return '<div class="pl-so-row"><b>'+(i+1)+'</b><div><p>'+esc(x.text)+'</p><p class="nx">→ '+esc(x.next)+'</p></div></div>'; }).join('')+'</div>';
     else html += '<div class="pl-so ok"><div class="k">What matters now</div><p>Everything is on plan. Keep going.</p></div>';
+    // opportunity cost: only the single biggest leak, in gross profit, with the move that plugs it
+    if(isAdmin && X.biggestLeak && X.biggestLeak.amount>0) html += '<button type="button" class="pl-bigleak" data-go="'+esc(X.biggestLeak.go)+'"><span class="k">Biggest leak</span><span class="v">≈ '+esc(HQ.money(X.biggestLeak.amount))+' <small>gross profit</small></span><span class="s">'+esc(X.biggestLeak.text)+'</span><span class="nx">→ '+esc(X.biggestLeak.next)+'</span></button>';
     // trust: any source that's failing or late, loudly
     if((X.stale||[]).length) html += '<button type="button" class="pl-stale" data-go="today">⚠ '+esc(X.stale.length===1?X.stale[0].name+' is '+(X.stale[0].chip==='red'?'failing':'late'):X.stale.length+' data sources are late or failing: '+X.stale.map(function(r){ return r.name.replace(/ \(.*\)$/,''); }).join(', '))+'. Numbers from '+(X.stale.length===1?'it':'them')+' may be out of date.</button>';
     var spark = function(series, money){ if(!series || series.length<2) return ''; var v=series.map(function(x){ return +x.value||0; }), mx=Math.max.apply(null,v)||1, w=96, h=24, n=v.length-1;

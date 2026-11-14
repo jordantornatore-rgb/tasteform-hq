@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.13.0';
+  HQ.VERSION = '3.14.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -1085,6 +1085,18 @@
     if (U.cac != null && U.cac > HQ.CAC_PLAN.target && simple.adSpend) so.push({ k: 'cac', score: 0.1, text: 'Ads cost ' + HQ.money(U.cac) + ' a client (max ' + HQ.money(HQ.CAC_PLAN.target) + ').', next: 'Keep ad spend small until a campaign brings a client under ' + HQ.money(HQ.CAC_PLAN.target) + '.' });
     so.sort(function (a, b) { return b.score - a.score; });
     simple.soWhat = so.slice(0, 3);
+    // opportunity cost: the single biggest pile of gross profit being left on the table right now (14 Nov 2026,
+    // "the biggest only"). Each candidate = people × the chance they'd have become a client × gross profit per client
+    // (actual, from clients who left: the conservative number). Rates: his own when there are 5+ calls, else the plan's.
+    var gpc = U.gpActual != null ? U.gpActual : U.gp, sw = G ? G.showed : 0, ns = G ? G.noShow : 0;
+    var showR = sw + ns >= 5 ? sw / (sw + ns) : HQ.CAC_PLAN.showRate / 100, closeR = G && sw >= 5 ? (G.closed || 0) / sw : HQ.CAC_PLAN.closeRate / 100;
+    var leaks = [];
+    if (unworked.length) leaks.push({ k: 'apps', people: unworked.length, amount: Math.round(unworked.length * showR * closeR * gpc), text: unworked.length + ' applicant' + (unworked.length === 1 ? '' : 's') + ' not called yet', next: 'Call them today.', go: 'apps' });
+    if (ns) leaks.push({ k: 'noshow', people: ns, amount: Math.round(ns * closeR * gpc), text: ns + ' no-show' + (ns === 1 ? '' : 's') + ' in ' + R.label, next: 'Text each one a new time today.', go: 'leadflow' });
+    var startN = HQ.isNum(act) && HQ.isNum(lft) ? act + lft : null, extra = startN != null ? lft - startN * pq.churnMax / 100 : 0;
+    if (extra >= 1) leaks.push({ k: 'churn', people: Math.round(extra), amount: Math.round(extra * gpc), text: Math.round(extra) + ' more client' + (Math.round(extra) === 1 ? '' : 's') + ' left than the plan allows (' + R.label + ')', next: 'Find who missed check-ins and call them before they cancel.', go: 'delivery' });
+    leaks.sort(function (a, b) { return b.amount - a.amount; });
+    simple.biggestLeak = gpc ? leaks[0] || null : null;
 
     return { today: today, range: R, period: period, traffic: traffic, leads: leads, sales: sales, delivery: delivery, leak: leak, simple: simple, todo: todo.slice(0, 3) };
   };
