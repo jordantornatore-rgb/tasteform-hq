@@ -2141,7 +2141,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.11.0"></script>
+<script src="hq-core.js?v=3.11.1"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -5630,7 +5630,7 @@ table.scores td{border-color:var(--border);}
     html += '<div class="pl-h2">Hand-off to Leads</div><div class="pl-list">'+
       plRow('Profile visits', acc, T.profileVisits)+
       plRow('Link taps', T.profileVisits.value&&T.linkTaps.value!=null ? HQ.pct(T.linkTaps.value, T.profileVisits.value)+'% of profile visits' : acc, T.linkTaps)+
-      plRow('Form views', 'Typeform', T.formViews, {go:'leadflow'})+
+      plRow('Form views', 'apply page + Typeform (barbershop QR)', T.formViews, {go:'leadflow'})+
     '</div><p class="pl-note">Views, saves and likes are the lifetime numbers of posts published in this period. Tap a row for the posts behind it.</p>';
     setHtml('plTraffic', html);
   };
@@ -5668,7 +5668,7 @@ table.scores td{border-color:var(--border);}
     function conv(label, v){ return '<div class="pl-conv">↓ '+esc(label)+' <b>'+(v==null?'<span class="pl-blank">–</span>':v+'%')+'</b></div>'; }
     var src = Object.keys(L.applications.bySource).sort(function(a,b){ return L.applications.bySource[b]-L.applications.bySource[a]; }).map(function(k){ return [k==='link_in_bio'?'Link in bio':(k==='unknown'?'Unknown source':k.replace(/_/g,' ')), num(L.applications.bySource[k])]; });
     var html = funnelChips()+'<div class="pl-funnel">'+
-      step('Form views', L.formViews, 'Typeform · '+d.range.label, [['Link taps on Instagram', d.traffic.linkTaps.value==null?'–':num(d.traffic.linkTaps.value)], ['Profile visits', d.traffic.profileVisits.value==null?'–':num(d.traffic.profileVisits.value)], ['Before', L.formViews.prev==null?'–':num(L.formViews.prev)]])+
+      step('Form views', L.formViews, 'apply page '+num(L.formViews.apply||0)+' + Typeform (barbershop QR) '+num(L.formViews.typeform||0)+' · '+d.range.label, [['Link taps on Instagram', d.traffic.linkTaps.value==null?'–':num(d.traffic.linkTaps.value)], ['Profile visits', d.traffic.profileVisits.value==null?'–':num(d.traffic.profileVisits.value)], ['Before', L.formViews.prev==null?'–':num(L.formViews.prev)]])+
       conv('view → start', L.rates.viewToStart)+
       step('Form starts', L.starts, L.starts.note)+
       conv('view → apply', L.rates.viewToApply)+
@@ -5700,7 +5700,6 @@ table.scores td{border-color:var(--border);}
       plRow('Cash collected', S.payments?'every Stripe payment · '+num(S.payments.value)+' payments, '+num(S.newPayers.value)+' first-time':'every Stripe payment', S.headline, {fmt:'money', go:'stripe'})+
       plRow('Sales closed', (S.closed.note||'moved to Closed / Won in GHL')+(S.newPayers&&S.newPayers.value&&S.newPayers.value>(S.closed.value||0)?' · Stripe has '+num(S.newPayers.value)+' new paying '+HQ.plural(S.newPayers.value,'client')+' in this window':''), S.closed)+
       plRow('Close rate', 'closed ÷ calls that showed · plan 50%+', S.closeRate, {fmt:'pct'})+
-      plRow('Average sale value', null, S.avgSale, {fmt:'money'})+
       plRow('Days from first contact to close', 'GHL lead created → closed', S.daysToClose, {fmt:'dp1', lowerIsBetter:true})+
       plRow('Refunds', S.refundsAllTime!=null?HQ.money(S.refundsAllTime)+' refunded in Stripe all time':null, S.refunds, {fmt:'money', lowerIsBetter:true})+
     '</div>';
