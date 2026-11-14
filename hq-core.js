@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.10.2';
+  HQ.VERSION = '3.11.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -465,22 +465,48 @@
   };
   HQ.dmCoverage = function (dmMeta) { if (!dmMeta || !dmMeta.lastScanAt) return null; return dmMeta.coverage ? dmMeta.coverage : { legacy: true, complete: false }; };
 
-  // Call outcomes Jordan gave by hand (meta/ghlManual: { days: { 'YYYY-MM-DD': { showed, noShow, closed, funnel } } }),
-  // laid over GHL's days for calls that were never marked there. From 14 Nov 2026 he marks new calls in GHL himself.
-  // A day GHL has already marked (showed + noShow > 0) keeps GHL's numbers.
+  // clients in 1FIT on free coaching (marked "Free (affiliate)" on the Revenue page)
+  HQ.freeClients = function (customers) {
+    if (!Array.isArray(customers)) return null;
+    return customers.filter(function (c) { return c && c.status === 'Free (affiliate)' && c.in1Fit !== false; }).length;
+  };
+  // 1FIT active minus free; without the Stripe list (non-admins) it stays 1FIT's count
+  HQ.payingActive = function (deliveryCounts, customers) {
+    var a = deliveryCounts && HQ.isNum(deliveryCounts.active) ? deliveryCounts.active : null;
+    if (a == null) return null;
+    var f = HQ.freeClients(customers);
+    return f == null ? a : Math.max(0, a - f);
+  };
+  // Call outcomes Jordan gave by hand (meta/ghlManual), laid over GHL's days for calls never marked there. From 14 Nov
+  // 2026 he marks new calls in GHL himself. manual.calls = [{ id, label, date, showed, closed }] (he can change dates
+  // on the Leads page); manual.days = { day: { showed, noShow, closed } } is the older form. A day GHL already marked
+  // keeps GHL's numbers; a hand-entered call on a day GHL has no call for adds the call.
+  HQ.ghlManualDays = function (manual) {
+    var out = {};
+    if (!manual) return out;
+    Object.keys(manual.days || {}).forEach(function (k) { var x = manual.days[k] || {}; out[k] = { showed: +x.showed || 0, noShow: +x.noShow || 0, closed: +x.closed || 0 }; });
+    (manual.calls || []).forEach(function (c) {
+      if (!c || !HQ.isDayKey(c.date)) return;
+      var d = out[c.date] || (out[c.date] = { showed: 0, noShow: 0, closed: 0 });
+      if (c.showed) d.showed++; else d.noShow++;
+      if (c.showed && c.closed) d.closed++;
+    });
+    return out;
+  };
   HQ.applyGhlManual = function (ghl, manual) {
-    if (!ghl || !ghl.days || !manual || !manual.days) return ghl;
+    var md = HQ.ghlManualDays(manual);
+    if (!ghl || !ghl.days || !Object.keys(md).length) return ghl;
     var days = {};
     Object.keys(ghl.days).forEach(function (k) { days[k] = ghl.days[k]; });
-    Object.keys(manual.days).forEach(function (k) {
-      var g = days[k], x = manual.days[k] || {};
-      if (!g || (g.showed || 0) + (g.noShow || 0) > 0) return;
-      var s = +x.showed || 0, ns = +x.noShow || 0, c = +x.closed || 0, d = Object.assign({}, g);
-      d.showed = s; d.noShow = ns; d.unmarked = Math.max(0, (g.held || 0) - s - ns); d.closed = (g.closed || 0) + c;
+    Object.keys(md).forEach(function (k) {
+      var g = days[k] || { booked: 0, held: 0, showed: 0, noShow: 0, unmarked: 0, closed: 0, byFunnel: {} }, x = md[k];
+      if ((g.showed || 0) + (g.noShow || 0) > 0) return;
+      var s = x.showed, ns = x.noShow, c = x.closed, d = Object.assign({}, g);
+      d.held = Math.max(g.held || 0, s + ns); d.showed = s; d.noShow = ns; d.unmarked = Math.max(0, d.held - s - ns); d.closed = (g.closed || 0) + c;
       var bf = {}; Object.keys(g.byFunnel || {}).forEach(function (f) { bf[f] = Object.assign({}, g.byFunnel[f]); });
-      var f = x.funnel || Object.keys(bf)[0] || 'unknown';
+      var f = Object.keys(bf)[0] || 'unknown';
       bf[f] = Object.assign({ booked: 0, held: 0, showed: 0, noShow: 0, closed: 0 }, bf[f]);
-      bf[f].showed += s; bf[f].noShow += ns; bf[f].closed += c;
+      bf[f].showed += s; bf[f].noShow += ns; bf[f].closed += c; bf[f].held = Math.max(bf[f].held || 0, s + ns);
       d.byFunnel = bf; d.manual = true; days[k] = d;
     });
     return Object.assign({}, ghl, { days: days });
@@ -962,7 +988,9 @@
     var dc = state.deliveryCounts || null;
     var pastStay = HQ.stripeRetention(stripeOn ? state.stripe.customers : null), UE = HQ.unitEcon(pastStay);
     var delivery = {
-      headline: m(dc && HQ.isNum(dc.active) ? dc.active : null, null, { label: 'active clients' }),
+      // paying clients only: 1FIT's active list minus the ones marked free coaching in Revenue (14 Nov 2026: Jordan doesn't
+      // want non-paying clients in the client count, churn or plan progress)
+      headline: m(HQ.payingActive(dc, stripeOn ? state.stripe.customers : null), null, { label: 'paying clients', free: HQ.freeClients(stripeOn ? state.stripe.customers : null) }),
       // challenge_members.joinedAt is the day the daily 1FIT scan first saw someone (most on its first run), not when
       // they started coaching, so "joined" and the average stay from it are wrong. Joined stays blank and the stay
       // is the working number until real 1FIT start dates are filled in (HQ.UNIT_ECON.realJoinDates).

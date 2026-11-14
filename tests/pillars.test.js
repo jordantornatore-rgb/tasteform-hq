@@ -163,7 +163,7 @@ const FUNNEL_KEYS = ['story', 'bio', 'offplatform', 'paid_direct', 'paid_indirec
     await page.evaluate(() => window.__hq.setView('home')); await page.click('#plHome .pl-card[data-go="delivery"]'); await page.waitForTimeout(80);
     const dv = await page.evaluate(() => ({ hidden: document.getElementById('viewDelivery').hidden, txt: document.getElementById('plDelivery').innerText }));
     check(`${label}: Delivery card opens Delivery`, () => assert.ok(!dv.hidden));
-    check(`${label}: active clients from hq_delivery_counts`, () => assert.ok(/Active clients\s*13/.test(dv.txt), dv.txt.slice(0, 80)));
+    check(`${label}: active clients from hq_delivery_counts`, () => assert.ok(/Paying clients[\s\S]{0,80}?\b13\b/.test(dv.txt), dv.txt.slice(0, 80)));
     check(`${label}: zero console errors`, () => assert.deepStrictEqual(log.errors, []));
     check(`${label}: zero console warnings`, () => assert.deepStrictEqual(log.warnings, []));
     await context.close();

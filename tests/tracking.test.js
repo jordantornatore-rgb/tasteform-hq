@@ -46,8 +46,14 @@ check('refunds all time passed through', () => assert.strictEqual(P.sales.refund
   const G = HQ.applyGhlManual(ghl, { days: { '2026-10-19': { showed: 2, noShow: 2, closed: 1 }, '2026-10-20': { showed: 0, noShow: 1 }, '2026-10-30': { showed: 1 } } });
   check('manual call outcomes fill unmarked GHL days', () => { const d = G.days['2026-10-19']; assert.deepStrictEqual([d.showed, d.noShow, d.unmarked, d.closed, d.byFunnel.unknown.closed], [2, 2, 0, 1, 1]); });
   check('a day GHL already marked keeps GHL', () => assert.strictEqual(G.days['2026-10-20'].noShow, 0));
-  check('no manual entry for a day GHL has no calls', () => assert.ok(!G.days['2026-10-30']));
+  check('a hand-entered call on a day GHL has none adds the call', () => { const d = G.days['2026-10-30']; assert.deepStrictEqual([d.held, d.showed, d.noShow], [1, 1, 0]); });
+  const G2 = HQ.applyGhlManual(ghl, { calls: [{ date: '2026-10-19', showed: true, closed: true }, { date: '2026-10-19', showed: false }, { date: 'bad', showed: true }] });
+  check('calls list: counted by date', () => { const d = G2.days['2026-10-19']; assert.deepStrictEqual([d.showed, d.noShow, d.closed, d.unmarked], [1, 1, 1, 2]); });
   check('ghl untouched without manual', () => assert.strictEqual(HQ.applyGhlManual(ghl, null), ghl));
+}
+{
+  const cu = [{ status: 'Free (affiliate)' }, { status: 'Free (affiliate)' }, { status: 'Free (affiliate)', in1Fit: false }, { status: 'Active' }];
+  check('paying clients = 1FIT active minus free coaching', () => { assert.strictEqual(HQ.freeClients(cu), 2); assert.strictEqual(HQ.payingActive({ active: 13 }, cu), 11); assert.strictEqual(HQ.payingActive({ active: 13 }, null), 13); assert.strictEqual(HQ.payingActive(null, cu), null); });
 }
 console.log(`tracking: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
