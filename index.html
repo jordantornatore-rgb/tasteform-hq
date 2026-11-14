@@ -1104,6 +1104,14 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
 .pl-seg{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);padding:3px;gap:2px}
 .pl-seg button{background:none;border:0;color:var(--muted);font:inherit;font-size:var(--t-s);padding:7px 12px;border-radius:9px;cursor:pointer;min-height:34px}
 .pl-seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--text);font-weight:600;box-shadow:var(--shadow)}
+.pl-so{border:1px solid var(--border-strong);background:var(--surface);border-radius:var(--r-l);padding:var(--s4);margin-bottom:var(--s3)}
+.pl-so .k{font-size:var(--t-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+.pl-so-row{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--border)}.pl-so-row:first-of-type{border-top:0}
+.pl-so-row>b{font-size:var(--t-s);color:var(--crit);min-width:14px}.pl-so-row p{margin:0;font-size:var(--t-m)}.pl-so-row p.nx{color:var(--muted);font-size:var(--t-s);margin-top:2px}
+.pl-so.ok p{margin:0}
+.pl-stale{display:block;width:100%;text-align:left;font:inherit;color:var(--text);background:var(--warn-soft);border:1px solid var(--warn);border-radius:var(--r-l);padding:12px var(--s4);margin-bottom:var(--s3);cursor:pointer;min-height:44px}
+.pl-spark{display:block;margin-top:6px;color:var(--muted)}
+.pl-ceil{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:0;margin-top:4px}
 .pl-leak{border:1px solid var(--warn);background:var(--warn-soft);border-radius:var(--r-l);padding:var(--s4)}
 .pl-leak .k{font-size:var(--t-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--warn);font-weight:700;margin-bottom:4px}
 .pl-leak p{margin:0;font-size:var(--t-m);color:var(--text)}
@@ -2170,7 +2178,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.11.2"></script>
+<script src="hq-core.js?v=3.13.0"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -5626,23 +5634,34 @@ table.scores td{border-color:var(--border);}
     return '<button type="button" class="pl-card" data-go="'+view+'"><span class="n">'+esc(name)+(admin?'<span class="pl-admin">ADMIN</span>':'')+'</span><span class="v">'+plVal(x?x.value:null, view==='sales'?'money':null)+'</span><span class="s">'+esc(sub)+'</span><span class="t">'+t+'</span></button>';
   }
   RENDER.home = function(){
-    plSeg(); var d = plData(), L = d.leads, T = d.traffic, S = d.sales, D = d.delivery, html = planCard();
+    plSeg(); var d = plData(), L = d.leads, T = d.traffic, S = d.sales, D = d.delivery, html = '';
     // the business in four numbers: seen → leads → cost per client → staying
     var X = d.simple || {};
+    // 1. so what / do next: the biggest gaps against the plan, each with the next move (Kaushik: never leave the reading to the owner)
+    var so = (X.soWhat||[]).filter(function(x){ return isAdmin || x.k!=='cac'; });
+    if(so.length) html += '<div class="pl-so"><div class="k">What matters now</div>'+so.map(function(x,i){ return '<div class="pl-so-row"><b>'+(i+1)+'</b><div><p>'+esc(x.text)+'</p><p class="nx">→ '+esc(x.next)+'</p></div></div>'; }).join('')+'</div>';
+    else html += '<div class="pl-so ok"><div class="k">What matters now</div><p>Everything is on plan. Keep going.</p></div>';
+    // trust: any source that's failing or late, loudly
+    if((X.stale||[]).length) html += '<button type="button" class="pl-stale" data-go="today">⚠ '+esc(X.stale.length===1?X.stale[0].name+' is '+(X.stale[0].chip==='red'?'failing':'late'):X.stale.length+' data sources are late or failing: '+X.stale.map(function(r){ return r.name.replace(/ \(.*\)$/,''); }).join(', '))+'. Numbers from '+(X.stale.length===1?'it':'them')+' may be out of date.</button>';
+    var spark = function(series, money){ if(!series || series.length<2) return ''; var v=series.map(function(x){ return +x.value||0; }), mx=Math.max.apply(null,v)||1, w=96, h=24, n=v.length-1;
+      var pts=v.map(function(y,i){ return (i/n*w).toFixed(1)+','+(h-2-(y/mx)*(h-4)).toFixed(1); }).join(' ');
+      return '<svg class="pl-spark" viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'" aria-label="last 13 weeks"><polyline points="'+pts+'" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="'+w+'" cy="'+pts.split(' ').pop().split(',')[1]+'" r="2.2" fill="currentColor"/></svg>'; };
     var card = function(view, name, valHtml, sub, foot, admin){ return '<button type="button" class="pl-card" data-go="'+view+'"><span class="n">'+esc(name)+(admin?'<span class="pl-admin">ADMIN</span>':'')+'</span><span class="v">'+valHtml+'</span><span class="s">'+esc(sub)+'</span><span class="t">'+foot+'</span></button>'; };
     var flat = function(t){ return '<span class="pl-flat">'+esc(t)+'</span>'; };
     html += '<div class="pl-h2">The business · '+esc(d.range.label)+'</div><div class="pl-grid pl-simple">'+
-      card('traffic','1 · Seen', plVal(X.seen?X.seen.value:null,'compact'), 'views on posts published', T.headline.value==null?'':flat((T.headline.value>=0?'+':'')+num(T.headline.value)+' followers'+(T.netSince?' since '+(HQ.fmtDay(T.netSince,'short')||T.netSince):''))) +
-      card('leadflow','2 · Leads', plVal(L.headline.value), 'applications + ad form leads'+(X.plan?' · plan '+X.plan.leadsMonth+' a month':''), X.viewsPerLead ? flat('1 lead per '+HQ.compact(X.viewsPerLead)+' views') : plTrend(L.headline)) +
+      card('traffic','1 · Seen', plVal(X.seen?X.seen.value:null,'compact')+spark(X.trend&&X.trend.seen), 'views on posts published', T.headline.value==null?'':flat((T.headline.value>=0?'+':'')+num(T.headline.value)+' followers'+(T.netSince?' since '+(HQ.fmtDay(T.netSince,'short')||T.netSince):''))) +
+      card('leadflow','2 · Leads', plVal(L.headline.value)+spark(X.trend&&X.trend.leads), 'applications + ad form leads'+(X.plan?' · plan '+X.plan.leadsMonth+' a month':''), X.viewsPerLead ? flat('1 lead per '+HQ.compact(X.viewsPerLead)+' views') : plTrend(L.headline)) +
       (isAdmin ? card('sales','3 · Cost per client', '<span class="'+(X.cac!=null&&X.cac<=X.cacTarget?'cac-ok':'cac-over')+'">'+plVal(X.cac,'money')+'</span>', 'paid ads since 1 Jan · '+HQ.money(X.cacTarget)+' max', flat(X.adSpend!=null?HQ.money(X.adSpend)+' ad spend this period':'no ad spend this period'), false) : '') +
-      card('delivery','4 · Staying', plVal(X.active), 'paying clients · leavers stayed '+X.stayMonths+' months', D.headline.value==null ? flat(state.deliveryError?'couldn’t load':'loading…') : flat(num(X.left)+' left'+(X.churnPct!=null?' · '+X.churnPct+'% churn, plan '+X.plan.churnMax+'% max':''))) +
+      card('delivery','4 · Staying', plVal(X.active)+(X.ceiling!=null?'<small class="pl-ceil">ceiling '+X.ceiling+'</small>':''), 'paying clients · leavers stayed '+X.stayMonths+' months', D.headline.value==null ? flat(state.deliveryError?'couldn’t load':'loading…') : flat(num(X.left)+' left'+(X.churnPct!=null?' · '+X.churnPct+'% churn, plan '+X.plan.churnMax+'% max':''))) +
     '</div>';
-    if(isAdmin && X.ratio!=null) html += '<p class="pl-note pl-simple-note">Each client is worth '+esc(HQ.money(X.ltv))+' in theory'+(X.actual!=null?' ('+esc(HQ.money(X.actual))+' actually paid)':'')+' and costs '+esc(HQ.money(X.cac))+' from ads: '+esc(X.ratio+'×')+' back. At the '+esc(HQ.money(X.cacTarget))+' target it would be '+esc(Math.round(X.ltv/X.cacTarget*10)/10+'×')+'.'+(S.headline.value!=null?' Cash collected '+esc(d.range.label)+': '+esc(HQ.money(S.headline.value))+'.':'')+'</p>';
+    if(isAdmin && X.unit && X.unit.gp!=null) html += '<p class="pl-note pl-simple-note">Each client makes '+esc(HQ.money(X.unit.gp))+' gross profit in theory'+(X.unit.gpActual!=null?' ('+esc(HQ.money(X.unit.gpActual))+' actually)':'')+' and costs '+esc(HQ.money(X.cac))+' from ads: '+esc(X.unit.gpRatio+'×')+' back. Hormozi wants 3× or more.'+(X.ceiling!=null?' Ceiling '+X.ceiling+' clients = '+X.newPerMonth+' new a month × '+X.stayMonths+' months each.':'')+(S.headline.value!=null?' Cash collected '+esc(d.range.label)+': '+esc(HQ.money(S.headline.value))+'.':'')+'</p>';
+    if(false && isAdmin && X.ratio!=null) html += '<p class="pl-note pl-simple-note">Each client is worth '+esc(HQ.money(X.ltv))+' in theory'+(X.actual!=null?' ('+esc(HQ.money(X.actual))+' actually paid)':'')+' and costs '+esc(HQ.money(X.cac))+' from ads: '+esc(X.ratio+'×')+' back. At the '+esc(HQ.money(X.cacTarget))+' target it would be '+esc(Math.round(X.ltv/X.cacTarget*10)/10+'×')+'.'+(S.headline.value!=null?' Cash collected '+esc(d.range.label)+': '+esc(HQ.money(S.headline.value))+'.':'')+'</p>';
     if(d.leak) html += '<div class="pl-leak"><div class="k">Where people drop off · '+esc(d.range.label)+'</div><p>'+esc(d.leak.text)+'</p></div>';
     var todos = d.todo.filter(function(t){ return !t.admin || isAdmin; });
     html += '<div class="pl-h2">Do today</div>';
     html += todos.length ? '<div class="pl-list">'+todos.map(function(t){ return t.go ? '<button type="button" class="pl-row" data-go="'+esc(t.go)+'"><div class="l">'+esc(t.label)+'</div><div class="r">'+num(t.count)+' <span class="go">›</span></div></button>' : '<div class="pl-row"><div class="l">'+esc(t.label)+'</div><div class="r">'+num(t.count)+'</div></div>'; }).join('')+'</div>'
       : '<div class="pl-list"><div class="pl-row"><div class="l">Nothing waiting on you.</div></div></div>';
+    html += '<div class="pl-h2">2027 plan</div>'+planCard();
     html += '<p class="pl-note">Tap a card for the numbers behind it. Everything else is under '+(window.innerWidth<760?'More':'Work and Tools')+'.</p>';
     setHtml('plHome', html);
   };
@@ -5758,6 +5777,10 @@ table.scores td{border-color:var(--border);}
       plRow('Overdue payments', 'clients in 1FIT past their usual date', D.failedPayments, {lowerIsBetter:true, go:isAdmin?'stripe':null})+
       (D.unit ? plRow('LTV · theoretical', HQ.money(D.unit.upfront)+' upfront + '+HQ.money(D.unit.price)+' a week × '+num(D.unit.weeks,1)+' weeks (how long clients who left stayed)', {value:D.unit.ltv, prev:null}, {fmt:'money'}) : '')+
       (D.unit ? plRow('LTV · actual', 'what clients who left really paid in total, from Stripe', {value:D.unit.actual, prev:null}, {fmt:'money', go:isAdmin?'stripe':null}) : '')+
+      (D.pastStay&&D.pastStay.bands ? plRow('Left in month 1', 'clients who left, by how long they stayed (Stripe)', {value:D.pastStay.bands.under1, prev:null}, {lowerIsBetter:true})+
+        plRow('Left in months 1–3', null, {value:D.pastStay.bands.m1to3, prev:null}, {lowerIsBetter:true})+
+        plRow('Left in months 3–6', null, {value:D.pastStay.bands.m3to6, prev:null}, {lowerIsBetter:true})+
+        plRow('Stayed 6+ months', null, {value:D.pastStay.bands.over6, prev:null}) : '')+
       (D.pastStay ? plRow('Months clients who left stayed', 'Stripe, first to last payment · '+num(D.pastStay.n)+' past clients · median '+num(D.pastStay.medianMonths,1), {value:D.pastStay.avgMonths, prev:null}, {fmt:'dp1', go:isAdmin?'stripe':null}) : '')+
       plRow('Paid per client so far', 'average paid per client, all of Stripe', D.ltv, {fmt:'money', go:isAdmin?'stripe':null})+
       plRow('Referrals', 'applications through a referral link', D.referrals)+
@@ -5782,6 +5805,11 @@ table.scores td{border-color:var(--border);}
       '<div class="pl-row"><div class="l">LTV · actual<small>what clients who left really paid, from Stripe</small></div><div class="r"><b>'+money(U.actual)+'</b></div></div>'+
       '<div class="pl-row"><div class="l">LTV ÷ CAC<small>'+esc((U.actualRatio!=null?'actual '+U.actualRatio+'× · ':'')+'at the $'+HQ.CAC_PLAN.target+' target '+U.planRatio+'×')+'</small></div><div class="r"><b>'+esc(U.ratio+'×')+'</b></div></div>'+
       '<div class="pl-row"><div class="l">Churn<small>'+esc('clients who left ÷ clients at the start, '+PD.range.label+' · plan '+HQ.planQuarter(PD.today).churnMax+'% a month max')+'</small></div><div class="r"><b>'+(CH&&CH.value!=null?esc(CH.value+'%'):money(null))+'</b></div></div>'+
+      (U.gp!=null ? '<div class="pl-row"><div class="l">Gross profit per client · theoretical<small>'+esc('LTV minus '+HQ.money(U.deliveryPerWeek)+' a week to deliver · plus about '+U.hoursPerClient+' hours of your time')+'</small></div><div class="r"><b>'+money(U.gp)+'</b></div></div>'+
+        '<div class="pl-row"><div class="l">Gross profit per client · actual<small>what leavers paid minus delivery</small></div><div class="r"><b>'+money(U.gpActual)+'</b></div></div>'+
+        '<div class="pl-row"><div class="l">Gross profit ÷ CAC (Hormozi)<small>'+esc('3× or more to be healthy · actual '+(U.gpActualRatio!=null?U.gpActualRatio+'×':'–')+' · at the $'+HQ.CAC_PLAN.target+' target '+U.gpPlanRatio+'×')+'</small></div><div class="r"><b><span class="'+(U.gpRatio>=3?'cac-ok':'cac-over')+'">'+esc(U.gpRatio+'×')+'</span></b></div></div>'+
+        '<div class="pl-row"><div class="l">30-day cash test (Hormozi)<small>'+esc('first 30 days gross profit '+HQ.money(U.cash30)+' vs 2 × (CAC + delivery) = '+HQ.money(U.need30)+' · at the $'+HQ.CAC_PLAN.target+' target you need '+HQ.money(U.cash30PlanNeed))+'</small></div><div class="r"><b><span class="'+(U.cash30Pass?'cac-ok':'cac-over')+'">'+(U.cash30Pass?'Pass':'Fail')+'</span></b></div></div>' : '')+
+      (PD.simple&&PD.simple.ceiling!=null ? '<div class="pl-row"><div class="l">Client ceiling (Hormozi)<small>'+esc(PD.simple.newPerMonth+' new paying clients a month × '+U.months+' months each · plan '+HQ.planQuarter(PD.today).clients+' by '+HQ.planQuarter(PD.today).label)+'</small></div><div class="r"><b>'+esc(String(PD.simple.ceiling))+'</b></div></div>' : '')+
     '</div><p class="pl-note">'+(U.fromStripe?'Stay and actual LTV come from the '+num(U.pastClients)+' clients who have left (Stripe); current clients are left out so the numbers stay conservative.':'Using the working 4.2 months until Stripe loads.')+'</p>';
     html += '<h3 class="pl-h">Cost per client (CAC) · by funnel</h3><div class="pl-seg cac-months">'+months.slice().reverse().map(function(m){ return '<button type="button" data-cac-month="'+m+'"" aria-pressed="'+(m===ym)+'">'+esc(mName(m))+'</button>'; }).join('')+'</div>';
     html += '<div class="pl-list">'+plRow('All funnels', C.costsIn ? 'every cost this month ÷ new clients' : 'needs this month’s costs', {value:C.total.cac, prev:null}, {fmt:'money', lowerIsBetter:true})+

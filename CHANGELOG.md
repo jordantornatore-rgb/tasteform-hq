@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.13.0 — 14 Nov 2026 (Dashboard research applied: so what, Hormozi's numbers, trends, trust)
+
+- Home opens with **What matters now**: the biggest gaps against the plan (ceiling, churn, show rate, leads pace, ad cost), worst first, each with the next move.
+- A loud line when a data source is failing or late, so a stale number never looks current.
+- 13-week trend lines on Seen and Leads; the Staying card shows Hormozi's **client ceiling** (new paying clients a month × months a client stays).
+- Gross profit: delivery is $20 a week per client + 30 min of Jordan's time. Sales shows gross profit per client (theoretical and actual), **gross profit ÷ CAC** (3×+ healthy) and the **30-day cash test**.
+- Delivery shows churn by tenure (left in month 1, 1–3, 3–6, stayed 6+).
+- The plan card moved under Do today.
+
 ## 3.12.0 — 14 Nov 2026 (Applications from the apply page)
 
 - **Applications** now reads the apply page (tasteformcoaching.vercel.app/apply, `app_sessions`) instead of Typeform. Test visits are left out.

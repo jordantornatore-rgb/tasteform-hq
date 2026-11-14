@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.11.2';
+  HQ.VERSION = '3.13.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -1062,6 +1062,29 @@
     simple.churnPct = delivery.churnPct.value;
     var pq = HQ.planQuarter(today);
     simple.plan = { leadsMonth: pq.leadsMonth, churnMax: pq.churnMax, clients: pq.clients, label: pq.label, followersDay: '10 to 15' };
+    // Hormozi's ceiling: new paying clients a month x months they stay
+    simple.newPerMonth = HQ.newClientsPerMonth(stripeOn ? state.stripe.customers : null, today);
+    simple.ceiling = HQ.clientCeiling(simple.newPerMonth, U.months);
+    simple.unit = U;
+    // 13-week trends for the cards (Monday weeks, this week so far last)
+    var allA = HQ.allApplications(state), sd = Array.isArray(state.stripeDaily) ? state.stripeDaily : null;
+    simple.trend = {
+      leads: HQ.weekly(today, 13, function (a, b) { var g = HQ.ghlSum(ghl, a, b); return allA.filter(function (x) { return x.day >= a && x.day <= b; }).length + (g ? g.paidLeads || 0 : 0); }),
+      seen: HQ.weekly(today, 13, function (a, b) { var v = 0, any = false; dated.forEach(function (p) { if (p._day >= a && p._day <= b && HQ.isNum(p.views)) { v += p.views; any = true; } }); return any ? v : 0; }),
+      cash: sd ? HQ.weekly(today, 13, function (a, b) { var t = 0; sd.forEach(function (r) { var d = r.date || r.id; if (d >= a && d <= b) t += +r.amount || 0; }); return Math.round(t); }) : null
+    };
+    // data you can't trust right now: sources that are failing or late
+    simple.stale = HQ.healthRows(state.meta || {}, now == null ? Date.now() : now).filter(function (r) { return r.chip === 'red' || r.chip === 'amber'; }).map(function (r) { return { name: r.name, chip: r.chip, lastAt: r.lastAt, why: r.why }; });
+    // "so what": the biggest gaps against the plan, worst first, each with the next move
+    var so = [], pct = function (a, b) { return b ? a / b : null; };
+    if (simple.ceiling != null && simple.ceiling < pq.clients) so.push({ k: 'ceiling', score: 1 - pct(simple.ceiling, pq.clients), text: 'At this pace you level out at about ' + simple.ceiling + ' clients (' + simple.newPerMonth + ' new a month × ' + U.months + ' months each). The plan needs ' + pq.clients + ' by ' + pq.label + '.', next: U.months < 6 ? 'Keep clients longer: a first win in week 1 and a check-in on anyone who misses one.' : 'Get more leads in.' });
+    if (simple.churnPct != null && simple.churnPct > pq.churnMax) so.push({ k: 'churn', score: (simple.churnPct - pq.churnMax) / 100 + 0.2, text: simple.churnPct + '% of clients left in the last ' + R.days + ' days (plan: ' + pq.churnMax + '% a month max).', next: 'Call the clients who missed a check-in this week.' });
+    if (leads.rates.showRate != null && leads.rates.showRate < 70) so.push({ k: 'show', score: (70 - leads.rates.showRate) / 100, text: 'Show rate ' + leads.rates.showRate + '% (plan 70%+).', next: 'Text every booked call the morning of, and cancel the ones that don\u2019t confirm.' });
+    var leadPace = R.days ? Math.round(leads.headline.value * 30 / R.days) : null;
+    if (leadPace != null && leadPace < pq.leadsMonth) so.push({ k: 'leads', score: 1 - pct(leadPace, pq.leadsMonth), text: 'Leads at ' + leadPace + ' a month (plan ' + pq.leadsMonth + ').', next: 'Story CTA every day and the link in bio pinned.' });
+    if (U.cac != null && U.cac > HQ.CAC_PLAN.target && simple.adSpend) so.push({ k: 'cac', score: 0.1, text: 'Ads cost ' + HQ.money(U.cac) + ' a client (max ' + HQ.money(HQ.CAC_PLAN.target) + ').', next: 'Keep ad spend small until a campaign brings a client under ' + HQ.money(HQ.CAC_PLAN.target) + '.' });
+    so.sort(function (a, b) { return b.score - a.score; });
+    simple.soWhat = so.slice(0, 3);
 
     return { today: today, range: R, period: period, traffic: traffic, leads: leads, sales: sales, delivery: delivery, leak: leak, simple: simple, todo: todo.slice(0, 3) };
   };
@@ -1358,7 +1381,7 @@
   // 14 Nov 2026 (Jordan): theoretical LTV = $299 upfront + $125 a week x how long clients who LEFT stayed (past clients
   // only, so it's conservative); actual LTV = what those past clients really paid in Stripe. 4.2 months is the fallback
   // when Stripe isn't loaded (non-admins).
-  HQ.UNIT_ECON = { retentionMonths: 4.2, pricePerWeek: 125, upfront: 299, set: '2026-11-14', realJoinDates: false,
+  HQ.UNIT_ECON = { retentionMonths: 4.2, pricePerWeek: 125, upfront: 299, deliveryPerWeek: 20, deliveryMinutesPerWeek: 30, set: '2026-11-14', realJoinDates: false,
     baseline: { from: '2026-01-01', to: '2026-11-13', adSpend: 5370, clients: 5 } };
   // Past clients in Stripe (status "Past client": paid before, no longer in 1FIT): how long they paid for and what
   // they paid in total. Stay = first to last payment plus one usual gap between payments (a month with one payment).
@@ -1374,8 +1397,11 @@
     }).filter(function (x) { return x != null; });
     var sorted = months.slice().sort(function (x, y) { return x - y; });
     var paid = rows.reduce(function (t, c) { return t + c.totalPaid; }, 0);
+    // churn by tenure (Hormozi: month-1 churn is a different problem from month-6 churn)
+    var bands = { under1: 0, m1to3: 0, m3to6: 0, over6: 0 };
+    months.forEach(function (x) { if (x < 1) bands.under1++; else if (x < 3) bands.m1to3++; else if (x < 6) bands.m3to6++; else bands.over6++; });
     return { n: months.length, avgMonths: Math.round(months.reduce(function (t, x) { return t + x; }, 0) / months.length * 10) / 10,
-      medianMonths: Math.round(sorted[Math.floor(sorted.length / 2)] * 10) / 10, avgPaid: Math.round(paid / rows.length) };
+      medianMonths: Math.round(sorted[Math.floor(sorted.length / 2)] * 10) / 10, avgPaid: Math.round(paid / rows.length), bands: bands };
   };
   HQ.unitEcon = function (pastStay) {
     var U = HQ.UNIT_ECON, b = U.baseline, real = !!(pastStay && HQ.isNum(pastStay.avgMonths));
@@ -1383,9 +1409,35 @@
     var weeks = Math.round(months * 52 / 12 * 10) / 10, ltv = Math.round(U.upfront + weeks * U.pricePerWeek);
     var actual = real && HQ.isNum(pastStay.avgPaid) ? pastStay.avgPaid : null;
     var cac = b.clients ? Math.round(b.adSpend / b.clients) : null, r = function (v) { return cac && v != null ? Math.round(v / cac * 10) / 10 : null; };
+    // Hormozi: judge on gross profit, not revenue. Delivery = $20 a week per client (Jordan, 14 Nov) + 30 min of his time.
+    var dpw = U.deliveryPerWeek || 0, gp = Math.round(U.upfront + weeks * (U.pricePerWeek - dpw)), gpActual = actual != null ? Math.round(actual - weeks * dpw) : null;
+    // 30-day cash test: gross profit in a client's first 30 days should beat 2 x (CAC + 30 days of delivery)
+    var w30 = 30 / 7, cash30 = Math.round(U.upfront + w30 * (U.pricePerWeek - dpw)), need30 = cac != null ? Math.round(2 * (cac + w30 * dpw)) : null;
     return { months: months, weeks: weeks, fromStripe: real, pastClients: real ? pastStay.n : null, price: U.pricePerWeek, upfront: U.upfront,
       ltv: ltv, actual: actual, cac: cac, adSpend: b.adSpend, clients: b.clients, from: b.from, to: b.to,
-      ratio: r(ltv), actualRatio: r(actual), planRatio: Math.round(ltv / HQ.CAC_PLAN.target * 10) / 10 };
+      ratio: r(ltv), actualRatio: r(actual), planRatio: Math.round(ltv / HQ.CAC_PLAN.target * 10) / 10,
+      deliveryPerWeek: dpw, hoursPerClient: Math.round(weeks * (U.deliveryMinutesPerWeek || 0) / 60),
+      gp: gp, gpActual: gpActual, gpRatio: r(gp), gpActualRatio: r(gpActual), gpPlanRatio: Math.round(gp / HQ.CAC_PLAN.target * 10) / 10,
+      cash30: cash30, need30: need30, cash30Pass: need30 != null ? cash30 > need30 : null, cash30PlanNeed: Math.round(2 * (HQ.CAC_PLAN.target + w30 * dpw)) };
+  };
+  // new paying clients a month: first Stripe payment in the last 90 days (coaching clients, not one-offs or free), / 3
+  HQ.newClientsPerMonth = function (customers, today) {
+    if (!Array.isArray(customers)) return null;
+    var from = HQ.addDays(today, -89);
+    var n = customers.filter(function (c) { return c && c.firstPaid && String(c.firstPaid).slice(0, 10) >= from && c.status !== 'One-off' && c.status !== 'Free (affiliate)'; }).length;
+    return Math.round(n / 3 * 10) / 10;
+  };
+  // Hormozi's ceiling: where the client count levels out = new clients a month x months a client stays
+  // (the same as new a month ÷ monthly churn, with churn = 1 ÷ months stayed)
+  HQ.clientCeiling = function (newPerMonth, monthsStayed) {
+    if (!HQ.isNum(newPerMonth) || !HQ.isNum(monthsStayed)) return null;
+    return Math.round(newPerMonth * monthsStayed);
+  };
+  // last N Monday-weeks of a daily series: [{ week, value }] oldest first
+  HQ.weekly = function (today, n, valueOf) {
+    var ws = HQ.weekStart(today), out = [];
+    for (var i = n - 1; i >= 0; i--) { var a = HQ.addDays(ws, -7 * i), b = HQ.addDays(a, 6); out.push({ week: a, value: valueOf(a, b > today ? today : b) }); }
+    return out;
   };
   HQ.adFunnelOf = function (name) {
     var n = String(name || '').toLowerCase();

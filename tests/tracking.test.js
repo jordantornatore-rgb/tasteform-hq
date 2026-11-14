@@ -61,5 +61,13 @@ check('refunds all time passed through', () => assert.strictEqual(P.sales.refund
   check('left: list + daily check after the cutoff', () => assert.strictEqual(HQ.leftIn({ left: 3 }, man, { '2026-11-20': { left: 1 }, '2026-11-12': { left: 1 } }, '2026-10-28', '2026-11-27'), 3));
   check('left: no list = the check\'s count', () => assert.strictEqual(HQ.leftIn({ left: 3 }, null, null, 'a', 'b'), 3));
 }
+{
+  const U = HQ.unitEcon({ avgMonths: 4.1, avgPaid: 1630, n: 23 });
+  check('gross profit: LTV minus $20 a week delivery; LTGP:CAC', () => { assert.strictEqual(U.gp, 2168); assert.strictEqual(U.gpActual, 1274); assert.strictEqual(U.gpRatio, 2); });
+  check('30-day cash test fails at $1,074 CAC', () => { assert.strictEqual(U.cash30Pass, false); assert.ok(U.cash30 > 700 && U.need30 > 2000); });
+  check('ceiling = new a month x months stayed', () => assert.strictEqual(HQ.clientCeiling(3, 4.1), 12));
+  check('new clients a month from first payments in 90 days, no one-offs', () => assert.strictEqual(HQ.newClientsPerMonth([{ firstPaid: '2026-10-01', status: 'Active' }, { firstPaid: '2026-11-01', status: 'One-off' }, { firstPaid: '2026-09-01', status: 'Past client' }, { firstPaid: '2026-01-01', status: 'Active' }], '2026-11-14'), 0.7));
+  check('weekly buckets: 13 Monday weeks', () => { const w = HQ.weekly('2026-11-14', 13, () => 1); assert.strictEqual(w.length, 13); assert.strictEqual(w[12].week, '2026-11-09'); });
+}
 console.log(`tracking: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
