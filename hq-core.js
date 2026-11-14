@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.11.0';
+  HQ.VERSION = '3.11.2';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -465,6 +465,18 @@
   };
   HQ.dmCoverage = function (dmMeta) { if (!dmMeta || !dmMeta.lastScanAt) return null; return dmMeta.coverage ? dmMeta.coverage : { legacy: true, complete: false }; };
 
+  // Clients who left in [from, to]. 1FIT's daily check only knows leavers it saw go (it started early Nov), so the leavers
+  // Jordan confirmed (meta/deliveryManual.left, dates from 1FIT) count up to the list's cutoff, and the daily check's
+  // per-day count (hq_delivery_by_day) after it. Without the list it's the check's own count for the window.
+  HQ.leftIn = function (dc, manual, byDay, from, to) {
+    if (!manual || !Array.isArray(manual.left) || !manual.cutoff) return dc && HQ.isNum(dc.left) ? dc.left : null;
+    var n = manual.left.filter(function (x) { return x && x.date >= from && x.date <= to && x.date <= manual.cutoff; }).length;
+    if (to > manual.cutoff) {
+      if (!byDay) return dc && HQ.isNum(dc.left) ? Math.max(n, dc.left) : n;
+      Object.keys(byDay).forEach(function (k) { if (k > manual.cutoff && k >= from && k <= to) n += +(byDay[k] && byDay[k].left) || 0; });
+    }
+    return n;
+  };
   // clients in 1FIT on free coaching (marked "Free (affiliate)" on the Revenue page)
   HQ.freeClients = function (customers) {
     if (!Array.isArray(customers)) return null;
@@ -902,6 +914,8 @@
     var tf = HQ.tfSum(state.tfDaily, R.from, R.to), tfp = HQ.tfSum(state.tfDaily, R.prevFrom, R.prevTo);
     var fc = HQ.followerChange(byDay, R.from, R.to), fcp = HQ.followerChange(byDay, R.prevFrom, R.prevTo);
     var top = curPosts.filter(function (p) { return HQ.isNum(p.follows); }).sort(function (a, b) { return b.follows - a.follows; })[0] || null;
+    var apSum = function (a, b) { var o = HQ.applySessions(state, a, b), t = { opened: 0, started: 0, submitted: 0 }; Object.keys(o).forEach(function (k) { t.opened += o[k].opened; t.started += o[k].started; t.submitted += o[k].submitted; }); return t; };
+    var apW = apSum(R.from, R.to), apP = apSum(R.prevFrom, R.prevTo);
     var traffic = {
       // headline = real follower growth from the daily follower count; post-credited follows are only the ones Instagram ties to a post
       headline: m(fc.net, fcp.partial ? null : fcp.net, { label: 'net new followers', since: fc.partial ? fc.startDay : null, from: fc.startDay, to: fc.endDay }),
@@ -914,7 +928,8 @@
       likes: m(likes, sumField(prevPosts, 'likes').value), comments: m(comments, sumField(prevPosts, 'comments').value),
       storyViews: m(storyViews.have ? storyViews.value : null, null), stories: stories.length,
       profileVisits: m(A('profileVisits'), AP('profileVisits')), linkTaps: m(A('externalLinkTaps'), AP('externalLinkTaps')),
-      formViews: m(tf.days ? tf.visits : null, tfp.days ? tfp.visits : null),
+      // form views = the apply page (link in bio and every tagged link) + Typeform (only the barbershop QR code now)
+      formViews: m(apW.opened + (tf.days ? tf.visits : 0), apP.opened + (tfp.days ? tfp.visits : 0), { apply: apW.opened, typeform: tf.days ? tf.visits : 0 }),
       top: top ? { id: top.id, title: top.title || null, follows: top.follows, views: top.views, shortcode: top.shortcode || null, day: top._day } : null
     };
 
@@ -926,8 +941,7 @@
     var bySrc = {}; appsAll.forEach(function (r) { var s = HQ.FUNNEL_LABEL[r.funnel] || r.funnel; bySrc[s] = (bySrc[s] || 0) + 1; });
     var fitKnown = apps.filter(function (r) { return r.fit === true || r.fit === false || r.fit === 'fit' || r.fit === 'not_fit'; });
     var fitYes = fitKnown.filter(function (r) { return r.fit === true || r.fit === 'fit'; }).length;
-    // Typeform's daily sync writes started == completed (it only sees finished forms), so starts stay blank until it reads partial responses.
-    var startsReal = (state.tfDaily || []).some(function (d) { return HQ.isNum(+d.started) && +d.started !== +d.completed; });
+    // form starts come from the apply page only (Typeform is just the barbershop QR and its sync only sees finished forms)
     var ghl = state.meta && state.meta.ghlSync, ghlOn = !!(ghl && ghl.connected);
     var dmBooked = null;
     if (opts.dmScanOk) dmBooked = (state.daily || []).filter(function (d) { var k = d.date || d.id; return k >= R.from && k <= R.to; }).reduce(function (a, d) { return a + (+d.callsBooked || 0); }, 0);
@@ -941,7 +955,7 @@
       headline: m(appsAll.length + paidL, appsPrev.length + paidLP, { label: 'leads', apps: appsAll.length, paid: paidL }),
       paidLeads: m(G ? paidL : null, GP ? paidLP : null),
       formViews: traffic.formViews,
-      starts: m(startsReal ? tf.started : null, startsReal ? tfp.started : null, { note: startsReal ? null : 'Typeform sync only counts finished forms' }),
+      starts: m(apW.started, apP.started, { note: 'apply page; Typeform (barbershop QR) not counted' }),
       applications: m(appsAll.length, appsPrev.length, { bySource: bySrc, qualified: fitKnown.length ? fitYes : null, qualifiedOf: fitKnown.length }),
       booked: m(booked, GP ? GP.booked : null, { fromDms: dmBooked, note: ghlOn ? null : 'Needs GoHighLevel', held: G ? G.held : null, upcoming7: ghlOn && HQ.isNum(ghl.upcoming7) ? ghl.upcoming7 : null }),
       showed: m(G && marked ? G.showed : null, GP && (GP.showed + GP.noShow) ? GP.showed : null, { note: showNote, noShow: G && marked ? G.noShow : null }),
@@ -949,8 +963,8 @@
       replied: m(G ? G.replied : null, GP ? GP.replied : null),
       costPerBooked: m(null, null, { note: 'Needs ad spend' }),
       rates: {
-        viewToStart: startsReal ? HQ.pct(tf.started, tf.visits) : null,
-        viewToApply: tf.days ? HQ.pct(apps.length, tf.visits) : null,
+        viewToStart: apW.opened ? HQ.pct(apW.started, apW.opened) : null,
+        viewToApply: traffic.formViews.value ? HQ.pct(appsAll.length, traffic.formViews.value) : null,
         applyToBooked: G && appsAll.length ? HQ.pct(G.booked, appsAll.length) : null, showRate: G && marked ? HQ.pct(G.showed, marked) : null,
         replyRate: G && G.outreach ? HQ.pct(G.replied, G.outreach) : null
       }
@@ -994,7 +1008,7 @@
       // challenge_members.joinedAt is the day the daily 1FIT scan first saw someone (most on its first run), not when
       // they started coaching, so "joined" and the average stay from it are wrong. Joined stays blank and the stay
       // is the working number until real 1FIT start dates are filled in (HQ.UNIT_ECON.realJoinDates).
-      churned: m(dc ? dc.left : null, null), joined: m(dc && HQ.UNIT_ECON.realJoinDates ? dc.joined : null, null),
+      churned: m(HQ.leftIn(dc, state.meta && state.meta.deliveryManual, state.deliveryByDay, R.from, R.to), null), joined: m(dc && HQ.UNIT_ECON.realJoinDates ? dc.joined : null, null),
       avgWeeks: m(HQ.UNIT_ECON.realJoinDates ? (dc && dc.avgWeeks != null ? +dc.avgWeeks : null) : UE.weeks, null),
       checkinsOnTime: m(dc ? dc.checkinsOnTime : null, null),
       checkinReplyTime: m(null, null),
