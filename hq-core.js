@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.10.1';
+  HQ.VERSION = '3.10.2';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -937,7 +937,8 @@
       headline: m(null, null, { label: 'cash collected' }),
       // GHL only knows a sale once a lead is moved to Closed / Won; if nothing in the window was moved or marked, it isn't being kept up to date, so blank, not 0
       closed: m(G && (G.closed || marked) ? G.closed : null, GP && (GP.closed || GP.showed + GP.noShow) ? GP.closed : null, { note: G && !(G.closed || marked) ? 'No lead moved to Closed in GHL' : null }),
-      closeRate: m(G && G.held && (G.closed || marked) ? HQ.pct(G.closed, G.held) : null, null),
+      // the plan's 'show to close': sales ÷ calls that showed (not ÷ every call held)
+      closeRate: m(G && G.showed && (G.closed || marked) ? HQ.pct(G.closed, G.showed) : null, null),
       avgSale: m(null, null), cac: m(null, null),
       daysToClose: m(G && G.closeDaysN ? Math.round(G.closeDaysSum / G.closeDaysN * 10) / 10 : null, null),
       refunds: m(null, null)

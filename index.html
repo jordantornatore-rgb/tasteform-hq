@@ -2141,7 +2141,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.10.1"></script>
+<script src="hq-core.js?v=3.10.2"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -5680,7 +5680,7 @@ table.scores td{border-color:var(--border);}
     html += '<div class="pl-list">'+
       plRow('Cash collected', S.payments?'every Stripe payment · '+num(S.payments.value)+' payments, '+num(S.newPayers.value)+' first-time':'every Stripe payment', S.headline, {fmt:'money', go:'stripe'})+
       plRow('Sales closed', (S.closed.note||'moved to Closed / Won in GHL')+(S.newPayers&&S.newPayers.value&&S.newPayers.value>(S.closed.value||0)?' · Stripe has '+num(S.newPayers.value)+' new paying '+HQ.plural(S.newPayers.value,'client')+' in this window':''), S.closed)+
-      plRow('Close rate', 'closed ÷ calls held', S.closeRate, {fmt:'pct'})+
+      plRow('Close rate', 'closed ÷ calls that showed · plan 50%+', S.closeRate, {fmt:'pct'})+
       plRow('Average sale value', null, S.avgSale, {fmt:'money'})+
       plRow('Days from first contact to close', 'GHL lead created → closed', S.daysToClose, {fmt:'dp1', lowerIsBetter:true})+
       plRow('Refunds', S.refundsAllTime!=null?HQ.money(S.refundsAllTime)+' refunded in Stripe all time':null, S.refunds, {fmt:'money', lowerIsBetter:true})+
