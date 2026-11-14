@@ -1,2 +1,3 @@
 tests/fixtures/
 index.backup.html
+.alerts-state.json
