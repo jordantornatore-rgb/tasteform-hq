@@ -41,5 +41,13 @@ check('refunds all time passed through', () => assert.strictEqual(P.sales.refund
   check('LTV theoretical = $299 upfront + $125/wk x weeks past clients stayed; actual = Stripe', () => { assert.strictEqual(U.weeks, 17.8); assert.strictEqual(U.ltv, 2524); assert.strictEqual(U.actual, 1630); assert.strictEqual(U.cac, 1074); });
   check('LTV falls back to 4.2 months without Stripe', () => { const F = HQ.unitEcon(null); assert.strictEqual(F.months, 4.2); assert.strictEqual(F.actual, null); });
 }
+{
+  const ghl = { connected: true, days: { '2026-10-19': { booked: 0, held: 4, showed: 0, noShow: 0, unmarked: 4, closed: 0, byFunnel: { unknown: { booked: 0, held: 3, showed: 0, noShow: 0, closed: 0 } } }, '2026-10-20': { held: 1, showed: 1, noShow: 0, unmarked: 0, closed: 0 } } };
+  const G = HQ.applyGhlManual(ghl, { days: { '2026-10-19': { showed: 2, noShow: 2, closed: 1 }, '2026-10-20': { showed: 0, noShow: 1 }, '2026-10-30': { showed: 1 } } });
+  check('manual call outcomes fill unmarked GHL days', () => { const d = G.days['2026-10-19']; assert.deepStrictEqual([d.showed, d.noShow, d.unmarked, d.closed, d.byFunnel.unknown.closed], [2, 2, 0, 1, 1]); });
+  check('a day GHL already marked keeps GHL', () => assert.strictEqual(G.days['2026-10-20'].noShow, 0));
+  check('no manual entry for a day GHL has no calls', () => assert.ok(!G.days['2026-10-30']));
+  check('ghl untouched without manual', () => assert.strictEqual(HQ.applyGhlManual(ghl, null), ghl));
+}
 console.log(`tracking: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

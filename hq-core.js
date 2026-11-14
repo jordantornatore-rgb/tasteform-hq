@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.10.0';
+  HQ.VERSION = '3.10.1';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -464,6 +464,27 @@
     return rows;
   };
   HQ.dmCoverage = function (dmMeta) { if (!dmMeta || !dmMeta.lastScanAt) return null; return dmMeta.coverage ? dmMeta.coverage : { legacy: true, complete: false }; };
+
+  // Call outcomes Jordan gave by hand (meta/ghlManual: { days: { 'YYYY-MM-DD': { showed, noShow, closed, funnel } } }),
+  // laid over GHL's days for calls that were never marked there. From 14 Nov 2026 he marks new calls in GHL himself.
+  // A day GHL has already marked (showed + noShow > 0) keeps GHL's numbers.
+  HQ.applyGhlManual = function (ghl, manual) {
+    if (!ghl || !ghl.days || !manual || !manual.days) return ghl;
+    var days = {};
+    Object.keys(ghl.days).forEach(function (k) { days[k] = ghl.days[k]; });
+    Object.keys(manual.days).forEach(function (k) {
+      var g = days[k], x = manual.days[k] || {};
+      if (!g || (g.showed || 0) + (g.noShow || 0) > 0) return;
+      var s = +x.showed || 0, ns = +x.noShow || 0, c = +x.closed || 0, d = Object.assign({}, g);
+      d.showed = s; d.noShow = ns; d.unmarked = Math.max(0, (g.held || 0) - s - ns); d.closed = (g.closed || 0) + c;
+      var bf = {}; Object.keys(g.byFunnel || {}).forEach(function (f) { bf[f] = Object.assign({}, g.byFunnel[f]); });
+      var f = x.funnel || Object.keys(bf)[0] || 'unknown';
+      bf[f] = Object.assign({ booked: 0, held: 0, showed: 0, noShow: 0, closed: 0 }, bf[f]);
+      bf[f].showed += s; bf[f].noShow += ns; bf[f].closed += c;
+      d.byFunnel = bf; d.manual = true; days[k] = d;
+    });
+    return Object.assign({}, ghl, { days: days });
+  };
 
   /* ---------- GoHighLevel day sums (meta/ghlSync.days, written by the ghl-sync function) ---------- */
   HQ.ghlSum = function (ghl, from, to) {
