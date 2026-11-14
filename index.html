@@ -271,6 +271,21 @@ details.tv table{margin-top:8px;}
 .arrow{color:var(--muted);}
 
 /* ===== funnels + charts (inline, no libs) ===== */
+.ap-q{display:flex;flex-direction:column;gap:8px;}
+.ap-row{display:grid;grid-template-columns:minmax(150px,260px) 1fr 170px;gap:12px;align-items:center;font-size:var(--t-s);}
+.ap-row .l small{display:block;color:var(--muted);font-size:var(--t-xs);}
+.ap-track{position:relative;height:14px;background:var(--surface-2);border-radius:3px;overflow:hidden;}
+.ap-track i{position:absolute;top:0;bottom:0;left:0;background:var(--accent);}
+.ap-track b{position:absolute;top:0;bottom:0;background:var(--crit-soft);border-left:1px solid var(--crit);}
+.ap-row .v{font-variant-numeric:tabular-nums;text-align:right;}
+.ap-row .v small{display:block;color:var(--muted);font-size:var(--t-xs);}
+.ap-row.worst .l,.ap-row.worst .v .lost{color:var(--crit);font-weight:600;}
+.ap-ans h3{font-size:var(--t-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px;}
+.ap-ans h3:first-child{margin-top:0;}
+.ap-old summary{cursor:pointer;list-style:none;}
+.ap-old summary::-webkit-details-marker{display:none;}
+.ap-old summary h2::after{content:' ▾';color:var(--muted);font-size:var(--t-s);}
+@media (max-width:620px){.ap-row{grid-template-columns:1fr 112px;}.ap-row .ap-track{grid-column:1 / -1;grid-row:2;}}
 .funnel{display:flex;flex-direction:column;gap:6px;}
 .f-row{display:grid;grid-template-columns:minmax(150px,220px) 1fr 110px;gap:10px;align-items:center;font-size:var(--t-s);}
 @media (max-width:520px){.f-row{grid-template-columns:128px 1fr 86px;}}
@@ -1851,39 +1866,53 @@ table.scores td{border-color:var(--border);}
       <div class="range" role="group" aria-label="Applications date range" id="appsRange"><button type="button" data-appsrange="7">7 days</button><button type="button" data-appsrange="30" aria-pressed="true">30 days</button><button type="button" data-appsrange="90">90 days</button><button type="button" data-appsrange="all">All time</button></div>
     </div>
     <div class="kpis">
-      <div class="kpi"><div class="label">Applications</div><div class="value" id="appsDone">–</div><div class="note" id="appsDoneNote">&nbsp;</div></div>
-      <div class="kpi"><div class="label">Form opens</div><div class="value" id="appsOpens">–</div><div class="note" id="appsOpensNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Opened the page</div><div class="value" id="appsOpens">–</div><div class="note" id="appsOpensNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">Applied</div><div class="value" id="appsDone">–</div><div class="note" id="appsDoneNote">&nbsp;</div></div>
       <div class="kpi"><div class="label">Open → apply</div><div class="value" id="appsRate">–</div><div class="note" id="appsRateNote">&nbsp;</div></div>
-      <div class="kpi"><div class="label">Good-fit applications</div><div class="value" id="appsFit">–</div><div class="note" id="appsFitNote">&nbsp;</div></div>
+      <div class="kpi"><div class="label">In market (25–40)</div><div class="value" id="appsFit">–</div><div class="note" id="appsFitNote">&nbsp;</div></div>
     </div>
     <div class="panel">
-      <h2>Applicants</h2>
-      <p class="rule">Newest first. "Good fit" = in Aus/NZ/UK/US, coaching is a top or important financial priority, and 18+. Tap an outcome as you work each one; it survives the hourly Typeform re-sync. These outcomes feed the Answered / Booked / Showed / Signed stages until GoHighLevel is connected.</p>
-      <div class="table-wrap"><table class="scores"><thead><tr><th>Applied</th><th>Name</th><th>Goal</th><th>Roadblock</th><th>Priority</th><th>Age</th><th>Fit</th><th>Contact</th><th>In DMs</th><th>Outcome</th></tr></thead><tbody id="appsBody"></tbody></table></div>
+      <h2>Where they drop off, question by question</h2>
+      <p class="rule">Everyone who opened tasteformcoaching.vercel.app/apply in the window. Each row: how many reached that screen, how many got past it, how many left there, and the usual time spent on it. The red row loses the most people.</p>
+      <div class="ap-q" id="apQ"></div>
+      <div class="f-note" id="apQNote"></div>
     </div>
     <div class="home-grid">
       <div class="home-col">
         <div class="panel">
-          <div class="chart-head"><div><h2>Opens vs applications</h2><p class="rule" style="margin-top:4px" id="appsChartRule">Everyone who opened the form, and the part of them who finished it.</p></div><div class="legend"><span><i class="sw" style="background:var(--series-1)"></i>Applied</span><span><i class="sw" style="background:var(--series-2)"></i>Opened, didn't apply</span></div></div>
+          <div class="chart-head"><div><h2>Opens vs applications</h2><p class="rule" style="margin-top:4px" id="appsChartRule">Everyone who opened the page, and the part of them who applied.</p></div><div class="legend"><span><i class="sw" style="background:var(--series-2)"></i>Opened, didn’t apply</span><span><i class="sw" style="background:var(--series-1)"></i>Applied</span></div></div>
           <div class="ads-chart" id="appsChart" style="position:relative"><div class="yaxis" id="appsY"></div><div class="plot" id="appsPlot"></div><div class="xaxis" id="appsX"></div></div>
           <details class="tv"><summary>Show as table</summary><div class="table-wrap"><table class="scores"><thead><tr><th id="appsTblPeriod">Day</th><th class="num">Opens</th><th class="num">Applications</th><th class="num">Open → apply</th></tr></thead><tbody id="appsTable"></tbody></table></div></details>
+        </div>
+        <div class="panel">
+          <h2>What they answered</h2>
+          <p class="rule">Everyone who answered, and how many of them went on to apply. Shows which answers stick and which drop.</p>
+          <div id="apAnswers"></div>
         </div>
       </div>
       <div class="home-col">
         <div class="panel">
-          <h2>Where they fall off</h2>
-          <p class="rule">From opening the form to a signed client, in the selected window. Call stages come from the outcomes you mark by hand until GoHighLevel is connected.</p>
-          <div class="funnel" id="appsFunnel"></div>
-          <div class="f-note" id="appsFunnelNote"></div>
+          <h2>Which link they came from</h2>
+          <p class="rule">From the tag on the link they opened (Funnel links, bio, ads).</p>
+          <div class="table-wrap"><table class="scores"><thead><tr><th>Source</th><th class="num">Opened</th><th class="num">Started</th><th class="num">Applied</th><th class="num">Rate</th></tr></thead><tbody id="appsSrcBody"></tbody></table></div>
+          <div class="f-note" id="appsSrcNote"></div>
         </div>
         <div class="panel">
-          <h2>Which link they came from</h2>
-          <p class="rule">Read from the link each person used to open the form.</p>
-          <div class="table-wrap"><table class="scores"><thead><tr><th>Source</th><th class="num">Opens</th><th class="num">Applied</th><th class="num">Rate</th></tr></thead><tbody id="appsSrcBody"></tbody></table></div>
-          <div class="f-note" id="appsSrcNote"></div>
+          <h2>Phone vs desktop</h2>
+          <div class="table-wrap"><table class="scores"><thead><tr><th>Device</th><th class="num">Opened</th><th class="num">Started</th><th class="num">Applied</th><th class="num">Rate</th></tr></thead><tbody id="apDevice"></tbody></table></div>
         </div>
       </div>
     </div>
+    <div class="panel">
+      <h2>Applicants</h2>
+      <p class="rule">Newest first, from the apply page. Calls, show-ups and sales for them are tracked in GoHighLevel (Leads and Sales pages).</p>
+      <div class="table-wrap"><table class="scores"><thead><tr><th>Applied</th><th>Name</th><th>Goal</th><th>Tried before</th><th>Age</th><th>Contact</th><th>Source</th></tr></thead><tbody id="apBody"></tbody></table></div>
+    </div>
+    <details class="panel ap-old">
+      <summary><h2 style="display:inline">Older Typeform applications</h2></summary>
+      <p class="rule">Before the apply page went live (12 Nov 2026), and the barbershop QR form since. Outcomes you tap here are kept.</p>
+      <div class="table-wrap"><table class="scores"><thead><tr><th>Applied</th><th>Name</th><th>Goal</th><th>Roadblock</th><th>Priority</th><th>Age</th><th>Fit</th><th>Contact</th><th>In DMs</th><th>Outcome</th></tr></thead><tbody id="appsBody"></tbody></table></div>
+    </details>
   </section>
 
   <!-- ===== ADS ===== -->
@@ -2141,7 +2170,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.11.2"></script>
+<script src="hq-core.js?v=3.11.0"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -2279,7 +2308,7 @@ table.scores td{border-color:var(--border);}
     loaded:{}
   };
   function metaBundle(){
-    return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, deliveryManual:state.deliveryManual||null, ghlSync:HQ.applyGhlManual?HQ.applyGhlManual(state.ghlMeta, state.ghlManual):state.ghlMeta, youtubeSync:state.youtubeMeta||null, scorecard:state.scorecardMeta, costs:state.costsMeta||null, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
+    return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, ghlSync:HQ.applyGhlManual?HQ.applyGhlManual(state.ghlMeta, state.ghlManual):state.ghlMeta, youtubeSync:state.youtubeMeta||null, scorecard:state.scorecardMeta, costs:state.costsMeta||null, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
   }
   function coreState(){ return { dms:state.dms, daily:state.daily, contacts:state.contacts, tfResponses:state.tfResponses, tfDaily:state.tfDaily, igPosts:state.igPosts, igStories:state.igStories, meta:metaBundle(), stripe:state.stripe.summary?{summary:state.stripe.summary, customers:isAdmin?(state.stripe.customers||null):null}:null, dmLoaded:state.dmLoaded }; }
 
@@ -2289,7 +2318,7 @@ table.scores td{border-color:var(--border);}
     today:['dms','daily','contacts','tfResponses','tfDaily','igPosts','igStories','meta','stripe'],
     funnel:['tfResponses','tfDaily','igPosts','igStories','meta','dms','daily','ads'],
     leads:['contacts','meta','dms'], dms:['dms','daily','reviews','contacts','meta'], follow:['dms','meta'], magnets:['dms','meta'],
-    apps:['tfResponses','tfDaily','meta','dms'], ads:['ads','meta'], content:['content'], analytics:['igPosts','igAccount','meta'], email:['email'], stripe:['stripe','meta'], subs:[], challenge:[], routine:[], links:[]
+    apps:['tfResponses','tfDaily','meta','dms','pillars'], ads:['ads','meta'], content:['content'], analytics:['igPosts','igAccount','meta'], email:['email'], stripe:['stripe','meta'], subs:[], challenge:[], routine:[], links:[]
   };
   var dirty = {global:true}, raf = null, currentView = 'home';
   window.__hqRenders = 0; // counted by the perf test
@@ -3067,7 +3096,7 @@ table.scores td{border-color:var(--border);}
   /* ---------- APPLICATIONS ---------- */
   var appsRange = (function(){ var v=read('hqAppsRange'); return (v==='7'||v==='30'||v==='90'||v==='all')?v:'30'; })();
   function appsWindow(){
-    var t=HQ.sydDay(Date.now()), days=(state.tfDaily||[]).map(function(d){ return d.date||d.id; }).sort();
+    var t=HQ.sydDay(Date.now()), days=(state.appSessions||[]).map(function(r){ var d=r.data||r; return d.firstSeenAt?HQ.sydDay(d.firstSeenAt):null; }).filter(Boolean).sort();
     if(appsRange==='all'){ var first=days.length?days[0]:t; return {from:first, to:t, len:HQ.daysBetween(first,t)+1, prev:null}; }
     var n=parseInt(appsRange,10);
     return {from:HQ.addDays(t,-(n-1)), to:t, len:n, prev:{from:HQ.addDays(t,-(2*n-1)), to:HQ.addDays(t,-n)}};
@@ -3075,53 +3104,60 @@ table.scores td{border-color:var(--border);}
   function appsDelta(cur, prev, goodUp){ if(appsRange==='all' || !prev) return ''; var d=Math.round(((cur-prev)/prev)*100), cls=d===0?'flat':((d>0)===goodUp?'up':'down'); return ' · <span class="delta '+cls+'">'+(d>0?'▲ ':(d<0?'▼ ':''))+Math.abs(d)+'%</span> vs prior '+appsRange+'d'; }
   RENDER.apps = function(){
     document.querySelectorAll('#appsRange button').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-appsrange')===appsRange?'true':'false'); });
-    var tm=state.tfMeta, lf=null; if(tm && tm.forms) tm.forms.forEach(function(f){ if(f.id===tm.liveFormId) lf=f; });
-    var metaEl=$('appsMetaLine');
-    if(!tm) metaEl.textContent = state.tfLoaded ? 'Not synced yet.' : 'Loading…';
-    else if(tm.ok===false) metaEl.innerHTML='<span class="delta down">Typeform sync failing</span> · '+esc(tm.error||'unknown error')+' · last good sync '+esc(relTime(tm.lastSyncAt)||'never');
-    else metaEl.textContent='Synced '+(relTime(tm.lastSyncAt)||'recently')+' · hourly from Typeform'+(lf?' · live form: '+lf.title:'');
-    var w=appsWindow(), cur=HQ.tfSum(state.tfDaily,w.from,w.to), prev=w.prev?HQ.tfSum(state.tfDaily,w.prev.from,w.prev.to):null;
-    var apps=HQ.appsInRange(state.tfResponses,w.from,w.to), fit=apps.filter(function(r){ return r.fit===true; }).length, fitKnown=apps.filter(function(r){ return r.fit!=null; }).length;
+    var w=appsWindow(), F=HQ.applyFunnel({appSessions:state.appSessions||[]}, w.from, w.to), P=w.prev?HQ.applyFunnel({appSessions:state.appSessions||[]}, w.prev.from, w.prev.to):null;
+    var loaded=!!(state.loaded && state.loaded.appSessions);
+    var lastAt=null; (state.appSessions||[]).forEach(function(r){ var d=r.data||r; if(d.lastSeenAt && (!lastAt || d.lastSeenAt>lastAt)) lastAt=d.lastSeenAt; });
+    setText('appsMetaLine', !loaded ? 'Loading…' : 'Live from the apply page (tasteformcoaching.vercel.app/apply)'+(lastAt?' · last visit '+(relTime(lastAt)||''):'')+' · test visits left out');
     var lbl = appsRange==='all' ? 'all time' : 'last '+appsRange+' days';
-    setText('appsOpens', num(cur.visits)); setHtml('appsOpensNote', lbl+(prev?appsDelta(cur.visits,prev.visits,true):''));
-    setText('appsDone', num(cur.completed)); setHtml('appsDoneNote', lbl+(prev?appsDelta(cur.completed,prev.completed,true):''));
-    var rate = cur.visits ? (cur.completed/cur.visits*100) : null, prate = prev&&prev.visits ? (prev.completed/prev.visits*100) : null;
+    setText('appsOpens', num(F.opened)); setHtml('appsOpensNote', lbl+(P?appsDelta(F.opened,P.opened,true):''));
+    setText('appsDone', num(F.submitted)); setHtml('appsDoneNote', lbl+(P?appsDelta(F.submitted,P.submitted,true):''));
+    var rate = F.opened ? (F.submitted/F.opened*100) : null, prate = P&&P.opened ? (P.submitted/P.opened*100) : null;
     setText('appsRate', rate==null?'–':(rate<10?rate.toFixed(1):Math.round(rate))+'%');
-    setHtml('appsRateNote', rate==null ? 'no opens in this window' : cur.completed+' of '+num(cur.visits)+' who opened it'+(prate!=null&&appsRange!=='all'?' · was '+(prate<10?prate.toFixed(1):Math.round(prate))+'%':''));
-    setText('appsFit', cur.completed ? fit : '–'); setHtml('appsFitNote', cur.completed ? (fitKnown ? HQ.pctText(fit,fitKnown)+' of applications' : 'older form, no fit questions') : 'no applications in this window');
-    // chart
-    var byDay={}; (state.tfDaily||[]).forEach(function(d){ byDay[d.date||d.id]=d; });
+    setHtml('appsRateNote', rate==null ? 'no visits in this window' : F.submitted+' of '+num(F.opened)+' who opened it'+(prate!=null&&appsRange!=='all'?' · was '+(prate<10?prate.toFixed(1):Math.round(prate))+'%':''));
+    var fitN=F.applicants.filter(function(x){ return x.inMarket===true; }).length;
+    setText('appsFit', F.submitted ? fitN : '–'); setHtml('appsFitNote', F.submitted ? HQ.pctText(fitN, F.submitted)+' of applications' : 'no applications in this window');
+    // question by question
+    var secs=function(v){ return v==null?'':(v<60?v+'s':Math.round(v/6)/10+' min'); };
+    if(!F.opened) setHtml('apQ', '<div class="empty-state">'+(loaded?'Nobody opened the apply page in this window.':'Loading…')+'</div>');
+    else setHtml('apQ', F.steps.map(function(x,i){
+      var base=F.opened||1, wDone=x.done/base*100, wLost=x.lost/base*100, worst=F.worst && F.worst.k===x.k;
+      var val = i===0 ? '<b>'+num(x.done)+'</b><small>opened</small>' : '<b>'+num(x.done)+'</b> of '+num(x.reached)+'<small>'+(x.lost?'<span class="lost">'+num(x.lost)+' left here ('+x.lostPct+'%)</span>':'nobody left here')+(x.medianSecs!=null?' · ~'+secs(x.medianSecs):'')+'</small>';
+      return '<div class="ap-row'+(worst?' worst':'')+'"><div class="l">'+esc(x.label)+(i===0?'':'<small>'+(x.ofOpened!=null?x.ofOpened+'% of everyone who opened':'')+'</small>')+'</div><div class="ap-track"><i style="width:'+wDone.toFixed(1)+'%"></i>'+(wLost?'<b style="left:'+wDone.toFixed(1)+'%;width:'+wLost.toFixed(1)+'%"></b>':'')+'</div><div class="v">'+val+'</div></div>';
+    }).join(''));
+    var land=F.steps[1]; 
+    setText('apQNote', !F.opened ? '' : (F.worst ? 'Biggest leak: '+F.worst.short+' — '+F.worst.lost+' of '+F.worst.reached+' left there ('+F.worst.lostPct+'%).' : 'Nobody dropped off after landing.')+(land && land.lost ? ' '+land.lost+' landed and never tapped start, so the page itself (headline, first screen) is the first thing to test.' : ''));
+    // answers
+    var Q=[['goal','Q1 · Goal'],['tried','Q2 · Tried before'],['age','Q3 · Age']];
+    setHtml('apAnswers', Q.some(function(q){ return F.answers[q[0]].length; }) ? '<div class="ap-ans">'+Q.map(function(q){ var l=F.answers[q[0]]; if(!l.length) return ''; return '<h3>'+esc(q[1])+'</h3><div class="table-wrap"><table class="scores"><thead><tr><th>Answer</th><th class="num">Answered</th><th class="num">Applied</th><th class="num">Rate</th></tr></thead><tbody>'+l.map(function(x){ return '<tr><td>'+esc(x.v)+'</td><td class="num">'+x.n+'</td><td class="num">'+x.sub+'</td><td class="num">'+HQ.pctText(x.sub,x.n)+'</td></tr>'; }).join('')+'</tbody></table></div>'; }).join('')+'</div>' : '<div class="empty-state">No answers in this window yet.</div>');
+    // chart: opens vs applications per day / week / month
     var gran = appsRange==='90' ? 'week' : (appsRange==='all' ? 'month' : 'day');
     function bkey(k){ if(gran==='day') return k; if(gran==='month') return k.slice(0,7); return HQ.weekStart(k); }
     var buckets=[], idx={};
-    HQ.dayRange(w.from, w.to).forEach(function(k){ var b=bkey(k); if(idx[b]==null){ idx[b]=buckets.length; buckets.push({k:b, visits:0, completed:0}); } var r=byDay[k]; if(r){ buckets[idx[b]].visits+=+r.visits||0; buckets[idx[b]].completed+=+r.completed||0; } });
-    var maxV=Math.max(1, Math.max.apply(null, buckets.map(function(b){ return b.visits; }))), nice = maxV<=5?5:(maxV<=10?10:(maxV<=20?20:(maxV<=50?50:(maxV<=100?100:Math.ceil(maxV/50)*50))));
+    HQ.dayRange(w.from, w.to).forEach(function(k){ var bk=bkey(k); if(idx[bk]==null){ idx[bk]=buckets.length; buckets.push({k:bk, visits:0, completed:0}); } var r=F.daily[k]; if(r){ buckets[idx[bk]].visits+=r.opened; buckets[idx[bk]].completed+=r.submitted; } });
+    var maxV=Math.max(1, Math.max.apply(null, buckets.map(function(x){ return x.visits; }))), nice = maxV<=5?5:(maxV<=10?10:(maxV<=20?20:(maxV<=50?50:(maxV<=100?100:Math.ceil(maxV/50)*50))));
     setHtml('appsY', [0,nice/2,nice].map(function(t){ return '<span style="bottom:'+(t/nice*100)+'%">'+t+'</span>'; }).join(''));
     var plot=$('appsPlot');
-    plot.innerHTML=[nice/2,nice].map(function(t){ return '<div class="gridline" style="bottom:'+(t/nice*100)+'%"></div>'; }).join('')+'<div class="cols">'+buckets.map(function(b,i){ var hc=b.completed/nice*100, ho=(b.visits-b.completed)/nice*100; return '<div class="col" tabindex="0" data-i="'+i+'" aria-label="'+esc(b.k)+': '+b.visits+' opens, '+b.completed+' applications">'+(b.completed?'<div class="seg'+(ho?'':' top')+'" style="height:'+hc+'%;background:var(--series-1)"></div>':'')+(ho?'<div class="seg top" style="height:'+ho+'%;background:var(--series-2)"></div>':'')+'</div>'; }).join('')+'</div>';
+    plot.innerHTML=[nice/2,nice].map(function(t){ return '<div class="gridline" style="bottom:'+(t/nice*100)+'%"></div>'; }).join('')+'<div class="cols">'+buckets.map(function(x,i){ var hc=x.completed/nice*100, ho=(x.visits-x.completed)/nice*100; return '<div class="col" tabindex="0" data-i="'+i+'" aria-label="'+esc(x.k)+': '+x.visits+' opens, '+x.completed+' applications">'+(x.completed?'<div class="seg'+(ho?'':' top')+'" style="height:'+hc+'%;background:var(--series-1)"></div>':'')+(ho?'<div class="seg top" style="height:'+ho+'%;background:var(--series-2)"></div>':'')+'</div>'; }).join('')+'</div>';
     var narrow = window.matchMedia && window.matchMedia('(max-width:520px)').matches, step=Math.max(1, Math.ceil(buckets.length/(narrow?6:10))), dense=buckets.length>14;
-    function blabel(b){ if(gran==='month') return HQ.MON[+b.k.slice(5,7)-1]; if(!dense) return HQ.fmtDay(b.k,'dm'); var d=+b.k.slice(8,10); return d<=step ? HQ.MON[+b.k.slice(5,7)-1] : String(d); }
-    function blong(b){ return gran==='month' ? HQ.fmtDay(b.k+'-01','month') : (gran==='week' ? 'Week of '+HQ.fmtDay(b.k,'short') : HQ.fmtDay(b.k,'wd')); }
-    setHtml('appsX', buckets.map(function(b,i){ return '<span>'+((i%step===(buckets.length-1)%step)?esc(blabel(b)):'')+'</span>'; }).join(''));
-    setText('appsChartRule', 'Everyone who opened the form, and the part of them who finished it — per '+gran+'.');
+    function blabel(x){ if(gran==='month') return HQ.MON[+x.k.slice(5,7)-1]; if(!dense) return HQ.fmtDay(x.k,'dm'); var d=+x.k.slice(8,10); return d<=step ? HQ.MON[+x.k.slice(5,7)-1] : String(d); }
+    function blong(x){ return gran==='month' ? HQ.fmtDay(x.k+'-01','month') : (gran==='week' ? 'Week of '+HQ.fmtDay(x.k,'short') : HQ.fmtDay(x.k,'wd')); }
+    setHtml('appsX', buckets.map(function(x,i){ return '<span>'+((i%step===(buckets.length-1)%step)?esc(blabel(x)):'')+'</span>'; }).join(''));
+    setText('appsChartRule', 'Everyone who opened the page, and the part of them who applied — per '+gran+'.');
     setText('appsTblPeriod', gran==='day'?'Day':(gran==='week'?'Week of':'Month'));
-    attachTip('appsChart', plot, function(i){ var b=buckets[i]; return '<b>'+esc(blong(b))+'</b><br>'+b.visits+' opened · '+b.completed+' applied'+(b.visits?' ('+Math.round(b.completed/b.visits*100)+'%)':''); });
-    setHtml('appsTable', buckets.slice().reverse().filter(function(b){ return b.visits; }).map(function(b){ return '<tr><td>'+esc(blong(b))+'</td><td class="num">'+b.visits+'</td><td class="num">'+b.completed+'</td><td class="num">'+HQ.pctText(b.completed,b.visits)+'</td></tr>'; }).join('') || '<tr><td colspan="4"><div class="empty-state">Nobody opened the form in this window.</div></td></tr>');
-    // funnel: Typeform stages are real; call stages come from the hand-marked outcomes
-    var inDms=apps.filter(function(r){ return !!r.dmThreadId; }).length, marked=apps.filter(function(r){ return HQ.outcomeTried(r.outcome); }).length;
-    var byHand = marked ? 'from outcomes marked by hand ('+marked+' of '+apps.length+' marked)' : 'no outcomes marked in this window yet; GoHighLevel not connected';
-    var stages=[{label:'Opened form', value:cur.visits},{label:'Applied', value:cur.completed},{label:'Good fit', value:cur.completed?fit:null, reason:'no applications'},{label:'In DMs (name match)', value:cur.completed?inDms:null, reason:'no applications'},
-      {label:'Answered call', value:marked?apps.filter(function(r){return HQ.outcomeAnswered(r.outcome);}).length:null, reason:byHand},{label:'Call booked', value:marked?apps.filter(function(r){return HQ.outcomeBooked(r.outcome);}).length:null, reason:byHand},{label:'Showed', value:marked?apps.filter(function(r){return HQ.outcomeShowed(r.outcome);}).length:null, reason:byHand},{label:'Signed', value:marked?apps.filter(function(r){return HQ.outcomeWon(r.outcome);}).length:null, reason:byHand}];
-    setHtml('appsFunnel', cur.visits ? funnelHtml(stages, {showWhy:true}) : '<div class="empty-state">Nobody opened the form in this window.</div>');
-    var fn='';
-    if(cur.visits && cur.started===cur.completed && cur.visits>cur.completed) fn=(cur.visits-cur.completed)+' of '+cur.visits+' people opened the form and didn’t submit. Typeform only saves finished forms on your plan, so it can’t show which question they quit on.';
-    if(cur.completed && !inDms) fn += (fn?' ':'')+'No applicant in this window matched an Instagram DM by name.';
-    setText('appsFunnelNote', fn);
-    // sources
-    var srcs=Object.keys(cur.src).map(function(s){ return {s:s, v:cur.src[s].visits, c:cur.src[s].completed}; }).sort(function(a,b){ return b.c-a.c || b.v-a.v; });
-    setHtml('appsSrcBody', srcs.length ? srcs.map(function(x){ return '<tr><td class="op-name">'+esc(srcLabel(x.s))+'</td><td class="num">'+x.v+'</td><td class="num">'+x.c+'</td><td class="num">'+HQ.pctText(x.c,x.v)+'</td></tr>'; }).join('') : '<tr><td colspan="4"><div class="empty-state">No opens in this window.</div></td></tr>');
-    var fid=(tm&&tm.liveFormId)||'ReFNu7kD';
-    setHtml('appsSrcNote', 'To see which post or story drives applications, give each placement its own link, e.g. <code>form.typeform.com/to/'+esc(fid)+'?utm_content=story-17oct</code>. Each tag gets its own row on the next hourly sync. No change to the form needed.');
+    attachTip('appsChart', plot, function(i){ var x=buckets[i]; return '<b>'+esc(blong(x))+'</b><br>'+x.visits+' opened · '+x.completed+' applied'+(x.visits?' ('+Math.round(x.completed/x.visits*100)+'%)':''); });
+    setHtml('appsTable', buckets.slice().reverse().filter(function(x){ return x.visits; }).map(function(x){ return '<tr><td>'+esc(blong(x))+'</td><td class="num">'+x.visits+'</td><td class="num">'+x.completed+'</td><td class="num">'+HQ.pctText(x.completed,x.visits)+'</td></tr>'; }).join('') || '<tr><td colspan="4"><div class="empty-state">No visits in this window.</div></td></tr>');
+    // sources and devices
+    var srcName=function(k){ var p=k.split('|'), f=HQ.FUNNEL_LABEL[p[0]]||p[0]; return p[1] ? f+' · '+p[1].replace(/_/g,' ') : f; };
+    var rows=function(list, name){ return list.length ? list.map(function(x){ return '<tr><td class="op-name">'+esc(name(x.k))+'</td><td class="num">'+x.opened+'</td><td class="num">'+x.started+'</td><td class="num">'+x.submitted+'</td><td class="num">'+HQ.pctText(x.submitted,x.opened)+'</td></tr>'; }).join('') : '<tr><td colspan="5"><div class="empty-state">No visits in this window.</div></td></tr>'; };
+    setHtml('appsSrcBody', rows(F.sources, srcName));
+    setHtml('apDevice', rows(F.devices, function(k){ return k==='mobile'?'Phone':(k==='desktop'?'Desktop':'Unknown'); }));
+    var noTag=F.sources.filter(function(x){ return /^unknown\|/.test(x.k); }).reduce(function(t,x){ return t+x.opened; },0);
+    setText('appsSrcNote', noTag ? noTag+' opened through an untagged link. Use a Funnel link so each placement gets its own row.' : '');
+    // applicants from the apply page
+    setHtml('apBody', F.applicants.length ? F.applicants.map(function(x){
+      var contact=(x.phone?'<a href="tel:'+esc(x.phone)+'">'+esc(x.phone)+'</a>':'')+(x.phone&&x.email?'<br>':'')+(x.email?'<a href="mailto:'+esc(x.email)+'">'+esc(x.email)+'</a>':'');
+      return '<tr><td style="white-space:nowrap">'+esc(HQ.fmtDay(HQ.sydDay(x.at),'short'))+'<div class="op-sample">'+esc(HQ.fmtTime(x.at))+'</div></td><td class="op-name">'+esc(x.firstName||'–')+'</td><td>'+esc(x.goal||'–')+'</td><td>'+esc(x.tried||'–')+'</td><td>'+esc(x.age||'–')+(x.inMarket===true?' <span class="chip good">in market</span>':'')+'</td><td>'+(contact||'–')+'</td><td>'+esc((HQ.FUNNEL_LABEL[x.funnel]||x.funnel)+(x.tag?' · '+x.tag.replace(/_/g,' '):''))+'</td></tr>';
+    }).join('') : '<tr><td colspan="7"><div class="empty-state">No applications in this window.</div></td></tr>');
     // applicants
     var list=(state.tfResponses||[]).filter(function(r){ return r.submittedAt; }).slice().sort(function(a,b){ return String(b.submittedAt).localeCompare(String(a.submittedAt)); });
     if(appsRange!=='all') list=list.filter(function(r){ var k=HQ.sydDay(r.submittedAt); return k>=w.from && k<=w.to; });
@@ -5411,7 +5447,6 @@ table.scores td{border-color:var(--border);}
     sub(db.collection('app_sessions').limit(5000), 'pillars', 'appSessions');
     doc('meta/ghlSync', 'meta', function(d){ state.ghlMeta=d; });
     doc('meta/ghlManual', 'meta', function(d){ state.ghlManual=d; });
-    doc('meta/deliveryManual', 'meta', function(d){ state.deliveryManual=d; });
     doc('meta/youtubeSync', 'meta', function(d){ state.youtubeMeta=d; });
     doc('meta/routineCalls', 'meta', function(d){ state.routineCalls=d; });
     doc('meta/morningReport', 'meta', function(d){ state.morningReport=d; });
@@ -5631,7 +5666,7 @@ table.scores td{border-color:var(--border);}
     html += '<div class="pl-h2">Hand-off to Leads</div><div class="pl-list">'+
       plRow('Profile visits', acc, T.profileVisits)+
       plRow('Link taps', T.profileVisits.value&&T.linkTaps.value!=null ? HQ.pct(T.linkTaps.value, T.profileVisits.value)+'% of profile visits' : acc, T.linkTaps)+
-      plRow('Form views', 'apply page + Typeform (barbershop QR)', T.formViews, {go:'leadflow'})+
+      plRow('Form views', 'Typeform', T.formViews, {go:'leadflow'})+
     '</div><p class="pl-note">Views, saves and likes are the lifetime numbers of posts published in this period. Tap a row for the posts behind it.</p>';
     setHtml('plTraffic', html);
   };
@@ -5669,7 +5704,7 @@ table.scores td{border-color:var(--border);}
     function conv(label, v){ return '<div class="pl-conv">↓ '+esc(label)+' <b>'+(v==null?'<span class="pl-blank">–</span>':v+'%')+'</b></div>'; }
     var src = Object.keys(L.applications.bySource).sort(function(a,b){ return L.applications.bySource[b]-L.applications.bySource[a]; }).map(function(k){ return [k==='link_in_bio'?'Link in bio':(k==='unknown'?'Unknown source':k.replace(/_/g,' ')), num(L.applications.bySource[k])]; });
     var html = funnelChips()+'<div class="pl-funnel">'+
-      step('Form views', L.formViews, 'apply page '+num(L.formViews.apply||0)+' + Typeform (barbershop QR) '+num(L.formViews.typeform||0)+' · '+d.range.label, [['Link taps on Instagram', d.traffic.linkTaps.value==null?'–':num(d.traffic.linkTaps.value)], ['Profile visits', d.traffic.profileVisits.value==null?'–':num(d.traffic.profileVisits.value)], ['Before', L.formViews.prev==null?'–':num(L.formViews.prev)]])+
+      step('Form views', L.formViews, 'Typeform · '+d.range.label, [['Link taps on Instagram', d.traffic.linkTaps.value==null?'–':num(d.traffic.linkTaps.value)], ['Profile visits', d.traffic.profileVisits.value==null?'–':num(d.traffic.profileVisits.value)], ['Before', L.formViews.prev==null?'–':num(L.formViews.prev)]])+
       conv('view → start', L.rates.viewToStart)+
       step('Form starts', L.starts, L.starts.note)+
       conv('view → apply', L.rates.viewToApply)+
@@ -5701,6 +5736,7 @@ table.scores td{border-color:var(--border);}
       plRow('Cash collected', S.payments?'every Stripe payment · '+num(S.payments.value)+' payments, '+num(S.newPayers.value)+' first-time':'every Stripe payment', S.headline, {fmt:'money', go:'stripe'})+
       plRow('Sales closed', (S.closed.note||'moved to Closed / Won in GHL')+(S.newPayers&&S.newPayers.value&&S.newPayers.value>(S.closed.value||0)?' · Stripe has '+num(S.newPayers.value)+' new paying '+HQ.plural(S.newPayers.value,'client')+' in this window':''), S.closed)+
       plRow('Close rate', 'closed ÷ calls that showed · plan 50%+', S.closeRate, {fmt:'pct'})+
+      plRow('Average sale value', null, S.avgSale, {fmt:'money'})+
       plRow('Days from first contact to close', 'GHL lead created → closed', S.daysToClose, {fmt:'dp1', lowerIsBetter:true})+
       plRow('Refunds', S.refundsAllTime!=null?HQ.money(S.refundsAllTime)+' refunded in Stripe all time':null, S.refunds, {fmt:'money', lowerIsBetter:true})+
     '</div>';

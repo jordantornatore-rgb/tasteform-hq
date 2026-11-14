@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.11.2';
+  HQ.VERSION = '3.11.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -465,18 +465,6 @@
   };
   HQ.dmCoverage = function (dmMeta) { if (!dmMeta || !dmMeta.lastScanAt) return null; return dmMeta.coverage ? dmMeta.coverage : { legacy: true, complete: false }; };
 
-  // Clients who left in [from, to]. 1FIT's daily check only knows leavers it saw go (it started early Nov), so the leavers
-  // Jordan confirmed (meta/deliveryManual.left, dates from 1FIT) count up to the list's cutoff, and the daily check's
-  // per-day count (hq_delivery_by_day) after it. Without the list it's the check's own count for the window.
-  HQ.leftIn = function (dc, manual, byDay, from, to) {
-    if (!manual || !Array.isArray(manual.left) || !manual.cutoff) return dc && HQ.isNum(dc.left) ? dc.left : null;
-    var n = manual.left.filter(function (x) { return x && x.date >= from && x.date <= to && x.date <= manual.cutoff; }).length;
-    if (to > manual.cutoff) {
-      if (!byDay) return dc && HQ.isNum(dc.left) ? Math.max(n, dc.left) : n;
-      Object.keys(byDay).forEach(function (k) { if (k > manual.cutoff && k >= from && k <= to) n += +(byDay[k] && byDay[k].left) || 0; });
-    }
-    return n;
-  };
   // clients in 1FIT on free coaching (marked "Free (affiliate)" on the Revenue page)
   HQ.freeClients = function (customers) {
     if (!Array.isArray(customers)) return null;
@@ -914,8 +902,6 @@
     var tf = HQ.tfSum(state.tfDaily, R.from, R.to), tfp = HQ.tfSum(state.tfDaily, R.prevFrom, R.prevTo);
     var fc = HQ.followerChange(byDay, R.from, R.to), fcp = HQ.followerChange(byDay, R.prevFrom, R.prevTo);
     var top = curPosts.filter(function (p) { return HQ.isNum(p.follows); }).sort(function (a, b) { return b.follows - a.follows; })[0] || null;
-    var apSum = function (a, b) { var o = HQ.applySessions(state, a, b), t = { opened: 0, started: 0, submitted: 0 }; Object.keys(o).forEach(function (k) { t.opened += o[k].opened; t.started += o[k].started; t.submitted += o[k].submitted; }); return t; };
-    var apW = apSum(R.from, R.to), apP = apSum(R.prevFrom, R.prevTo);
     var traffic = {
       // headline = real follower growth from the daily follower count; post-credited follows are only the ones Instagram ties to a post
       headline: m(fc.net, fcp.partial ? null : fcp.net, { label: 'net new followers', since: fc.partial ? fc.startDay : null, from: fc.startDay, to: fc.endDay }),
@@ -928,8 +914,7 @@
       likes: m(likes, sumField(prevPosts, 'likes').value), comments: m(comments, sumField(prevPosts, 'comments').value),
       storyViews: m(storyViews.have ? storyViews.value : null, null), stories: stories.length,
       profileVisits: m(A('profileVisits'), AP('profileVisits')), linkTaps: m(A('externalLinkTaps'), AP('externalLinkTaps')),
-      // form views = the apply page (link in bio and every tagged link) + Typeform (only the barbershop QR code now)
-      formViews: m(apW.opened + (tf.days ? tf.visits : 0), apP.opened + (tfp.days ? tfp.visits : 0), { apply: apW.opened, typeform: tf.days ? tf.visits : 0 }),
+      formViews: m(tf.days ? tf.visits : null, tfp.days ? tfp.visits : null),
       top: top ? { id: top.id, title: top.title || null, follows: top.follows, views: top.views, shortcode: top.shortcode || null, day: top._day } : null
     };
 
@@ -941,7 +926,8 @@
     var bySrc = {}; appsAll.forEach(function (r) { var s = HQ.FUNNEL_LABEL[r.funnel] || r.funnel; bySrc[s] = (bySrc[s] || 0) + 1; });
     var fitKnown = apps.filter(function (r) { return r.fit === true || r.fit === false || r.fit === 'fit' || r.fit === 'not_fit'; });
     var fitYes = fitKnown.filter(function (r) { return r.fit === true || r.fit === 'fit'; }).length;
-    // form starts come from the apply page only (Typeform is just the barbershop QR and its sync only sees finished forms)
+    // Typeform's daily sync writes started == completed (it only sees finished forms), so starts stay blank until it reads partial responses.
+    var startsReal = (state.tfDaily || []).some(function (d) { return HQ.isNum(+d.started) && +d.started !== +d.completed; });
     var ghl = state.meta && state.meta.ghlSync, ghlOn = !!(ghl && ghl.connected);
     var dmBooked = null;
     if (opts.dmScanOk) dmBooked = (state.daily || []).filter(function (d) { var k = d.date || d.id; return k >= R.from && k <= R.to; }).reduce(function (a, d) { return a + (+d.callsBooked || 0); }, 0);
@@ -955,7 +941,7 @@
       headline: m(appsAll.length + paidL, appsPrev.length + paidLP, { label: 'leads', apps: appsAll.length, paid: paidL }),
       paidLeads: m(G ? paidL : null, GP ? paidLP : null),
       formViews: traffic.formViews,
-      starts: m(apW.started, apP.started, { note: 'apply page; Typeform (barbershop QR) not counted' }),
+      starts: m(startsReal ? tf.started : null, startsReal ? tfp.started : null, { note: startsReal ? null : 'Typeform sync only counts finished forms' }),
       applications: m(appsAll.length, appsPrev.length, { bySource: bySrc, qualified: fitKnown.length ? fitYes : null, qualifiedOf: fitKnown.length }),
       booked: m(booked, GP ? GP.booked : null, { fromDms: dmBooked, note: ghlOn ? null : 'Needs GoHighLevel', held: G ? G.held : null, upcoming7: ghlOn && HQ.isNum(ghl.upcoming7) ? ghl.upcoming7 : null }),
       showed: m(G && marked ? G.showed : null, GP && (GP.showed + GP.noShow) ? GP.showed : null, { note: showNote, noShow: G && marked ? G.noShow : null }),
@@ -963,8 +949,8 @@
       replied: m(G ? G.replied : null, GP ? GP.replied : null),
       costPerBooked: m(null, null, { note: 'Needs ad spend' }),
       rates: {
-        viewToStart: apW.opened ? HQ.pct(apW.started, apW.opened) : null,
-        viewToApply: traffic.formViews.value ? HQ.pct(appsAll.length, traffic.formViews.value) : null,
+        viewToStart: startsReal ? HQ.pct(tf.started, tf.visits) : null,
+        viewToApply: tf.days ? HQ.pct(apps.length, tf.visits) : null,
         applyToBooked: G && appsAll.length ? HQ.pct(G.booked, appsAll.length) : null, showRate: G && marked ? HQ.pct(G.showed, marked) : null,
         replyRate: G && G.outreach ? HQ.pct(G.replied, G.outreach) : null
       }
@@ -1008,7 +994,7 @@
       // challenge_members.joinedAt is the day the daily 1FIT scan first saw someone (most on its first run), not when
       // they started coaching, so "joined" and the average stay from it are wrong. Joined stays blank and the stay
       // is the working number until real 1FIT start dates are filled in (HQ.UNIT_ECON.realJoinDates).
-      churned: m(HQ.leftIn(dc, state.meta && state.meta.deliveryManual, state.deliveryByDay, R.from, R.to), null), joined: m(dc && HQ.UNIT_ECON.realJoinDates ? dc.joined : null, null),
+      churned: m(dc ? dc.left : null, null), joined: m(dc && HQ.UNIT_ECON.realJoinDates ? dc.joined : null, null),
       avgWeeks: m(HQ.UNIT_ECON.realJoinDates ? (dc && dc.avgWeeks != null ? +dc.avgWeeks : null) : UE.weeks, null),
       checkinsOnTime: m(dc ? dc.checkinsOnTime : null, null),
       checkinReplyTime: m(null, null),
@@ -1130,6 +1116,52 @@
       keys.forEach(function (k) { seen[k] = 1; });
       return !dup;
     });
+  };
+  /* ---------- the apply page, question by question (tasteformcoaching.vercel.app/apply, app_sessions) ----------
+     Each session records a timestamp per step it got past (steps.open/start/goal/tried/age/name/email) and submitted.
+     "Reached" a screen = got past the one before it. Lost at a screen = reached it but never answered it. */
+  HQ.APPLY_STEPS = [
+    { k: 'open', label: 'Landed on the page', short: 'Landed' },
+    { k: 'start', label: 'Tapped start', short: 'Start' },
+    { k: 'goal', label: 'Q1 · What are you hoping to achieve in 90 days?', short: 'Q1 Goal' },
+    { k: 'tried', label: 'Q2 · What have you tried that didn’t stick?', short: 'Q2 Tried before' },
+    { k: 'age', label: 'Q3 · Age', short: 'Q3 Age' },
+    { k: 'name', label: 'Q4 · First name', short: 'Q4 Name' },
+    { k: 'email', label: 'Q5 · Email', short: 'Q5 Email' },
+    { k: 'submitted', label: 'Q6 · Mobile → submitted', short: 'Q6 Mobile' }
+  ];
+  HQ.applyFunnel = function (state, from, to) {
+    var S = HQ.APPLY_STEPS, sess = [];
+    (state.appSessions || []).forEach(function (r) {
+      var d = r.data || r, at = d.firstSeenAt; if (!at) return;
+      var day = HQ.sydDay(at); if ((from && day < from) || (to && day > to)) return;
+      if (HQ.funnelOf(d.utm) === 'test') return;
+      var st = Object.assign({}, d.steps || {}); if (!st.open) st.open = at; if (d.submitted && !st.submitted) st.submitted = d.submittedAt || d.lastSeenAt || at;
+      sess.push({ id: r.id, d: d, st: st, day: day });
+    });
+    var med = function (a) { if (!a.length) return null; var x = a.slice().sort(function (p, q) { return p - q; }), m = Math.floor(x.length / 2); return x.length % 2 ? x[m] : (x[m - 1] + x[m]) / 2; };
+    var steps = S.map(function (s, i) {
+      var done = sess.filter(function (x) { return !!x.st[s.k]; });
+      var reached = i === 0 ? sess.length : sess.filter(function (x) { return !!x.st[S[i - 1].k]; }).length;
+      var secs = i === 0 ? [] : done.map(function (x) { var a = Date.parse(x.st[S[i - 1].k]), b = Date.parse(x.st[s.k]); return (b - a) / 1000; }).filter(function (v) { return v >= 0 && v < 3600; });
+      return { k: s.k, label: s.label, short: s.short, reached: reached, done: done.length, lost: Math.max(0, reached - done.length), lostPct: reached ? Math.round((reached - done.length) / reached * 100) : null, medianSecs: secs.length ? Math.round(med(secs)) : null, ofOpened: sess.length ? Math.round(done.length / sess.length * 100) : null };
+    });
+    // the biggest leak = most people lost at one screen (after landing)
+    var worst = null; steps.forEach(function (x, i) { if (i === 0) return; if (x.lost > 0 && (!worst || x.lost > worst.lost)) worst = x; });
+    // answers: everyone who answered vs those who then finished
+    var ans = {};
+    ['goal', 'tried', 'age'].forEach(function (q) {
+      var m = {}; sess.forEach(function (x) { var v = x.d.answers && x.d.answers[q]; if (!v) return; var o = m[v] || (m[v] = { v: v, n: 0, sub: 0 }); o.n++; if (x.st.submitted) o.sub++; });
+      ans[q] = Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return b.n - a.n; });
+    });
+    var by = function (fn) { var m = {}; sess.forEach(function (x) { var k = fn(x) || 'unknown'; var o = m[k] || (m[k] = { k: k, opened: 0, started: 0, submitted: 0 }); o.opened++; if (x.st.start) o.started++; if (x.st.submitted) o.submitted++; }); return Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return b.submitted - a.submitted || b.opened - a.opened; }); };
+    var src = by(function (x) { var u = x.d.utm || {}; return HQ.funnelOf(u) + '|' + (u.utm_content || u.utm_campaign || ''); });
+    var device = by(function (x) { return x.d.device; });
+    var daily = {}; sess.forEach(function (x) { var o = daily[x.day] || (daily[x.day] = { opened: 0, submitted: 0 }); o.opened++; if (x.st.submitted) o.submitted++; });
+    var applicants = sess.filter(function (x) { return x.st.submitted; }).map(function (x) { var c = x.d.contact || {}, a = x.d.answers || {}, u = x.d.utm || {}; return { id: x.id, at: x.st.submitted, firstName: c.firstName || '', email: c.email || '', phone: c.phoneE164 || c.phone || '', goal: a.goal || '', tried: a.tried || '', age: a.age || '', inMarket: HQ.ageInMarket(a.age), funnel: HQ.funnelOf(u), tag: u.utm_content || u.utm_campaign || '', device: x.d.device || '' }; })
+      .sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); });
+    return { sessions: sess.length, steps: steps, worst: worst, answers: ans, sources: src, devices: device, daily: daily, applicants: applicants,
+      opened: sess.length, started: steps[1].done, submitted: steps[steps.length - 1].done };
   };
   // apply-page visits (opened / started / submitted) per funnel, test entries dropped
   HQ.applySessions = function (state, from, to) {

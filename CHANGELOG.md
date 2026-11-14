@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.12.0 — 14 Nov 2026 (Applications from the apply page)
+
+- **Applications** now reads the apply page (tasteformcoaching.vercel.app/apply, `app_sessions`) instead of Typeform. Test visits are left out.
+- New **Where they drop off, question by question**: landed → tapped start → Q1 goal → Q2 tried before → Q3 age → Q4 name → Q5 email → Q6 mobile/submitted. Each row shows how many reached it, got past it, left there (%), and the usual time spent; the biggest leak is red, with a one-line note.
+- **What they answered** (each answer vs how many then applied), **Which link they came from** (opened / started / applied by funnel link), **Phone vs desktop**, an opens-vs-applications chart, and the apply-page **Applicants** list (goal, tried before, age, in-market tag, contact, source).
+- Older Typeform applications (and their outcome buttons) are kept in a collapsed section at the bottom.
+- `HQ.applyFunnel(state, from, to)` in hq-core.js. Tests: `node tests/apps.test.js` (70 checks).
+
 ## 3.10.0 — 14 Nov 2026 (Theoretical and actual LTV)
 
 - **LTV · theoretical** = $299 upfront + $125 a week × how long clients who LEFT stayed (Stripe, past clients only, so it's conservative). **LTV · actual** = what those past clients really paid. Both on Sales (Where you stand) and Delivery; Home's line shows both.
