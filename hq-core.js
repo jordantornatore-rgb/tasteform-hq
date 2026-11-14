@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.11.1';
+  HQ.VERSION = '3.11.2';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -465,6 +465,18 @@
   };
   HQ.dmCoverage = function (dmMeta) { if (!dmMeta || !dmMeta.lastScanAt) return null; return dmMeta.coverage ? dmMeta.coverage : { legacy: true, complete: false }; };
 
+  // Clients who left in [from, to]. 1FIT's daily check only knows leavers it saw go (it started early Nov), so the leavers
+  // Jordan confirmed (meta/deliveryManual.left, dates from 1FIT) count up to the list's cutoff, and the daily check's
+  // per-day count (hq_delivery_by_day) after it. Without the list it's the check's own count for the window.
+  HQ.leftIn = function (dc, manual, byDay, from, to) {
+    if (!manual || !Array.isArray(manual.left) || !manual.cutoff) return dc && HQ.isNum(dc.left) ? dc.left : null;
+    var n = manual.left.filter(function (x) { return x && x.date >= from && x.date <= to && x.date <= manual.cutoff; }).length;
+    if (to > manual.cutoff) {
+      if (!byDay) return dc && HQ.isNum(dc.left) ? Math.max(n, dc.left) : n;
+      Object.keys(byDay).forEach(function (k) { if (k > manual.cutoff && k >= from && k <= to) n += +(byDay[k] && byDay[k].left) || 0; });
+    }
+    return n;
+  };
   // clients in 1FIT on free coaching (marked "Free (affiliate)" on the Revenue page)
   HQ.freeClients = function (customers) {
     if (!Array.isArray(customers)) return null;
@@ -996,7 +1008,7 @@
       // challenge_members.joinedAt is the day the daily 1FIT scan first saw someone (most on its first run), not when
       // they started coaching, so "joined" and the average stay from it are wrong. Joined stays blank and the stay
       // is the working number until real 1FIT start dates are filled in (HQ.UNIT_ECON.realJoinDates).
-      churned: m(dc ? dc.left : null, null), joined: m(dc && HQ.UNIT_ECON.realJoinDates ? dc.joined : null, null),
+      churned: m(HQ.leftIn(dc, state.meta && state.meta.deliveryManual, state.deliveryByDay, R.from, R.to), null), joined: m(dc && HQ.UNIT_ECON.realJoinDates ? dc.joined : null, null),
       avgWeeks: m(HQ.UNIT_ECON.realJoinDates ? (dc && dc.avgWeeks != null ? +dc.avgWeeks : null) : UE.weeks, null),
       checkinsOnTime: m(dc ? dc.checkinsOnTime : null, null),
       checkinReplyTime: m(null, null),

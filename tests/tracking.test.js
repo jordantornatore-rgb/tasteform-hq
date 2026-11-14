@@ -55,5 +55,11 @@ check('refunds all time passed through', () => assert.strictEqual(P.sales.refund
   const cu = [{ status: 'Free (affiliate)' }, { status: 'Free (affiliate)' }, { status: 'Free (affiliate)', in1Fit: false }, { status: 'Active' }];
   check('paying clients = 1FIT active minus free coaching', () => { assert.strictEqual(HQ.freeClients(cu), 2); assert.strictEqual(HQ.payingActive({ active: 13 }, cu), 11); assert.strictEqual(HQ.payingActive({ active: 13 }, null), 13); assert.strictEqual(HQ.payingActive(null, cu), null); });
 }
+{
+  const man = { cutoff: '2026-11-14', left: [{ date: '2026-11-10' }, { date: '2026-10-29' }, { date: '2026-10-27' }, { date: '2026-10-20' }] };
+  check('left: confirmed list up to the cutoff', () => assert.strictEqual(HQ.leftIn({ left: 3 }, man, null, '2026-10-16', '2026-11-14'), 4));
+  check('left: list + daily check after the cutoff', () => assert.strictEqual(HQ.leftIn({ left: 3 }, man, { '2026-11-20': { left: 1 }, '2026-11-12': { left: 1 } }, '2026-10-28', '2026-11-27'), 3));
+  check('left: no list = the check\'s count', () => assert.strictEqual(HQ.leftIn({ left: 3 }, null, null, 'a', 'b'), 3));
+}
 console.log(`tracking: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

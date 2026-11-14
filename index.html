@@ -2141,7 +2141,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.11.1"></script>
+<script src="hq-core.js?v=3.11.2"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -2279,7 +2279,7 @@ table.scores td{border-color:var(--border);}
     loaded:{}
   };
   function metaBundle(){
-    return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, ghlSync:HQ.applyGhlManual?HQ.applyGhlManual(state.ghlMeta, state.ghlManual):state.ghlMeta, youtubeSync:state.youtubeMeta||null, scorecard:state.scorecardMeta, costs:state.costsMeta||null, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
+    return { dmScan:state.dmMeta, scan:state.scanMeta, igScan:state.igMeta, typeformSync:state.tfMeta, adsSync:state.adsMeta, contentPlan:state.contentPlan, goal:state.goal, deliveryManual:state.deliveryManual||null, ghlSync:HQ.applyGhlManual?HQ.applyGhlManual(state.ghlMeta, state.ghlManual):state.ghlMeta, youtubeSync:state.youtubeMeta||null, scorecard:state.scorecardMeta, costs:state.costsMeta||null, routineCalls:state.routineCalls, morningReport:state.morningReport, stripeSync:state.stripe.meta };
   }
   function coreState(){ return { dms:state.dms, daily:state.daily, contacts:state.contacts, tfResponses:state.tfResponses, tfDaily:state.tfDaily, igPosts:state.igPosts, igStories:state.igStories, meta:metaBundle(), stripe:state.stripe.summary?{summary:state.stripe.summary, customers:isAdmin?(state.stripe.customers||null):null}:null, dmLoaded:state.dmLoaded }; }
 
@@ -5411,6 +5411,7 @@ table.scores td{border-color:var(--border);}
     sub(db.collection('app_sessions').limit(5000), 'pillars', 'appSessions');
     doc('meta/ghlSync', 'meta', function(d){ state.ghlMeta=d; });
     doc('meta/ghlManual', 'meta', function(d){ state.ghlManual=d; });
+    doc('meta/deliveryManual', 'meta', function(d){ state.deliveryManual=d; });
     doc('meta/youtubeSync', 'meta', function(d){ state.youtubeMeta=d; });
     doc('meta/routineCalls', 'meta', function(d){ state.routineCalls=d; });
     doc('meta/morningReport', 'meta', function(d){ state.morningReport=d; });
