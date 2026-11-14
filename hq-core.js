@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.14.0';
+  HQ.VERSION = '3.14.1';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -440,9 +440,9 @@
         dmIncomplete = 'Last run did not cover everything: ' + (why.join('; ') || 'see coverage') + '. Treat DM counts as a floor.';
       }
     }
-    rows.push(row('DM scan', dm && dm.lastScanAt, { schedule: (dm && dm.schedule) || '6:07, 10:07, 14:07, 18:07, 22:07', staleHours: 9, stoppedEarly: early(dm), incomplete: dmIncomplete, partial: dmPartial, failed: dm && dm.lastAttemptOk === false ? (dm.lastAttemptNote || 'Last attempt failed.') : null, items: dm && HQ.isNum(dm.threadsRead) ? dm.threadsRead + ' threads read' : null, notRun: 'Runs in Chrome on the Mac mini. Nothing written yet.' }));
+    rows.push(row('DM scan', dm && dm.lastScanAt, { notConnected: 'Paused: no DMs are sent while outbound is being fixed (14 Nov).', schedule: (dm && dm.schedule) || '6:07, 10:07, 14:07, 18:07, 22:07', staleHours: 9, stoppedEarly: early(dm), incomplete: dmIncomplete, partial: dmPartial, failed: dm && dm.lastAttemptOk === false ? (dm.lastAttemptNote || 'Last attempt failed.') : null, items: dm && HQ.isNum(dm.threadsRead) ? dm.threadsRead + ' threads read' : null, notRun: 'Runs in Chrome on the Mac mini. Nothing written yet.' }));
     var bl = meta.dmBacklog || null;
-    rows.push(row('DM backlog (nightly deep pass)', bl && bl.lastScanAt, { schedule: (bl && bl.schedule) || 'nightly 22:40', staleHours: 30, stoppedEarly: early(bl), failed: bl && bl.lastAttemptOk === false ? (bl.lastAttemptNote || 'Last attempt failed.') : null, partial: bl && HQ.isNum(bl.staleRemaining) && bl.staleRemaining > 0 ? bl.staleRemaining + ' leads still older than 24 h; ' + (HQ.isNum(bl.pendingRemaining) ? bl.pendingRemaining + ' placeholders left' : '') : null, items: bl && bl.processed ? Object.keys(bl.processed).reduce(function (a, k) { return a + (HQ.isNum(bl.processed[k]) ? bl.processed[k] : 0); }, 0) + ' rows re-verified' : null, notRun: 'Runs in Chrome on the Mac mini at 22:40. Nothing written yet.' }));
+    rows.push(row('DM backlog (nightly deep pass)', bl && bl.lastScanAt, { notConnected: 'Paused with the DM scan.', schedule: (bl && bl.schedule) || 'nightly 22:40', staleHours: 30, stoppedEarly: early(bl), failed: bl && bl.lastAttemptOk === false ? (bl.lastAttemptNote || 'Last attempt failed.') : null, partial: bl && HQ.isNum(bl.staleRemaining) && bl.staleRemaining > 0 ? bl.staleRemaining + ' leads still older than 24 h; ' + (HQ.isNum(bl.pendingRemaining) ? bl.pendingRemaining + ' placeholders left' : '') : null, items: bl && bl.processed ? Object.keys(bl.processed).reduce(function (a, k) { return a + (HQ.isNum(bl.processed[k]) ? bl.processed[k] : 0); }, 0) + ' rows re-verified' : null, notRun: 'Runs in Chrome on the Mac mini at 22:40. Nothing written yet.' }));
     var sc = meta.scan || null;
     rows.push(row('Likes scan (warm leads)', sc && sc.lastScanAt, { schedule: (sc && sc.schedule) || 'daily 3:15am', staleHours: 30, stoppedEarly: early(sc), failed: sc && sc.lastAttemptOk === false ? (sc.lastAttemptNote || 'Last attempt failed.') : null, partial: sc && sc.partialPosts ? sc.partialPosts + ' big post(s) only partly readable' : null, items: sc && HQ.isNum(sc.windowPosts) ? sc.windowPosts + ' posts, ' + (HQ.isNum(sc.uniqueLikers) ? sc.uniqueLikers + ' likers' : '') : null, notRun: 'Runs in Chrome on the Mac mini. Nothing written yet.' }));
     var ig = meta.igScan || null;
@@ -452,7 +452,7 @@
     var rc = meta.routineCalls || null;
     rows.push(row('Google Calendar → calls', rc && rc.updatedAt, { schedule: '6:12, 9:12, 12:12, 15:12, 18:12', staleHours: 7, items: rc && rc.dates ? Object.keys(rc.dates).length + ' days' : null, notRun: 'Nothing written yet.' }));
     var mr = meta.morningReport || null;
-    rows.push(row('Morning Slack report', mr && mr.sentAt, { schedule: 'daily 6:47am', staleHours: 26, failed: mr && mr.ok === false ? (mr.error || 'Failed to send.') : null, notRun: 'Will record here from the next run.' }));
+    rows.push(row('Morning Slack report', mr && mr.sentAt, { notConnected: 'Retired: replaced by the 7:15am HQ digest email (14 Nov).', schedule: 'daily 6:47am', staleHours: 26, failed: mr && mr.ok === false ? (mr.error || 'Failed to send.') : null, notRun: 'Will record here from the next run.' }));
     var ads = meta.adsSync || null;
     rows.push(row('Meta Ads sync', ads && ads.lastSyncAt, { schedule: 'daily', staleHours: 30, failed: ads && ads.ok === false ? (ads.error || 'Sync failing.') : null, notConnected: ads ? null : 'Meta Ads connector not added. Ads tab shows how.' }));
     var stp = meta.stripeSync || null;
