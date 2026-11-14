@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.9.4';
+  HQ.VERSION = '3.10.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -938,13 +938,14 @@
 
     // --- Delivery: client counts arrive from hq_delivery_counts (names stay admin only); money rows need Stripe
     var dc = state.deliveryCounts || null;
+    var pastStay = HQ.stripeRetention(stripeOn ? state.stripe.customers : null), UE = HQ.unitEcon(pastStay);
     var delivery = {
       headline: m(dc && HQ.isNum(dc.active) ? dc.active : null, null, { label: 'active clients' }),
       // challenge_members.joinedAt is the day the daily 1FIT scan first saw someone (most on its first run), not when
       // they started coaching, so "joined" and the average stay from it are wrong. Joined stays blank and the stay
       // is the working number until real 1FIT start dates are filled in (HQ.UNIT_ECON.realJoinDates).
       churned: m(dc ? dc.left : null, null), joined: m(dc && HQ.UNIT_ECON.realJoinDates ? dc.joined : null, null),
-      avgWeeks: m(HQ.UNIT_ECON.realJoinDates ? (dc && dc.avgWeeks != null ? +dc.avgWeeks : null) : HQ.unitEcon().weeks, null),
+      avgWeeks: m(HQ.UNIT_ECON.realJoinDates ? (dc && dc.avgWeeks != null ? +dc.avgWeeks : null) : UE.weeks, null),
       checkinsOnTime: m(dc ? dc.checkinsOnTime : null, null),
       checkinReplyTime: m(null, null),
       referrals: m(appsAll.filter(function (x) { return String(x.medium || '').toLowerCase() === 'referral'; }).length, appsPrev ? appsPrev.filter(function (x) { return String(x.medium || '').toLowerCase() === 'referral'; }).length : null),
@@ -954,7 +955,7 @@
       failedPayments: m(stripeOn && Array.isArray(state.stripe.customers) ? state.stripe.customers.filter(function (c) { return c && c.status === 'Overdue' && c.in1Fit !== false && c.nextDue; }).length : null, null),
       ltv: m(stripeOn && HQ.isNum(sum.avgLifetimeValue) ? sum.avgLifetimeValue : null, null),
       // what past clients really did, from Stripe (first to last payment plus one usual gap); checks the working numbers
-      pastStay: HQ.stripeRetention(stripeOn ? state.stripe.customers : null)
+      pastStay: pastStay, unit: UE
     };
 
     // --- the one line at the top: where people drop out between content and a call (facts only, no targets yet)
@@ -983,12 +984,12 @@
     // --- the business in four numbers (13 Nov 2026, "make the business simple"): people see the content, some become
     // leads, each client costs something to get, and they stay a while. Cost and stay use the working numbers
     // (HQ.UNIT_ECON) until real 1FIT start dates and closed sales in GoHighLevel can replace them.
-    var U = HQ.unitEcon(), adsW = HQ.adsSum(state.adsDaily, R.from, R.to);
+    var U = UE, adsW = HQ.adsSum(state.adsDaily, R.from, R.to);
     var simple = {
       seen: traffic.views, newFollowers: traffic.headline.value,
       leads: leads.headline, viewsPerLead: HQ.isNum(traffic.views.value) && leads.headline.value ? Math.round(traffic.views.value / leads.headline.value) : null,
       cac: U.cac, cacTarget: HQ.CAC_PLAN.target, adSpend: adsW ? Math.round(adsW.spend) : null,
-      active: delivery.headline.value, left: delivery.churned.value, stayMonths: U.months, ltv: U.ltv, ratio: U.ratio,
+      active: delivery.headline.value, left: delivery.churned.value, stayMonths: U.months, ltv: U.ltv, actual: U.actual, ratio: U.ratio, actualRatio: U.actualRatio,
       cash: sales.headline.value
     };
     // churn = clients who left in the window ÷ clients at its start (active now + those who left); the plan's measure
@@ -1244,7 +1245,10 @@
   // Working numbers Jordan set on 13 Nov 2026, used until 1FIT / Stripe / Newie history replaces them.
   // LTV = 4.2 months kept x $125 a week (pre price rise). Old CAC = Meta spend since 1 Jan 2026 (both ad accounts,
   // read in Ads Manager; earlier spend is sunk) / clients who came from ads (Ben R, Aaron A, Sami E, Laini G, Charbel Y).
-  HQ.UNIT_ECON = { retentionMonths: 4.2, pricePerWeek: 125, set: '2026-11-13', realJoinDates: false,
+  // 14 Nov 2026 (Jordan): theoretical LTV = $299 upfront + $125 a week x how long clients who LEFT stayed (past clients
+  // only, so it's conservative); actual LTV = what those past clients really paid in Stripe. 4.2 months is the fallback
+  // when Stripe isn't loaded (non-admins).
+  HQ.UNIT_ECON = { retentionMonths: 4.2, pricePerWeek: 125, upfront: 299, set: '2026-11-14', realJoinDates: false,
     baseline: { from: '2026-01-01', to: '2026-11-13', adSpend: 5370, clients: 5 } };
   // Past clients in Stripe (status "Past client": paid before, no longer in 1FIT): how long they paid for and what
   // they paid in total. Stay = first to last payment plus one usual gap between payments (a month with one payment).
@@ -1263,12 +1267,15 @@
     return { n: months.length, avgMonths: Math.round(months.reduce(function (t, x) { return t + x; }, 0) / months.length * 10) / 10,
       medianMonths: Math.round(sorted[Math.floor(sorted.length / 2)] * 10) / 10, avgPaid: Math.round(paid / rows.length) };
   };
-  HQ.unitEcon = function () {
-    var U = HQ.UNIT_ECON, b = U.baseline;
-    var weeks = Math.round(U.retentionMonths * 52 / 12 * 10) / 10, ltv = Math.round(weeks * U.pricePerWeek);
-    var cac = b.clients ? Math.round(b.adSpend / b.clients) : null;
-    return { months: U.retentionMonths, weeks: weeks, price: U.pricePerWeek, ltv: ltv, cac: cac, adSpend: b.adSpend, clients: b.clients,
-      from: b.from, to: b.to, ratio: cac ? Math.round(ltv / cac * 10) / 10 : null, planRatio: Math.round(ltv / HQ.CAC_PLAN.target * 10) / 10 };
+  HQ.unitEcon = function (pastStay) {
+    var U = HQ.UNIT_ECON, b = U.baseline, real = !!(pastStay && HQ.isNum(pastStay.avgMonths));
+    var months = real ? pastStay.avgMonths : U.retentionMonths;
+    var weeks = Math.round(months * 52 / 12 * 10) / 10, ltv = Math.round(U.upfront + weeks * U.pricePerWeek);
+    var actual = real && HQ.isNum(pastStay.avgPaid) ? pastStay.avgPaid : null;
+    var cac = b.clients ? Math.round(b.adSpend / b.clients) : null, r = function (v) { return cac && v != null ? Math.round(v / cac * 10) / 10 : null; };
+    return { months: months, weeks: weeks, fromStripe: real, pastClients: real ? pastStay.n : null, price: U.pricePerWeek, upfront: U.upfront,
+      ltv: ltv, actual: actual, cac: cac, adSpend: b.adSpend, clients: b.clients, from: b.from, to: b.to,
+      ratio: r(ltv), actualRatio: r(actual), planRatio: Math.round(ltv / HQ.CAC_PLAN.target * 10) / 10 };
   };
   HQ.adFunnelOf = function (name) {
     var n = String(name || '').toLowerCase();

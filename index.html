@@ -2141,7 +2141,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.9.4"></script>
+<script src="hq-core.js?v=3.10.0"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -5597,9 +5597,9 @@ table.scores td{border-color:var(--border);}
       card('traffic','1 · Seen', plVal(X.seen?X.seen.value:null,'compact'), 'views on posts published', T.headline.value==null?'':flat((T.headline.value>=0?'+':'')+num(T.headline.value)+' followers'+(T.netSince?' since '+(HQ.fmtDay(T.netSince,'short')||T.netSince):''))) +
       card('leadflow','2 · Leads', plVal(L.headline.value), 'applications + ad form leads'+(X.plan?' · plan '+X.plan.leadsMonth+' a month':''), X.viewsPerLead ? flat('1 lead per '+HQ.compact(X.viewsPerLead)+' views') : plTrend(L.headline)) +
       (isAdmin ? card('sales','3 · Cost per client', '<span class="'+(X.cac!=null&&X.cac<=X.cacTarget?'cac-ok':'cac-over')+'">'+plVal(X.cac,'money')+'</span>', 'paid ads since 1 Jan · '+HQ.money(X.cacTarget)+' max', flat(X.adSpend!=null?HQ.money(X.adSpend)+' ad spend this period':'no ad spend this period'), false) : '') +
-      card('delivery','4 · Staying', plVal(X.active), 'active clients · stay '+X.stayMonths+' months avg', D.headline.value==null ? flat(state.deliveryError?'couldn’t load':'loading…') : flat(num(X.left)+' left'+(X.churnPct!=null?' · '+X.churnPct+'% churn, plan '+X.plan.churnMax+'% max':''))) +
+      card('delivery','4 · Staying', plVal(X.active), 'active clients · leavers stayed '+X.stayMonths+' months', D.headline.value==null ? flat(state.deliveryError?'couldn’t load':'loading…') : flat(num(X.left)+' left'+(X.churnPct!=null?' · '+X.churnPct+'% churn, plan '+X.plan.churnMax+'% max':''))) +
     '</div>';
-    if(isAdmin && X.ratio!=null) html += '<p class="pl-note pl-simple-note">Each client is worth '+esc(HQ.money(X.ltv))+' and costs '+esc(HQ.money(X.cac))+' from ads: '+esc(X.ratio+'×')+' back. At the '+esc(HQ.money(X.cacTarget))+' target it would be '+esc(Math.round(X.ltv/X.cacTarget*10)/10+'×')+'.'+(S.headline.value!=null?' Cash collected '+esc(d.range.label)+': '+esc(HQ.money(S.headline.value))+'.':'')+'</p>';
+    if(isAdmin && X.ratio!=null) html += '<p class="pl-note pl-simple-note">Each client is worth '+esc(HQ.money(X.ltv))+' in theory'+(X.actual!=null?' ('+esc(HQ.money(X.actual))+' actually paid)':'')+' and costs '+esc(HQ.money(X.cac))+' from ads: '+esc(X.ratio+'×')+' back. At the '+esc(HQ.money(X.cacTarget))+' target it would be '+esc(Math.round(X.ltv/X.cacTarget*10)/10+'×')+'.'+(S.headline.value!=null?' Cash collected '+esc(d.range.label)+': '+esc(HQ.money(S.headline.value))+'.':'')+'</p>';
     if(d.leak) html += '<div class="pl-leak"><div class="k">Where people drop off · '+esc(d.range.label)+'</div><p>'+esc(d.leak.text)+'</p></div>';
     var todos = d.todo.filter(function(t){ return !t.admin || isAdmin; });
     html += '<div class="pl-h2">Do today</div>';
@@ -5695,14 +5695,14 @@ table.scores td{border-color:var(--border);}
       plRow('Joined', (HQ.UNIT_ECON||{}).realJoinDates ? d.range.label : 'needs real 1FIT start dates', D.joined)+
       plRow('Left', d.range.label, D.churned, {lowerIsBetter:true})+
       plRow('Churn', 'left ÷ clients at the start of '+d.range.label+' · plan '+HQ.planQuarter(d.today).churnMax+'% a month max', D.churnPct, {fmt:'pct', lowerIsBetter:true})+
-      plRow('Average weeks stayed', (HQ.UNIT_ECON||{}).realJoinDates ? 'everyone with a join date' : 'working number: '+(HQ.UNIT_ECON||{retentionMonths:4.2}).retentionMonths+' months', D.avgWeeks, {fmt:'dp1'})+
+      plRow('Average weeks stayed', D.unit&&D.unit.fromStripe ? 'clients who left, from Stripe ('+num(D.unit.pastClients)+')' : 'working number: '+(HQ.UNIT_ECON||{retentionMonths:4.2}).retentionMonths+' months', D.avgWeeks, {fmt:'dp1'})+
       plRow('Check-ins on time', d.range.label, D.checkinsOnTime)+
       plRow('Check-in reply time', 'not tracked yet', D.checkinReplyTime)+
-      plRow('Monthly recurring', 'Stripe subscriptions (Newie later)', D.mrr, {fmt:'money', go:isAdmin?'stripe':null})+
+      plRow('Monthly recurring', 'Stripe subscriptions only; most clients pay by link', D.mrr, {fmt:'money', go:isAdmin?'stripe':null})+
       plRow('Overdue payments', 'clients in 1FIT past their usual date', D.failedPayments, {lowerIsBetter:true, go:isAdmin?'stripe':null})+
-      (function(){ if(!HQ.unitEcon) return ''; var U=HQ.unitEcon(); return plRow('LTV (working number)', U.months+' months kept × '+HQ.money(U.price)+' a week', {value:U.ltv, prev:null}, {fmt:'money'}); })()+
-      (D.pastStay ? plRow('Past clients stayed', 'Stripe, first to last payment · '+num(D.pastStay.n)+' past clients · median '+num(D.pastStay.medianMonths,1)+' months', {value:D.pastStay.avgMonths, prev:null}, {fmt:'dp1', go:isAdmin?'stripe':null})+
-        plRow('Paid per past client', 'Stripe: what a client who left really paid in total', {value:D.pastStay.avgPaid, prev:null}, {fmt:'money', go:isAdmin?'stripe':null}) : '')+
+      (D.unit ? plRow('LTV · theoretical', HQ.money(D.unit.upfront)+' upfront + '+HQ.money(D.unit.price)+' a week × '+num(D.unit.weeks,1)+' weeks (how long clients who left stayed)', {value:D.unit.ltv, prev:null}, {fmt:'money'}) : '')+
+      (D.unit ? plRow('LTV · actual', 'what clients who left really paid in total, from Stripe', {value:D.unit.actual, prev:null}, {fmt:'money', go:isAdmin?'stripe':null}) : '')+
+      (D.pastStay ? plRow('Months clients who left stayed', 'Stripe, first to last payment · '+num(D.pastStay.n)+' past clients · median '+num(D.pastStay.medianMonths,1), {value:D.pastStay.avgMonths, prev:null}, {fmt:'dp1', go:isAdmin?'stripe':null}) : '')+
       plRow('Paid per client so far', 'average paid per client, all of Stripe', D.ltv, {fmt:'money', go:isAdmin?'stripe':null})+
       plRow('Referrals', 'applications through a referral link', D.referrals)+
     '</div><p class="pl-note">'+(state.deliveryError?'Couldn’t load client counts ('+esc(state.deliveryError)+'). ':'')+'Active clients come from 1FIT’s active list (checked daily). Money rows come from Stripe until Newie is connected.</p>';
@@ -5719,12 +5719,14 @@ table.scores td{border-color:var(--border);}
     var mName = function(m){ return new Date(Date.UTC(+m.slice(0,4), +m.slice(5,7)-1, 1)).toLocaleString('en-AU',{month:'short', timeZone:'UTC'}); };
     var money = function(v){ return v==null ? '<span class="pl-blank">–</span>' : esc(HQ.money(v)); };
     var vs = function(actual, max){ if(actual==null || max==null) return money(actual); return '<span class="'+(actual<=max?'cac-ok':'cac-over')+'">'+money(actual)+'</span>'; };
-    var U = HQ.unitEcon ? HQ.unitEcon() : null;
+    var PD = plData(), U = PD.delivery.unit, CH = PD.delivery.churnPct;
     var html = !U ? '' : '<h3 class="pl-h">Where you stand · since 1 Jan</h3><div class="pl-list">'+
       '<div class="pl-row"><div class="l">Paid ads CAC<small>'+esc(HQ.money(U.adSpend)+' Meta spend ÷ '+U.clients+' clients from ads · target '+HQ.money(HQ.CAC_PLAN.target)+' max')+'</small></div><div class="r"><b>'+vs(U.cac, HQ.CAC_PLAN.target)+'</b></div></div>'+
-      '<div class="pl-row"><div class="l">LTV<small>'+esc(U.months+' months kept × '+HQ.money(U.price)+' a week')+'</small></div><div class="r"><b>'+money(U.ltv)+'</b></div></div>'+
-      '<div class="pl-row"><div class="l">LTV ÷ CAC<small>'+esc('at the $'+HQ.CAC_PLAN.target+' target it would be '+U.planRatio+'×')+'</small></div><div class="r"><b>'+esc(U.ratio+'×')+'</b></div></div>'+
-    '</div><p class="pl-note">Working numbers from 13 Nov. New 1FIT, Stripe and Meta data will replace them.</p>';
+      '<div class="pl-row"><div class="l">LTV · theoretical<small>'+esc(HQ.money(U.upfront)+' upfront + '+HQ.money(U.price)+' a week × '+num(U.weeks,1)+' weeks clients who left stayed')+'</small></div><div class="r"><b>'+money(U.ltv)+'</b></div></div>'+
+      '<div class="pl-row"><div class="l">LTV · actual<small>what clients who left really paid, from Stripe</small></div><div class="r"><b>'+money(U.actual)+'</b></div></div>'+
+      '<div class="pl-row"><div class="l">LTV ÷ CAC<small>'+esc((U.actualRatio!=null?'actual '+U.actualRatio+'× · ':'')+'at the $'+HQ.CAC_PLAN.target+' target '+U.planRatio+'×')+'</small></div><div class="r"><b>'+esc(U.ratio+'×')+'</b></div></div>'+
+      '<div class="pl-row"><div class="l">Churn<small>'+esc('clients who left ÷ clients at the start, '+PD.range.label+' · plan '+HQ.planQuarter(PD.today).churnMax+'% a month max')+'</small></div><div class="r"><b>'+(CH&&CH.value!=null?esc(CH.value+'%'):money(null))+'</b></div></div>'+
+    '</div><p class="pl-note">'+(U.fromStripe?'Stay and actual LTV come from the '+num(U.pastClients)+' clients who have left (Stripe); current clients are left out so the numbers stay conservative.':'Using the working 4.2 months until Stripe loads.')+'</p>';
     html += '<h3 class="pl-h">Cost per client (CAC) · by funnel</h3><div class="pl-seg cac-months">'+months.slice().reverse().map(function(m){ return '<button type="button" data-cac-month="'+m+'"" aria-pressed="'+(m===ym)+'">'+esc(mName(m))+'</button>'; }).join('')+'</div>';
     html += '<div class="pl-list">'+plRow('All funnels', C.costsIn ? 'every cost this month ÷ new clients' : 'needs this month’s costs', {value:C.total.cac, prev:null}, {fmt:'money', lowerIsBetter:true})+
       HQ.FUNNELS.concat([{key:'dm_outreach'}]).map(function(f){ var x=C.funnels[f.key];

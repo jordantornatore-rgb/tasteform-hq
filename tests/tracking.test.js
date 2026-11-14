@@ -36,5 +36,10 @@ check('refunds all time passed through', () => assert.strictEqual(P.sales.refund
   check('stripe retention: past clients only, stay = first to last + one gap', () => { assert.strictEqual(R.n, 2); assert.strictEqual(R.avgPaid, 1000); assert.ok(R.avgMonths > 1.9 && R.avgMonths < 2.1, String(R.avgMonths)); });
   check('stripe retention: null without data', () => assert.strictEqual(HQ.stripeRetention(null), null));
 }
+{
+  const U = HQ.unitEcon({ avgMonths: 4.1, avgPaid: 1630, n: 23 });
+  check('LTV theoretical = $299 upfront + $125/wk x weeks past clients stayed; actual = Stripe', () => { assert.strictEqual(U.weeks, 17.8); assert.strictEqual(U.ltv, 2524); assert.strictEqual(U.actual, 1630); assert.strictEqual(U.cac, 1074); });
+  check('LTV falls back to 4.2 months without Stripe', () => { const F = HQ.unitEcon(null); assert.strictEqual(F.months, 4.2); assert.strictEqual(F.actual, null); });
+}
 console.log(`tracking: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

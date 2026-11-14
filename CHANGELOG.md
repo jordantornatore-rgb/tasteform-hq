@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.10.0 — 14 Nov 2026 (Theoretical and actual LTV)
+
+- **LTV · theoretical** = $299 upfront + $125 a week × how long clients who LEFT stayed (Stripe, past clients only, so it's conservative). **LTV · actual** = what those past clients really paid. Both on Sales (Where you stand) and Delivery; Home's line shows both.
+- Average stay now comes from clients who left (Stripe) instead of the fixed 4.2 months (still the fallback for non-admins).
+- Churn added to Sales' Where you stand box.
+
 ## 3.9.0 — 14 Nov 2026 (The business in four numbers)
 
 - Home leads with the business made simple: **1 · Seen** (views on posts published), **2 · Leads** (applications + ad instant-form leads, the same count as the Friday scorecard), **3 · Cost per client** (paid ads since 1 Jan vs the $250 max), **4 · Staying** (active clients, average stay, LTV). One line under them: LTV ÷ CAC and cash collected.
