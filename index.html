@@ -2185,7 +2185,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.15.0"></script>
+<script src="hq-core.js?v=3.15.1"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -3180,6 +3180,7 @@ table.scores td{border-color:var(--border);}
       return '<tr><td style="white-space:nowrap">'+esc(HQ.fmtDay(HQ.sydDay(x.at),'short'))+'<div class="op-sample">'+esc(HQ.fmtTime(x.at))+'</div></td><td class="op-name">'+esc(x.firstName||'–')+'</td><td>'+esc(x.goal||'–')+'</td><td>'+esc(x.tried||'–')+'</td><td>'+esc(x.age||'–')+(x.inMarket===true?' <span class="chip good">in market</span>':'')+'</td><td>'+(contact||'–')+'</td><td>'+esc((HQ.FUNNEL_LABEL[x.funnel]||x.funnel)+(x.tag?' · '+x.tag.replace(/_/g,' '):''))+'</td></tr>';
     }).join('') : '<tr><td colspan="7"><div class="empty-state">No applications in this window.</div></td></tr>');
     // applicants
+    var fid=(state.tfMeta&&state.tfMeta.liveFormId)||'';
     var list=(state.tfResponses||[]).filter(function(r){ return r.submittedAt; }).slice().sort(function(a,b){ return String(b.submittedAt).localeCompare(String(a.submittedAt)); });
     if(appsRange!=='all') list=list.filter(function(r){ var k=HQ.sydDay(r.submittedAt); return k>=w.from && k<=w.to; });
     var QUICK=[['answered','Answered'],['no_answer','No answer'],['voicemail','Voicemail'],['booked','Booked'],['showed','Showed'],['won','Signed'],['not_fit','Not a fit']];
