@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.15.0 — 15 Nov 2026 (Drop-off per link)
+
+- Applications has a **Which link** picker: All links, or one story CTA / the bio / an ad on its own. The KPIs, **question-by-question drop-off**, answers and applicants all follow the pick. Tapping a row in "Which link they came from" picks it.
+- Each funnel view on Leads links straight to it. `HQ.applyFunnel(state, from, to, linkKey)`, `HQ.applyLinkKey(utm)`.
+
 ## 3.13.0 — 14 Nov 2026 (Dashboard research applied: so what, Hormozi's numbers, trends, trust)
 
 - Home opens with **What matters now**: the biggest gaps against the plan (ceiling, churn, show rate, leads pace, ad cost), worst first, each with the next move.

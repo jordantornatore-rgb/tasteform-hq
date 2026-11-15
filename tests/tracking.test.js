@@ -74,5 +74,15 @@ check('refunds all time passed through', () => assert.strictEqual(P.sales.refund
   const P = HQ.computePillars(st, Date.parse('2026-11-14T03:00:00Z'), 30);
   check('biggest leak: no-shows x close rate x gross profit', () => { const L = P.simple.biggestLeak; assert.ok(L && L.amount > 0, JSON.stringify(L)); assert.ok(['noshow', 'churn'].indexOf(L.k) >= 0, L.k); });
 }
+{
+  const mk = (id, utm, steps, sub) => ({ id, data: { firstSeenAt: '2026-11-14T04:00:00Z', utm, steps, submitted: !!sub, submittedAt: sub ? '2026-11-14T04:05:00Z' : null } });
+  const st = { appSessions: [
+    mk('a', { utm_medium: 'story', utm_content: 'harris' }, { open: 1 }), mk('b', { utm_medium: 'story', utm_content: 'harris' }, { open: 1, start: 1, goal: 1, tried: 1, age: 1, name: 1 }),
+    mk('c', { utm_medium: 'bio', utm_content: 'link_in_bio' }, { open: 1, start: 1, goal: 1, tried: 1, age: 1, name: 1, email: 1 }, true) ] };
+  const k = HQ.applyLinkKey({ utm_medium: 'story', utm_content: 'harris' });
+  const F = HQ.applyFunnel(st, '2026-11-01', '2026-11-30', k), A = HQ.applyFunnel(st, '2026-11-01', '2026-11-30', 'all');
+  check('apply funnel for one link: only its visits', () => { assert.strictEqual(F.opened, 2); assert.strictEqual(F.started, 1); assert.strictEqual(F.submitted, 0); assert.strictEqual(A.opened, 3); });
+  check('one link: left on the first screen and at the name step', () => { assert.strictEqual(F.steps[1].lost, 1); assert.strictEqual(F.steps.filter(s => s.k === 'email')[0].lost, 1); });
+}
 console.log(`tracking: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

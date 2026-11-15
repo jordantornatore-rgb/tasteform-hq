@@ -1109,6 +1109,8 @@ body.ce-dragging,body.ce-dragging *{cursor:grabbing !important;user-select:none;
 .pl-so-row{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--border)}.pl-so-row:first-of-type{border-top:0}
 .pl-so-row>b{font-size:var(--t-s);color:var(--crit);min-width:14px}.pl-so-row p{margin:0;font-size:var(--t-m)}.pl-so-row p.nx{color:var(--muted);font-size:var(--t-s);margin-top:2px}
 .pl-so.ok p{margin:0}
+.ap-linkpick{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.ap-linkpick label{font-weight:700;font-size:var(--t-s)}.ap-linkpick select{min-height:44px;max-width:100%}
+tr.ap-srcrow{cursor:pointer}tr.ap-srcrow:hover td{background:var(--surface-2,rgba(0,0,0,.03))}
 .pl-bigleak{display:block;width:100%;text-align:left;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--crit);border-radius:var(--r-l);padding:var(--s4);margin-bottom:var(--s3);cursor:pointer}
 .pl-bigleak .k{display:block;font-size:var(--t-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--crit);font-weight:700}
 .pl-bigleak .v{display:block;font-size:28px;font-weight:750;margin-top:4px}.pl-bigleak .v small{font-size:var(--t-s);color:var(--muted);font-weight:500}
@@ -1877,6 +1879,7 @@ table.scores td{border-color:var(--border);}
       <div><h1>Applications</h1><div class="sub" id="appsMetaLine">Loading…</div></div>
       <div class="range" role="group" aria-label="Applications date range" id="appsRange"><button type="button" data-appsrange="7">7 days</button><button type="button" data-appsrange="30" aria-pressed="true">30 days</button><button type="button" data-appsrange="90">90 days</button><button type="button" data-appsrange="all">All time</button></div>
     </div>
+    <div class="ap-linkpick"><label for="appsLink">Which link</label><select id="appsLink" class="input" aria-label="Show one link (story CTA, bio, ad) or all of them"></select><span class="f-note" id="appsLinkNote"></span></div>
     <div class="kpis">
       <div class="kpi"><div class="label">Opened the page</div><div class="value" id="appsOpens">–</div><div class="note" id="appsOpensNote">&nbsp;</div></div>
       <div class="kpi"><div class="label">Applied</div><div class="value" id="appsDone">–</div><div class="note" id="appsDoneNote">&nbsp;</div></div>
@@ -2182,7 +2185,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.14.1"></script>
+<script src="hq-core.js?v=3.15.0"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -3106,6 +3109,7 @@ table.scores td{border-color:var(--border);}
   });
 
   /* ---------- APPLICATIONS ---------- */
+  var appsLink = (function(){ var v=read('hqAppsLink'); return v||'all'; })();
   var appsRange = (function(){ var v=read('hqAppsRange'); return (v==='7'||v==='30'||v==='90'||v==='all')?v:'30'; })();
   function appsWindow(){
     var t=HQ.sydDay(Date.now()), days=(state.appSessions||[]).map(function(r){ var d=r.data||r; return d.firstSeenAt?HQ.sydDay(d.firstSeenAt):null; }).filter(Boolean).sort();
@@ -3116,7 +3120,13 @@ table.scores td{border-color:var(--border);}
   function appsDelta(cur, prev, goodUp){ if(appsRange==='all' || !prev) return ''; var d=Math.round(((cur-prev)/prev)*100), cls=d===0?'flat':((d>0)===goodUp?'up':'down'); return ' · <span class="delta '+cls+'">'+(d>0?'▲ ':(d<0?'▼ ':''))+Math.abs(d)+'%</span> vs prior '+appsRange+'d'; }
   RENDER.apps = function(){
     document.querySelectorAll('#appsRange button').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-appsrange')===appsRange?'true':'false'); });
-    var w=appsWindow(), F=HQ.applyFunnel({appSessions:state.appSessions||[]}, w.from, w.to), P=w.prev?HQ.applyFunnel({appSessions:state.appSessions||[]}, w.prev.from, w.prev.to):null;
+    var w=appsWindow(), AS={appSessions:state.appSessions||[]}, FA=HQ.applyFunnel(AS, w.from, w.to);
+    // one link at a time (a single story CTA, the bio, an ad) or all of them: everything below follows the pick
+    var srcName=function(k){ if(k==='all') return 'All links'; var p=k.split('|'), f=HQ.FUNNEL_LABEL[p[0]]||(p[0]==='unknown'?'Untagged link':p[0]); return p[1] ? f+' · '+p[1].replace(/_/g,' ') : f; };
+    var linkKeys=FA.sources.map(function(x){ return x.k; }); if(appsLink!=='all' && linkKeys.indexOf(appsLink)<0) linkKeys.push(appsLink);
+    var ls=$('appsLink'); if(ls){ ls.innerHTML=['all'].concat(linkKeys).map(function(k){ var x=k==='all'?FA:(FA.sources.filter(function(y){ return y.k===k; })[0]||{opened:0,submitted:0}); return '<option value="'+esc(k)+'"'+(k===appsLink?' selected':'')+'>'+esc(srcName(k)+' — '+(x.opened||0)+' opened · '+(x.submitted||0)+' applied')+'</option>'; }).join(''); }
+    setText('appsLinkNote', appsLink==='all' ? 'Pick a story CTA or the bio to see its own drop-off.' : 'Showing only people who came through this link.');
+    var F=HQ.applyFunnel(AS, w.from, w.to, appsLink), P=w.prev?HQ.applyFunnel(AS, w.prev.from, w.prev.to, appsLink):null;
     var loaded=!!(state.loaded && state.loaded.appSessions);
     var lastAt=null; (state.appSessions||[]).forEach(function(r){ var d=r.data||r; if(d.lastSeenAt && (!lastAt || d.lastSeenAt>lastAt)) lastAt=d.lastSeenAt; });
     setText('appsMetaLine', !loaded ? 'Loading…' : 'Live from the apply page (tasteformcoaching.vercel.app/apply)'+(lastAt?' · last visit '+(relTime(lastAt)||''):'')+' · test visits left out');
@@ -3159,12 +3169,11 @@ table.scores td{border-color:var(--border);}
     attachTip('appsChart', plot, function(i){ var x=buckets[i]; return '<b>'+esc(blong(x))+'</b><br>'+x.visits+' opened · '+x.completed+' applied'+(x.visits?' ('+Math.round(x.completed/x.visits*100)+'%)':''); });
     setHtml('appsTable', buckets.slice().reverse().filter(function(x){ return x.visits; }).map(function(x){ return '<tr><td>'+esc(blong(x))+'</td><td class="num">'+x.visits+'</td><td class="num">'+x.completed+'</td><td class="num">'+HQ.pctText(x.completed,x.visits)+'</td></tr>'; }).join('') || '<tr><td colspan="4"><div class="empty-state">No visits in this window.</div></td></tr>');
     // sources and devices
-    var srcName=function(k){ var p=k.split('|'), f=HQ.FUNNEL_LABEL[p[0]]||p[0]; return p[1] ? f+' · '+p[1].replace(/_/g,' ') : f; };
     var rows=function(list, name){ return list.length ? list.map(function(x){ return '<tr><td class="op-name">'+esc(name(x.k))+'</td><td class="num">'+x.opened+'</td><td class="num">'+x.started+'</td><td class="num">'+x.submitted+'</td><td class="num">'+HQ.pctText(x.submitted,x.opened)+'</td></tr>'; }).join('') : '<tr><td colspan="5"><div class="empty-state">No visits in this window.</div></td></tr>'; };
-    setHtml('appsSrcBody', rows(F.sources, srcName));
+    setHtml('appsSrcBody', rows(FA.sources, srcName).replace(/<tr><td class="op-name">/g, '<tr class="ap-srcrow"><td class="op-name">'));
     setHtml('apDevice', rows(F.devices, function(k){ return k==='mobile'?'Phone':(k==='desktop'?'Desktop':'Unknown'); }));
     var noTag=F.sources.filter(function(x){ return /^unknown\|/.test(x.k); }).reduce(function(t,x){ return t+x.opened; },0);
-    setText('appsSrcNote', noTag ? noTag+' opened through an untagged link. Use a Funnel link so each placement gets its own row.' : '');
+    setText('appsSrcNote', 'Tap a link to see its own question-by-question drop-off at the top.'+(noTag ? ' '+noTag+' opened through an untagged link. Use a Funnel link so each placement gets its own row.' : ''));
     // applicants from the apply page
     setHtml('apBody', F.applicants.length ? F.applicants.map(function(x){
       var contact=(x.phone?'<a href="tel:'+esc(x.phone)+'">'+esc(x.phone)+'</a>':'')+(x.phone&&x.email?'<br>':'')+(x.email?'<a href="mailto:'+esc(x.email)+'">'+esc(x.email)+'</a>':'');
@@ -3182,6 +3191,8 @@ table.scores td{border-color:var(--border);}
       return '<tr'+(cur?'':' class="hl"')+'><td title="'+esc(HQ.fmtDay(HQ.sydDay(r.submittedAt),'wd')+' '+HQ.fmtTime(r.submittedAt))+'" style="white-space:nowrap">'+esc(HQ.fmtDay(HQ.sydDay(r.submittedAt),'short'))+'<div class="op-sample">'+esc(relTime(r.submittedAt)||'')+'</div></td><td class="op-name">'+esc(name)+(r.formTitle&&r.formId!==fid?'<div class="op-sample">'+esc(r.formTitle)+'</div>':'')+'</td><td>'+esc(r.goal||'–')+'</td><td>'+esc(r.roadblock||'–')+'</td><td>'+esc(r.priority||'–')+'</td><td>'+esc(r.ageBand||'–')+'</td><td>'+fitChip+'</td><td style="white-space:nowrap">'+(contact||'–')+'</td><td>'+dm+'</td><td>'+btns+'</td></tr>';
     }).join('') : '<tr><td colspan="10"><div class="empty-state">No applications in this window.</div></td></tr>');
   };
+  $('appsLink').addEventListener('change', function(ev){ appsLink=ev.target.value||'all'; store('hqAppsLink', appsLink); renderNow('apps'); });
+  $('appsSrcBody').addEventListener('click', function(ev){ var tr=ev.target.closest('tr.ap-srcrow'); if(!tr) return; var i=[].indexOf.call(tr.parentNode.children, tr), ks=HQ.applyFunnel({appSessions:state.appSessions||[]}, appsWindow().from, appsWindow().to).sources; if(!ks[i]) return; appsLink=ks[i].k; store('hqAppsLink', appsLink); renderNow('apps'); window.scrollTo({top:0, behavior:'smooth'}); });
   $('appsRange').addEventListener('click', function(ev){ var b=ev.target.closest('button[data-appsrange]'); if(!b) return; appsRange=b.getAttribute('data-appsrange'); store('hqAppsRange', appsRange); renderNow('apps'); });
   $('appsBody').addEventListener('click', async function(ev){
     var b=ev.target.closest('button[data-outcome]'); if(!b || !db) return;
@@ -5718,7 +5729,7 @@ table.scores td{border-color:var(--border);}
     plSeg();
     if(plFunnel!=='all'){
       var dd = plData(), FF = HQ.computeFunnels(plState(), Date.now(), plPeriod), xx = FF.funnels[plFunnel];
-      setHtml('plLeads', funnelChips()+funnelSteps(dd, xx, FF.range)+'<p class="pl-note">Only people who came in through a tagged '+esc(HQ.FUNNEL_LABEL[plFunnel])+' link count here. Get the links under Tools → Funnel links.</p>');
+      setHtml('plLeads', funnelChips()+funnelSteps(dd, xx, FF.range)+'<div class="pl-list">'+plRow('Drop-off question by question, per link', 'each story CTA or bio link on its own (Applications)', null, {go:'apps', arrowOnly:true})+'</div><p class="pl-note">Only people who came in through a tagged '+esc(HQ.FUNNEL_LABEL[plFunnel])+' link count here. Get the links under Tools → Funnel links.</p>');
       return;
     }
     var d = plData(), L = d.leads, base = L.formViews.value || 0;

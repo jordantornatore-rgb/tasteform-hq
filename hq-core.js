@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.14.1';
+  HQ.VERSION = '3.15.0';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -1179,12 +1179,16 @@
     { k: 'email', label: 'Q5 · Email', short: 'Q5 Email' },
     { k: 'submitted', label: 'Q6 · Mobile → submitted', short: 'Q6 Mobile' }
   ];
-  HQ.applyFunnel = function (state, from, to) {
+  // one key per link: funnel + its tag (utm_content, else utm_campaign), e.g. "story|talking_head_client_shoutout_harris"
+  HQ.applyLinkKey = function (utm) { var u = utm || {}; return HQ.funnelOf(u) + '|' + (u.utm_content || u.utm_campaign || ''); };
+  // linkKey (optional): only visits through that one link, so a single story CTA gets its own question-by-question view
+  HQ.applyFunnel = function (state, from, to, linkKey) {
     var S = HQ.APPLY_STEPS, sess = [];
     (state.appSessions || []).forEach(function (r) {
       var d = r.data || r, at = d.firstSeenAt; if (!at) return;
       var day = HQ.sydDay(at); if ((from && day < from) || (to && day > to)) return;
       if (HQ.funnelOf(d.utm) === 'test') return;
+      if (linkKey && linkKey !== 'all' && HQ.applyLinkKey(d.utm) !== linkKey) return;
       var st = Object.assign({}, d.steps || {}); if (!st.open) st.open = at; if (d.submitted && !st.submitted) st.submitted = d.submittedAt || d.lastSeenAt || at;
       sess.push({ id: r.id, d: d, st: st, day: day });
     });
@@ -1204,7 +1208,7 @@
       ans[q] = Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return b.n - a.n; });
     });
     var by = function (fn) { var m = {}; sess.forEach(function (x) { var k = fn(x) || 'unknown'; var o = m[k] || (m[k] = { k: k, opened: 0, started: 0, submitted: 0 }); o.opened++; if (x.st.start) o.started++; if (x.st.submitted) o.submitted++; }); return Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return b.submitted - a.submitted || b.opened - a.opened; }); };
-    var src = by(function (x) { var u = x.d.utm || {}; return HQ.funnelOf(u) + '|' + (u.utm_content || u.utm_campaign || ''); });
+    var src = by(function (x) { return HQ.applyLinkKey(x.d.utm); });
     var device = by(function (x) { return x.d.device; });
     var daily = {}; sess.forEach(function (x) { var o = daily[x.day] || (daily[x.day] = { opened: 0, submitted: 0 }); o.opened++; if (x.st.submitted) o.submitted++; });
     var applicants = sess.filter(function (x) { return x.st.submitted; }).map(function (x) { var c = x.d.contact || {}, a = x.d.answers || {}, u = x.d.utm || {}; return { id: x.id, at: x.st.submitted, firstName: c.firstName || '', email: c.email || '', phone: c.phoneE164 || c.phone || '', goal: a.goal || '', tried: a.tried || '', age: a.age || '', inMarket: HQ.ageInMarket(a.age), funnel: HQ.funnelOf(u), tag: u.utm_content || u.utm_campaign || '', device: x.d.device || '' }; })
