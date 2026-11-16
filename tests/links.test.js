@@ -66,7 +66,7 @@ async function open(browser, url, { width = 1280, dark = false, role = 'admin' }
       const rows = await page.evaluate(() => window.__mock.__tables.cta_links.map(r => Object.assign({ id: r.id }, r.data)));
       const row = rows.find(r => r.id === '9_5_fat_loss');
       check(`${label}: row saved`, () => assert.ok(row && row.label === '9-5 Fat Loss' && row.type === 'sticker'));
-      check(`${label}: url built`, () => assert.strictEqual(row && row.url, 'https://tasteformcoaching.vercel.app/?utm_source=instagram&utm_medium=story&utm_campaign=sticker&utm_content=9_5_fat_loss'));
+      check(`${label}: url built`, () => assert.strictEqual(row && row.url, 'https://tasteformcoaching.vercel.app/s/9_5_fat_loss'));
       // re-add same text: updates, no duplicate
       await page.fill('#slText', '9-5 fat loss'); await page.click('[data-sltype="dm"]'); await page.click('#slAdd'); await page.waitForTimeout(150);
       const n = await page.evaluate(() => window.__mock.__tables.cta_links.filter(r => r.id === '9_5_fat_loss').length);

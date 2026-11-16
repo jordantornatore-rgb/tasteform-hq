@@ -2186,7 +2186,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.15.2"></script>
+<script src="hq-core.js?v=3.15.3"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -6603,11 +6603,14 @@ table.scores td{border-color:var(--border);}
   var client=null, type='lead_magnet', links=[], counts={}, loaded=false, poller=null;
   function $(id){ return document.getElementById(id); }
   function norm(s){ return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,''); }
-  function build(slug,t){ return BASE+'?utm_source=instagram&utm_medium=story&utm_campaign='+t+'&utm_content='+slug; }
+  // short links: the apply site (vercel.json) redirects /<code>/<slug> to the full tagged URL
+  var SC={lead_magnet:'m', sticker:'s', dm:'d'};
+  function build(slug,t){ return SC[t] ? BASE+SC[t]+'/'+slug : BASE+'?utm_source=instagram&utm_medium=story&utm_campaign='+t+'&utm_content='+slug; }
   // off-platform + ads: [utm_source, utm_medium, utm_campaign, label]; HQ.funnelOf reads utm_medium / utm_campaign
   var FL={qr:['offline','qr','poster','QR / poster'], referral:['client','referral','referral','Referral'], affiliate:['affiliate','affiliate','affiliate','Affiliate'], collab:['partner','collab','collab','Collab'], email:['newsletter','email','email','Email'], youtube:['youtube','youtube','description','YouTube'], ads_direct:['meta','paid','fasttrack','Paid · direct'], ads_indirect:['meta','paid','compounding','Paid · indirect']};
   var flType='qr';
-  function buildF(slug,t){ var f=FL[t]; return BASE+'apply?utm_source='+f[0]+'&utm_medium='+f[1]+'&utm_campaign='+f[2]+'&utm_content='+slug; }
+  var FC={qr:'q', referral:'r', affiliate:'a', collab:'c', email:'e', youtube:'y', ads_direct:'p', ads_indirect:'pi'};
+  function buildF(slug,t){ var f=FL[t]; return FC[t] ? BASE+FC[t]+'/'+slug : BASE+'apply?utm_source='+f[0]+'&utm_medium='+f[1]+'&utm_campaign='+f[2]+'&utm_content='+slug; }
   function msg(t){ var m=$('slMsg'); if(m) m.textContent=t||''; }
   function copy(text, btn){
     var done=function(){ if(!btn) return; var o=btn.textContent; btn.textContent='Copied ✓'; setTimeout(function(){ btn.textContent=o; },1400); };
@@ -6618,7 +6621,7 @@ table.scores td{border-color:var(--border);}
     var el=$('flList'); if(!el) return;
     var rows=links.filter(function(l){ return l.data && l.data.funnelLink; });
     el.innerHTML=rows.length ? rows.map(function(l){ var d=l.data, f=FL[d.type]||[], c=counts[(f[1]||'')+':'+d.slug]||{o:0,a:0};
-      return '<div class="sl-row"><div class="sl-l"><div class="sl-s">'+esc(d.label||l.id)+'</div><div class="sl-m">'+esc(f[3]||d.type)+' · '+c.o+' opened · '+c.a+' applied</div></div><button type="button" class="btn" data-slcopy="'+esc(d.url||'')+'">Copy</button></div>'; }).join('')
+      return '<div class="sl-row"><div class="sl-l"><div class="sl-s">'+esc(d.label||l.id)+'</div><div class="sl-m">'+esc(f[3]||d.type)+' · '+c.o+' opened · '+c.a+' applied</div><div class="sl-m mono">'+esc(String(d.slug&&FL[d.type]?buildF(d.slug,d.type):(d.url||'')).replace(/^https:\/\//,''))+'</div></div><button type="button" class="btn" data-slcopy="'+esc(d.slug&&FL[d.type]?buildF(d.slug,d.type):(d.url||''))+'">Copy</button></div>'; }).join('')
       : '<div class="empty-state">No off-platform or ad links yet.</div>';
   }
   function render(){
@@ -6630,7 +6633,7 @@ table.scores td{border-color:var(--border);}
     el.innerHTML=story.map(function(l){
       var d=l.data||{}, c=counts[l.id]||{o:0,a:0};
       var when=d.createdAt?new Date(d.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}):'';
-      return '<div class="sl-row"><div class="sl-l"><div class="sl-s">'+esc(d.label||l.id)+'</div><div class="sl-m">'+esc(TYPES[d.type]||d.type||'')+' · '+esc(when)+' · '+c.o+' opened · '+c.a+' applied</div></div><button type="button" class="btn" data-slcopy="'+esc(d.url||'')+'">Copy</button></div>';
+      return '<div class="sl-row"><div class="sl-l"><div class="sl-s">'+esc(d.label||l.id)+'</div><div class="sl-m">'+esc(TYPES[d.type]||d.type||'')+' · '+esc(when)+' · '+c.o+' opened · '+c.a+' applied</div><div class="sl-m mono">'+esc(String(d.slug?build(d.slug,d.type):(d.url||'')).replace(/^https:\/\//,''))+'</div></div><button type="button" class="btn" data-slcopy="'+esc(d.slug?build(d.slug,d.type):(d.url||''))+'">Copy</button></div>';
     }).join('');
   }
   function load(){
