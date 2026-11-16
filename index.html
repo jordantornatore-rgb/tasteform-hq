@@ -2053,13 +2053,14 @@ table.scores td{border-color:var(--border);}
       <h3 class="pl-h" style="margin:0 0 6px">Off-platform and ads</h3>
       <p class="rule">Pick the funnel, type who or where it's for (e.g. the barber shop, the client who referred them), copy the link. Use a QR code generator on the QR link for posters.</p>
       <div class="sl-make">
-        <input class="input sl-in" id="flText" type="text" maxlength="60" autocomplete="off" placeholder="Who or where, e.g. ryans barber" aria-label="Who or where">
+        <input class="input sl-in" id="flText" type="text" maxlength="60" autocomplete="off" placeholder="Who or where, e.g. ryans barber or bali ep1" aria-label="Who or where">
         <div class="seg-filter" role="group" aria-label="Funnel" id="flType">
           <button type="button" data-fltype="qr" aria-pressed="true">QR / poster</button>
           <button type="button" data-fltype="referral" aria-pressed="false">Referral</button>
           <button type="button" data-fltype="affiliate" aria-pressed="false">Affiliate</button>
           <button type="button" data-fltype="collab" aria-pressed="false">Collab</button>
           <button type="button" data-fltype="email" aria-pressed="false">Email</button>
+          <button type="button" data-fltype="youtube" aria-pressed="false">YouTube</button>
           <button type="button" data-fltype="ads_direct" aria-pressed="false">Paid · direct</button>
           <button type="button" data-fltype="ads_indirect" aria-pressed="false">Paid · indirect</button>
         </div>
@@ -2185,7 +2186,7 @@ table.scores td{border-color:var(--border);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="hq-core.js?v=3.15.1"></script>
+<script src="hq-core.js?v=3.15.2"></script>
 <script>
 /* ---------- auth (Supabase) ---------- */
 (function(){
@@ -6604,7 +6605,7 @@ table.scores td{border-color:var(--border);}
   function norm(s){ return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,''); }
   function build(slug,t){ return BASE+'?utm_source=instagram&utm_medium=story&utm_campaign='+t+'&utm_content='+slug; }
   // off-platform + ads: [utm_source, utm_medium, utm_campaign, label]; HQ.funnelOf reads utm_medium / utm_campaign
-  var FL={qr:['offline','qr','poster','QR / poster'], referral:['client','referral','referral','Referral'], affiliate:['affiliate','affiliate','affiliate','Affiliate'], collab:['partner','collab','collab','Collab'], email:['newsletter','email','email','Email'], ads_direct:['meta','paid','fasttrack','Paid · direct'], ads_indirect:['meta','paid','compounding','Paid · indirect']};
+  var FL={qr:['offline','qr','poster','QR / poster'], referral:['client','referral','referral','Referral'], affiliate:['affiliate','affiliate','affiliate','Affiliate'], collab:['partner','collab','collab','Collab'], email:['newsletter','email','email','Email'], youtube:['youtube','youtube','description','YouTube'], ads_direct:['meta','paid','fasttrack','Paid · direct'], ads_indirect:['meta','paid','compounding','Paid · indirect']};
   var flType='qr';
   function buildF(slug,t){ var f=FL[t]; return BASE+'apply?utm_source='+f[0]+'&utm_medium='+f[1]+'&utm_campaign='+f[2]+'&utm_content='+slug; }
   function msg(t){ var m=$('slMsg'); if(m) m.textContent=t||''; }

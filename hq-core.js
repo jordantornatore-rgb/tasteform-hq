@@ -10,7 +10,7 @@
 (function (root) {
   'use strict';
   var HQ = {};
-  HQ.VERSION = '3.15.1';
+  HQ.VERSION = '3.15.2';
   HQ.TZ = 'Australia/Sydney';
 
   /* ---------- text + number formatting ---------- */
@@ -1128,7 +1128,7 @@
     if (m === 'story') return 'story';
     if (m === 'bio' || c === 'link_in_bio') return 'bio';
     if (/^(paid|ads?|cpc|paid_social)$/.test(m) || /^(fb|facebook|meta)(_?ads?)?$/.test(s)) return /(vsl|training|email|youtube|compounding|indirect)/.test(camp + ' ' + c) ? 'paid_indirect' : 'paid_direct';
-    if (/^(offline|qr|poster|referral|affiliate|collab|email|partner)$/.test(m)) return 'offplatform';
+    if (/^(offline|qr|poster|referral|affiliate|collab|email|partner|youtube)$/.test(m)) return 'offplatform';
     return 'unknown';
   };
   // Typeform is only used at the barbershop since the tagged apply page went live (12 Nov 2026), so an untagged Typeform from then on is off-platform.

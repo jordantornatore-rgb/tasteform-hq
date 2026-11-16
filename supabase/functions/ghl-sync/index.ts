@@ -47,7 +47,7 @@ export function funnelOf(utm: Record<string, string> | null, source?: string | n
   if (m === "story") return "story";
   if (m === "bio" || c === "link_in_bio") return "bio";
   if (/^(paid|ads?|cpc|paid_social)$/.test(m) || /^(fb|facebook|meta)(_?ads?)?$/.test(s)) return /(vsl|training|email|youtube|compounding|indirect)/.test(camp + " " + c) ? "paid_indirect" : "paid_direct";
-  if (/^(offline|qr|poster|referral|affiliate|collab|email|partner)$/.test(m)) return "offplatform";
+  if (/^(offline|qr|poster|referral|affiliate|collab|email|partner|youtube)$/.test(m)) return "offplatform";
   return "unknown";
 }
 // Typeform is only used at the barbershop since 12 Nov 2026: untagged Typeform from then on = off-platform (same as HQ.typeformFunnel)
