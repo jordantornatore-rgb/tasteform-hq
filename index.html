@@ -5713,7 +5713,7 @@ table.scores td{border-color:var(--border);}
   function manualCallsHtml(){
     var M = state.ghlManual; if(!isAdmin || !M || !Array.isArray(M.calls) || !M.calls.length) return '';
     var rows = M.calls.slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); }).map(function(c){
-      var out = c.showed ? (c.closed ? 'showed · bought' : 'showed · didn’t buy') : 'no-show';
+      var out = c.showed ? (c.closed ? 'showed · bought' : (c.pending ? 'showed · said yes, payment pending' : 'showed · didn’t buy')) : 'no-show';
       return '<div class="pl-row"><div class="l">'+esc(c.label||'Call')+'<small>'+esc(out+(c.dateGuess?' · date is a guess, set the real one':''))+'</small></div><div class="r"><input type="date" class="input" style="width:auto" data-mc-id="'+esc(c.id)+'" value="'+esc(c.date||'')+'" aria-label="Call date for '+esc(c.label||'call')+'"></div></div>';
     }).join('');
     return '<h3 class="pl-h">Calls you gave me by hand · '+num(M.calls.length)+'</h3><div class="pl-list">'+rows+'</div><p class="pl-note">These count in the show and close rates until the same calls are marked in GoHighLevel. Change a date and it saves. <span id="mcStatus"></span></p>';
