@@ -15,7 +15,7 @@
     Object.keys(fixtures || {}).forEach(function (t) { tables[t] = (fixtures[t] || []).map(function (r) { return Object.assign({ updated_at: '2026-10-21T00:00:00Z' }, r); }); });
     var stats = { selects: 0, upserts: 0 };
     function from(t) {
-      var filters = [], single = false, rng = null, ord = null, del = false, proj = null;
+      var filters = [], single = false, rng = null, ord = null, del = false, proj = null, upd = null;
       var q = {
         select: function (cols) { if (cols && cols !== '*') proj = String(cols).split(',').map(function (c) { c = c.trim(); var i = c.indexOf(':'); return i > 0 ? [c.slice(0, i), c.slice(i + 1)] : [c, c]; }); return q; },
         limit: function () { return q; },
@@ -27,6 +27,7 @@
         then: function (res, rej) {
           stats.selects++;
           if (opts.failTables && opts.failTables.indexOf(t) >= 0) return Promise.resolve({ data: null, error: { message: 'mock failure for ' + t } }).then(res, rej);
+          if (upd) { stats.updates = (stats.updates || 0) + 1; (tables[t] || []).forEach(function (r) { if (filters.every(function (f) { return f(r); })) Object.assign(r, clone(upd)); }); return Promise.resolve({ data: null, error: null }).then(res, rej); }
           if (del) { stats.deletes = (stats.deletes || 0) + 1; tables[t] = (tables[t] || []).filter(function (r) { return !filters.every(function (f) { return f(r); }); }); return Promise.resolve({ data: null, error: null }).then(res, rej); }
           var rows = (tables[t] || []).filter(function (r) { return filters.every(function (f) { return f(r); }); });
           if (ord) rows = rows.slice().sort(function (x, y) { return String(x[ord]).localeCompare(String(y[ord])); });
@@ -36,6 +37,7 @@
           return Promise.resolve({ data: out, error: null }).then(res, rej);
         },
         delete: function () { del = true; return q; },
+        update: function (patch) { upd = patch; return q; },
         insert: function (row) {
           stats.inserts = (stats.inserts || 0) + 1;
           var arr = tables[t] || (tables[t] = []), r2 = Object.assign({ created_at: new Date().toISOString() }, clone(row)); arr.push(r2);

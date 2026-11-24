@@ -201,7 +201,9 @@ button.kpi:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .seg-filter button[aria-pressed="true"]{background:var(--text);color:var(--bg);}
 .seg-filter button:focus-visible{outline:2px solid var(--accent);}
 .ck-make{max-width:560px;display:flex;flex-direction:column;gap:6px;}
-.ck-l{font-size:13px;font-weight:600;color:var(--muted);margin-top:6px;}
+.ck-l{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-top:10px;}
+.ck-make .input{display:block;width:100%;margin-top:4px;}
+.ck-make summary{margin-bottom:2px;}
 .ck-btns{margin-top:10px;}
 .ck-row{display:flex;gap:var(--s3);align-items:flex-start;padding:12px 0;border-top:1px solid var(--border);}
 .ck-row:first-child{border-top:0;padding-top:0;}
@@ -213,6 +215,14 @@ button.kpi:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .ck-chip.hot{background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
 .ck-q{margin-top:8px;padding:8px 10px;border-left:3px solid var(--accent);background:var(--surface-2);border-radius:6px;font-size:14px;white-space:pre-wrap;}
 .ck-act{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+.ck-pts{margin-top:8px;font-size:14px;line-height:1.5;white-space:pre-wrap;color:var(--text-2);}
+.ck-ans{margin-top:8px;font-size:13px;color:var(--muted);}
+.ck-ans summary{cursor:pointer;font-weight:600;}
+.ck-ans dl{margin:6px 0 0;display:grid;grid-template-columns:minmax(120px,30%) 1fr;gap:4px 10px;}
+.ck-ans dt{color:var(--muted);} .ck-ans dd{margin:0;color:var(--text-2);}
+.ck-send{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.ck-send .input{flex:1;min-width:200px;}
+.ck-chip.bad{border-color:#b5533c;color:#e08a73;}
 .sl-make{max-width:520px;}
 .sl-in{font-size:var(--t-m);min-height:var(--tap,44px);width:100%;}
 .sl-msg{font-size:var(--t-xs);color:var(--muted);min-height:16px;}
@@ -2102,8 +2112,9 @@ table.scores td{border-color:var(--border);}
 
   <!-- ===== ROUTINE (admin only) ===== -->
   <section id="viewCheckins" role="tabpanel" aria-labelledby="tabCheckins" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
-    <div class="top"><div><h1>Check-in replies</h1><div class="sub">Paste your Loom, copy the link, send it in 1FIT. They watch it, then can rate it, ask a question or book a 1:1.</div></div></div>
-    <div class="panel ck-make">
+    <div class="top"><div><h1>Check-in replies</h1><div class="sub">Talking points → record the Loom → paste it → it sends itself. They watch, then can rate it, ask a question or book a 1:1.</div></div></div>
+    <div class="panel" id="ckTodoWrap"><h3 class="pl-h" style="margin:0 0 6px">To record</h3><p class="rule" style="margin-top:0">Claude reads the new 1FIT check-ins on Saturday arvo and Sunday and writes your talking points. Record the Loom, paste it, tap Send: they get the link by email (and SMS if GHL has their mobile).</p><div id="ckTodo"><div class="empty-state">Loading…</div></div></div>
+    <details class="panel ck-make"><summary class="pl-h" style="cursor:pointer">Send one by hand</summary>
       <label class="ck-l" for="ckClient">Client</label>
       <input class="input" id="ckClient" list="ckRoster" autocomplete="off" placeholder="Start typing a name" maxlength="80">
       <datalist id="ckRoster"></datalist>
@@ -2111,9 +2122,9 @@ table.scores td{border-color:var(--border);}
       <input class="input" id="ckLoom" type="url" autocomplete="off" placeholder="https://www.loom.com/share/…">
       <label class="ck-l" for="ckNote">Note under the video <span class="muted">(optional)</span></label>
       <textarea class="input" id="ckNote" rows="3" maxlength="1500" placeholder="e.g. Targets for this week: 10k steps, protein 180g"></textarea>
-      <div class="ck-btns"><button type="button" class="btn primary" id="ckAdd" disabled>Make link + copy message</button></div>
+      <div class="ck-btns"><button type="button" class="btn primary" id="ckAdd" disabled>Send to client</button></div>
       <div class="sl-msg" id="ckMsg" role="status"></div>
-    </div>
+    </details>
     <div class="panel"><h3 class="pl-h" style="margin:0 0 6px">Sent replies</h3><div id="ckList"><div class="empty-state">Loading…</div></div></div>
   </section>
   <section id="viewRoutine" role="tabpanel" aria-labelledby="tabRoutine" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
@@ -6746,17 +6757,50 @@ table.scores td{border-color:var(--border);}
   function valid(){ var b=$('ckAdd'); if(b) b.disabled=!(($('ckClient').value||'').trim() && loomOk($('ckLoom').value)); }
   function badge(){
     var n2=rows.filter(function(r){ var seen=JSON.parse(localStorage.getItem('ckSeen')||'{}'); return (r.question_at && !seen[r.id+'q']) || (r.support_at && r.wants_support && !seen[r.id+'s']); }).length;
+    n2+=rows.filter(function(r){ return r.status==='draft' && !r.loom_url; }).length;
     var b=$('ckBadge'); if(b){ b.hidden=!n2; b.textContent=n2; }
   }
+  function renderTodo(){
+    var el=$('ckTodo'); if(!el) return;
+    if(!loaded){ el.innerHTML='<div class="empty-state">Loading…</div>'; return; }
+    var d=rows.filter(function(r){ return r.status==='draft' && !r.loom_url; });
+    if(!d.length){ el.innerHTML='<div class="empty-state">Nothing to record. New check-ins land here Saturday arvo and Sunday.</div>'; return; }
+    el.innerHTML=d.map(function(r){
+      var c=r.checkin||{}, ans=c.answers||{}, keys=Object.keys(ans);
+      var meta=[c.submittedLabel?('Submitted '+c.submittedLabel):'', c.weight?('Weight '+c.weight):'', c.weightChange||''].filter(Boolean).join(' · ');
+      return '<div class="ck-row"><div class="ck-main"><div class="ck-name">'+esc(r.client_name)+'</div>'+(meta?'<div class="ck-meta">'+esc(meta)+'</div>':'')+
+        (r.points?'<div class="ck-pts">'+esc(r.points)+'</div>':'')+
+        (keys.length?'<details class="ck-ans"><summary>Their check-in answers</summary><dl>'+keys.map(function(k){ return '<dt>'+esc(k)+'</dt><dd>'+esc(ans[k])+'</dd>'; }).join('')+'</dl></details>':'')+
+        '<div class="ck-send"><input class="input" type="url" placeholder="Paste the Loom link" data-ckloom="'+esc(r.id)+'" autocomplete="off"><button type="button" class="btn primary" data-cksend="'+esc(r.id)+'" disabled>Send</button><button type="button" class="btn" data-ckskip="'+esc(r.id)+'" title="No Loom for this one">Skip</button></div></div></div>';
+    }).join('');
+  }
+  function sendDraft(id){
+    var inp=document.querySelector('[data-ckloom="'+id+'"]'), btn=document.querySelector('[data-cksend="'+id+'"]'); if(!inp) return;
+    var loom=(inp.value||'').trim(); if(!loomOk(loom)) return; btn.disabled=true; btn.textContent='Sending…';
+    client.from('checkin_replies').update({loom_url:loom, status:'sending'}).eq('id',id).then(function(r){
+      if(r.error){ btn.disabled=false; btn.textContent='Send'; alert("Didn't save: "+r.error.message); return; }
+      var row=rows.find(function(x){ return x.id===id; }); if(row){ row.loom_url=loom; row.status='sending'; row.created_at=row.created_at||new Date().toISOString(); }
+      render(); setTimeout(load, 6000);
+    });
+  }
+  function skipDraft(id){
+    client.from('checkin_replies').update({status:'skipped'}).eq('id',id).then(function(r){ if(!r.error){ var row=rows.find(function(x){ return x.id===id; }); if(row) row.status='skipped'; render(); } });
+  }
   function render(){
+    renderTodo();
     var el=$('ckList'); if(!el) return;
     if(!loaded){ el.innerHTML='<div class="empty-state">Loading…</div>'; return; }
-    if(!rows.length){ el.innerHTML='<div class="empty-state">No replies sent yet. Make your first one above.</div>'; badge(); return; }
+    var all=rows; rows=all.filter(function(r){ return !!r.loom_url; });
+    if(!rows.length){ rows=all; el.innerHTML='<div class="empty-state">No replies sent yet.</div>'; badge(); return; }
     var avg=rows.filter(function(r){ return r.rating; }), a=avg.length?(avg.reduce(function(s,r){ return s+r.rating; },0)/avg.length).toFixed(1):null;
     var watched=rows.filter(function(r){ return r.views>0; }).length;
     var head='<div class="ck-meta" style="margin-bottom:10px">'+rows.length+' sent · '+watched+' opened · '+(a?('avg rating '+a+'/5 from '+avg.length):'no ratings yet')+' · '+rows.filter(function(r){ return r.wants_support; }).length+' wanted a 1:1</div>';
     el.innerHTML=head+rows.map(function(r){
       var url=PAGE+r.id, chips=[];
+      var sr=r.send_result||{};
+      if(r.status==='sending') chips.push('<span class="ck-chip">Sending…</span>');
+      else if(r.status==='send_failed') chips.push('<span class="ck-chip bad">Didn\'t send: '+esc(sr.error||(sr.email&&sr.email.err)||'check GHL')+'</span>');
+      else if(r.sent_at) chips.push('<span class="ck-chip">Sent'+(sr.email&&sr.email.ok?' by email':'')+(sr.sms&&sr.sms.ok?' + SMS':'')+'</span>');
       chips.push('<span class="ck-chip">'+(r.views?('Opened '+r.views+'×, last '+rel(r.last_viewed_at)):'Not opened yet')+'</span>');
       if(r.rating) chips.push('<span class="ck-chip">'+r.rating+'/5 helpful</span>');
       if(r.wants_support===true) chips.push('<span class="ck-chip hot">Wants a 1:1 · '+rel(r.support_at)+'</span>');
@@ -6765,7 +6809,7 @@ table.scores td{border-color:var(--border);}
       return '<div class="ck-row"><div class="ck-main"><div class="ck-name">'+esc(r.client_name)+'</div><div class="ck-meta">Sent '+esc(rel(r.created_at))+' · <a href="'+esc(r.loom_url)+'" target="_blank" rel="noopener">Loom</a> · <a href="'+esc(url)+'" target="_blank" rel="noopener">Their page</a></div><div class="ck-chips">'+chips.join('')+'</div>'+(r.question?'<div class="ck-q"><b>Question</b> · '+esc(rel(r.question_at))+'<br>'+esc(r.question)+'</div>':'')+'</div><div class="ck-act"><button type="button" class="btn small" data-ckcopy="'+esc(r.id)+'">Copy message</button></div></div>';
     }).join('');
     try{ var seen=JSON.parse(localStorage.getItem('ckSeen')||'{}'); var v=$('viewCheckins'); if(v && !v.hidden){ rows.forEach(function(r){ if(r.question_at) seen[r.id+'q']=1; if(r.support_at && r.wants_support) seen[r.id+'s']=1; }); localStorage.setItem('ckSeen', JSON.stringify(seen)); } }catch(e){}
-    badge();
+    rows=all; badge();
   }
   function load(){
     if(!client || !admin) return;
@@ -6786,17 +6830,20 @@ table.scores td{border-color:var(--border);}
     var name=($('ckClient').value||'').trim(), loom=($('ckLoom').value||'').trim(), note=($('ckNote').value||'').trim();
     if(!name || !loomOk(loom) || !client) return;
     var m=roster.find(function(x){ return x.name.toLowerCase()===name.toLowerCase(); });
-    var row={id:token(), client_name:m?m.name:name, member_id:m?m.id:null, loom_url:loom, note:note||null};
+    var row={id:token(), client_name:m?m.name:name, member_id:m?m.id:null, loom_url:loom, note:note||null, status:'sending'};
     var btn=$('ckAdd'); btn.disabled=true; $('ckMsg').textContent='Saving…';
     client.from('checkin_replies').insert(row).select().then(function(r){
       if(r.error){ $('ckMsg').textContent="Didn't save: "+r.error.message; btn.disabled=false; return; }
-      copy(message(row.client_name, PAGE+row.id), btn);
-      $('ckMsg').textContent='Copied. Paste it to '+row.client_name.split(' ')[0]+' in 1FIT.';
+      btn.textContent='Sent ✓'; setTimeout(function(){ btn.textContent='Send to client'; },1600);
+      $('ckMsg').textContent='Sending to '+row.client_name.split(' ')[0]+' now (email, plus SMS if GHL has their mobile).';
+      setTimeout(load, 6000);
       $('ckClient').value=''; $('ckLoom').value=''; $('ckNote').value='';
       rows.unshift(r.data && r.data[0] || Object.assign({created_at:new Date().toISOString(), views:0}, row)); render();
     });
   }
   document.addEventListener('input', function(e){ if(e.target && /^ck(Client|Loom)$/.test(e.target.id)) valid(); });
+  document.addEventListener('input', function(e){ var id=e.target && e.target.getAttribute && e.target.getAttribute('data-ckloom'); if(id){ var b=document.querySelector('[data-cksend="'+id+'"]'); if(b) b.disabled=!loomOk(e.target.value); } });
+  document.addEventListener('click', function(e){ var s2=e.target.closest && e.target.closest('[data-cksend]'); if(s2){ sendDraft(s2.getAttribute('data-cksend')); return; } var k2=e.target.closest && e.target.closest('[data-ckskip]'); if(k2) skipDraft(k2.getAttribute('data-ckskip')); });
   document.addEventListener('click', function(e){
     if(e.target.closest && e.target.closest('#ckAdd')){ add(); return; }
     var c=e.target.closest && e.target.closest('[data-ckcopy]'); if(c){ var r=rows.find(function(x){ return x.id===c.getAttribute('data-ckcopy'); }); if(r) copy(message(r.client_name, PAGE+r.id), c); }

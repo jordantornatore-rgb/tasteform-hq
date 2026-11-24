@@ -13,6 +13,7 @@ const now = Date.now(), iso = m => new Date(now - m * 60000).toISOString();
 const FX = {
   checkin_replies: [
     { id: 'tok1', client_name: 'Alex Katsianos', member_id: 'alex-katsianos', loom_url: 'https://www.loom.com/share/0123456789abcdef0123456789abcdef', note: null, created_at: iso(300), views: 2, last_viewed_at: iso(30), rating: 5, rated_at: iso(29), question: 'Can I swap rice for potatoes?', question_at: iso(28), wants_support: true, support_at: iso(27) },
+    { id: 'draft1', client_name: 'Sami Ellaz', member_id: 'sami', loom_url: null, status: 'draft', created_at: iso(60), views: 0, points: 'WIN: down 0.6kg\nFIX: weekends', checkin: { submittedLabel: 'Sat 9:10am', weight: '80 kg', answers: { 'Biggest win': 'Hit protein 6/7' } } },
     { id: 'tok2', client_name: 'Dom Socaciu', member_id: null, loom_url: 'https://www.loom.com/share/fedcba9876543210fedcba9876543210', created_at: iso(2000), views: 0 }
   ],
   challenge_members: [{ id: 'alex-katsianos', data: { name: 'Alex Katsianos', active: true } }, { id: 'jack-keys', data: { name: 'Jack Keys', active: true } }, { id: 'old', data: { name: 'Old Guy', active: false } }],
@@ -58,6 +59,7 @@ async function hq(browser, url, { width, dark, role }) {
         check(`${label}: question shown`, () => assert.ok(/Can I swap rice for potatoes\?/.test(st.list)));
         check(`${label}: roster = active only`, () => assert.strictEqual(st.opts, 2));
         check(`${label}: no horizontal scroll`, () => assert.ok(!st.scroll));
+        await page.click('summary.pl-h').catch(()=>{});
         const dis0 = await page.$eval('#ckAdd', b => b.disabled);
         await page.fill('#ckClient', 'Jack Keys'); await page.fill('#ckLoom', 'not a loom link');
         const dis1 = await page.$eval('#ckAdd', b => b.disabled);
@@ -67,10 +69,16 @@ async function hq(browser, url, { width, dark, role }) {
         await page.click('#ckAdd'); await page.waitForTimeout(400);
         const after = await page.evaluate(() => ({ rows: window.__mock.__tables.checkin_replies, msg: document.getElementById('ckMsg').innerText, list: document.getElementById('ckList').innerText }));
         const nr = after.rows[after.rows.length - 1];
-        check(`${label}: row saved`, () => { assert.strictEqual(after.rows.length, 3); assert.strictEqual(nr.client_name, 'Jack Keys'); assert.strictEqual(nr.member_id, 'jack-keys'); assert.strictEqual(nr.note, 'Targets: 180g protein'); assert.ok(/^[a-z0-9]{12}$/.test(nr.id), nr.id); });
-        check(`${label}: message`, () => assert.ok(/Copied\. Paste it to Jack in 1FIT\./.test(after.msg), after.msg));
+        check(`${label}: row saved`, () => { assert.strictEqual(after.rows.length, 4); assert.strictEqual(nr.client_name, 'Jack Keys'); assert.strictEqual(nr.member_id, 'jack-keys'); assert.strictEqual(nr.note, 'Targets: 180g protein'); assert.ok(/^[a-z0-9]{12}$/.test(nr.id), nr.id); });
+        check(`${label}: message`, () => assert.ok(/Sending to Jack now/.test(after.msg), after.msg));
         check(`${label}: new row on top`, () => assert.ok(/^3 sent/.test(after.list) && after.list.indexOf('Jack Keys') < after.list.indexOf('Alex'), after.list));
-        if (width === 1280) { const clip = await page.evaluate(() => navigator.clipboard.readText()).catch(() => null); if (clip !== null) check(`${label}: clipboard`, () => assert.ok(/^Hey Jack, here's your check-in reply 👇\nhttps:\/\/jordantornatore-rgb\.github\.io\/tasteform-hq\/r\.html\?k=[a-z0-9]{12}$/.test(clip), clip)); }
+        // draft: points + answers shown, Send needs a Loom, Send writes loom_url
+        const td = await page.evaluate(() => document.getElementById('ckTodo').innerText);
+        check(`${label}: draft listed`, () => assert.ok(/Sami Ellaz/.test(td) && /WIN: down 0\.6kg/.test(td) && /Their check-in answers/.test(td), td));
+        await page.fill('[data-ckloom="draft1"]', 'https://www.loom.com/share/99998888777766665555444433332222');
+        await page.click('[data-cksend="draft1"]'); await page.waitForTimeout(300);
+        const d1 = await page.evaluate(() => window.__mock.__tables.checkin_replies.find(r => r.id === 'draft1'));
+        check(`${label}: draft sent`, () => { assert.strictEqual(d1.loom_url, 'https://www.loom.com/share/99998888777766665555444433332222'); assert.strictEqual(d1.status, 'sending'); });
         if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `hq-${width}-${dark ? 'dark' : 'light'}.png`), fullPage: false });
       }
       check(`${label}: no console errors`, () => assert.deepStrictEqual(errors, []));
