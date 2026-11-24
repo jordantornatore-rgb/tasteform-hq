@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.16.0 — 24 Nov 2026 (Check-in replies)
+
+- New **Check-in replies** tab (Work, admin only): pick the client (1FIT active list), paste the Loom link, optional note, tap **Make link + copy message**. It copies "Hey <name>, here's your check-in reply 👇 <link>" to paste in 1FIT.
+- The link opens **r.html?k=<token>** (public, no login): the Loom embedded, then optional **How helpful was this? (1–5)**, **Got a question?** and **Want a 1:1?** ("Would you like to book a 1:1, or do you feel like you need extra support?"). Yes shows the GHL "Check In Call (one off)" calendar.
+- A question or a Yes texts Jordan straight away (hq-notify). The tab lists every reply: opened (how many times, last), rating, question, wants a 1:1; badge for new ones. Summary: sent, opened, average rating, 1:1 asks.
+- Table `checkin_replies` (admin only); the page reads/answers one row by token through `checkin_open` / `checkin_answer` (migration `20261124_checkin_replies.sql`). Tests: `node tests/checkins.test.js` (84 checks).
+
 ## 3.15.0 — 15 Nov 2026 (Drop-off per link)
 
 - Applications has a **Which link** picker: All links, or one story CTA / the bio / an ad on its own. The KPIs, **question-by-question drop-off**, answers and applicants all follow the pick. Tapping a row in "Which link they came from" picks it.

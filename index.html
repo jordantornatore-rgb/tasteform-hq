@@ -200,6 +200,19 @@ button.kpi:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .seg-filter button{border:none;background:none;color:var(--muted);font-weight:600;font-size:var(--t-s);padding:7px 12px;min-height:34px;border-radius:var(--r-pill);cursor:pointer;}
 .seg-filter button[aria-pressed="true"]{background:var(--text);color:var(--bg);}
 .seg-filter button:focus-visible{outline:2px solid var(--accent);}
+.ck-make{max-width:560px;display:flex;flex-direction:column;gap:6px;}
+.ck-l{font-size:13px;font-weight:600;color:var(--muted);margin-top:6px;}
+.ck-btns{margin-top:10px;}
+.ck-row{display:flex;gap:var(--s3);align-items:flex-start;padding:12px 0;border-top:1px solid var(--border);}
+.ck-row:first-child{border-top:0;padding-top:0;}
+.ck-main{flex:1;min-width:0;}
+.ck-name{font-weight:700;}
+.ck-meta{font-size:13px;color:var(--muted);margin-top:2px;}
+.ck-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.ck-chip{font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;border:1px solid var(--border);color:var(--text-2);}
+.ck-chip.hot{background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
+.ck-q{margin-top:8px;padding:8px 10px;border-left:3px solid var(--accent);background:var(--surface-2);border-radius:6px;font-size:14px;white-space:pre-wrap;}
+.ck-act{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
 .sl-make{max-width:520px;}
 .sl-in{font-size:var(--t-m);min-height:var(--tap,44px);width:100%;}
 .sl-msg{font-size:var(--t-xs);color:var(--muted);min-height:16px;}
@@ -1489,6 +1502,7 @@ table.scores td{border-color:var(--border);}
       <button class="tab" role="tab" id="tabScorecard" aria-selected="false" aria-controls="viewScorecard" data-view="scorecard"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 10h16M10 4v16"/></svg><span>Scorecard</span></button>
       <div class="sb-group">Work</div>
       <button class="tab" role="tab" id="tabTime" aria-selected="false" aria-controls="viewTime" data-view="time" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="7"/><path d="M12 14V10M10 3h4M12 3v4M18 8l1.5-1.5"/></svg><span>Time</span></button>
+      <button class="tab" role="tab" id="tabCheckins" aria-selected="false" aria-controls="viewCheckins" data-view="checkins" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg><span>Check-in replies</span><span class="tab-badge" id="ckBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabToday" aria-selected="false" aria-controls="viewToday" data-view="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Daily brief</span></button>
             <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>DMs</span><span class="tab-badge" id="dmsBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabFollow" aria-selected="false" aria-controls="viewFollow" data-view="follow"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/></svg><span>Follow-ups</span><span class="tab-badge" id="fuBadge" hidden></span></button>
@@ -2087,6 +2101,21 @@ table.scores td{border-color:var(--border);}
   </section>
 
   <!-- ===== ROUTINE (admin only) ===== -->
+  <section id="viewCheckins" role="tabpanel" aria-labelledby="tabCheckins" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div class="top"><div><h1>Check-in replies</h1><div class="sub">Paste your Loom, copy the link, send it in 1FIT. They watch it, then can rate it, ask a question or book a 1:1.</div></div></div>
+    <div class="panel ck-make">
+      <label class="ck-l" for="ckClient">Client</label>
+      <input class="input" id="ckClient" list="ckRoster" autocomplete="off" placeholder="Start typing a name" maxlength="80">
+      <datalist id="ckRoster"></datalist>
+      <label class="ck-l" for="ckLoom">Loom link</label>
+      <input class="input" id="ckLoom" type="url" autocomplete="off" placeholder="https://www.loom.com/share/…">
+      <label class="ck-l" for="ckNote">Note under the video <span class="muted">(optional)</span></label>
+      <textarea class="input" id="ckNote" rows="3" maxlength="1500" placeholder="e.g. Targets for this week: 10k steps, protein 180g"></textarea>
+      <div class="ck-btns"><button type="button" class="btn primary" id="ckAdd" disabled>Make link + copy message</button></div>
+      <div class="sl-msg" id="ckMsg" role="status"></div>
+    </div>
+    <div class="panel"><h3 class="pl-h" style="margin:0 0 6px">Sent replies</h3><div id="ckList"><div class="empty-state">Loading…</div></div></div>
+  </section>
   <section id="viewRoutine" role="tabpanel" aria-labelledby="tabRoutine" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div id="routineRoot" style="display:flex;flex-direction:column;gap:var(--s4);">
       <div class="top"><div><h1>Routine</h1><div class="sub" id="rtSub">Loading…</div></div><div class="r-nav" id="rtNav"></div></div>
@@ -2169,6 +2198,7 @@ table.scores td{border-color:var(--border);}
       <button class="sheet-btn" data-view="subs" id="sheetSubs" hidden>Subscriptions</button>
       <button class="sheet-btn" data-view="challenge" id="sheetChallenge" hidden>Challenge <span class="tab-badge" id="chBadgeBb" hidden></span></button>
       <button class="sheet-btn" data-view="routine" id="sheetRoutine" hidden>Routine</button>
+      <button class="sheet-btn" data-view="checkins" id="sheetCheckins" hidden>Check-in replies</button>
       <button class="sheet-btn" data-view="time" id="sheetTime" hidden>Time</button>
       <button class="sheet-btn" id="sheetTheme">Theme: system</button>
       <button class="sheet-btn" id="sheetSignOut">Sign out</button>
@@ -2352,14 +2382,14 @@ table.scores td{border-color:var(--border);}
   Object.keys(VIEW_DEPS).forEach(function(v){ dirty[v]=true; });
 
   /* ---------- views ---------- */
-  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', scorecard:'viewScorecard', people:'viewPeople', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine', time:'viewTime', links:'viewLinks'};
-  var ADMIN_VIEWS={sales:1, people:1, stripe:1, subs:1, routine:1, time:1, challenge:1, email:1};
+  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', scorecard:'viewScorecard', people:'viewPeople', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine', time:'viewTime', links:'viewLinks', checkins:'viewCheckins'};
+  var ADMIN_VIEWS={sales:1, people:1, stripe:1, subs:1, routine:1, time:1, challenge:1, email:1, checkins:1};
   function setView(view, push){
     if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='home';
     currentView = view;
     Object.keys(VIEWS).forEach(function(k){ var el=$(VIEWS[k]); if(el) el.hidden = k!==view; });
     document.querySelectorAll('[data-view]').forEach(function(b){ b.setAttribute('aria-selected', b.getAttribute('data-view')===view?'true':'false'); });
-    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['traffic','leadflow','people','sales','delivery','today','dms','follow','funnel','leads','magnets','ads','content','analytics','email','stripe','subs','challenge','routine','links'].indexOf(view)>=0?'true':'false');
+    var bbMore=$('bbMore'); if(bbMore) bbMore.setAttribute('aria-selected', ['traffic','leadflow','people','sales','delivery','today','dms','follow','funnel','leads','magnets','ads','content','analytics','email','stripe','subs','challenge','routine','links','checkins'].indexOf(view)>=0?'true':'false');
     document.querySelectorAll('#tabRow .tab').forEach(function(t){ t.setAttribute('tabindex', t.getAttribute('data-view')===view?'0':'-1'); });
     if(push!==false){ try{ history.replaceState(null,'','#'+view); }catch(e){} }
     closeSheet();
@@ -6694,6 +6724,95 @@ table.scores td{border-color:var(--border);}
   });
   document.addEventListener('tf-auth-signed-out', function(){ client=null; links=[]; counts={}; loaded=false; if(poller) clearInterval(poller); });
   window.__storyLinks={norm:norm, build:build, buildF:buildF};
+})();
+</script>
+<script>
+/* ---------- Check-in replies (admin only; table checkin_replies, public page r.html?k=<token>) ---------- */
+(function(){
+  'use strict';
+  var esc=HQ.esc, PAGE=location.origin+location.pathname.replace(/[^\/]*$/,'')+'r.html?k=';
+  if(!/github\.io/.test(location.host)) PAGE='https://jordantornatore-rgb.github.io/tasteform-hq/r.html?k=';
+  var client=null, admin=false, rows=[], roster=[], loaded=false, poller=null;
+  function $(id){ return document.getElementById(id); }
+  function token(){ var a=new Uint8Array(9); crypto.getRandomValues(a); return Array.from(a,function(b){ return 'abcdefghijkmnpqrstuvwxyz23456789'[b%32]; }).join('')+Date.now().toString(36).slice(-3); }
+  function loomOk(u){ return /loom\.com\/(share|embed)\/[a-f0-9]{16,}/i.test(u||''); }
+  function rel(t){ if(!t) return ''; var d=(Date.now()-new Date(t))/60000; if(d<60) return Math.max(1,Math.round(d))+'m ago'; if(d<1440) return Math.round(d/60)+'h ago'; return new Date(t).toLocaleDateString('en-AU',{day:'numeric',month:'short'}); }
+  function message(name,url){ return 'Hey '+(name.split(' ')[0]||'')+', here\'s your check-in reply 👇\n'+url; }
+  function copy(text, btn){
+    var done=function(){ if(!btn) return; var o=btn.textContent; btn.textContent='Copied ✓'; setTimeout(function(){ btn.textContent=o; },1400); };
+    var fb=function(){ var t=document.createElement('textarea'); t.value=text; t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t); t.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(t); done(); };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fb); else fb();
+  }
+  function valid(){ var b=$('ckAdd'); if(b) b.disabled=!(($('ckClient').value||'').trim() && loomOk($('ckLoom').value)); }
+  function badge(){
+    var n2=rows.filter(function(r){ var seen=JSON.parse(localStorage.getItem('ckSeen')||'{}'); return (r.question_at && !seen[r.id+'q']) || (r.support_at && r.wants_support && !seen[r.id+'s']); }).length;
+    var b=$('ckBadge'); if(b){ b.hidden=!n2; b.textContent=n2; }
+  }
+  function render(){
+    var el=$('ckList'); if(!el) return;
+    if(!loaded){ el.innerHTML='<div class="empty-state">Loading…</div>'; return; }
+    if(!rows.length){ el.innerHTML='<div class="empty-state">No replies sent yet. Make your first one above.</div>'; badge(); return; }
+    var avg=rows.filter(function(r){ return r.rating; }), a=avg.length?(avg.reduce(function(s,r){ return s+r.rating; },0)/avg.length).toFixed(1):null;
+    var watched=rows.filter(function(r){ return r.views>0; }).length;
+    var head='<div class="ck-meta" style="margin-bottom:10px">'+rows.length+' sent · '+watched+' opened · '+(a?('avg rating '+a+'/5 from '+avg.length):'no ratings yet')+' · '+rows.filter(function(r){ return r.wants_support; }).length+' wanted a 1:1</div>';
+    el.innerHTML=head+rows.map(function(r){
+      var url=PAGE+r.id, chips=[];
+      chips.push('<span class="ck-chip">'+(r.views?('Opened '+r.views+'×, last '+rel(r.last_viewed_at)):'Not opened yet')+'</span>');
+      if(r.rating) chips.push('<span class="ck-chip">'+r.rating+'/5 helpful</span>');
+      if(r.wants_support===true) chips.push('<span class="ck-chip hot">Wants a 1:1 · '+rel(r.support_at)+'</span>');
+      if(r.wants_support===false) chips.push('<span class="ck-chip">No 1:1 needed</span>');
+      if(r.booked_click_at) chips.push('<span class="ck-chip">Opened calendar</span>');
+      return '<div class="ck-row"><div class="ck-main"><div class="ck-name">'+esc(r.client_name)+'</div><div class="ck-meta">Sent '+esc(rel(r.created_at))+' · <a href="'+esc(r.loom_url)+'" target="_blank" rel="noopener">Loom</a> · <a href="'+esc(url)+'" target="_blank" rel="noopener">Their page</a></div><div class="ck-chips">'+chips.join('')+'</div>'+(r.question?'<div class="ck-q"><b>Question</b> · '+esc(rel(r.question_at))+'<br>'+esc(r.question)+'</div>':'')+'</div><div class="ck-act"><button type="button" class="btn small" data-ckcopy="'+esc(r.id)+'">Copy message</button></div></div>';
+    }).join('');
+    try{ var seen=JSON.parse(localStorage.getItem('ckSeen')||'{}'); var v=$('viewCheckins'); if(v && !v.hidden){ rows.forEach(function(r){ if(r.question_at) seen[r.id+'q']=1; if(r.support_at && r.wants_support) seen[r.id+'s']=1; }); localStorage.setItem('ckSeen', JSON.stringify(seen)); } }catch(e){}
+    badge();
+  }
+  function load(){
+    if(!client || !admin) return;
+    client.from('checkin_replies').select('*').order('created_at',{ascending:false}).limit(200).then(function(r){
+      if(r.error){ var m=$('ckMsg'); if(m) m.textContent="Couldn't load replies: "+r.error.message; return; }
+      rows=r.data||[]; loaded=true; render();
+    });
+  }
+  function loadRoster(){
+    client.from('challenge_members').select('id,data').then(function(res){
+      if(res.error) return;
+      roster=(res.data||[]).filter(function(r){ return r.data && r.data.active===true && !/tornatore|montojo/i.test(r.data.name||''); })
+        .map(function(r){ return {id:r.id, name:r.data.name||r.id}; }).sort(function(a,b){ return a.name.localeCompare(b.name); });
+      var dl=$('ckRoster'); if(dl) dl.innerHTML=roster.map(function(x){ return '<option value="'+esc(x.name)+'"></option>'; }).join('');
+    });
+  }
+  function add(){
+    var name=($('ckClient').value||'').trim(), loom=($('ckLoom').value||'').trim(), note=($('ckNote').value||'').trim();
+    if(!name || !loomOk(loom) || !client) return;
+    var m=roster.find(function(x){ return x.name.toLowerCase()===name.toLowerCase(); });
+    var row={id:token(), client_name:m?m.name:name, member_id:m?m.id:null, loom_url:loom, note:note||null};
+    var btn=$('ckAdd'); btn.disabled=true; $('ckMsg').textContent='Saving…';
+    client.from('checkin_replies').insert(row).select().then(function(r){
+      if(r.error){ $('ckMsg').textContent="Didn't save: "+r.error.message; btn.disabled=false; return; }
+      copy(message(row.client_name, PAGE+row.id), btn);
+      $('ckMsg').textContent='Copied. Paste it to '+row.client_name.split(' ')[0]+' in 1FIT.';
+      $('ckClient').value=''; $('ckLoom').value=''; $('ckNote').value='';
+      rows.unshift(r.data && r.data[0] || Object.assign({created_at:new Date().toISOString(), views:0}, row)); render();
+    });
+  }
+  document.addEventListener('input', function(e){ if(e.target && /^ck(Client|Loom)$/.test(e.target.id)) valid(); });
+  document.addEventListener('click', function(e){
+    if(e.target.closest && e.target.closest('#ckAdd')){ add(); return; }
+    var c=e.target.closest && e.target.closest('[data-ckcopy]'); if(c){ var r=rows.find(function(x){ return x.id===c.getAttribute('data-ckcopy'); }); if(r) copy(message(r.client_name, PAGE+r.id), c); }
+  });
+  document.addEventListener('hq-view', function(ev){ if(ev.detail && ev.detail.view==='checkins'){ load(); } });
+  document.addEventListener('tf-auth-ready', function(ev){
+    var role=ev.detail && ev.detail.profile && ev.detail.profile.role; client=ev.detail && ev.detail.supabase;
+    admin=role==='admin';
+    var tab=$('tabCheckins'), sheet=$('sheetCheckins');
+    if(tab) tab.hidden=!admin; if(sheet) sheet.hidden=!admin;
+    if(!admin) return;
+    loadRoster(); load();
+    if(poller) clearInterval(poller); poller=setInterval(load, 60000);
+  });
+  document.addEventListener('tf-auth-signed-out', function(){ client=null; admin=false; rows=[]; loaded=false; if(poller) clearInterval(poller); var t=$('tabCheckins'); if(t) t.hidden=true; var s2=$('sheetCheckins'); if(s2) s2.hidden=true; });
+  window.__checkins={token:token, loomOk:loomOk, message:message, page:function(){ return PAGE; }};
 })();
 </script>
 <script>

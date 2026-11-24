@@ -12,7 +12,7 @@
   function makeMockClient(fixtures, opts) {
     opts = opts || {};
     var tables = {};
-    Object.keys(fixtures || {}).forEach(function (t) { tables[t] = (fixtures[t] || []).map(function (r) { return { id: r.id, data: r.data, updated_at: r.updated_at || '2026-10-21T00:00:00Z' }; }); });
+    Object.keys(fixtures || {}).forEach(function (t) { tables[t] = (fixtures[t] || []).map(function (r) { return Object.assign({ updated_at: '2026-10-21T00:00:00Z' }, r); }); });
     var stats = { selects: 0, upserts: 0 };
     function from(t) {
       var filters = [], single = false, rng = null, ord = null, del = false, proj = null;
@@ -36,6 +36,12 @@
           return Promise.resolve({ data: out, error: null }).then(res, rej);
         },
         delete: function () { del = true; return q; },
+        insert: function (row) {
+          stats.inserts = (stats.inserts || 0) + 1;
+          var arr = tables[t] || (tables[t] = []), r2 = Object.assign({ created_at: new Date().toISOString() }, clone(row)); arr.push(r2);
+          var p = Promise.resolve({ data: [clone(r2)], error: null });
+          return { select: function () { return p; }, then: function (a, b) { return p.then(a, b); } };
+        },
         upsert: function (row) {
           stats.upserts++;
           var arr = tables[t] || (tables[t] = []), i = -1;

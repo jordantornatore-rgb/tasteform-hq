@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0F0D0B">
+<title>Your check-in reply · TasteForm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Open+Sans:wght@400;600;700;800&display=swap">
+<style>
+  :root{ --bg:#0F0D0B; --surface:#1A1611; --surface-2:#231D16; --border:#3A2F24; --text:#F2F1E8; --text-2:#D9D2C2; --muted:#A89A86; --accent:#C49A6C; --on-accent:#0F0D0B; --ok:#7FB77E; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--bg); color:var(--text); font:16px/1.5 "Open Sans",system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:720px; margin:0 auto; padding:28px 18px 60px; padding-top:max(28px, env(safe-area-inset-top)); }
+  .brand{ font-family:Anton,Impact,sans-serif; letter-spacing:.08em; font-size:15px; color:var(--accent); text-transform:uppercase; }
+  h1{ font-family:Anton,Impact,sans-serif; font-weight:400; text-transform:uppercase; letter-spacing:.01em; font-size:clamp(30px,7vw,44px); line-height:1.05; margin:10px 0 6px; }
+  .sub{ color:var(--muted); margin:0 0 22px; }
+  .video{ position:relative; width:100%; padding-top:56.25%; background:#000; border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .video iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .note{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-top:14px; white-space:pre-wrap; color:var(--text-2); }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px; margin-top:16px; }
+  .card h2{ font-family:Anton,Impact,sans-serif; font-weight:400; text-transform:uppercase; letter-spacing:.02em; font-size:21px; margin:0 0 4px; }
+  .opt{ color:var(--muted); font-size:13px; margin:0 0 14px; }
+  .divider{ display:flex; align-items:center; gap:12px; color:var(--muted); font-size:13px; text-transform:uppercase; letter-spacing:.12em; margin:30px 0 4px; }
+  .divider::before,.divider::after{ content:""; flex:1; height:1px; background:var(--border); }
+  .rate{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+  .rate button{ appearance:none; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:12px 0 10px; font:700 20px/1 "Open Sans",sans-serif; cursor:pointer; }
+  .rate button small{ display:block; font-size:10.5px; font-weight:600; color:var(--muted); margin-top:6px; letter-spacing:.02em; }
+  .rate button[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .rate button[aria-pressed="true"] small{ color:var(--on-accent); }
+  textarea{ width:100%; min-height:110px; resize:vertical; background:var(--surface-2); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:12px 14px; font:inherit; }
+  textarea:focus,button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn{ appearance:none; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:13px 18px; font:700 15px/1 "Open Sans",sans-serif; cursor:pointer; }
+  .btn.primary{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .btn:disabled{ opacity:.45; cursor:default; }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:center; }
+  .yn{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .yn .btn[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .msg{ color:var(--ok); font-size:14px; font-weight:600; min-height:1.2em; }
+  .asked{ background:var(--surface-2); border-left:3px solid var(--accent); padding:10px 12px; border-radius:8px; color:var(--text-2); white-space:pre-wrap; margin-bottom:10px; font-size:15px; }
+  .cal{ margin-top:14px; border-radius:12px; overflow:hidden; background:#fff; }
+  .cal iframe{ width:100%; height:760px; border:0; display:block; }
+  .center{ text-align:center; padding:80px 10px; color:var(--muted); }
+  footer{ color:var(--muted); font-size:12px; text-align:center; margin-top:34px; }
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">TasteForm</div>
+  <div id="loading" class="center">Loading your reply…</div>
+  <div id="missing" class="center" hidden>This link doesn't work anymore. Message Jordan and he'll resend it.</div>
+
+  <main id="main" hidden>
+    <h1 id="hello">Your check-in reply</h1>
+    <p class="sub">Watch this first. Everything below it is optional.</p>
+    <div class="video"><iframe id="vid" title="Check-in reply video" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+    <div class="note" id="note" hidden></div>
+    <div class="row" id="openLoomRow" hidden><a class="btn" id="openLoom" target="_blank" rel="noopener">Open the video in Loom</a></div>
+
+    <div class="divider">After you've watched</div>
+
+    <section class="card" aria-labelledby="hRate">
+      <h2 id="hRate">How helpful was this?</h2>
+      <p class="opt">Optional · 1 = not much, 5 = super helpful</p>
+      <div class="rate" id="rate" role="group" aria-labelledby="hRate">
+        <button type="button" data-r="1" aria-pressed="false">1<small>Not much</small></button>
+        <button type="button" data-r="2" aria-pressed="false">2<small>&nbsp;</small></button>
+        <button type="button" data-r="3" aria-pressed="false">3<small>Solid</small></button>
+        <button type="button" data-r="4" aria-pressed="false">4<small>&nbsp;</small></button>
+        <button type="button" data-r="5" aria-pressed="false">5<small>Super helpful</small></button>
+      </div>
+      <div class="msg" id="rateMsg" role="status"></div>
+    </section>
+
+    <section class="card" aria-labelledby="hQ">
+      <h2 id="hQ">Got a question?</h2>
+      <p class="opt">Optional · anything from the video or your week. It goes straight to Jordan.</p>
+      <div id="asked" class="asked" hidden></div>
+      <textarea id="q" maxlength="2000" placeholder="Type your question…" aria-labelledby="hQ"></textarea>
+      <div class="row"><button type="button" class="btn primary" id="qSend" disabled>Send to Jordan</button><span class="msg" id="qMsg" role="status"></span></div>
+    </section>
+
+    <section class="card" aria-labelledby="hS">
+      <h2 id="hS">Want a 1:1?</h2>
+      <p class="opt">Would you like to book a 1:1, or do you feel like you need extra support right now? Optional.</p>
+      <div class="yn" role="group" aria-labelledby="hS">
+        <button type="button" class="btn" id="sYes" aria-pressed="false">Yes, book a 1:1</button>
+        <button type="button" class="btn" id="sNo" aria-pressed="false">No, I'm good</button>
+      </div>
+      <div class="msg" id="sMsg" role="status" style="margin-top:10px"></div>
+      <div id="calWrap" hidden>
+        <p class="opt" style="margin:10px 0 0">Pick a time that suits you below.</p>
+        <div class="cal"><iframe id="cal" title="Book a 1:1 with Jordan" scrolling="yes"></iframe></div>
+      </div>
+    </section>
+
+    <footer>Private link for you only · TasteForm Coaching</footer>
+  </main>
+</div>
+<script>
+(function(){
+  'use strict';
+  var URL_='https://hucqdrekawzsrbbkczgj.supabase.co/rest/v1/rpc/';
+  var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1Y3FkcmVrYXd6c3JiYmtjemdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3NzgxNjMsImV4cCI6MjEwNzM1NDE2M30.5NNB-_F6yLb9tP9UvoZvFFS9HftuF7tocc1kdT6w0ug';
+  var CAL='https://api.leadconnectorhq.com/widget/booking/2ie8EAWu8y2iJNpwzrxj';
+  function $(id){ return document.getElementById(id); }
+  var k=(new URLSearchParams(location.search).get('k')||'').trim();
+  function rpc(fn, body){
+    return fetch(URL_+fn, {method:'POST', headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'}, body:JSON.stringify(body)})
+      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  function embed(u){
+    var m=String(u||'').match(/loom\.com\/(?:share|embed)\/([a-f0-9]{16,})/i);
+    return m ? 'https://www.loom.com/embed/'+m[1]+'?hide_owner=true&hide_share=true&hideEmbedTopBar=true' : null;
+  }
+  function answer(o){ o.k=k; return rpc('checkin_answer', o); }
+  function setRate(n){ document.querySelectorAll('#rate [data-r]').forEach(function(b){ b.setAttribute('aria-pressed', +b.getAttribute('data-r')===n?'true':'false'); }); }
+  function setSupport(v){
+    $('sYes').setAttribute('aria-pressed', v===true?'true':'false');
+    $('sNo').setAttribute('aria-pressed', v===false?'true':'false');
+    $('calWrap').hidden = v!==true;
+    if(v===true && !$('cal').src) $('cal').src=CAL;
+  }
+  if(!k){ $('loading').hidden=true; $('missing').hidden=false; return; }
+  rpc('checkin_open', {k:k}).then(function(d){
+    $('loading').hidden=true;
+    if(!d){ $('missing').hidden=false; return; }
+    $('main').hidden=false;
+    if(d.name) $('hello').textContent='Hey '+d.name+', here\'s your reply';
+    var e=embed(d.loom);
+    if(e) $('vid').src=e; else { $('vid').parentNode.hidden=true; }
+    if(d.loom){ $('openLoom').href=d.loom; $('openLoomRow').hidden=!!e; }
+    if(d.note){ $('note').textContent=d.note; $('note').hidden=false; }
+    if(d.rating) setRate(d.rating);
+    if(d.question){ $('asked').textContent='You asked: '+d.question; $('asked').hidden=false; }
+    if(d.wants_support===true || d.wants_support===false) setSupport(d.wants_support);
+  }).catch(function(){ $('loading').textContent='Couldn\'t load your reply. Check your connection and refresh.'; });
+
+  $('rate').addEventListener('click', function(ev){
+    var b=ev.target.closest('[data-r]'); if(!b) return;
+    var n=+b.getAttribute('data-r'); setRate(n); $('rateMsg').textContent='';
+    answer({p_rating:n}).then(function(){ $('rateMsg').textContent='Thanks, noted.'; }, function(){ $('rateMsg').textContent='Didn\'t save, tap again.'; });
+  });
+  $('q').addEventListener('input', function(){ $('qSend').disabled=!this.value.trim(); });
+  $('qSend').addEventListener('click', function(){
+    var t=$('q').value.trim(); if(!t) return; var btn=this; btn.disabled=true; $('qMsg').textContent='Sending…';
+    answer({p_question:t}).then(function(){ $('asked').textContent='You asked: '+t; $('asked').hidden=false; $('q').value=''; $('qMsg').textContent='Sent. Jordan will get back to you.'; },
+      function(){ btn.disabled=false; $('qMsg').textContent='Didn\'t send, try again.'; });
+  });
+  $('sYes').addEventListener('click', function(){ setSupport(true); $('sMsg').textContent=''; answer({p_wants_support:true}).then(function(){ $('sMsg').textContent='Jordan\'s been told. Grab a time below.'; }, function(){}); });
+  $('sNo').addEventListener('click', function(){ setSupport(false); answer({p_wants_support:false}).then(function(){ $('sMsg').textContent='All good. Keep going.'; }, function(){}); });
+})();
+</script>
+</body>
+</html>
