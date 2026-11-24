@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
   const send = async (msg: Record<string, unknown>) => { const r = await fetch(GHL + "/conversations/messages", { method: "POST", headers: H("2021-04-15"), body: JSON.stringify(msg) }); const j = await r.json().catch(() => ({})); return { ok: r.ok, status: r.status, id: j.messageId || j.emailMessageId || null, err: r.ok ? null : (j.message || JSON.stringify(j).slice(0, 200)) }; };
   result.email = await send({ type: "Email", contactId: contact.id, subject: "your check-in reply", html, message: text, emailFrom: FROM_EMAIL, emailTo: email });
   if (contact.phone && !contact.dnd) {
-    result.sms = await send({ type: "SMS", contactId: contact.id, message: `Hey ${first}, your check-in reply is ready: ${link}` });
+    result.sms = await send({ type: "SMS", contactId: contact.id, message: `Hey ${first}, your check-in reply is ready. I've emailed it to you, check your inbox (or junk) 👊` });
   } else result.sms = { ok: false, skipped: contact.phone ? "dnd" : "no mobile in GHL" };
   const sentOk = !!((result.email as any)?.ok || (result.sms as any)?.ok);
   await save({ sentOk });
