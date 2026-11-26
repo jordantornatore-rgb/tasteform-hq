@@ -272,6 +272,20 @@ button.kpi:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .cl-edit label{font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:4px;}
 .cl-edit .wide{grid-column:1 / -1;}
 .cl-empty{font-size:14px;color:var(--muted);}
+.cl-ins{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--border);font-size:14px;line-height:1.5;}
+.cl-ins:first-child{border-top:0;}
+.cl-ins .ic{width:26px;flex-shrink:0;text-align:center;}
+.cl-ins .body{color:var(--text-2);}
+.cl-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:12px;color:var(--muted);text-align:center;}
+.cl-dow span{display:block;padding:10px 0;border-radius:var(--r-s);font-weight:700;color:var(--text);margin-bottom:3px;}
+.cl-scores{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:14px;}
+.cl-run{display:flex;flex-direction:column;}
+.cl-step{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--border);}
+.cl-step:first-child{border-top:0;}
+.cl-step .n{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+.cl-step .b{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
+.cl-step h4{margin:0;font-size:15px;}
+
 .ph-wrap{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3);}
 .ph-pane{display:flex;flex-direction:column;gap:8px;min-width:0;}
 .ph-ctl{display:flex;flex-direction:column;gap:6px;}
@@ -6996,7 +7010,7 @@ table.scores td{border-color:var(--border);}
   function kg(v,sign){ if(v==null || !isFinite(v)) return '–'; var s=(Math.round(v*10)/10).toFixed(1); return (sign && v>0?'+':'')+s; }
   function num(v){ var x=parseFloat(v); return isFinite(x)?x:null; }
   function first(n){ return String(n||'').split(' ')[0]; }
-  function arr(x){ return Array.isArray(x)?x.filter(function(s){ return s!=null && String(typeof s==='object'?(s.text||s.lift||''):s).trim(); }):[]; }
+  function arr(x){ return Array.isArray(x)?x.filter(function(s){ return s!=null && String(typeof s==='object'?(s.text||s.lift||s.q||s.promise||s.title||''):s).trim(); }):[]; }
   function txt(x){ return typeof x==='object'&&x?(x.text||''):String(x); }
 
   function model(row){
@@ -7195,6 +7209,7 @@ table.scores td{border-color:var(--border);}
         '<div class="panel"><h3 class="cl-h">Gym insights</h3>'+(g.length?list(g):'<p class="cl-empty">'+(o.hasSess?'No PRs or stalls flagged this week.':'No 1FIT workouts synced yet.')+'</p>')+'</div>'+
       '</div>'+
       (o.eta!=null||o.stall?'<div class="panel"><h3 class="cl-h">Prediction</h3><p style="margin:0;font-size:15px">'+(o.eta!=null?'On the 4-week trend ('+kg2(o.trend)+' kg/wk) '+esc(first(o.name))+' reaches '+kg(o.goalW)+' kg around <b>'+fmtD(o.eta)+'</b>.':'')+(o.stall==='flat'?' <b style="color:var(--crit)">Scale has stalled for 2 weeks</b> ('+kg2(o.trend14)+' kg/wk).':o.stall==='wrong'?' <b style="color:var(--crit)">Weight has moved the wrong way for 2 weeks</b> ('+kg2(o.trend14)+' kg/wk).':'')+'</p></div>':'')+
+      renderInsights(o)+
       macroPanel(o)+
       (p.brief||flags.length||o.statusWhy?'<div class="panel">'+(p.brief?'<h3 class="cl-h">Brief for your next call or Loom</h3><div class="cl-brief">'+esc(p.brief)+'</div>':'')+(o.statusWhy?'<p style="margin:0"><b>Why '+SLABEL[o.status].toLowerCase()+':</b> '+esc(o.statusWhy)+'</p>':'')+(flags.length?'<h3 class="cl-h">Key flags</h3>'+list(flags):'')+'</div>':'')+
       (o.unans.length?'<div class="panel"><h3 class="cl-h">Unanswered on WhatsApp</h3><div class="cl-tl">'+o.unans.map(function(u){ return '<div class="cl-ev unans"><div class="ic">💬</div><div><div class="when">'+esc(fmtD(dn(u.at)))+'</div><div class="body">'+esc(txt(u))+'</div></div></div>'; }).join('')+'</div></div>':'')+
@@ -7228,21 +7243,80 @@ table.scores td{border-color:var(--border);}
       '<label class="wide">Key flags (one per line)<textarea class="input" data-clf="flags" rows="3" maxlength="800" placeholder="Injuries, preferences, anything to keep top of mind">'+esc(m.flags||'')+'</textarea></label>'+
       '</div><div><button type="button" class="btn primary" data-clsave>Save</button> <span class="sl-msg" id="clSaveMsg" role="status"></span></div></details>';
   }
+  /* ---------- Insights (computed from every metric we hold + the nightly's written analysis) ---------- */
+  var DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  function insightsData(o){
+    var ms=metrics[o.id]||[], T=dn(today()), d={};
+    // training by weekday, last 8 full weeks
+    var M=monday(T), from=M-56, sess=ms.filter(function(m){ var n=dn(m.date); return m.kind==='session' && n>=from && n<M; });
+    d.dow=[0,0,0,0,0,0,0]; sess.forEach(function(m){ d.dow[(new Date(dn(m.date)*DAY).getUTCDay()+6)%7]++; }); d.dowWeeks=Math.min(8, o.start!=null?Math.max(0,Math.round((M-Math.max(from,monday(o.start)))/7)):8);
+    // weekday vs weekend calories, last 28 days
+    var cal=ms.filter(function(m){ return m.kind==='calories' && num(m.value)!=null && dn(m.date)>T-28; });
+    var wd=cal.filter(function(m){ return (new Date(dn(m.date)*DAY).getUTCDay()+6)%7<5; }), we=cal.filter(function(m){ return (new Date(dn(m.date)*DAY).getUTCDay()+6)%7>=5; });
+    var av=function(a){ return a.length?a.reduce(function(s,m){ return s+num(m.value); },0)/a.length:null; };
+    d.calWd=av(wd); d.calWe=av(we); d.calDays=cal.length; d.target=num(((o.p.macros||{}).calories));
+    var pr=ms.filter(function(m){ return m.kind==='protein' && num(m.value)!=null && dn(m.date)>T-28; }); d.protAvg=av(pr); d.protTarget=num((o.p.macros||{}).protein);
+    d.protHit=d.protTarget?pr.filter(function(m){ return num(m.value)>=d.protTarget*0.95; }).length:null; d.protDays=pr.length;
+    // food + weight logging consistency, last 28 days
+    var days=function(k){ var s={}; ms.forEach(function(m){ if(m.kind===k && dn(m.date)>T-28) s[m.date]=1; }); return Object.keys(s).length; };
+    d.logCal=days('calories'); d.logW=days('weight'); d.span=Math.min(28, o.start!=null?T-o.start+1:28);
+    // check-in scores (detail.scores {energy, sleep, stress, hunger, rating...}) last 8 check-ins
+    var cks=ms.filter(function(m){ return m.kind==='checkin' && m.detail && m.detail.scores; }).sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); }).slice(-8);
+    d.scores={}; cks.forEach(function(m){ Object.keys(m.detail.scores).forEach(function(k){ var v=num(m.detail.scores[k]); if(v!=null) (d.scores[k]=d.scores[k]||[]).push(v); }); });
+    // lifts (kind 'lift': value = estimated 1RM kg, detail {lift, top:'90x6'})
+    var L={}; ms.filter(function(m){ return m.kind==='lift' && m.detail && m.detail.lift && num(m.value)!=null; }).forEach(function(m){ (L[m.detail.lift]=L[m.detail.lift]||[]).push({n:dn(m.date), v:num(m.value), top:m.detail.top||''}); });
+    d.lifts=Object.keys(L).map(function(k){ var a=L[k].sort(function(x,y){ return x.n-y.n; }); var last=a[a.length-1], f=a[0], prev4=a.filter(function(x){ return x.n<=last.n-28; }).pop(), prev3=a.filter(function(x){ return x.n<=last.n-21; }).pop(); return {lift:k, first:f, last:last, ch:last.v-f.v, ch4:prev4?last.v-prev4.v:null, ch3:prev3?last.v-prev3.v:null, series:a.slice(-10).map(function(x){ return x.v; })}; }).sort(function(a,b){ return b.last.v-a.last.v; });
+    return d;
+  }
+  function autoInsights(o, d){
+    var out=[];
+    if(d.dowWeeks>=3 && o.spw){ var tot=d.dow.reduce(function(s,x){ return s+x; },0); var top=d.dow.map(function(c,i){ return {i:i,c:c}; }).sort(function(a,b){ return b.c-a.c; }).slice(0,o.spw).filter(function(x){ return x.c>0; }).map(function(x){ return DOW[x.i]; }); if(tot && o.gymPct!=null && o.gymPct<90) out.push({type:'pattern', title:tot+' of '+(o.spw*d.dowWeeks)+' planned sessions in the last '+d.dowWeeks+' full weeks', detail:'By day: '+DOW.map(function(n,i){ return n+' '+d.dow[i]; }).join(' · ')+'. Reliable days: '+(top.join(', ')||'none')+'. Build the plan around those.'}); }
+    if(d.calWd!=null && d.calWe!=null && d.calDays>=8){ var gap=d.calWe-d.calWd; if(Math.abs(gap)>=200) out.push({type:gap>0?'risk':'pattern', title:'Weekends '+(gap>0?'+':'')+Math.round(gap)+' kcal vs weekdays', detail:'Weekday avg '+Math.round(d.calWd)+' · weekend avg '+Math.round(d.calWe)+(d.target?' · target '+d.target:'')+' (last 28 days, '+d.calDays+' days logged).'}); }
+    if(d.protTarget && d.protDays>=7){ out.push({type:d.protHit/d.protDays>=0.7?'win':'risk', title:'Protein hit '+d.protHit+'/'+d.protDays+' logged days', detail:'Avg '+Math.round(d.protAvg)+' g vs '+d.protTarget+' g target.'}); }
+    if(d.span>=7){ var lw=Math.round(d.logW/d.span*100), lc=Math.round(d.logCal/d.span*100); if(lw<70||lc<70) out.push({type:'risk', title:'Logging gaps', detail:'Weighed in '+d.logW+'/'+d.span+' days, food logged '+d.logCal+'/'+d.span+' days. Trends get less reliable below ~5 days a week.'}); }
+    Object.keys(d.scores).forEach(function(k){ var a=d.scores[k]; if(a.length>=3){ var ch=a[a.length-1]-a[0]; if(Math.abs(ch)>=2) out.push({type:(/stress|hunger|crav/i.test(k)?ch<0:ch>0)?'win':'risk', title:k.charAt(0).toUpperCase()+k.slice(1)+' '+a[0]+' → '+a[a.length-1]+' over '+a.length+' check-ins', detail:'Scores: '+a.join(', ')+'.'}); } });
+    d.lifts.forEach(function(l){ if(l.ch3!=null && Math.abs(l.ch3)<0.5 && l.series.length>=4) out.push({type:'pattern', title:l.lift+' flat for 3+ weeks', detail:'Est. 1RM '+kg(l.last.v)+' kg (top set '+l.last.top+').'}); });
+    return out;
+  }
+  function renderInsights(o){
+    var d=insightsData(o), written=arr(o.p.insights), auto=autoInsights(o,d);
+    var ICO={win:'✅', risk:'⚠️', pattern:'🔁', opportunity:'💡', life:'🗓️'};
+    var item=function(x){ return '<div class="cl-ins '+esc(x.type||'')+'"><div class="ic">'+(ICO[x.type]||'•')+'</div><div><b>'+esc(x.title||txt(x))+'</b>'+(x.detail?'<div class="body">'+esc(x.detail)+'</div>':'')+(x.evidence?'<div class="cl-sub">'+esc(x.evidence)+'</div>':'')+'</div></div>'; };
+    var lifts=d.lifts.length?'<h3 class="cl-h" style="margin-top:6px">Lifts (estimated 1RM)</h3><div style="overflow-x:auto"><table class="cl-cmp"><thead><tr><th>Lift</th><th>Now</th><th>Top set</th><th>4 wks</th><th>Since start</th><th>Trend</th></tr></thead><tbody>'+d.lifts.slice(0,8).map(function(l){ return '<tr><th scope="row">'+esc(l.lift)+'</th><td>'+kg(l.last.v)+' kg</td><td>'+esc(l.last.top)+'</td><td class="cl-d '+(l.ch4>0.4?'good':l.ch4!=null&&l.ch4<-0.4?'bad':'')+'">'+(l.ch4==null?'–':kg(l.ch4,true))+'</td><td class="cl-d '+(l.ch>0.4?'good':l.ch<-0.4?'bad':'')+'">'+kg(l.ch,true)+'</td><td>'+spark(l.series)+'</td></tr>'; }).join('')+'</tbody></table></div>':'';
+    var dow=(d.dowWeeks>=2&&o.spw)?'<h3 class="cl-h" style="margin-top:6px">Sessions by day · last '+d.dowWeeks+' wks</h3><div class="cl-dow">'+DOW.map(function(n,i){ var v=d.dow[i], a=Math.min(1,v/Math.max(1,d.dowWeeks)); return '<div><span style="background:color-mix(in srgb, var(--accent) '+Math.round(a*100)+'%, var(--surface-2))">'+v+'</span>'+n+'</div>'; }).join('')+'</div>':'';
+    var sc=Object.keys(d.scores).length?'<h3 class="cl-h" style="margin-top:6px">Check-in scores</h3><div class="cl-scores">'+Object.keys(d.scores).map(function(k){ var a=d.scores[k]; return '<div><span class="cl-sub" style="display:block">'+esc(k)+'</span><b>'+a[a.length-1]+'</b> '+spark(a)+'</div>'; }).join('')+'</div>':'';
+    var all=written.concat(auto);
+    return '<div class="panel"><h3 class="cl-h">Coach insights</h3>'+(all.length?'<div class="cl-tl">'+all.map(item).join('')+'</div>':'<p class="cl-empty">Insights appear once there are a couple of weeks of logs.</p>')+dow+sc+lifts+'</div>';
+  }
+
+  /* ---------- Loom prep: a run sheet for a ~4-minute Loom ---------- */
   function renderLoom(o){
     var L=o.p.loom||{}, d=o.draft, c=(d&&d.checkin)||{}, ans=c.answers||{}, keys=Object.keys(ans);
-    var box=function(cls, title, items, empty){ return '<div class="cl-pt '+cls+'"><h4>'+title+'</h4>'+list(items, empty)+'</div>'; };
-    return '<div class="panel"><div class="cl-top"><div><h3 class="cl-h">Loom script'+(L.weekOf?' · week of '+esc(fmtD(dn(L.weekOf))):'')+'</h3><p class="cl-sub" style="margin:4px 0 0">Only you see this. Open Screenshare to record: it shows the client-safe page with none of these notes.</p></div><button type="button" class="btn primary" data-clshare style="margin-left:auto">Hide notes · Screenshare ↗</button></div>'+
-      '<div class="cl-loom">'+
-        box('like','👍 What I\'m liking', L.likes, 'Nothing drafted yet.')+
-        box('dislike','👎 What I\'m not liking', L.dislikes, 'Nothing drafted yet.')+
-        box('focus','🎯 Focus for next week', L.focus, 'Nothing drafted yet.')+
-        box('','❓ Their questions to answer', arr(L.questions).concat(o.unans.map(txt)), 'No open questions.')+
-      '</div>'+
-      '<p class="cl-sub" style="margin:0">The scheduled task drafts these from 1FIT, WhatsApp and their last call. The numbers to point at are on the Screenshare page.</p></div>'+
-      (d?'<div class="panel"><h3 class="cl-h">This week\'s check-in'+(c.submittedLabel?' · '+esc(c.submittedLabel):'')+'</h3>'+(d.points?'<div class="ck-pts" style="margin:0">'+esc(d.points)+'</div>':'')+(keys.length?'<details class="ck-ans" open><summary>Their answers</summary><dl>'+keys.map(function(k){ return '<dt>'+esc(k)+'</dt><dd>'+esc(ans[k])+'</dd>'; }).join('')+'</dl></details>':'')+'<div><button type="button" class="btn" data-clgock>Record done? Paste the Loom in Check-in replies →</button></div></div>':
-        '<div class="panel"><p class="cl-empty" style="margin:0">No check-in waiting for a Loom. New ones are drafted Saturday arvo and Sunday.</p></div>')+
-      kpiRow(o);
+    var T=dn(today()), A=cmpStats(o.id, nd(T-6), nd(T)), B=cmpStats(o.id, nd(T-13), nd(T-7));
+    var wins=arr(L.wins).length?arr(L.wins):arr(L.likes), fixes=arr(L.fixes).length?arr(L.fixes):arr(L.dislikes), targets=arr(L.targets).length?arr(L.targets):arr(L.focus);
+    var qs=arr(L.questions).map(function(q){ return typeof q==='object'?q:{q:q}; }).concat(o.unans.map(function(u){ return {q:txt(u), from:'WhatsApp '+fmtD(dn(u.at))}; }));
+    var adj=L.adjustments||{}, cb=arr(L.callbacks), ev=function(x){ return x&&typeof x==='object'&&(x.evidence||x.why)?'<div class="cl-sub">'+esc([x.why,x.evidence].filter(Boolean).join(' · '))+'</div>':''; };
+    var li=function(items, empty){ items=arr(items); return items.length?'<ul class="cl-ul">'+items.map(function(x){ return '<li>'+esc(txt(x))+ev(x)+'</li>'; }).join('')+'</ul>':'<p class="cl-empty">'+empty+'</p>'; };
+    var f1=function(v,dp){ return v==null?'–':(Math.round(v*Math.pow(10,dp))/Math.pow(10,dp)).toFixed(dp); };
+    var sb=function(lab,a,b,dp,u){ var av=a&&a.v!=null?a.v:(typeof a==='number'?a:null), bv=b&&b.v!=null?b.v:(typeof b==='number'?b:null); return '<tr><th scope="row">'+lab+'</th><td>'+f1(av,dp)+(av!=null?u:'')+'</td><td>'+f1(bv,dp)+(bv!=null?u:'')+'</td><td>'+((av!=null&&bv!=null)?((av-bv>0?'+':'')+f1(av-bv,dp)):'–')+'</td></tr>'; };
+    var step=function(n, title, mins, body){ return '<div class="cl-step"><div class="n">'+n+'</div><div class="b"><h4>'+title+(mins?' <span class="cl-sub" style="display:inline">'+mins+'</span>':'')+'</h4>'+body+'</div></div>'; };
+    var adjBody=['training','nutrition','habits'].map(function(k){ var a=arr(adj[k]); return a.length?'<div><b style="font-size:13px">'+k.charAt(0).toUpperCase()+k.slice(1)+'</b>'+li(a,'')+'</div>':''; }).join('')+(o.macroOpen?'<div class="cl-sub">Macro check waiting on the Overview: decide it before you record.</div>':'');
+    return '<div class="panel"><div class="cl-top"><div><h3 class="cl-h">Loom run sheet'+(L.weekOf?' · week of '+esc(fmtD(dn(L.weekOf))):'')+'</h3><p class="cl-sub" style="margin:4px 0 0">Only you see this. Aim for about 4 minutes. Flip to Screenshare to record: it shows the numbers, none of these notes.</p></div><button type="button" class="btn primary" data-clshare style="margin-left:auto">Hide notes · Screenshare ↗</button></div>'+
+      '<div class="cl-run">'+
+      step(1,'Open','~15s', L.hook?'<p style="margin:0">'+esc(L.hook)+'</p>':'<p class="cl-empty">"'+esc(first(o.name))+', week '+(o.week||'–')+' done. Let\'s go through it."</p>')+
+      step(2,'Scoreboard: this week vs last','~40s · on screen','<div style="overflow-x:auto"><table class="cl-cmp"><thead><tr><th></th><th>This wk</th><th>Last wk</th><th>Change</th></tr></thead><tbody>'+sb('Weight avg',A&&A.weight,B&&B.weight,1,' kg')+sb('Sessions',A&&A.sessions,B&&B.sessions,0,'/'+(o.spw||'–'))+sb('Steps/day',A&&A.steps,B&&B.steps,0,'')+sb('Calories/day',A&&A.calories,B&&B.calories,0,'')+sb('Protein/day',A&&A.protein,B&&B.protein,0,' g')+'</tbody></table></div>'+(o.trend!=null?'<p class="cl-sub" style="margin:6px 0 0">4-wk trend '+kg2(o.trend)+' kg/wk'+(o.eta!=null?' · goal ~'+fmtD(o.eta):'')+(o.stall?' · <b style="color:var(--crit)">stalled 2 wks</b>':'')+'</p>':''))+
+      step(3,'👍 Wins','~45s', li(wins,'Nothing drafted yet.'))+
+      step(4,'👎 What\'s holding them back','~45s', li(fixes,'Nothing drafted yet.'))+
+      step(5,'❓ Their questions → your answer','~45s', qs.length?'<ul class="cl-ul">'+qs.map(function(q){ return '<li><b>'+esc(q.q||'')+'</b>'+(q.from?' <span class="cl-sub" style="display:inline">('+esc(q.from)+')</span>':'')+(q.answer?'<div>→ '+esc(q.answer)+'</div>':'')+'</li>'; }).join('')+'</ul>':'<p class="cl-empty">No open questions.</p>')+
+      step(6,'🔧 Changes this week','~30s', adjBody||'<p class="cl-empty">No changes. Keep the plan.</p>')+
+      step(7,'↩︎ Last time you agreed','~15s', cb.length?'<ul class="cl-ul">'+cb.map(function(x){ var s=x.status||''; return '<li>'+esc(x.promise||txt(x))+(s?' <span class="cl-st '+(s==='done'?'on_track':s==='missed'?'off_track':'watch')+'">'+esc(s)+'</span>':'')+(x.evidence?'<div class="cl-sub">'+esc(x.evidence)+'</div>':'')+'</li>'; }).join('')+'</ul>':'<p class="cl-empty">Nothing on record from the last call or Loom.</p>')+
+      step(8,'🎯 Next week\'s targets','~20s', li(targets,'Nothing drafted yet.'))+
+      step(9,'Close','~10s', L.close?'<p style="margin:0">'+esc(L.close)+'</p>':'<p class="cl-empty">One line that sends them into the week.</p>')+
+      '</div></div>'+
+      (d?'<div class="panel"><h3 class="cl-h">This week\'s check-in'+(c.submittedLabel?' · '+esc(c.submittedLabel):'')+'</h3>'+(d.points?'<div class="ck-pts" style="margin:0">'+esc(d.points)+'</div>':'')+(keys.length?'<details class="ck-ans" open><summary>Their answers</summary><dl>'+keys.map(function(k){ return '<dt>'+esc(k)+'</dt><dd>'+esc(ans[k])+'</dd>'; }).join('')+'</dl></details>':'')+'<div><button type="button" class="btn" data-clgock>Record done? Paste the Loom in Check-in replies →</button></div></div>':'')+
+      renderInsights(o);
   }
+
 
   /* ---------- Progress photos: compare side by side (pick date + angle, zoom, pan, brightness, contrast) + branded post builder ----------
      client_photos data: {member_id, date, pos (1..n in the 1FIT gallery), angle: front|back|side|other, path (storage key in bucket progress-photos), weight, w, h}.
@@ -7407,7 +7481,7 @@ table.scores td{border-color:var(--border);}
   }
   function renderShare(){
     var row=profiles.find(function(r){ return r.id===openId; }), el=$('clShare'); if(!row||!el) return;
-    var o=model(row), p=o.p, L=p.loom||{}, wins=arr((p.screen||{}).wins); if(!wins.length) wins=arr(L.likes);
+    var o=model(row), p=o.p, L=p.loom||{}, wins=arr((p.screen||{}).wins); if(!wins.length) wins=arr(L.wins).length?arr(L.wins):arr(L.likes); if(!arr(L.focus).length && arr(L.targets).length) L=Object.assign({}, L, {focus:arr(L.targets)});
     var prs=arr((p.gym||{}).prs).map(function(x){ return (x.lift||'')+' '+(x.from!=null?x.from+' → ':'')+(x.to!=null?x.to:'')+(x.unit?' '+x.unit:' kg'); });
     el.innerHTML='<div class="sh-top"><div><h1>'+esc(first(o.name))+'</h1><div class="sh-sub">'+[o.week?'Week '+o.week:null, o.phase||null, o.goal||null].filter(Boolean).map(esc).join(' · ')+'</div></div><button type="button" class="btn sh-exit" data-clshareexit>Exit screenshare (Esc)</button></div>'+
       '<div class="kpis">'+

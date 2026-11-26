@@ -23,10 +23,26 @@ for (let w = 1; w <= 4; w++) [0, 1, 4, 5].forEach(d => metrics.push({ id: 'hk|s|
 for (let i = 13; i >= 0; i--) metrics.push({ id: 'se|' + i, data: { member_id: 'sami-ellaz', date: nd(T - i), kind: 'weight', value: i % 2 ? 80.1 : 80.0 } });
 const svg = (c, label) => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800"><rect width="600" height="800" fill="${c}"/><circle cx="300" cy="160" r="80" fill="#fff"/><text x="40" y="700" font-size="60" fill="#fff">${label}</text></svg>`);
 const STORAGE = { 'jack-keys/2026-09-25-1.jpg': svg('#335', 'W1 FRONT'), 'jack-keys/2026-09-25-2.jpg': svg('#533', 'W1 BACK'), 'jack-keys/2026-11-20-1.jpg': svg('#353', 'W9 FRONT'), 'jack-keys/2026-11-20-2.jpg': svg('#553', 'W9 BACK') };
+// richer Jack data: calories/protein/steps 28 days (weekends high), lifts weekly, check-in scores
+for (let i = 27; i >= 0; i--) { const n = T - i, dow = (new Date(n * 864e5).getUTCDay() + 6) % 7, we = dow >= 5;
+  metrics.push({ id: 'jk|cal|' + i, data: { member_id: 'jack-keys', date: nd(n), kind: 'calories', value: we ? 2900 : 2150 } });
+  metrics.push({ id: 'jk|pro|' + i, data: { member_id: 'jack-keys', date: nd(n), kind: 'protein', value: we ? 120 : 185 } });
+  metrics.push({ id: 'jk|st|' + i, data: { member_id: 'jack-keys', date: nd(n), kind: 'steps', value: 8000 + (i % 5) * 400 } }); }
+[['Bench press', [80, 82.5, 85, 87.5, 90, 92.5]], ['Back squat', [110, 112, 113, 113, 113, 113]], ['RDL', [100, 105, 107.5, 110, 115, 117.5]]].forEach(([lift, vals]) => vals.forEach((v, k) => metrics.push({ id: 'jk|lift|' + lift + k, data: { member_id: 'jack-keys', date: nd(T - 7 * (vals.length - 1 - k) - 2), kind: 'lift', value: v, detail: { lift, top: Math.round(v * 0.85) + 'x6' } } })));
+[[25, 7, 6, 5], [18, 7, 6, 6], [11, 6, 5, 7], [4, 5, 5, 8]].forEach(([d, energy, sleep, stress]) => metrics.push({ id: 'jk|cks|' + d, data: { member_id: 'jack-keys', date: nd(T - d), kind: 'checkin', value: 1, detail: { summary: 'Energy ' + energy + ', stress ' + stress, scores: { energy, sleep, stress } } } }));
 const FX = {
   client_profiles: [
     { id: 'jack-keys', data: { name: 'Jack Keys', startDate: '2026-09-22', sessionsPerWeek: 4, goalWeight: 85, goalPace: -0.5, phase: 'Cut', brief: 'SECRET BRIEF scale slowing', flags: ['Knee niggle'], syncedAt: '2026-11-25T13:00:00Z',
-      loom: { weekOf: '2026-11-23', likes: ['Weighed in every day'], dislikes: ['PRIVATE DISLIKE two missed Thursdays'], focus: ['Train Thursday before work drinks'], questions: ['Creatine?'] },
+      macros: { calories: 2300, protein: 180, carbs: 230, fat: 70, setAt: '2026-11-03' },
+      loom: { weekOf: '2026-11-23', hook: 'Jack, week 10 and the bench just hit 90 for 6. That is the strongest you have been on this program.',
+        likes: ['Weighed in every day'], wins: [{ text: 'Weighed in every day', evidence: '7/7 weigh-ins, 4th week running' }, { text: 'Bench 80 → 92.5 kg est. 1RM since week 4', evidence: 'top set 79x6 Mon' }],
+        fixes: [{ text: 'PRIVATE DISLIKE two missed Thursdays', why: 'Thursday is work drinks: both missed sessions were Thursdays', evidence: '0/4 Thu sessions in 4 wks' }, { text: 'Weekends ~750 kcal over weekdays', why: 'Weekend protein 120 g vs 185 g weekdays', evidence: 'last 28 days' }],
+        dislikes: ['PRIVATE DISLIKE two missed Thursdays'], focus: ['Train Thursday before work drinks'], targets: [{ text: 'Train Thursday before work drinks', evidence: '4/4 sessions' }, 'Protein 170 g+ on Sat and Sun', '9k steps average'],
+        questions: [{ q: 'Creatine?', answer: '5 g a day, any time, no loading. Expect +1 kg water on the scale in week 1, that is fine.' }],
+        adjustments: { training: ['Move Thursday Pull to Wednesday 6am'], nutrition: ['Keep 2300 kcal: decide the macro check first'], habits: ['Pre-log Saturday dinner by 2pm'] },
+        callbacks: [{ promise: 'Cap drinks at 4 on nights out', status: 'missed', evidence: 'Sat 2,900 kcal, he said 6 beers' }, { promise: 'Back photos every check-in', status: 'done' }],
+        close: 'Fix Thursdays and the weekend, and the scale moves again. Your call.' },
+      insights: [{ type: 'risk', title: 'Scale has slowed while lifts climb', detail: 'Trend −0.35 kg/wk vs −0.5 goal; bench +12.5 kg in 5 wks. Likely weekends, not muscle.', evidence: 'weights 28 days, lifts weekly' }, { type: 'life', title: 'Work Christmas party Fri 12 Dec', detail: 'Plan the day: train AM, protein-first lunch.' }],
       gym: { prs: [{ lift: 'Bench', from: 80, to: 90 }], stalls: [{ lift: 'Squat', weight: 110, weeks: 3 }] },
       whatsapp: { unanswered: [{ at: '2026-11-24', text: 'Should I take creatine?' }] } } },
     { id: 'harris-katsianos', data: { name: 'Harris Katsianos', startDate: '2026-10-27', sessionsPerWeek: 4 } },
@@ -89,7 +105,7 @@ async function hq(browser, url, { width, dark, role }) {
       check(`${label}: trend kg/wk`, () => assert.ok(Math.abs(m.trend + 0.35) < 1e-6, m.trend));
       check(`${label}: gym 8/16 = 50%`, () => assert.strictEqual(m.gymPct, 50));
       check(`${label}: this week 1`, () => assert.strictEqual(m.thisWeek, 1));
-      check(`${label}: check-ins 3/4`, () => assert.strictEqual(m.ck, '3/4'));
+      check(`${label}: check-ins 4/4`, () => assert.strictEqual(m.ck, '4/4'));
       check(`${label}: eta exists`, () => assert.ok(m.eta > 0));
       check(`${label}: jack watch`, () => assert.strictEqual(m.status, 'watch'));
       check(`${label}: harris 100% on track, no weight`, () => assert.ok(m.h === 100 && m.hs === 'on_track' && m.hw === undefined, JSON.stringify(m)));
@@ -111,7 +127,7 @@ async function hq(browser, url, { width, dark, role }) {
       check(`${label}: gym insights`, () => assert.ok(/PR · Bench 80→90 kg/.test(p) && /Stalled · Squat at 110 kg for 3 wks/.test(p)));
       check(`${label}: brief + unanswered + timeline`, () => assert.ok(/SECRET BRIEF/.test(p) && /Should I take creatine\?/.test(p) && /4 drinks max/.test(p) && /Your Loom reply/.test(p) && /rated 5\/5/.test(p)));
       const c = await page.evaluate(() => document.getElementById('clCmp').innerText);
-      check(`${label}: compare 7 vs 7`, () => assert.ok(/Weight \(avg\)\s+91\.7 kg\s*7 days\s+92\.\d kg\s*7 days\s+-0\.\d kg/.test(c) && /Gym sessions\s+1\s+2\s+-1/.test(c) && /Steps \(avg\/day\)\s+–\s+–\s+–/.test(c), c));
+      check(`${label}: compare 7 vs 7`, () => assert.ok(/Weight \(avg\)\s+91\.7 kg\s*7 days\s+92\.\d kg\s*7 days\s+-0\.\d kg/.test(c) && /Gym sessions\s+1\s+2\s+-1/.test(c) && /Steps \(avg\/day\)\s+8,6\d\d\s+7 days/.test(c), c));
       check(`${label}: cut → weight down is green`, () => assert.ok(page.locator('#clCmp .cl-d.good')));
       await page.$eval('[data-clcmp="14"]', b => b.click()); await page.waitForTimeout(100);
       const c14 = await page.evaluate(() => document.getElementById('clCmp').innerText);
@@ -127,6 +143,8 @@ async function hq(browser, url, { width, dark, role }) {
       if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `profile-${tag}.png`), fullPage: true });
       await page.click('[data-clmode="loom"]'); await page.waitForTimeout(150);
       const l = await page.evaluate(() => document.getElementById('clProfile').innerText);
+      check(`${label}: loom run sheet`, () => assert.ok(/strongest you have been/.test(l) && /Scoreboard/.test(l) && /Thursday is work drinks/.test(l) && /5 g a day/.test(l) && /Move Thursday Pull/.test(l) && /Cap drinks at 4/.test(l) && /missed/.test(l) && /Protein 170 g\+/.test(l) && /Your call/.test(l), l.slice(0, 1500)));
+      check(`${label}: insights auto`, () => assert.ok(/Weekends \+750 kcal vs weekdays/.test(l) && /Back squat flat for 3\+ weeks/.test(l) && /8 of 32 planned sessions/.test(l) && /Stress 5 → 8 over 4 check-ins/.test(l) && /Protein hit 20\/28/.test(l) && /Work Christmas party/.test(l), l.slice(l.search(/coach insights/i), l.search(/coach insights/i) + 1500)));
       check(`${label}: loom prep points`, () => assert.ok(/Weighed in every day/.test(l) && /PRIVATE DISLIKE/.test(l) && /Train Thursday/.test(l) && /Creatine\?/.test(l) && /Bench PR/.test(l), l.slice(0, 800)));
       if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `loom-${tag}.png`), fullPage: true });
       await page.click('#clProfile [data-clshare]'); await page.waitForTimeout(150);

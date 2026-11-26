@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.20.0 — 26 Nov 2026 (Clients: deeper Loom prep + coach insights)
+
+- **Loom prep is now a 9-step run sheet** (~4 min): open line, scoreboard this week vs last (weight, sessions, steps, calories, protein + trend/goal date), wins with evidence, what's holding them back with the cause, their questions with your drafted answer, changes this week (training / nutrition / habits), what was agreed last time (done / partly / missed), next week's targets, close.
+- **Coach insights** (Overview and Loom prep): the nightly's written analysis (wins, risks, patterns, opportunities, upcoming life events, each with evidence) plus insights HQ computes from every log: planned vs done sessions and reliable training days, weekend vs weekday calories, protein hit rate, logging gaps, check-in score trends (energy / sleep / stress…), flat lifts. Panels for sessions by weekday, check-in score sparklines and a lift table (estimated 1RM, top set, 4-week and since-start change).
+- Nightly sync writes `lift` and check-in `scores` metrics and the new `loom` / `insights` fields, reading the client's full history before writing.
+
 ## 3.19.0 — 26 Nov 2026 (Clients: progress photos + post builder)
 
 - Client page **Photos**: two panes side by side, each with its own date (with week and weigh-in) and angle (front / side / back). Drag to move, scroll or pinch to zoom, zoom linked or separate, brightness and contrast per side, reset, swap.
