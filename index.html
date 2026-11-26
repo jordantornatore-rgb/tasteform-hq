@@ -220,6 +220,69 @@ button.kpi:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .ck-ans summary{cursor:pointer;font-weight:600;}
 .ck-ans dl{margin:6px 0 0;display:grid;grid-template-columns:minmax(120px,30%) 1fr;gap:4px 10px;}
 .ck-ans dt{color:var(--muted);} .ck-ans dd{margin:0;color:var(--text-2);}
+/* ---------- Clients (client database) ---------- */
+.cl-list{display:flex;flex-direction:column;}
+.cl-row{display:grid;grid-template-columns:minmax(150px,1.6fr) 110px 1fr 1fr 1fr 1fr;gap:var(--s3);align-items:center;padding:10px 6px;border-top:1px solid var(--border);cursor:pointer;border-radius:var(--r-s);background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;color:inherit;font:inherit;width:100%;}
+.cl-row:first-child{border-top:0;}
+.cl-row:hover{background:var(--surface-2);}
+.cl-row.head{cursor:default;font-size:var(--t-xs);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.cl-row.head:hover{background:none;}
+.cl-name{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cl-sub{font-size:12px;color:var(--muted);font-weight:400;}
+.cl-cell{font-size:14px;min-width:0;}
+.cl-cell .cl-sub{display:block;}
+.cl-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--muted);}
+.cl-dot.on_track{background:var(--good);} .cl-dot.watch{background:var(--warn);} .cl-dot.off_track{background:var(--crit);}
+.cl-st{font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;}
+.cl-st.on_track{background:var(--good-soft);color:var(--good);} .cl-st.watch{background:var(--warn-soft);color:var(--warn);} .cl-st.off_track{background:var(--crit-soft);color:var(--crit);} .cl-st.unknown{background:var(--surface-2);color:var(--muted);}
+.cl-att{display:block;font-size:12px;color:var(--crit);font-weight:600;white-space:normal;}
+.cl-name .cl-sub{margin-left:6px;}
+.cl-spark{width:70px;height:22px;vertical-align:middle;}
+@media (max-width:820px){
+  .cl-row{grid-template-columns:1fr auto;gap:4px var(--s3);}
+  .cl-row.head{display:none;}
+  .cl-row .cl-cell.hide-m{display:none;}
+  .cl-name{white-space:normal;}
+  .cl-row .cl-mline{grid-column:1 / -1;font-size:13px;color:var(--text-2);}
+}
+@media (min-width:821px){ .cl-mline{display:none;} }
+.cl-top{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;}
+.cl-ava{width:44px;height:44px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+.cl-seg{display:inline-flex;border:1px solid var(--border);border-radius:999px;padding:3px;gap:2px;margin-left:auto;flex-wrap:wrap;}
+.cl-seg button{border:0;background:none;color:var(--text-2);font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;cursor:pointer;}
+.cl-seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);}
+.cl-h{font-size:var(--t-xs);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0;}
+.cl-chart{width:100%;height:auto;display:block;}
+.cl-chart text{font-size:11px;fill:var(--muted);font-family:'Open Sans',sans-serif;}
+.cl-ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:1.5;}
+.cl-brief{border:1px solid var(--accent);border-radius:var(--r-m);padding:12px 14px;font-size:14px;line-height:1.6;white-space:pre-wrap;}
+.cl-tl{display:flex;flex-direction:column;}
+.cl-ev{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--border);font-size:14px;line-height:1.5;}
+.cl-ev:first-child{border-top:0;}
+.cl-ev .ic{width:26px;height:26px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.cl-ev .when{font-size:12px;color:var(--muted);}
+.cl-ev .body{white-space:pre-wrap;color:var(--text-2);}
+.cl-ev.unans .ic{background:var(--crit-soft);}
+.cl-loom{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3);}
+@media (max-width:820px){ .cl-loom{grid-template-columns:1fr;} }
+.cl-pt{border:1px solid var(--border);border-radius:var(--r-m);padding:12px 14px;display:flex;flex-direction:column;gap:6px;}
+.cl-pt h4{margin:0;font-size:14px;}
+.cl-pt.like{border-color:var(--good);} .cl-pt.dislike{border-color:var(--crit);} .cl-pt.focus{border-color:var(--accent);}
+.cl-edit{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+.cl-edit label{font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:4px;}
+.cl-edit .wide{grid-column:1 / -1;}
+.cl-empty{font-size:14px;color:var(--muted);}
+/* Screenshare: full screen, client-safe content only */
+.cl-share{position:fixed;inset:0;z-index:9000;background:var(--page-bg,var(--bg));overflow:auto;padding:28px clamp(16px,4vw,56px);display:flex;flex-direction:column;gap:var(--s4);}
+.cl-share[hidden]{display:none;}
+.cl-share .sh-top{display:flex;align-items:flex-end;gap:var(--s3);flex-wrap:wrap;}
+.cl-share h1{font-family:'Anton',Impact,sans-serif;font-size:clamp(34px,5vw,60px);line-height:1;margin:0;letter-spacing:.01em;}
+.cl-share .sh-sub{color:var(--muted);font-size:16px;}
+.cl-share .sh-exit{margin-left:auto;}
+.cl-share .kpi .value{font-size:clamp(30px,3.6vw,46px);}
+.cl-share .sh-grid{display:grid;grid-template-columns:2fr 1fr;gap:var(--s4);}
+@media (max-width:900px){ .cl-share .sh-grid{grid-template-columns:1fr;} }
+.cl-share .cl-ul{font-size:17px;gap:8px;}
 .ck-send{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
 .ck-send .input{flex:1;min-width:200px;}
 .ck-chip.bad{border-color:#b5533c;color:#e08a73;}
@@ -1512,6 +1575,7 @@ table.scores td{border-color:var(--border);}
       <button class="tab" role="tab" id="tabScorecard" aria-selected="false" aria-controls="viewScorecard" data-view="scorecard"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 10h16M10 4v16"/></svg><span>Scorecard</span></button>
       <div class="sb-group">Work</div>
       <button class="tab" role="tab" id="tabTime" aria-selected="false" aria-controls="viewTime" data-view="time" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="7"/><path d="M12 14V10M10 3h4M12 3v4M18 8l1.5-1.5"/></svg><span>Time</span></button>
+      <button class="tab" role="tab" id="tabClients" aria-selected="false" aria-controls="viewClients" data-view="clients" hidden><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 11l2 2 4-4"/></svg><span>Clients</span><span class="tab-badge" id="clBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabCheckins" aria-selected="false" aria-controls="viewCheckins" data-view="checkins" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg><span>Check-in replies</span><span class="tab-badge" id="ckBadge" hidden></span></button>
       <button class="tab" role="tab" id="tabToday" aria-selected="false" aria-controls="viewToday" data-view="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Daily brief</span></button>
             <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>DMs</span><span class="tab-badge" id="dmsBadge" hidden></span></button>
@@ -2127,6 +2191,15 @@ table.scores td{border-color:var(--border);}
     </details>
     <div class="panel"><h3 class="pl-h" style="margin:0 0 6px">Sent replies</h3><div id="ckList"><div class="empty-state">Loading…</div></div></div>
   </section>
+  <section id="viewClients" role="tabpanel" aria-labelledby="tabClients" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
+    <div id="clRoster" style="display:flex;flex-direction:column;gap:var(--s4);">
+      <div class="top"><div><h1>Clients</h1><div class="sub" id="clSub">Loading…</div></div></div>
+      <div class="kpis" id="clKpis"></div>
+      <div class="panel"><div id="clList" class="cl-list"><div class="empty-state">Loading…</div></div></div>
+    </div>
+    <div id="clProfile" hidden style="display:flex;flex-direction:column;gap:var(--s4);"></div>
+  </section>
+  <div id="clShare" class="cl-share" hidden role="dialog" aria-modal="true" aria-label="Screenshare view"></div>
   <section id="viewRoutine" role="tabpanel" aria-labelledby="tabRoutine" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
     <div id="routineRoot" style="display:flex;flex-direction:column;gap:var(--s4);">
       <div class="top"><div><h1>Routine</h1><div class="sub" id="rtSub">Loading…</div></div><div class="r-nav" id="rtNav"></div></div>
@@ -2209,6 +2282,7 @@ table.scores td{border-color:var(--border);}
       <button class="sheet-btn" data-view="subs" id="sheetSubs" hidden>Subscriptions</button>
       <button class="sheet-btn" data-view="challenge" id="sheetChallenge" hidden>Challenge <span class="tab-badge" id="chBadgeBb" hidden></span></button>
       <button class="sheet-btn" data-view="routine" id="sheetRoutine" hidden>Routine</button>
+      <button class="sheet-btn" data-view="clients" id="sheetClients" hidden>Clients</button>
       <button class="sheet-btn" data-view="checkins" id="sheetCheckins" hidden>Check-in replies</button>
       <button class="sheet-btn" data-view="time" id="sheetTime" hidden>Time</button>
       <button class="sheet-btn" id="sheetTheme">Theme: system</button>
@@ -2393,8 +2467,8 @@ table.scores td{border-color:var(--border);}
   Object.keys(VIEW_DEPS).forEach(function(v){ dirty[v]=true; });
 
   /* ---------- views ---------- */
-  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', scorecard:'viewScorecard', people:'viewPeople', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine', time:'viewTime', links:'viewLinks', checkins:'viewCheckins'};
-  var ADMIN_VIEWS={sales:1, people:1, stripe:1, subs:1, routine:1, time:1, challenge:1, email:1, checkins:1};
+  var VIEWS={home:'viewHome', traffic:'viewTraffic', leadflow:'viewLeadflow', sales:'viewSales', delivery:'viewDelivery', scorecard:'viewScorecard', people:'viewPeople', today:'viewToday', funnel:'viewFunnel', leads:'viewLeads', dms:'viewDms', follow:'viewFollow', magnets:'viewMagnets', apps:'viewApps', ads:'viewAds', content:'viewContent', analytics:'viewAnalytics', email:'viewEmail', stripe:'viewStripe', subs:'viewSubs', challenge:'viewChallenge', routine:'viewRoutine', time:'viewTime', links:'viewLinks', checkins:'viewCheckins', clients:'viewClients'};
+  var ADMIN_VIEWS={sales:1, people:1, stripe:1, subs:1, routine:1, time:1, challenge:1, email:1, checkins:1, clients:1};
   function setView(view, push){
     if(!VIEWS[view] || (ADMIN_VIEWS[view] && !isAdmin)) view='home';
     currentView = view;
@@ -2442,7 +2516,7 @@ table.scores td{border-color:var(--border);}
   (function initView(){ var v=(location.hash||'').replace('#',''); currentView = VIEWS[v]?v:'home'; })();
 
   /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
-  var VIEW_LABEL={home:'Home', traffic:'Traffic', leadflow:'Leads', sales:'Sales', delivery:'Delivery', scorecard:'Scorecard', people:'Lead list', today:'Daily brief', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine', time:'Time', links:'Funnel links'};
+  var VIEW_LABEL={home:'Home', traffic:'Traffic', leadflow:'Leads', sales:'Sales', delivery:'Delivery', scorecard:'Scorecard', people:'Lead list', today:'Daily brief', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine', time:'Time', links:'Funnel links', checkins:'Check-in replies', clients:'Clients'};
   var VIEW_KEYS={'1':'home','2':'traffic','3':'leadflow','4':'sales','5':'delivery','6':'apps','7':'content','8':'today'};
   var appEl=$('appRoot');
   function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
@@ -6860,6 +6934,295 @@ table.scores td{border-color:var(--border);}
   });
   document.addEventListener('tf-auth-signed-out', function(){ client=null; admin=false; rows=[]; loaded=false; if(poller) clearInterval(poller); var t=$('tabCheckins'); if(t) t.hidden=true; var s2=$('sheetCheckins'); if(s2) s2.hidden=true; });
   window.__checkins={token:token, loomOk:loomOk, message:message, page:function(){ return PAGE; }};
+})();
+</script>
+<script>
+/* ---------- Clients: the client database (admin only) ----------
+   Tables (admin-only RLS), filled every night by the "Client database nightly" scheduled task via hq_merge:
+     client_profiles  id = challenge_members.id  data: name, email, startDate, sessionsPerWeek, goal, phase, goalWeight, startWeight,
+                      goalPace (kg/wk), status (on_track|watch|off_track), statusWhy, flags[], brief, loom{weekOf,likes[],dislikes[],focus[],questions[]},
+                      screen{wins[]}, gym{prs[{lift,from,to,date}], stalls[{lift,weight,weeks}], missed[]}, whatsapp{lastClientAt,lastJordanAt,unanswered[{at,text}]},
+                      lastCallAt, nextCallAt, syncedAt. data.manual{} = what Jordan typed in HQ (wins over the nightly values, never overwritten by it).
+     client_metrics   data: member_id, date (YYYY-MM-DD, Sydney), kind weight|steps|session|checkin, value, detail
+     client_timeline  data: member_id, at, source whatsapp|checkin|loom|fathom|1fit|note, title, body, private, unanswered
+   Every number is computed from those rows; if there isn't enough data the cell shows "–". Screenshare view = client-safe only. */
+(function(){
+  'use strict';
+  var esc=HQ.esc, client=null, admin=false, loaded=false, poller=null;
+  var profiles=[], metrics={}, timeline={}, replies=[], openId=null, mode='overview';
+  function $(id){ return document.getElementById(id); }
+  var DAY=864e5;
+  function today(){ if(window.__CL_TODAY) return window.__CL_TODAY; try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Sydney',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()); }catch(e){ return new Date().toISOString().slice(0,10); } }
+  function dn(s){ if(!s) return null; var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(s)); return m?Math.round(Date.UTC(+m[1],+m[2]-1,+m[3])/DAY):null; }
+  function nd(n){ return new Date(n*DAY).toISOString().slice(0,10); }
+  function monday(n){ return n-((new Date(n*DAY).getUTCDay()+6)%7); }
+  function fmtD(n){ return n==null?'–':new Date(n*DAY).toLocaleDateString('en-AU',{day:'numeric',month:'short',timeZone:'UTC'}); }
+  function ago(n){ if(n==null) return '–'; var d=dn(today())-n; return d<=0?'today':d===1?'yesterday':d+' days ago'; }
+  function kg(v,sign){ if(v==null || !isFinite(v)) return '–'; var s=(Math.round(v*10)/10).toFixed(1); return (sign && v>0?'+':'')+s; }
+  function num(v){ var x=parseFloat(v); return isFinite(x)?x:null; }
+  function first(n){ return String(n||'').split(' ')[0]; }
+  function arr(x){ return Array.isArray(x)?x.filter(function(s){ return s!=null && String(typeof s==='object'?(s.text||s.lift||''):s).trim(); }):[]; }
+  function txt(x){ return typeof x==='object'&&x?(x.text||''):String(x); }
+
+  function model(row){
+    var p=row.data||{}, man=p.manual||{}, id=row.id, T=dn(today());
+    var ms=metrics[id]||[];
+    var w=ms.filter(function(m){ return m.kind==='weight' && num(m.value)!=null && dn(m.date)!=null; }).map(function(m){ return {n:dn(m.date), v:num(m.value)}; }).sort(function(a,b){ return a.n-b.n; });
+    var o={id:id, p:p, man:man, name:p.name||id, w:w};
+    o.start=dn(man.startDate||p.startDate);
+    o.week=o.start!=null?Math.floor((T-o.start)/7)+1:null;
+    o.goal=man.goal||p.goal||''; o.phase=man.phase||p.phase||'';
+    o.goalW=num(man.goalWeight!=null&&man.goalWeight!==''?man.goalWeight:p.goalWeight);
+    o.pace=num(man.goalPace!=null&&man.goalPace!==''?man.goalPace:p.goalPace);
+    o.spw=num(man.sessionsPerWeek||p.sessionsPerWeek);
+    if(w.length){
+      var L=w[w.length-1].n, last7=w.filter(function(x){ return x.n>L-7; });
+      o.lastW=L; o.avg7=last7.reduce(function(s,x){ return s+x.v; },0)/last7.length;
+      var sw=num(man.startWeight!=null&&man.startWeight!==''?man.startWeight:p.startWeight); o.startW=sw!=null?sw:w[0].v;
+      o.change=w.length>1||sw!=null?o.avg7-o.startW:null; o.startFrom=sw!=null?o.start:w[0].n;
+      var t=w.filter(function(x){ return x.n>L-28; });
+      if(t.length>=4 && t[t.length-1].n-t[0].n>=10){
+        var mx=t.reduce(function(s,x){ return s+x.n; },0)/t.length, my=t.reduce(function(s,x){ return s+x.v; },0)/t.length, sxy=0, sxx=0;
+        t.forEach(function(x){ sxy+=(x.n-mx)*(x.v-my); sxx+=(x.n-mx)*(x.n-mx); });
+        o.trend=sxx?sxy/sxx*7:null;
+      }
+      if(o.goalW!=null && o.trend && Math.abs(o.trend)>=0.05 && (o.goalW-o.avg7)*o.trend>0){ o.eta=Math.round(L+(o.goalW-o.avg7)/o.trend*7); }
+      var wk={}; w.forEach(function(x){ var k=monday(x.n); (wk[k]=wk[k]||[]).push(x.v); });
+      o.weekly=Object.keys(wk).map(Number).sort(function(a,b){ return a-b; }).slice(-8).map(function(k){ return wk[k].reduce(function(s,v){ return s+v; },0)/wk[k].length; });
+    }
+    var sess=ms.filter(function(m){ return m.kind==='session' && dn(m.date)!=null; }).map(function(m){ return dn(m.date); });
+    var M=monday(T); o.thisWeek=sess.filter(function(n){ return n>=M && n<=T; }).length;
+    var from=M-28; if(o.start!=null){ var ff=monday(o.start)===o.start?o.start:monday(o.start)+7; from=Math.max(from, ff); }
+    var weeks=Math.max(0, Math.round((M-from)/7));
+    o.gymWeeks=weeks; o.gymDone=sess.filter(function(n){ return n>=from && n<M; }).length;
+    o.gymPct=(o.spw && weeks)?Math.round(o.gymDone/(o.spw*weeks)*100):null;
+    o.hasSess=sess.length>0;
+    var cks=ms.filter(function(m){ return m.kind==='checkin' && dn(m.date)!=null; }).map(function(m){ return dn(m.date); }).sort(function(a,b){ return a-b; });
+    o.lastCheckin=cks.length?cks[cks.length-1]:null;
+    var ckWeeks=Math.min(4, o.start!=null?Math.max(1,Math.ceil((T-o.start+1)/7)):4);
+    o.ckDone=Object.keys(cks.filter(function(n){ return n>T-ckWeeks*7; }).reduce(function(s,n){ s[monday(n)]=1; return s; },{})).length; o.ckWeeks=ckWeeks;
+    var st=ms.filter(function(m){ return m.kind==='steps' && num(m.value)!=null && dn(m.date)>T-7; });
+    o.steps=st.length?Math.round(st.reduce(function(s,m){ return s+num(m.value); },0)/st.length):null;
+    var rp=replies.filter(function(r){ return r.member_id===id; });
+    o.replies=rp; o.draft=rp.find(function(r){ return r.status==='draft' && !r.loom_url; })||null;
+    var wa=p.whatsapp||{}; o.unans=arr(wa.unanswered);
+    o.att=[];
+    if(o.unans.length) o.att.push(o.unans.length+' unanswered WhatsApp');
+    rp.forEach(function(r){ if(r.wants_support===true && !r.booked_click_at) o.att.push('wants a 1:1'); if(r.question) o.att.push('asked a question on a Loom'); });
+    if(o.lastCheckin!=null && T-o.lastCheckin>=10) o.att.push('no check-in for '+(T-o.lastCheckin)+' days');
+    if(o.gymPct!=null && o.gymPct<50) o.att.push('gym '+o.gymPct+'%');
+    o.att=o.att.filter(function(x,i,a){ return a.indexOf(x)===i; });
+    var s=p.status;
+    if(!s){ if(!w.length && !o.hasSess && o.lastCheckin==null) s='unknown'; else if((o.gymPct!=null&&o.gymPct<50)||(o.lastCheckin!=null&&T-o.lastCheckin>=14)) s='off_track'; else if((o.gymPct!=null&&o.gymPct<75)||(o.lastCheckin!=null&&T-o.lastCheckin>=10)||(o.pace!=null&&o.trend!=null&&o.pace*o.trend<0)) s='watch'; else s='on_track'; }
+    o.status=s; o.statusWhy=p.statusWhy||'';
+    var all=[];
+    (timeline[id]||[]).forEach(function(e){ all.push({at:e.at, n:dn(e.at), source:e.source||'note', title:e.title||'', body:e.body||'', private:e.private!==false, unans:!!e.unanswered}); });
+    rp.filter(function(r){ return r.loom_url; }).forEach(function(r){ var bits=[r.views?('Opened '+r.views+'×'):'Not opened yet']; if(r.rating) bits.push('rated '+r.rating+'/5'); if(r.wants_support===true) bits.push('wants a 1:1'); if(r.wants_support===false) bits.push('no 1:1 needed'); all.push({at:r.sent_at||r.created_at, n:dn(r.sent_at||r.created_at), source:'loom', title:'Your Loom reply', body:bits.join(' · ')+(r.question?'\nQuestion: '+r.question:''), private:true}); });
+    ms.filter(function(m){ return m.kind==='checkin' && m.detail && m.detail.summary; }).forEach(function(m){ all.push({at:m.date, n:dn(m.date), source:'checkin', title:'Check-in', body:m.detail.summary, private:true}); });
+    o.timeline=all.filter(function(e){ return e.n!=null; }).sort(function(a,b){ return String(b.at).localeCompare(String(a.at)); });
+    var calls=o.timeline.filter(function(e){ return e.source==='fathom'; });
+    o.lastCall=dn(p.lastCallAt)||(calls.length?calls[0].n:null);
+    var contact=[dn(wa.lastJordanAt), o.lastCall].concat(rp.filter(function(r){ return r.loom_url; }).map(function(r){ return dn(r.sent_at||r.created_at); })).filter(function(x){ return x!=null; });
+    o.lastContact=contact.length?Math.max.apply(null,contact):null;
+    return o;
+  }
+  var RANK={off_track:0, watch:1, unknown:3, on_track:2};
+  var SLABEL={on_track:'On track', watch:'Watch', off_track:'Off track', unknown:'No data yet'};
+  var ICON={whatsapp:'💬', checkin:'📋', loom:'🎥', fathom:'📞', '1fit':'🏋️', note:'📝'};
+
+  function spark(vals){
+    if(!vals || vals.length<2) return '<span class="cl-sub">–</span>';
+    var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), r=mx-mn||1;
+    var pts=vals.map(function(v,i){ return (i*(68/(vals.length-1))+1).toFixed(1)+','+(20-(v-mn)/r*18).toFixed(1); }).join(' ');
+    return '<svg class="cl-spark" viewBox="0 0 70 22" aria-hidden="true"><polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  }
+  function chart(o, big){
+    var w=o.w; if(w.length<2) return '<p class="cl-empty">Not enough weigh-ins yet for a chart.</p>';
+    var W=big?900:640, H=big?320:200, pl=40, pr=12, pt=12, pb=24;
+    var x0=w[0].n, x1=w[w.length-1].n; if(x1===x0) x1=x0+1;
+    var vs=w.map(function(x){ return x.v; }); if(o.goalW!=null && Math.abs(o.goalW-o.avg7)<15) vs.push(o.goalW);
+    var mn=Math.floor(Math.min.apply(null,vs)-0.5), mx=Math.ceil(Math.max.apply(null,vs)+0.5);
+    function X(n){ return pl+(n-x0)/(x1-x0)*(W-pl-pr); } function Y(v){ return pt+(mx-v)/(mx-mn)*(H-pt-pb); }
+    var avg=w.map(function(x){ var s=w.filter(function(y){ return y.n>x.n-7 && y.n<=x.n; }); return {n:x.n, v:s.reduce(function(a,y){ return a+y.v; },0)/s.length}; });
+    var out='<svg class="cl-chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Weight from '+kg(w[0].v)+' to '+kg(o.avg7)+' kg">';
+    [mn, (mn+mx)/2, mx].forEach(function(v){ out+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--border)" stroke-width="1"/><text x="'+(pl-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(Math.round(v*10)/10)+'</text>'; });
+    if(o.goalW!=null && o.goalW>=mn && o.goalW<=mx) out+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(o.goalW)+'" y2="'+Y(o.goalW)+'" stroke="var(--good)" stroke-width="1.5" stroke-dasharray="5 4"/><text x="'+(W-pr)+'" y="'+(Y(o.goalW)-5)+'" text-anchor="end" style="fill:var(--good)">goal '+kg(o.goalW)+'</text>';
+    w.forEach(function(x){ out+='<circle cx="'+X(x.n).toFixed(1)+'" cy="'+Y(x.v).toFixed(1)+'" r="'+(big?3:2.2)+'" fill="var(--muted)" opacity=".45"/>'; });
+    out+='<polyline points="'+avg.map(function(a){ return X(a.n).toFixed(1)+','+Y(a.v).toFixed(1); }).join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="'+(big?3:2.4)+'" stroke-linejoin="round" stroke-linecap="round"/>';
+    out+='<text x="'+pl+'" y="'+(H-6)+'">'+fmtD(x0)+'</text><text x="'+(W-pr)+'" y="'+(H-6)+'" text-anchor="end">'+fmtD(w[w.length-1].n)+'</text></svg>';
+    return out;
+  }
+  function kpi(label, value, note, cls){ return '<div class="kpi'+(cls?' '+cls:'')+'"><div class="label">'+esc(label)+'</div><div class="value">'+value+'</div><div class="note">'+(note?esc(note):'&nbsp;')+'</div></div>'; }
+  function kg2(v){ if(v==null||!isFinite(v)) return '–'; return (v>0?'+':'')+(Math.round(v*100)/100).toFixed(2); }
+  function trendNote(o){ if(o.trend==null) return 'needs 4+ weigh-ins over 10+ days'; return (o.pace!=null?'goal pace '+kg(o.pace,true)+' kg/wk':'no goal pace set')+(o.eta!=null?' · goal by '+fmtD(o.eta):''); }
+  function trendCls(o){ if(o.trend==null || o.pace==null) return ''; return o.pace*o.trend<0?'alert':(Math.abs(o.trend)>=Math.abs(o.pace)*0.7?'good':''); }
+
+  function renderRoster(){
+    var el=$('clList'); if(!el) return;
+    if(!loaded){ el.innerHTML='<div class="empty-state">Loading…</div>'; return; }
+    var ms=profiles.map(model).sort(function(a,b){ return (b.att.length?1:0)-(a.att.length?1:0) || RANK[a.status]-RANK[b.status] || a.name.localeCompare(b.name); });
+    var synced=profiles.map(function(r){ return (r.data||{}).syncedAt; }).filter(Boolean).sort().pop();
+    $('clSub').textContent=ms.length+' active clients · '+(synced?'last nightly sync '+new Date(synced).toLocaleString('en-AU',{weekday:'short',hour:'numeric',minute:'2-digit'}):'nightly sync hasn\'t run yet')+'. Tap a client for their page and Loom prep.';
+    var cnt=function(s){ return ms.filter(function(o){ return o.status===s; }).length; };
+    var gp=ms.filter(function(o){ return o.gymPct!=null; }), avgG=gp.length?Math.round(gp.reduce(function(s,o){ return s+o.gymPct; },0)/gp.length):null;
+    $('clKpis').innerHTML=kpi('Need attention', ms.filter(function(o){ return o.att.length; }).length, 'unanswered, 1:1 asks, missed check-ins', ms.some(function(o){ return o.att.length; })?'alert':'')+
+      kpi('On track', cnt('on_track'), cnt('watch')+' watch · '+cnt('off_track')+' off track', 'good')+
+      kpi('Avg gym compliance', avgG==null?'–':avgG+'<small>%</small>', 'last 4 full weeks')+
+      kpi('Loom drafts', ms.filter(function(o){ return o.draft; }).length, 'waiting to record');
+    var nb=ms.filter(function(o){ return o.att.length; }).length, bd=$('clBadge'); if(bd){ bd.hidden=!nb; bd.textContent=nb; }
+    if(!ms.length){ el.innerHTML='<div class="empty-state">No clients yet.</div>'; return; }
+    el.innerHTML='<div class="cl-row head"><span>Client</span><span>Status</span><span>Weight (7-day)</span><span>Gym</span><span>Last check-in</span><span>Last contact</span></div>'+ms.map(function(o){
+      var gym=o.spw?(o.thisWeek+'/'+o.spw+' this wk'):'–';
+      return '<button type="button" class="cl-row" data-clopen="'+esc(o.id)+'">'+
+        '<span class="cl-name"><span class="cl-dot '+o.status+'"></span>'+esc(o.name)+'<span class="cl-sub">'+(o.week?'Week '+o.week:'')+(o.phase?' · '+esc(o.phase):'')+'</span>'+(o.att.length?'<span class="cl-att">'+esc(o.att.join(' · '))+'</span>':'')+'</span>'+
+        '<span class="cl-cell"><span class="cl-st '+o.status+'">'+SLABEL[o.status]+'</span></span>'+
+        '<span class="cl-cell hide-m">'+(o.avg7!=null?kg(o.avg7)+' kg ':'– ')+spark(o.weekly)+'<span class="cl-sub">'+(o.change!=null?kg(o.change,true)+' kg since start':'&nbsp;')+'</span></span>'+
+        '<span class="cl-cell hide-m">'+gym+'<span class="cl-sub">'+(o.gymPct!=null?o.gymPct+'% last 4 wks':'&nbsp;')+'</span></span>'+
+        '<span class="cl-cell hide-m">'+ago(o.lastCheckin)+'</span>'+
+        '<span class="cl-cell hide-m">'+ago(o.lastContact)+'</span>'+
+        '<span class="cl-mline">'+[o.avg7!=null?kg(o.avg7)+' kg ('+kg(o.change,true)+')':null, o.spw?gym:null, 'check-in '+ago(o.lastCheckin)].filter(Boolean).join(' · ')+'</span>'+
+      '</button>';
+    }).join('');
+  }
+
+  function list(items, empty){ items=arr(items); return items.length?'<ul class="cl-ul">'+items.map(function(s){ return '<li>'+esc(txt(s))+'</li>'; }).join('')+'</ul>':'<p class="cl-empty">'+esc(empty)+'</p>'; }
+  function gymBlock(o){
+    var g=o.p.gym||{}, parts=[];
+    arr(g.prs).forEach(function(x){ parts.push('PR · '+(x.lift||'')+' '+(x.from!=null?x.from+'→':'')+(x.to!=null?x.to:'')+(x.unit?' '+x.unit:' kg')+(x.date?' ('+fmtD(dn(x.date))+')':'')); });
+    arr(g.stalls).forEach(function(x){ parts.push('Stalled · '+(x.lift||'')+(x.weight!=null?' at '+x.weight+' kg':'')+(x.weeks?' for '+x.weeks+' wks':'')); });
+    arr(g.missed).forEach(function(x){ parts.push('Missed · '+txt(x)); });
+    arr(g.notes).forEach(function(x){ parts.push(txt(x)); });
+    return parts;
+  }
+  function profileHead(o){
+    var ini=o.name.split(' ').map(function(s){ return s[0]||''; }).join('').slice(0,2).toUpperCase();
+    return '<div class="cl-top"><button type="button" class="btn small" data-clback>← Clients</button><div class="cl-ava">'+esc(ini)+'</div><div><h1 style="margin:0">'+esc(o.name)+'</h1><div class="sub">'+[o.week?'Week '+o.week:null, o.phase||null, o.goal||null, o.start!=null?'started '+fmtD(o.start):null].filter(Boolean).map(esc).join(' · ')+'</div></div>'+
+      '<span class="cl-st '+o.status+'">'+SLABEL[o.status]+'</span>'+
+      '<div class="cl-seg" role="group" aria-label="View"><button type="button" data-clmode="overview" aria-pressed="'+(mode==='overview')+'">Overview</button><button type="button" data-clmode="loom" aria-pressed="'+(mode==='loom')+'">Loom prep</button><button type="button" data-clshare>Screenshare ↗</button></div></div>';
+  }
+  function kpiRow(o){
+    return '<div class="kpis">'+
+      kpi('Scale (7-day avg)', o.avg7!=null?kg(o.avg7)+'<small> kg</small>':'–', o.change!=null?kg(o.change,true)+' kg since start'+(o.lastW!=null?' · last weigh-in '+ago(o.lastW):''):'no weigh-ins yet')+
+      kpi('Trajectory', o.trend!=null?kg2(o.trend)+'<small> kg/wk</small>':'–', trendNote(o), trendCls(o))+
+      kpi('Gym compliance', o.gymPct!=null?o.gymPct+'<small>%</small>':'–', o.spw?(o.gymDone+'/'+(o.spw*o.gymWeeks)+' sessions last '+o.gymWeeks+' wks · '+o.thisWeek+'/'+o.spw+' this week'):'sessions per week not set', o.gymPct==null?'':o.gymPct>=85?'good':o.gymPct<60?'alert':'')+
+      kpi('Check-ins', o.ckDone+'<small>/'+o.ckWeeks+'</small>', 'weeks with a check-in · last '+ago(o.lastCheckin)+(o.steps!=null?' · steps '+o.steps.toLocaleString('en-AU')+'/day':''))+
+    '</div>';
+  }
+  function renderOverview(o){
+    var p=o.p, g=gymBlock(o), flags=arr((o.man.flags?String(o.man.flags).split('\n'):[]).concat(arr(p.flags)));
+    var tl=o.timeline.slice(0,30);
+    return kpiRow(o)+
+      '<div class="grid2">'+
+        '<div class="panel"><h3 class="cl-h">Weight</h3>'+chart(o,false)+'<p class="cl-sub" style="margin:0">Dots = daily weigh-ins, line = 7-day average'+(o.goalW!=null?', dashed = goal':'')+'.</p></div>'+
+        '<div class="panel"><h3 class="cl-h">Gym insights</h3>'+(g.length?list(g):'<p class="cl-empty">'+(o.hasSess?'No PRs or stalls flagged this week.':'No 1FIT workouts synced yet.')+'</p>')+'</div>'+
+      '</div>'+
+      (p.brief||flags.length||o.statusWhy?'<div class="panel">'+(p.brief?'<h3 class="cl-h">Brief for your next call or Loom</h3><div class="cl-brief">'+esc(p.brief)+'</div>':'')+(o.statusWhy?'<p style="margin:0"><b>Why '+SLABEL[o.status].toLowerCase()+':</b> '+esc(o.statusWhy)+'</p>':'')+(flags.length?'<h3 class="cl-h">Key flags</h3>'+list(flags):'')+'</div>':'')+
+      (o.unans.length?'<div class="panel"><h3 class="cl-h">Unanswered on WhatsApp</h3><div class="cl-tl">'+o.unans.map(function(u){ return '<div class="cl-ev unans"><div class="ic">💬</div><div><div class="when">'+esc(fmtD(dn(u.at)))+'</div><div class="body">'+esc(txt(u))+'</div></div></div>'; }).join('')+'</div></div>':'')+
+      '<div class="panel"><h3 class="cl-h">Timeline</h3>'+(tl.length?'<div class="cl-tl">'+tl.map(function(e){ return '<div class="cl-ev'+(e.unans?' unans':'')+'"><div class="ic">'+(ICON[e.source]||'•')+'</div><div style="min-width:0"><div class="when">'+esc(fmtD(e.n))+' · '+esc(e.title||e.source)+'</div><div class="body">'+esc(e.body)+'</div></div></div>'; }).join('')+'</div>':'<p class="cl-empty">Nothing yet. WhatsApp, check-ins, Looms and calls land here every night.</p>')+'</div>'+
+      editForm(o);
+  }
+  function editForm(o){
+    var m=o.man, p=o.p;
+    var v=function(k){ return esc(m[k]!=null&&m[k]!==''?m[k]:(p[k]!=null?p[k]:'')); };
+    return '<details class="panel"><summary class="pl-h" style="cursor:pointer">Edit goal & details</summary><div class="cl-edit">'+
+      '<label class="wide">Goal<input class="input" data-clf="goal" value="'+v('goal')+'" maxlength="160" placeholder="e.g. Cut to 80 kg with visible abs by March"></label>'+
+      '<label>Phase<select class="input" data-clf="phase">'+['','Cut','Lean bulk','Recomp','Maintain'].map(function(x){ return '<option'+((m.phase||p.phase||'')===x?' selected':'')+'>'+x+'</option>'; }).join('')+'</select></label>'+
+      '<label>Start weight (kg)<input class="input" data-clf="startWeight" inputmode="decimal" value="'+v('startWeight')+'"></label>'+
+      '<label>Goal weight (kg)<input class="input" data-clf="goalWeight" inputmode="decimal" value="'+v('goalWeight')+'"></label>'+
+      '<label>Goal pace (kg/wk)<input class="input" data-clf="goalPace" inputmode="decimal" value="'+v('goalPace')+'" placeholder="-0.5"></label>'+
+      '<label>Sessions per week<input class="input" data-clf="sessionsPerWeek" inputmode="numeric" value="'+v('sessionsPerWeek')+'"></label>'+
+      '<label class="wide">Key flags (one per line)<textarea class="input" data-clf="flags" rows="3" maxlength="800" placeholder="Injuries, preferences, anything to keep top of mind">'+esc(m.flags||'')+'</textarea></label>'+
+      '</div><div><button type="button" class="btn primary" data-clsave>Save</button> <span class="sl-msg" id="clSaveMsg" role="status"></span></div></details>';
+  }
+  function renderLoom(o){
+    var L=o.p.loom||{}, d=o.draft, c=(d&&d.checkin)||{}, ans=c.answers||{}, keys=Object.keys(ans);
+    var box=function(cls, title, items, empty){ return '<div class="cl-pt '+cls+'"><h4>'+title+'</h4>'+list(items, empty)+'</div>'; };
+    return '<div class="panel"><div class="cl-top"><div><h3 class="cl-h">Loom script'+(L.weekOf?' · week of '+esc(fmtD(dn(L.weekOf))):'')+'</h3><p class="cl-sub" style="margin:4px 0 0">Only you see this. Open Screenshare to record: it shows the client-safe page with none of these notes.</p></div><button type="button" class="btn primary" data-clshare style="margin-left:auto">Hide notes · Screenshare ↗</button></div>'+
+      '<div class="cl-loom">'+
+        box('like','👍 What I\'m liking', L.likes, 'Nothing drafted yet.')+
+        box('dislike','👎 What I\'m not liking', L.dislikes, 'Nothing drafted yet.')+
+        box('focus','🎯 Focus for next week', L.focus, 'Nothing drafted yet.')+
+        box('','❓ Their questions to answer', arr(L.questions).concat(o.unans.map(txt)), 'No open questions.')+
+      '</div>'+
+      '<p class="cl-sub" style="margin:0">The scheduled task drafts these from 1FIT, WhatsApp and their last call. The numbers to point at are on the Screenshare page.</p></div>'+
+      (d?'<div class="panel"><h3 class="cl-h">This week\'s check-in'+(c.submittedLabel?' · '+esc(c.submittedLabel):'')+'</h3>'+(d.points?'<div class="ck-pts" style="margin:0">'+esc(d.points)+'</div>':'')+(keys.length?'<details class="ck-ans" open><summary>Their answers</summary><dl>'+keys.map(function(k){ return '<dt>'+esc(k)+'</dt><dd>'+esc(ans[k])+'</dd>'; }).join('')+'</dl></details>':'')+'<div><button type="button" class="btn" data-clgock>Record done? Paste the Loom in Check-in replies →</button></div></div>':
+        '<div class="panel"><p class="cl-empty" style="margin:0">No check-in waiting for a Loom. New ones are drafted Saturday arvo and Sunday.</p></div>')+
+      kpiRow(o);
+  }
+  function renderProfile(){
+    var el=$('clProfile'), row=profiles.find(function(r){ return r.id===openId; });
+    if(!row){ openId=null; $('clRoster').hidden=false; el.hidden=true; renderRoster(); return; }
+    var o=model(row);
+    $('clRoster').hidden=true; el.hidden=false;
+    el.innerHTML=profileHead(o)+(mode==='loom'?renderLoom(o):renderOverview(o));
+  }
+  function renderShare(){
+    var row=profiles.find(function(r){ return r.id===openId; }), el=$('clShare'); if(!row||!el) return;
+    var o=model(row), p=o.p, L=p.loom||{}, wins=arr((p.screen||{}).wins); if(!wins.length) wins=arr(L.likes);
+    var prs=arr((p.gym||{}).prs).map(function(x){ return (x.lift||'')+' '+(x.from!=null?x.from+' → ':'')+(x.to!=null?x.to:'')+(x.unit?' '+x.unit:' kg'); });
+    el.innerHTML='<div class="sh-top"><div><h1>'+esc(first(o.name))+'</h1><div class="sh-sub">'+[o.week?'Week '+o.week:null, o.phase||null, o.goal||null].filter(Boolean).map(esc).join(' · ')+'</div></div><button type="button" class="btn sh-exit" data-clshareexit>Exit screenshare (Esc)</button></div>'+
+      '<div class="kpis">'+
+        kpi('Weight now', o.avg7!=null?kg(o.avg7)+'<small> kg</small>':'–', '7-day average')+
+        kpi('Since you started', o.change!=null?kg(o.change,true)+'<small> kg</small>':'–', o.startFrom!=null?'from '+fmtD(o.startFrom):'', o.change!=null&&o.pace!=null&&o.change*o.pace>0?'good':'')+
+        kpi('Training', o.gymPct!=null?o.gymDone+'<small>/'+(o.spw*o.gymWeeks)+'</small>':'–', o.gymPct!=null?'sessions, last '+o.gymWeeks+' weeks ('+o.gymPct+'%)':'')+
+        kpi('Check-ins', o.ckDone+'<small>/'+o.ckWeeks+'</small>', 'weeks checked in')+
+      '</div>'+
+      '<div class="sh-grid"><div class="panel"><h3 class="cl-h">Your weight</h3>'+chart(o,true)+(o.trend!=null?'<p style="margin:0;font-size:16px">Trending '+kg2(o.trend)+' kg a week'+(o.eta!=null?', on pace for '+kg(o.goalW)+' kg around '+fmtD(o.eta):'')+'.</p>':'')+'</div>'+
+      '<div style="display:flex;flex-direction:column;gap:var(--s4)">'+
+        '<div class="panel"><h3 class="cl-h">Wins this week</h3>'+list(wins,'–')+'</div>'+
+        (prs.length?'<div class="panel"><h3 class="cl-h">Strength PRs</h3>'+list(prs)+'</div>':'')+
+        '<div class="panel"><h3 class="cl-h">Focus for next week</h3>'+list(L.focus,'–')+'</div>'+
+      '</div></div>';
+    el.hidden=false; document.body.style.overflow='hidden';
+    var b=el.querySelector('[data-clshareexit]'); if(b) b.focus();
+  }
+  function closeShare(){ var el=$('clShare'); if(el && !el.hidden){ el.hidden=true; el.innerHTML=''; document.body.style.overflow=''; } }
+  function render(){ if(openId) renderProfile(); else { $('clRoster').hidden=false; $('clProfile').hidden=true; renderRoster(); } }
+  function save(){
+    var row=profiles.find(function(r){ return r.id===openId; }); if(!row) return;
+    var m=Object.assign({}, (row.data||{}).manual||{});
+    document.querySelectorAll('#clProfile [data-clf]').forEach(function(i){ var k=i.getAttribute('data-clf'), v=(i.value||'').trim(); if(/Weight|Pace|sessions/.test(k)){ if(v===''){ delete m[k]; } else { var n=parseFloat(v); if(isFinite(n)) m[k]=n; } } else { if(v) m[k]=v; else delete m[k]; } });
+    m.editedAt=new Date().toISOString();
+    var data=Object.assign({}, row.data||{}, {manual:m}), msg=$('clSaveMsg'); if(msg) msg.textContent='Saving…';
+    client.from('client_profiles').update({data:data}).eq('id',row.id).then(function(r){
+      if(r.error){ if(msg) msg.textContent="Didn't save: "+r.error.message; return; }
+      row.data=data; renderProfile(); var m2=$('clSaveMsg'); if(m2) m2.textContent='Saved ✓';
+    });
+  }
+  function load(){
+    if(!client || !admin) return Promise.resolve();
+    var q=function(t, lim){ return client.from(t).select('id,data').limit(lim); };
+    return Promise.all([q('client_profiles',500), q('client_metrics',20000), q('client_timeline',5000),
+      client.from('checkin_replies').select('id,member_id,client_name,created_at,sent_at,loom_url,status,views,rating,question,wants_support,booked_click_at,points,checkin').order('created_at',{ascending:false}).limit(500)
+    ]).then(function(rs){
+      var err=rs.find(function(r){ return r.error; }); if(err && rs[0].error){ $('clSub').textContent="Couldn't load clients: "+rs[0].error.message; return; }
+      profiles=(rs[0].data||[]).filter(function(r){ return r.data && r.data.active!==false; });
+      metrics={}; (rs[1].data||[]).forEach(function(r){ var d=r.data||{}; if(!d.member_id) return; (metrics[d.member_id]=metrics[d.member_id]||[]).push(d); });
+      timeline={}; (rs[2].data||[]).forEach(function(r){ var d=r.data||{}; if(!d.member_id) return; (timeline[d.member_id]=timeline[d.member_id]||[]).push(d); });
+      replies=(rs[3]&&rs[3].data)||[];
+      loaded=true; var v=$('viewClients'); if(v && !v.hidden) render(); else renderRoster();
+    });
+  }
+  document.addEventListener('click', function(e){
+    var t=e.target.closest ? e.target : e.target.parentElement; if(!t || !t.closest) return;
+    var o=t.closest('[data-clopen]'); if(o){ openId=o.getAttribute('data-clopen'); mode='overview'; render(); window.scrollTo(0,0); return; }
+    if(t.closest('[data-clback]')){ openId=null; render(); return; }
+    var m=t.closest('[data-clmode]'); if(m){ mode=m.getAttribute('data-clmode'); renderProfile(); return; }
+    if(t.closest('[data-clshare]')){ renderShare(); return; }
+    if(t.closest('[data-clshareexit]')){ closeShare(); return; }
+    if(t.closest('[data-clsave]')){ save(); return; }
+    if(t.closest('[data-clgock]')){ var b=$('tabCheckins'); if(b) b.click(); return; }
+  });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeShare(); });
+  document.addEventListener('hq-view', function(ev){ if(ev.detail && ev.detail.view==='clients'){ render(); load(); } else closeShare(); });
+  document.addEventListener('tf-auth-ready', function(ev){
+    var role=ev.detail && ev.detail.profile && ev.detail.profile.role; client=ev.detail && ev.detail.supabase; admin=role==='admin';
+    var tab=$('tabClients'), sheet=$('sheetClients'); if(tab) tab.hidden=!admin; if(sheet) sheet.hidden=!admin;
+    if(!admin) return;
+    load(); if(poller) clearInterval(poller); poller=setInterval(function(){ var v=$('viewClients'); if(v && !v.hidden && !openId) load(); }, 120000);
+  });
+  document.addEventListener('tf-auth-signed-out', function(){ client=null; admin=false; profiles=[]; loaded=false; openId=null; closeShare(); if(poller) clearInterval(poller); var t=$('tabClients'); if(t) t.hidden=true; var s=$('sheetClients'); if(s) s.hidden=true; });
+  window.__clients={model:function(id){ var r=profiles.find(function(x){ return x.id===id; }); return r?model(r):null; }, open:function(id,m){ openId=id; mode=m||'overview'; render(); }, share:renderShare, close:closeShare, load:load};
 })();
 </script>
 <script>

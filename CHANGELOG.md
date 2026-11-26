@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.17.0 — 26 Nov 2026 (Clients: the client database)
+
+- New **Clients** tab (Work, admin only; replaces the Notion Client Register). Roster of active clients: status (On track / Watch / Off track), needs-attention reasons (unanswered WhatsApp, 1:1 asks, Loom questions, no check-in 10+ days, gym under 50%), weight 7-day average + weekly sparkline + change since start, gym this week and last 4 full weeks %, last check-in, last contact. Badge = clients needing attention.
+- Client page: **Overview** (scale 7-day avg, trajectory kg/wk vs goal pace with goal date, gym compliance, check-ins, steps; weight chart with goal line; gym insights PRs/stalls/missed; brief; key flags; unanswered WhatsApp; timeline of WhatsApp, check-ins, Looms, Fathom calls) and **Loom prep** (coach only: liking / not liking / focus / their questions, this week's check-in answers).
+- **Screenshare** opens a full-screen, client-safe page (first name, weight, change, training, check-ins, chart, wins, PRs, focus). No brief, flags, dislikes or messages. Esc exits.
+- **Edit goal & details** saves to `data.manual` (goal, phase, start/goal weight, goal pace, sessions/week, flags), which the nightly sync never overwrites.
+- Tables `client_profiles`, `client_metrics`, `client_timeline` (admin only, `hq_merge` allowed), migration `20261126_client_database.sql`. Filled nightly by the "Client database nightly" scheduled task. Tests: `node tests/clients.test.js` (116 checks).
+
 ## 3.16.0 — 24 Nov 2026 (Check-in replies)
 
 - New **Check-in replies** tab (Work, admin only): pick the client (1FIT active list), paste the Loom link, optional note, tap **Make link + copy message**. It copies "Hey <name>, here's your check-in reply 👇 <link>" to paste in 1FIT.
