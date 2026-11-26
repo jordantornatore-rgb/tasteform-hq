@@ -272,6 +272,19 @@ button.kpi:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .cl-edit label{font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:4px;}
 .cl-edit .wide{grid-column:1 / -1;}
 .cl-empty{font-size:14px;color:var(--muted);}
+.cl-cmp-pre{display:flex;gap:6px;flex-wrap:wrap;}
+.cl-cmp-pre .btn[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
+.cl-cmp-dates{display:flex;gap:var(--s3);flex-wrap:wrap;}
+.cl-cmp-dates label{font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:4px;}
+.cl-cmp-dates span{display:flex;align-items:center;gap:6px;}
+.cl-cmp-dates .input{width:auto;min-width:0;}
+.cl-cmp{width:100%;border-collapse:collapse;font-size:14px;}
+.cl-cmp th,.cl-cmp td{padding:8px 10px;border-top:1px solid var(--border);text-align:right;vertical-align:top;}
+.cl-cmp thead th{border-top:0;font-size:var(--t-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.cl-cmp th[scope=row],.cl-cmp thead th:first-child{text-align:left;font-weight:600;}
+.cl-cmp .cl-sub{display:block;font-weight:400;letter-spacing:0;text-transform:none;}
+.cl-d.good{color:var(--good);font-weight:700;} .cl-d.bad{color:var(--crit);font-weight:700;}
+
 /* Screenshare: full screen, client-safe content only */
 .cl-share{position:fixed;inset:0;z-index:9000;background:var(--page-bg,var(--bg));overflow:auto;padding:28px clamp(16px,4vw,56px);display:flex;flex-direction:column;gap:var(--s4);}
 .cl-share[hidden]{display:none;}
@@ -6949,7 +6962,7 @@ table.scores td{border-color:var(--border);}
 (function(){
   'use strict';
   var esc=HQ.esc, client=null, admin=false, loaded=false, poller=null;
-  var profiles=[], metrics={}, timeline={}, replies=[], openId=null, mode='overview';
+  var profiles=[], metrics={}, timeline={}, replies=[], openId=null, mode='overview', cmp=null;
   function $(id){ return document.getElementById(id); }
   var DAY=864e5;
   function today(){ if(window.__CL_TODAY) return window.__CL_TODAY; try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Sydney',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()); }catch(e){ return new Date().toISOString().slice(0,10); } }
@@ -7108,10 +7121,47 @@ table.scores td{border-color:var(--border);}
       kpi('Check-ins', o.ckDone+'<small>/'+o.ckWeeks+'</small>', 'weeks with a check-in · last '+ago(o.lastCheckin)+(o.steps!=null?' · steps '+o.steps.toLocaleString('en-AU')+'/day':''))+
     '</div>';
   }
+  /* Compare two date ranges: averages per day that has data (exact or blank). Default: last 7 days vs the 7 before. */
+  function cmpPreset(days){ var T=dn(today()); return {a1:nd(T-days+1), a2:nd(T), b1:nd(T-2*days+1), b2:nd(T-days)}; }
+  function cmpStats(id, from, to){
+    var f=dn(from), t=dn(to); if(f==null||t==null||t<f) return null;
+    var ms=(metrics[id]||[]).filter(function(m){ var n=dn(m.date); return n!=null && n>=f && n<=t; });
+    var avgOf=function(kind){ var by={}; ms.forEach(function(m){ var v=num(m.value); if(m.kind===kind && v!=null && by[m.date]==null) by[m.date]=v; }); var ks=Object.keys(by); return ks.length?{v:ks.reduce(function(s,k){ return s+by[k]; },0)/ks.length, n:ks.length}:null; };
+    var days=t-f+1, sess=ms.filter(function(m){ return m.kind==='session'; }).length;
+    return {days:days, weight:avgOf('weight'), steps:avgOf('steps'), calories:avgOf('calories'), protein:avgOf('protein'), sessions:sess, perWeek:days>=7?sess/days*7:null, checkins:ms.filter(function(m){ return m.kind==='checkin'; }).length};
+  }
+  function renderCompare(o){
+    if(!cmp) cmp=cmpPreset(7);
+    var A=cmpStats(o.id, cmp.a1, cmp.a2), B=cmpStats(o.id, cmp.b1, cmp.b2);
+    var f1=function(v,d){ return v==null?'–':(Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toLocaleString('en-AU',{minimumFractionDigits:d, maximumFractionDigits:d}); };
+    var row=function(label, a, b, d, unit, lowerGood){
+      var av=a&&a.v!=null?a.v:(typeof a==='number'?a:null), bv=b&&b.v!=null?b.v:(typeof b==='number'?b:null);
+      var diff=(av!=null&&bv!=null)?av-bv:null, cls='';
+      if(diff!=null && lowerGood!=null && Math.abs(diff)>1e-9) cls=((diff<0)===lowerGood)?'good':'bad';
+      var n=function(x){ return x&&x.n!=null?'<span class="cl-sub">'+x.n+' day'+(x.n===1?'':'s')+'</span>':''; };
+      return '<tr><th scope="row">'+label+'</th><td>'+f1(av,d)+(av!=null?unit:'')+n(a)+'</td><td>'+f1(bv,d)+(bv!=null?unit:'')+n(b)+'</td><td class="cl-d '+cls+'">'+(diff==null?'–':(diff>0?'+':'')+f1(diff,d)+unit)+'</td></tr>';
+    };
+    var lose=/cut/i.test(o.phase||'')||(o.pace!=null&&o.pace<0)?true:(/bulk/i.test(o.phase||'')||(o.pace!=null&&o.pace>0)?false:null);
+    var pr=function(k){ var p=cmpPreset(k); return '<button type="button" class="btn small" data-clcmp="'+k+'" aria-pressed="'+(p.a1===cmp.a1&&p.a2===cmp.a2&&p.b1===cmp.b1&&p.b2===cmp.b2)+'">'+k+' vs '+k+' days</button>'; };
+    var dt=function(k){ return '<input class="input" type="date" data-clcd="'+k+'" value="'+esc(cmp[k])+'">'; };
+    return '<h3 class="cl-h">Compare periods</h3>'+
+      '<div class="cl-cmp-pre">'+pr(7)+pr(14)+pr(28)+'</div>'+
+      '<div class="cl-cmp-dates"><label>This period'+'<span>'+dt('a1')+'–'+dt('a2')+'</span></label><label>Compared with<span>'+dt('b1')+'–'+dt('b2')+'</span></label></div>'+
+      (!A||!B?'<p class="cl-empty">Pick a start date on or before the end date.</p>':
+      '<div style="overflow-x:auto"><table class="cl-cmp"><thead><tr><th></th><th>This period<span class="cl-sub">'+esc(fmtD(dn(cmp.a1)))+' – '+esc(fmtD(dn(cmp.a2)))+' · '+A.days+'d</span></th><th>Compared with<span class="cl-sub">'+esc(fmtD(dn(cmp.b1)))+' – '+esc(fmtD(dn(cmp.b2)))+' · '+B.days+'d</span></th><th>Change</th></tr></thead><tbody>'+
+        row('Weight (avg)', A.weight, B.weight, 1, ' kg', lose)+
+        row('Steps (avg/day)', A.steps, B.steps, 0, '', false)+
+        row('Calories (avg/day)', A.calories, B.calories, 0, '', null)+
+        row('Protein (avg/day)', A.protein, B.protein, 0, ' g', false)+
+        row('Gym sessions', A.sessions, B.sessions, 0, '', false)+
+        row('Sessions per week', A.perWeek, B.perWeek, 1, '', false)+
+        row('Check-ins', A.checkins, B.checkins, 0, '', false)+
+      '</tbody></table></div><p class="cl-sub" style="margin:0">Averages use only the days that have a log; the grey count shows how many. "–" = nothing logged.</p>');
+  }
   function renderOverview(o){
     var p=o.p, g=gymBlock(o), flags=arr((o.man.flags?String(o.man.flags).split('\n'):[]).concat(arr(p.flags)));
     var tl=o.timeline.slice(0,30);
-    return kpiRow(o)+
+    return kpiRow(o)+'<div class="panel" id="clCmp">'+renderCompare(o)+'</div>'+
       '<div class="grid2">'+
         '<div class="panel"><h3 class="cl-h">Weight</h3>'+chart(o,false)+'<p class="cl-sub" style="margin:0">Dots = daily weigh-ins, line = 7-day average'+(o.goalW!=null?', dashed = goal':'')+'.</p></div>'+
         '<div class="panel"><h3 class="cl-h">Gym insights</h3>'+(g.length?list(g):'<p class="cl-empty">'+(o.hasSess?'No PRs or stalls flagged this week.':'No 1FIT workouts synced yet.')+'</p>')+'</div>'+
@@ -7211,9 +7261,11 @@ table.scores td{border-color:var(--border);}
     if(t.closest('[data-clshare]')){ renderShare(); return; }
     if(t.closest('[data-clshareexit]')){ closeShare(); return; }
     if(t.closest('[data-clsave]')){ save(); return; }
+    var cp=t.closest('[data-clcmp]'); if(cp){ cmp=cmpPreset(+cp.getAttribute('data-clcmp')); var row0=profiles.find(function(r){ return r.id===openId; }); if(row0) $('clCmp').innerHTML=renderCompare(model(row0)); return; }
     if(t.closest('[data-clgock]')){ var b=$('tabCheckins'); if(b) b.click(); return; }
   });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeShare(); });
+  document.addEventListener('change', function(e){ var k=e.target && e.target.getAttribute && e.target.getAttribute('data-clcd'); if(!k || !cmp || !e.target.value) return; cmp[k]=e.target.value; var row0=profiles.find(function(r){ return r.id===openId; }); if(row0) $('clCmp').innerHTML=renderCompare(model(row0)); });
   document.addEventListener('hq-view', function(ev){ if(ev.detail && ev.detail.view==='clients'){ render(); load(); } else closeShare(); });
   document.addEventListener('tf-auth-ready', function(ev){
     var role=ev.detail && ev.detail.profile && ev.detail.profile.role; client=ev.detail && ev.detail.supabase; admin=role==='admin';
@@ -7222,7 +7274,7 @@ table.scores td{border-color:var(--border);}
     load(); if(poller) clearInterval(poller); poller=setInterval(function(){ var v=$('viewClients'); if(v && !v.hidden && !openId) load(); }, 120000);
   });
   document.addEventListener('tf-auth-signed-out', function(){ client=null; admin=false; profiles=[]; loaded=false; openId=null; closeShare(); if(poller) clearInterval(poller); var t=$('tabClients'); if(t) t.hidden=true; var s=$('sheetClients'); if(s) s.hidden=true; });
-  window.__clients={model:function(id){ var r=profiles.find(function(x){ return x.id===id; }); return r?model(r):null; }, open:function(id,m){ openId=id; mode=m||'overview'; render(); }, share:renderShare, close:closeShare, load:load};
+  window.__clients={cmp:function(id,a1,a2,b1,b2){ return cmpStats(id,a1,a2) && {a:cmpStats(id,a1,a2), b:cmpStats(id,b1,b2)}; }, model:function(id){ var r=profiles.find(function(x){ return x.id===id; }); return r?model(r):null; }, open:function(id,m){ openId=id; mode=m||'overview'; render(); }, share:renderShare, close:closeShare, load:load};
 })();
 </script>
 <script>

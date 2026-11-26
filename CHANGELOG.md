@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.17.1 — 26 Nov 2026 (Clients: compare periods)
+
+- Client page **Compare periods**: last 7 vs previous 7 days by default, one-tap 14 vs 14 and 28 vs 28, or pick any two date ranges. Shows weight, steps, calories and protein averages (over days with a log, with the day count), gym sessions, sessions per week (periods of 7+ days) and check-ins, with the change coloured for their phase.
+
 ## 3.17.0 — 26 Nov 2026 (Clients: the client database)
 
 - New **Clients** tab (Work, admin only; replaces the Notion Client Register). Roster of active clients: status (On track / Watch / Off track), needs-attention reasons (unanswered WhatsApp, 1:1 asks, Loom questions, no check-in 10+ days, gym under 50%), weight 7-day average + weekly sparkline + change since start, gym this week and last 4 full weeks %, last check-in, last contact. Badge = clients needing attention.
