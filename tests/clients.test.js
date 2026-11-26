@@ -191,6 +191,13 @@ async function hq(browser, url, { width, dark, role }) {
       const logged = await page.evaluate(() => (window.__mock.__tables.client_profiles.find(x => x.id === 'jack-keys').data.posts || []).length);
       check(`${label}: post logged with consent`, () => assert.strictEqual(logged, 1));
       await page.keyboard.press('Escape');
+      // monthly report
+      await page.$eval('[data-clreport]', b => b.click()); await page.waitForTimeout(500);
+      const rp = await page.evaluate(() => ({ t: document.getElementById('rpDoc') ? document.getElementById('rpDoc').innerText : '', imgs: document.querySelectorAll('#rpDoc .rp-pair img').length }));
+      check(`${label}: report renders`, () => assert.ok(/JACK'S PROGRESS REPORT/i.test(rp.t) && /WEIGHT CHANGE/i.test(rp.t) && /From Jordan/i.test(rp.t) && /SESSIONS/i.test(rp.t), rp.t.slice(0, 600)));
+      check(`${label}: report has no private notes`, () => assert.ok(!/SECRET|PRIVATE|creatine|Knee/i.test(rp.t), rp.t));
+      if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `report-${tag}.png`), fullPage: false });
+      await page.keyboard.press('Escape');
       // edit
       await page.click('[data-clmode="overview"]'); await page.waitForTimeout(100);
       await page.evaluate(() => { document.querySelector('#clProfile details:last-of-type').open = true; });
