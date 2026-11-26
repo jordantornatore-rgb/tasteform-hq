@@ -7093,7 +7093,7 @@ table.scores td{border-color:var(--border);}
     var from=M-28; if(o.start!=null){ var ff=monday(o.start)===o.start?o.start:monday(o.start)+7; from=Math.max(from, ff); }
     var weeks=Math.max(0, Math.round((M-from)/7));
     o.gymWeeks=weeks; o.gymDone=sess.filter(function(n){ return n>=from && n<M; }).length;
-    o.gymPct=(o.spw && weeks)?Math.round(o.gymDone/(o.spw*weeks)*100):null;
+    o.gymPct=(o.spw && weeks && sess.length)?Math.round(o.gymDone/(o.spw*weeks)*100):null; // no session ever synced = unknown, not 0%
     o.hasSess=sess.length>0;
     var cks=ms.filter(function(m){ return m.kind==='checkin' && dn(m.date)!=null; }).map(function(m){ return dn(m.date); }).sort(function(a,b){ return a-b; });
     o.lastCheckin=cks.length?cks[cks.length-1]:null;
