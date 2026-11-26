@@ -7543,7 +7543,7 @@ table.scores td{border-color:var(--border);}
       '<section class="rp-stats">'+
         stat('Weight change', (a0!=null&&a1!=null)?kg(a1-a0,true)+'<small> kg</small>':'–', (a0!=null&&a1!=null)?'7-day average '+kg(a0)+' → '+kg(a1)+' kg':'')+
         stat('Lowest weigh-in', low?kg(low.v)+'<small> kg</small>':'–', low?fmtD(low.n):'')+
-        stat('Sessions', sess.length+(o.spw?'<small>/'+(o.spw*weeks)+'</small>':''), perf.length?'average session rating '+(perf.reduce(function(s,v){ return s+v; },0)/perf.length).toFixed(1)+'/5':'')+
+        stat('Sessions', ((R.sessions&&R.sessions.done!=null)?R.sessions.done:sess.length)+(o.spw?'<small>/'+((R.sessions&&R.sessions.planned)||o.spw*weeks)+'</small>':''), (R.sessions&&R.sessions.note)||(perf.length?'average session rating '+(perf.reduce(function(s,v){ return s+v; },0)/perf.length).toFixed(1)+'/5':''))+
         stat('Check-ins', ck+'<small>/'+weeks+'</small>', (R.checkins&&R.checkins.onTime)||'')+
       '</section>'+
       (w.length>1?'<section class="rp-card"><h2>Your weight</h2>'+chart(chartO,true)+'<p class="rp-cap">Dots are daily weigh-ins, the line is your 7-day average. Daily swings are water and food, the line is the truth.</p></section>':'')+
