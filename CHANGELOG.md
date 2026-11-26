@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.21.0 — 26 Nov 2026 (Clients: monthly report + Loom record mode)
+
+- **Report ↗** on every client: a branded, client-facing monthly progress report (weight change on 7-day averages, lowest weigh-in, sessions, check-ins, weight chart, then-and-now photos front and back, strength table, wins, their own words, a "From Jordan" note you edit right on the page, next month's focus). Save as PDF.
+- **▶ Record mode** in Loom prep: full-screen, client-safe slides to screenshare in Loom (title, this week vs last, weight trend, then-and-now photos, wins and PRs, next week's targets). **Script window** opens beside it with what to say on each slide (opener, callbacks, causes, drafted answers, adjustments, close) and a timer that goes red after 4:30. Arrow keys or Next move both; Esc closes both.
+- Roster: clients with no synced workouts show gym as unknown, not 0%.
+
 ## 3.20.0 — 26 Nov 2026 (Clients: deeper Loom prep + coach insights)
 
 - **Loom prep is now a 9-step run sheet** (~4 min): open line, scoreboard this week vs last (weight, sessions, steps, calories, protein + trend/goal date), wins with evidence, what's holding them back with the cause, their questions with your drafted answer, changes this week (training / nutrition / habits), what was agreed last time (done / partly / missed), next week's targets, close.

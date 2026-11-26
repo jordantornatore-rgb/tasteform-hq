@@ -147,6 +147,26 @@ async function hq(browser, url, { width, dark, role }) {
       check(`${label}: insights auto`, () => assert.ok(/Weekends \+750 kcal vs weekdays/.test(l) && /Back squat flat for 3\+ weeks/.test(l) && /8 of 32 planned sessions/.test(l) && /Stress 5 → 8 over 4 check-ins/.test(l) && /Protein hit 20\/28/.test(l) && /Work Christmas party/.test(l), l.slice(l.search(/coach insights/i), l.search(/coach insights/i) + 1500)));
       check(`${label}: loom prep points`, () => assert.ok(/Weighed in every day/.test(l) && /PRIVATE DISLIKE/.test(l) && /Train Thursday/.test(l) && /Creatine\?/.test(l) && /Bench PR/.test(l), l.slice(0, 800)));
       if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `loom-${tag}.png`), fullPage: true });
+      // record mode: slides + script window
+      await page.$eval('[data-cldeck]', b => b.click()); await page.waitForTimeout(300);
+      const dk = await page.evaluate(() => ({ n: document.querySelectorAll('.dk-slide').length, t: document.querySelector('.dk-slide:not([hidden])').innerText, all: [...document.querySelectorAll('.dk-slide')].map(s => s.textContent).join(' ') }));
+      check(`${label}: deck slides`, () => assert.ok(dk.n >= 5 && /JACK/i.test(dk.t), JSON.stringify(dk).slice(0, 300)));
+      check(`${label}: deck client-safe`, () => assert.ok(!/SECRET|PRIVATE|Knee|Cap drinks|5 g a day/i.test(dk.all), dk.all.slice(0, 800)));
+      await page.keyboard.press('ArrowRight'); await page.waitForTimeout(100);
+      const dk2 = await page.evaluate(() => ({ c: document.querySelector('.dk-count').textContent, t: document.querySelector('.dk-slide:not([hidden])').innerText }));
+      check(`${label}: arrow advances`, () => assert.ok(/^2 \//.test(dk2.c) && /THIS WEEK VS LAST WEEK/i.test(dk2.t), JSON.stringify(dk2)));
+      if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `deck-${tag}.png`) });
+      const [pop] = await Promise.all([page.waitForEvent('popup', { timeout: 4000 }).catch(() => null), page.$eval('[data-dkpres]', b => b.click())]);
+      await page.waitForTimeout(300);
+      const pt = pop ? await pop.evaluate(() => document.body.innerText) : '';
+      check(`${label}: script window`, () => assert.ok(/Scoreboard/.test(pt) && /Cap drinks at 4/.test(pt) && /only you see this/i.test(pt), pt.slice(0, 400)));
+      await page.keyboard.press('ArrowRight'); await page.waitForTimeout(200);
+      const pt2 = pop ? await pop.evaluate(() => document.body.innerText) : '';
+      check(`${label}: script follows slides`, () => assert.ok(/The trend/.test(pt2) && /Thursday is work drinks/.test(pt2), pt2.slice(0, 400)));
+      if (SHOTS && pop) await pop.screenshot({ path: path.join(SHOTS, `script-${tag}.png`) });
+      await page.keyboard.press('Escape'); await page.waitForTimeout(150);
+      const pc = pop ? await pop.isClosed() : true;
+      check(`${label}: Esc closes script window`, () => assert.ok(pc));
       await page.click('#clProfile [data-clshare]'); await page.waitForTimeout(150);
       const s = await page.evaluate(() => { const e = document.getElementById('clShare'); return { hidden: e.hidden, t: e.innerText }; });
       check(`${label}: screenshare open`, () => assert.ok(!s.hidden));
