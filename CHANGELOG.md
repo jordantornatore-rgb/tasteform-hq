@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.24.0 — 26 Nov 2026 (Loom system)
+
+- Reply page **Yes, book a 1:1** now shows the **Tuesday 1:1 (20 min)** calendar, with the copy "Tuesday nights, 5:30–9pm".
+- Check-in replies: every To record card has **Loom prep + record mode ↗**, which opens that client's run sheet and slides. The copy explains the new flow: paste the Loom in 1FIT's Video link and the Sun/Mon evening **Loom pickup** task sends it. Pasting here still sends straight away.
+- The weekend drafts task now writes 6 lines (Open, Win, Fix, Answer, Next week, Close) in Jordan's voice from `meta.jordanVoice` plus the client profile.
+
 ## 3.23.0 — 26 Nov 2026 (Sidebar reorder)
 
 - Sidebar and phone More sheet regrouped in the order you work: **Today** (Home, Daily brief, Time, Routine, Scorecard), **Content** (Content Engine, Analytics, Traffic), **Leads** (Leads, Applications, Lead list, DMs, Follow-ups, Warm Leads, Magnets, Ads, Email, Funnel links, Funnel old), **Sales**, **Clients** (Clients, Check-in replies, Delivery, Challenge), **Money** (Revenue, Subscriptions). Group labels hide when everything under them is admin-only. Number keys: 1 Home, 2 Daily brief, 3 Content, 4 Leads, 5 Applications, 6 Sales, 7 Clients, 8 Delivery.

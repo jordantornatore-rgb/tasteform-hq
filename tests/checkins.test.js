@@ -75,6 +75,7 @@ async function hq(browser, url, { width, dark, role }) {
         // draft: points + answers shown, Send needs a Loom, Send writes loom_url
         const td = await page.evaluate(() => document.getElementById('ckTodo').innerText);
         check(`${label}: draft listed`, () => assert.ok(/Sami Ellaz/.test(td) && /WIN: down 0\.6kg/.test(td) && /Their check-in answers/.test(td), td));
+        { const has = await page.$('[data-ckprep="sami"]'); check(`${label}: Loom prep button`, () => assert.ok(has)); }
         await page.fill('[data-ckloom="draft1"]', 'https://www.loom.com/share/99998888777766665555444433332222');
         await page.click('[data-cksend="draft1"]'); await page.waitForTimeout(300);
         const d1 = await page.evaluate(() => window.__mock.__tables.checkin_replies.find(r => r.id === 'draft1'));
@@ -113,7 +114,7 @@ async function hq(browser, url, { width, dark, role }) {
       check(`${L}: answers sent`, () => assert.deepStrictEqual(ans, [{ p_rating: 4, k: 'good' }, { p_question: 'How much water?', k: 'good' }, { p_wants_support: true, k: 'good' }]));
       check(`${L}: rating shown`, () => assert.strictEqual(s2.pressed, 'true'));
       check(`${L}: question echoed`, () => assert.strictEqual(s2.asked, 'You asked: How much water?'));
-      check(`${L}: calendar after Yes`, () => { assert.ok(!s2.calHidden); assert.strictEqual(s2.cal, 'https://api.leadconnectorhq.com/widget/booking/2ie8EAWu8y2iJNpwzrxj'); });
+      check(`${L}: calendar after Yes`, () => { assert.ok(!s2.calHidden); assert.strictEqual(s2.cal, 'https://api.leadconnectorhq.com/widget/booking/rNWVeOSA895nsAYqrpxz'); });
       if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `page-${width}-yes.png`), fullPage: false });
       await page.goto(url + '/r.html?k=bad'); await page.waitForSelector('#missing:not([hidden])', { timeout: 3000 }).catch(() => {});
       const miss = await page.evaluate(() => !document.getElementById('missing').hidden);

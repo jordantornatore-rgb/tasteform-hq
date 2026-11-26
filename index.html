@@ -120,6 +120,7 @@ code{background:var(--surface-2);border:1px solid var(--border);border-radius:6p
 .sheet{position:fixed;inset:0;z-index:60;background:rgba(15,13,11,.5);display:flex;align-items:flex-end;}
 .sheet-card{background:var(--surface);border-radius:var(--r-l) var(--r-l) 0 0;padding:var(--s4) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom,0));width:100%;display:flex;flex-direction:column;gap:var(--s2);}
 .sheet-card h2{font-size:var(--t-l);margin-bottom:var(--s2);}
+.ck-prep{margin:8px 0 0}
 .sheet-grp{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:10px 2px 0;}
 .sheet-btn{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:var(--r-m);min-height:var(--tap);padding:0 var(--s4);text-align:left;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .sheet-btn[aria-selected="true"]{border-color:var(--text);}
@@ -2318,8 +2319,8 @@ table.scores td{border-color:var(--border);}
 
   <!-- ===== ROUTINE (admin only) ===== -->
   <section id="viewCheckins" role="tabpanel" aria-labelledby="tabCheckins" hidden style="display:flex;flex-direction:column;gap:var(--s4);">
-    <div class="top"><div><h1>Check-in replies</h1><div class="sub">Talking points → record the Loom → paste it → it sends itself. They watch, then can rate it, ask a question or book a 1:1.</div></div></div>
-    <div class="panel" id="ckTodoWrap"><h3 class="pl-h" style="margin:0 0 6px">To record</h3><p class="rule" style="margin-top:0">Claude reads the new 1FIT check-ins on Saturday arvo and Sunday and writes your talking points. Record the Loom, paste it, tap Send: they get the link by email (and SMS if GHL has their mobile).</p><div id="ckTodo"><div class="empty-state">Loading…</div></div></div>
+    <div class="top"><div><h1>Check-in replies</h1><div class="sub">Talking points → record the Loom (about 4 min) → paste it in 1FIT's Video link → it sends itself. They watch, then can rate it, ask a question or book a Tuesday 1:1.</div></div></div>
+    <div class="panel" id="ckTodoWrap"><h3 class="pl-h" style="margin:0 0 6px">To record</h3><p class="rule" style="margin-top:0">Claude reads the new 1FIT check-ins on Saturday arvo and Sunday and writes your talking points (full run sheet + record mode under Loom prep). Record the Loom and paste it in 1FIT's Video link as normal: Claude picks it up Sunday evening and Monday and sends them their reply page by email (and SMS if GHL has their mobile). Pasting it here sends straight away.</p><div id="ckTodo"><div class="empty-state">Loading…</div></div></div>
     <details class="panel ck-make"><summary class="pl-h" style="cursor:pointer">Send one by hand</summary>
       <label class="ck-l" for="ckClient">Client</label>
       <input class="input" id="ckClient" list="ckRoster" autocomplete="off" placeholder="Start typing a name" maxlength="80">
@@ -6996,7 +6997,8 @@ table.scores td{border-color:var(--border);}
       return '<div class="ck-row"><div class="ck-main"><div class="ck-name">'+esc(r.client_name)+'</div>'+(meta?'<div class="ck-meta">'+esc(meta)+'</div>':'')+
         (r.points?'<div class="ck-pts">'+esc(r.points)+'</div>':'')+
         (keys.length?'<details class="ck-ans"><summary>Their check-in answers</summary><dl>'+keys.map(function(k){ return '<dt>'+esc(k)+'</dt><dd>'+esc(ans[k])+'</dd>'; }).join('')+'</dl></details>':'')+
-        '<div class="ck-send"><input class="input" type="url" placeholder="Paste the Loom link" data-ckloom="'+esc(r.id)+'" autocomplete="off"><button type="button" class="btn primary" data-cksend="'+esc(r.id)+'" disabled>Send</button><button type="button" class="btn" data-ckskip="'+esc(r.id)+'" title="No Loom for this one">Skip</button></div></div></div>';
+        (r.member_id?'<div class="ck-prep"><button type="button" class="btn" data-ckprep="'+esc(r.member_id)+'">Loom prep + record mode ↗</button></div>':'')+
+        '<div class="ck-send"><input class="input" type="url" placeholder="Paste the Loom link (or put it in 1FIT\'s Video link)" data-ckloom="'+esc(r.id)+'" autocomplete="off"><button type="button" class="btn primary" data-cksend="'+esc(r.id)+'" disabled>Send</button><button type="button" class="btn" data-ckskip="'+esc(r.id)+'" title="No Loom for this one">Skip</button></div></div></div>';
     }).join('');
   }
   function sendDraft(id){
@@ -7068,7 +7070,7 @@ table.scores td{border-color:var(--border);}
   }
   document.addEventListener('input', function(e){ if(e.target && /^ck(Client|Loom)$/.test(e.target.id)) valid(); });
   document.addEventListener('input', function(e){ var id=e.target && e.target.getAttribute && e.target.getAttribute('data-ckloom'); if(id){ var b=document.querySelector('[data-cksend="'+id+'"]'); if(b) b.disabled=!loomOk(e.target.value); } });
-  document.addEventListener('click', function(e){ var s2=e.target.closest && e.target.closest('[data-cksend]'); if(s2){ sendDraft(s2.getAttribute('data-cksend')); return; } var k2=e.target.closest && e.target.closest('[data-ckskip]'); if(k2) skipDraft(k2.getAttribute('data-ckskip')); });
+  document.addEventListener('click', function(e){ var pp=e.target.closest && e.target.closest('[data-ckprep]'); if(pp){ if(window.hqOpenClientLoom) window.hqOpenClientLoom(pp.getAttribute('data-ckprep')); return; } var s2=e.target.closest && e.target.closest('[data-cksend]'); if(s2){ sendDraft(s2.getAttribute('data-cksend')); return; } var k2=e.target.closest && e.target.closest('[data-ckskip]'); if(k2) skipDraft(k2.getAttribute('data-ckskip')); });
   document.addEventListener('click', function(e){
     if(e.target.closest && e.target.closest('#ckAdd')){ add(); return; }
     var c=e.target.closest && e.target.closest('[data-ckcopy]'); if(c){ var r=rows.find(function(x){ return x.id===c.getAttribute('data-ckcopy'); }); if(r) copy(message(r.client_name, PAGE+r.id), c); }
@@ -7762,6 +7764,8 @@ table.scores td{border-color:var(--border);}
       loaded=true; var v=$('viewClients'); if(v && !v.hidden) render(); else renderRoster();
     });
   }
+  /* Check-in replies → this client's Loom prep. */
+  window.hqOpenClientLoom=function(id){ var b=$('tabClients'); if(b) b.click(); openId=id; mode='loom'; if(loaded) render(); window.scrollTo(0,0); };
   document.addEventListener('click', function(e){
     var t=e.target.closest ? e.target : e.target.parentElement; if(!t || !t.closest) return;
     var o=t.closest('[data-clopen]'); if(o){ openId=o.getAttribute('data-clopen'); mode='overview'; render(); window.scrollTo(0,0); return; }
