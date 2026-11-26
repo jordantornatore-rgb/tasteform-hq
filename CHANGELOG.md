@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.22.0 — 26 Nov 2026 (Clients: weekly report)
+
+- **Weekly ↗** on every client (Monthly ↗ is the month report): last full Mon–Sun week as a client-facing scorecard: x/y ticks (sessions, weigh-ins, food logged, check-in, steps), session streak, weight 7-day average vs last week with 4-week chart, wins, this week's targets, your closing line. Save as PDF or screenshot for WhatsApp.
+
 ## 3.21.0 — 26 Nov 2026 (Clients: monthly report + Loom record mode)
 
 - **Report ↗** on every client: a branded, client-facing monthly progress report (weight change on 7-day averages, lowest weigh-in, sessions, check-ins, weight chart, then-and-now photos front and back, strength table, wins, their own words, a "From Jordan" note you edit right on the page, next month's focus). Save as PDF.

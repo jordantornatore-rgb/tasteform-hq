@@ -218,6 +218,11 @@ async function hq(browser, url, { width, dark, role }) {
       check(`${label}: report has no private notes`, () => assert.ok(!/SECRET|PRIVATE|creatine|Knee/i.test(rp.t), rp.t));
       if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `report-${tag}.png`), fullPage: false });
       await page.keyboard.press('Escape');
+      await page.$eval('[data-clweek]', b => b.click()); await page.waitForTimeout(300);
+      const wk = await page.evaluate(() => document.getElementById('rpDoc').innerText);
+      check(`${label}: weekly report`, () => assert.ok(/JACK'S WEEK/i.test(wk) && /Sessions/i.test(wk) && /Weigh-ins/i.test(wk) && /targets/i.test(wk) && !/PRIVATE|SECRET|Cap drinks/i.test(wk), wk.slice(0, 500)));
+      if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `weekly-${tag}.png`), fullPage: false });
+      await page.keyboard.press('Escape');
       // edit
       await page.click('[data-clmode="overview"]'); await page.waitForTimeout(100);
       await page.evaluate(() => { document.querySelector('#clProfile details:last-of-type').open = true; });

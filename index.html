@@ -272,6 +272,18 @@ button.kpi:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .cl-edit label{font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:4px;}
 .cl-edit .wide{grid-column:1 / -1;}
 .cl-empty{font-size:14px;color:var(--muted);}
+.wk-score{display:flex;align-items:center;gap:18px;background:#0F0D0B;color:#F2F1E8;border-radius:12px;padding:18px 22px;}
+.wk-big{font-family:'Anton',Impact,sans-serif;font-size:64px;line-height:1;color:#B8895A;}
+.wk-big small{font-size:28px;color:#8F8272;}
+.wk-score b{display:block;font-size:20px;}
+.wk-score span{display:block;color:#BCAA90;margin-top:4px;}
+.wk-ticks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+.wk-tick{display:flex;gap:10px;align-items:center;border:1px solid #DED8C8;border-radius:10px;padding:12px;}
+.wk-tick .ic{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;}
+.wk-tick.ok .ic{background:#2F7D4F;color:#fff;} .wk-tick.no .ic{background:#B3412F;color:#fff;}
+.wk-tick b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6B6153;}
+.wk-tick span{font-size:18px;font-weight:700;}
+
 .cl-share.dk-mode{padding:0;gap:0;background:#0F0D0B;color:#F2F1E8;}
 .dk-bar{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid #271F16;}
 .dk-bar .btn{background:#271F16;color:#F2F1E8;border-color:#3A2F24;}
@@ -7231,7 +7243,7 @@ table.scores td{border-color:var(--border);}
     var ini=o.name.split(' ').map(function(s){ return s[0]||''; }).join('').slice(0,2).toUpperCase();
     return '<div class="cl-top"><button type="button" class="btn small" data-clback>← Clients</button><div class="cl-ava">'+esc(ini)+'</div><div><h1 style="margin:0">'+esc(o.name)+'</h1><div class="sub">'+[o.week?'Week '+o.week:null, o.phase||null, o.goal||null, o.start!=null?'started '+fmtD(o.start):null].filter(Boolean).map(esc).join(' · ')+'</div></div>'+
       '<span class="cl-st '+o.status+'">'+SLABEL[o.status]+'</span>'+
-      '<div class="cl-seg" role="group" aria-label="View"><button type="button" data-clmode="overview" aria-pressed="'+(mode==='overview')+'">Overview</button><button type="button" data-clmode="loom" aria-pressed="'+(mode==='loom')+'">Loom prep</button><button type="button" data-clmode="photos" aria-pressed="'+(mode==='photos')+'">Photos</button><button type="button" data-clshare>Screenshare ↗</button><button type="button" data-clreport>Report ↗</button></div></div>';
+      '<div class="cl-seg" role="group" aria-label="View"><button type="button" data-clmode="overview" aria-pressed="'+(mode==='overview')+'">Overview</button><button type="button" data-clmode="loom" aria-pressed="'+(mode==='loom')+'">Loom prep</button><button type="button" data-clmode="photos" aria-pressed="'+(mode==='photos')+'">Photos</button><button type="button" data-clshare>Screenshare ↗</button><button type="button" data-clweek>Weekly ↗</button><button type="button" data-clreport>Monthly ↗</button></div></div>';
   }
   function kpiRow(o){
     return '<div class="kpis">'+
@@ -7649,6 +7661,38 @@ table.scores td{border-color:var(--border);}
     if(t.closest('[data-dknext]')){ deckGo(DECK.i+1); return; }
     if(t.closest('[data-dkprev]')){ deckGo(DECK.i-1); return; }
     if(t.closest('[data-dkpres]')){ deckPres(true); return; } });
+
+  /* ---------- Weekly report (client-facing): last full Mon–Sun week, scorecard ticks, streak, weight vs last week, wins, targets ---------- */
+  function renderWeekly(){
+    var row=profiles.find(function(r){ return r.id===openId; }), el=$('clShare'); if(!row||!el) return;
+    var o=model(row), p=o.p, L=p.loom||{}, T=dn(today()), M=monday(T), from=M-7, to=M-1;
+    var ms=metrics[o.id]||[], inW=function(m,a,b){ var n=dn(m.date); return n>=a && n<=b; };
+    var days=function(kind,a,b){ var s={}; ms.forEach(function(m){ if(m.kind===kind && inW(m,a,b)) s[m.date]=1; }); return Object.keys(s).length; };
+    var sess=ms.filter(function(m){ return m.kind==='session' && inW(m,from,to); }).length;
+    var wIn=days('weight',from,to), fIn=days('calories',from,to), ck=ms.some(function(m){ return m.kind==='checkin' && inW(m,from,to+1); });
+    var avgW=function(a,b){ var x=o.w.filter(function(y){ return y.n>=a && y.n<=b; }); return x.length?x.reduce(function(s,y){ return s+y.v; },0)/x.length:null; };
+    var wa=avgW(from,to), wb=avgW(from-7,from-1);
+    var st=ms.filter(function(m){ return m.kind==='steps' && inW(m,from,to) && num(m.value)!=null; }), steps=st.length?Math.round(st.reduce(function(s,m){ return s+num(m.value); },0)/st.length):null;
+    var streak=0; if(o.spw){ for(var k=0;k<52;k++){ var a=from-7*k, b=a+6, c=ms.filter(function(m){ return m.kind==='session' && inW(m,a,b); }).length; if(c>=o.spw) streak++; else break; } }
+    var tick=function(label, done, of, ok){ return '<div class="wk-tick '+(ok?'ok':'no')+'"><div class="ic">'+(ok?'✓':'✕')+'</div><div><b>'+label+'</b><span>'+done+(of!=null?' / '+of:'')+'</span></div></div>'; };
+    var ticks=(o.spw?tick('Sessions', sess, o.spw, sess>=o.spw):'')+tick('Weigh-ins', wIn, 7, wIn>=5)+(fIn?tick('Food logged', fIn, 7, fIn>=5):'')+tick('Check-in', ck?'Done':'Missed', null, ck)+(steps!=null?tick('Steps / day', steps.toLocaleString('en-AU'), null, true):'');
+    var hit=[o.spw?sess>=o.spw:null, wIn>=5, fIn?fIn>=5:null, ck].filter(function(x){ return x!==null; }), score=hit.filter(Boolean).length;
+    var wins=arr((p.screen||{}).wins); if(!wins.length) wins=arr(L.wins).length?arr(L.wins):arr(L.likes);
+    var targets=arr(L.targets).length?arr(L.targets):arr(L.focus);
+    var chartO=Object.assign({}, o, {w:o.w.filter(function(y){ return y.n>=to-27 && y.n<=to; })});
+    el.innerHTML='<div class="rp-bar no-print"><button type="button" class="btn" data-rpclose>Close (Esc)</button><span class="cl-sub">Weekly report · last full week. Save as PDF or screenshot it for WhatsApp.</span><button type="button" class="btn primary" data-rpprint>Save as PDF</button></div>'+
+      '<article class="rp wk" id="rpDoc">'+
+      '<header class="rp-head"><div class="rp-brand">T A S T E F O R M</div><div class="rp-kick">'+(o.start!=null?'Week '+(Math.floor((from-o.start)/7)+1)+' · ':'')+esc(fmtD(from))+' – '+esc(fmtD(to))+'</div><h1>'+esc(first(o.name))+'\'s week</h1></header>'+
+      '<section class="wk-score"><div class="wk-big">'+score+'<small>/'+hit.length+'</small></div><div><b>'+(score===hit.length?'Perfect week.':score>=hit.length-1?'Strong week. One thing to tighten.':'Room to win back next week.')+'</b>'+(streak>=2?'<span>🔥 '+streak+' weeks in a row hitting every session</span>':'')+'</div></section>'+
+      '<section class="wk-ticks">'+ticks+'</section>'+
+      (wa!=null?'<section class="rp-card"><h2>Weight</h2><p class="rp-big">'+kg(wa)+' kg <span>7-day average'+(wb!=null?' · '+kg(wa-wb,true)+' kg vs last week':'')+'</span></p>'+(chartO.w.length>1?chart(chartO,false):'')+'</section>':'')+
+      (wins.length?'<section class="rp-card"><h2>Wins</h2><ul class="rp-wins">'+wins.map(function(x){ return '<li>'+esc(txt(x))+'</li>'; }).join('')+'</ul></section>':'')+
+      (targets.length?'<section class="rp-card"><h2>This week\'s targets</h2><ol class="rp-next">'+targets.map(function(x){ return '<li>'+esc(txt(x))+'</li>'; }).join('')+'</ol></section>':'')+
+      (L.close?'<section class="rp-quote"><blockquote>'+esc(L.close)+'</blockquote><cite>Jordan</cite></section>':'')+
+      '<footer class="rp-foot">TASTEFORM COACHING · @jordantornatore</footer></article>';
+    el.hidden=false; el.classList.add('rp-mode'); document.body.style.overflow='hidden';
+  }
+  document.addEventListener('click', function(e){ var t=e.target.closest?e.target:null; if(t && t.closest('[data-clweek]')) renderWeekly(); });
 
   function renderProfile(){
     var el=$('clProfile'), row=profiles.find(function(r){ return r.id===openId; });
