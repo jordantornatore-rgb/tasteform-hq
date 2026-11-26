@@ -120,6 +120,7 @@ code{background:var(--surface-2);border:1px solid var(--border);border-radius:6p
 .sheet{position:fixed;inset:0;z-index:60;background:rgba(15,13,11,.5);display:flex;align-items:flex-end;}
 .sheet-card{background:var(--surface);border-radius:var(--r-l) var(--r-l) 0 0;padding:var(--s4) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom,0));width:100%;display:flex;flex-direction:column;gap:var(--s2);}
 .sheet-card h2{font-size:var(--t-l);margin-bottom:var(--s2);}
+.sheet-grp{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:10px 2px 0;}
 .sheet-btn{border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:var(--r-m);min-height:var(--tap);padding:0 var(--s4);text-align:left;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .sheet-btn[aria-selected="true"]{border-color:var(--text);}
 
@@ -1704,36 +1705,38 @@ table.scores td{border-color:var(--border);}
   <aside class="sidebar" id="sidebar">
     <div class="sb-brand"><span class="sb-logo" aria-hidden="true">TF</span><span class="sb-name">TasteForm <small>HQ</small></span><button type="button" class="sb-collapse" id="sbCollapse" title="Collapse sidebar" aria-label="Collapse sidebar">‹</button></div>
     <nav class="sb-nav" id="tabRow" role="tablist" aria-label="Sections">
-      <div class="sb-group">Overview</div>
+      <div class="sb-group">Today</div>
       <button class="tab" role="tab" id="tabHome" aria-selected="true" aria-controls="viewHome" data-view="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span><kbd>1</kbd></button>
-      <button class="tab" role="tab" id="tabTraffic" aria-selected="false" aria-controls="viewTraffic" data-view="traffic"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Traffic</span><kbd>2</kbd></button>
-      <button class="tab" role="tab" id="tabLeadflow" aria-selected="false" aria-controls="viewLeadflow" data-view="leadflow"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Leads</span><kbd>3</kbd></button>
-      <button class="tab" role="tab" id="tabPeople" aria-selected="false" aria-controls="viewPeople" data-view="people" hidden><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/></svg><span>Lead list</span><span class="tab-badge" id="peopleBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabSales" aria-selected="false" aria-controls="viewSales" data-view="sales" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Sales</span><kbd>4</kbd></button>
-      <button class="tab" role="tab" id="tabDelivery" aria-selected="false" aria-controls="viewDelivery" data-view="delivery"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span>Delivery</span><kbd>5</kbd></button>
-      <button class="tab" role="tab" id="tabScorecard" aria-selected="false" aria-controls="viewScorecard" data-view="scorecard"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 10h16M10 4v16"/></svg><span>Scorecard</span></button>
-      <div class="sb-group">Work</div>
+      <button class="tab" role="tab" id="tabToday" aria-selected="false" aria-controls="viewToday" data-view="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Daily brief</span><kbd>2</kbd></button>
       <button class="tab" role="tab" id="tabTime" aria-selected="false" aria-controls="viewTime" data-view="time" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="7"/><path d="M12 14V10M10 3h4M12 3v4M18 8l1.5-1.5"/></svg><span>Time</span></button>
-      <button class="tab" role="tab" id="tabClients" aria-selected="false" aria-controls="viewClients" data-view="clients" hidden><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 11l2 2 4-4"/></svg><span>Clients</span><span class="tab-badge" id="clBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabCheckins" aria-selected="false" aria-controls="viewCheckins" data-view="checkins" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg><span>Check-in replies</span><span class="tab-badge" id="ckBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabToday" aria-selected="false" aria-controls="viewToday" data-view="today"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Daily brief</span></button>
-            <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>DMs</span><span class="tab-badge" id="dmsBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabFollow" aria-selected="false" aria-controls="viewFollow" data-view="follow"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/></svg><span>Follow-ups</span><span class="tab-badge" id="fuBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabMagnets" aria-selected="false" aria-controls="viewMagnets" data-view="magnets"><svg viewBox="0 0 24 24"><path d="M6 3v8a6 6 0 0 0 12 0V3"/><path d="M6 3h4v8H6zM14 3h4v8h-4z"/></svg><span>Magnets</span><span class="tab-badge" id="magBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabLeads" aria-selected="false" aria-controls="viewLeads" data-view="leads"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Warm Leads</span></button>
-      <div class="sb-group">Tools</div>
-      <button class="tab" role="tab" id="tabFunnel" aria-selected="false" aria-controls="viewFunnel" data-view="funnel"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Funnel</span></button>
-      <button class="tab" role="tab" id="tabLinks" aria-selected="false" aria-controls="viewLinks" data-view="links"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span>Funnel links</span></button>
-      <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg><span>Applications</span><span class="tab-badge" id="appsBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads"><svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M17 8a4 4 0 0 1 0 8"/></svg><span>Ads</span></button>
-      <button class="tab" role="tab" id="tabContent" aria-selected="false" aria-controls="viewContent" data-view="content"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5l2 4M14 5l2 4M10 12l4 2.5-4 2.5z"/></svg><span>Content Engine</span></button>
+      <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Routine</span></button>
+      <button class="tab" role="tab" id="tabScorecard" aria-selected="false" aria-controls="viewScorecard" data-view="scorecard"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 10h16M10 4v16"/></svg><span>Scorecard</span></button>
+      <div class="sb-group">Content</div>
+      <button class="tab" role="tab" id="tabContent" aria-selected="false" aria-controls="viewContent" data-view="content"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5l2 4M14 5l2 4M10 12l4 2.5-4 2.5z"/></svg><span>Content Engine</span><kbd>3</kbd></button>
       <button class="tab" role="tab" id="tabAnalytics" aria-selected="false" aria-controls="viewAnalytics" data-view="analytics"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Analytics</span></button>
+      <button class="tab" role="tab" id="tabTraffic" aria-selected="false" aria-controls="viewTraffic" data-view="traffic"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Traffic</span></button>
+      <div class="sb-group">Leads</div>
+      <button class="tab" role="tab" id="tabLeadflow" aria-selected="false" aria-controls="viewLeadflow" data-view="leadflow"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Leads</span><kbd>4</kbd></button>
+      <button class="tab" role="tab" id="tabApps" aria-selected="false" aria-controls="viewApps" data-view="apps"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg><span>Applications</span><kbd>5</kbd><span class="tab-badge" id="appsBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabPeople" aria-selected="false" aria-controls="viewPeople" data-view="people" hidden><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/></svg><span>Lead list</span><span class="tab-badge" id="peopleBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabDms" aria-selected="false" aria-controls="viewDms" data-view="dms"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>DMs</span><span class="tab-badge" id="dmsBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabFollow" aria-selected="false" aria-controls="viewFollow" data-view="follow"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/></svg><span>Follow-ups</span><span class="tab-badge" id="fuBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabLeads" aria-selected="false" aria-controls="viewLeads" data-view="leads"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Warm Leads</span></button>
+      <button class="tab" role="tab" id="tabMagnets" aria-selected="false" aria-controls="viewMagnets" data-view="magnets"><svg viewBox="0 0 24 24"><path d="M6 3v8a6 6 0 0 0 12 0V3"/><path d="M6 3h4v8H6zM14 3h4v8h-4z"/></svg><span>Magnets</span><span class="tab-badge" id="magBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabAds" aria-selected="false" aria-controls="viewAds" data-view="ads"><svg viewBox="0 0 24 24"><path d="M3 11l14-6v14L3 13z"/><path d="M17 8a4 4 0 0 1 0 8"/></svg><span>Ads</span></button>
       <button class="tab" role="tab" id="tabEmail" aria-selected="false" aria-controls="viewEmail" data-view="email" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Email</span></button>
-      <div class="sb-group" id="sbGroupBusiness" hidden>Business</div>
+      <button class="tab" role="tab" id="tabLinks" aria-selected="false" aria-controls="viewLinks" data-view="links"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span>Funnel links</span></button>
+      <button class="tab" role="tab" id="tabFunnel" aria-selected="false" aria-controls="viewFunnel" data-view="funnel"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span>Funnel (old)</span></button>
+      <div class="sb-group" id="sbGroupSales" hidden>Sales</div>
+      <button class="tab" role="tab" id="tabSales" aria-selected="false" aria-controls="viewSales" data-view="sales" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Sales</span><kbd>6</kbd></button>
+      <div class="sb-group">Clients</div>
+      <button class="tab" role="tab" id="tabClients" aria-selected="false" aria-controls="viewClients" data-view="clients" hidden><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 11l2 2 4-4"/></svg><span>Clients</span><kbd>7</kbd><span class="tab-badge" id="clBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabCheckins" aria-selected="false" aria-controls="viewCheckins" data-view="checkins" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg><span>Check-in replies</span><span class="tab-badge" id="ckBadge" hidden></span></button>
+      <button class="tab" role="tab" id="tabDelivery" aria-selected="false" aria-controls="viewDelivery" data-view="delivery"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span>Delivery</span><kbd>8</kbd></button>
+      <button class="tab" role="tab" id="tabChallenge" aria-selected="false" aria-controls="viewChallenge" data-view="challenge" hidden><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg><span>Challenge</span><span class="tab-badge" id="chBadge" hidden></span></button>
+      <div class="sb-group" id="sbGroupBusiness" hidden>Money</div>
       <button class="tab" role="tab" id="tabStripe" aria-selected="false" aria-controls="viewStripe" data-view="stripe" hidden><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-2-2.2-3-5-3s-5 1-5 3 2 3 5 3 5 1 5 3-2.2 3-5 3-5-1-5-3"/></svg><span>Revenue</span></button>
       <button class="tab" role="tab" id="tabSubs" aria-selected="false" aria-controls="viewSubs" data-view="subs" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg><span>Subscriptions</span></button>
-      <button class="tab" role="tab" id="tabChallenge" aria-selected="false" aria-controls="viewChallenge" data-view="challenge" hidden><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg><span>Challenge</span><span class="tab-badge" id="chBadge" hidden></span></button>
-      <button class="tab" role="tab" id="tabRoutine" aria-selected="false" aria-controls="viewRoutine" data-view="routine" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Routine</span></button>
     </nav>
     <div class="sb-foot">
       <button type="button" class="sb-search" id="cmdkOpen" aria-label="Jump to a section (Cmd+K)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span>Jump to…</span><kbd>⌘K</kbd></button>
@@ -2401,29 +2404,35 @@ table.scores td{border-color:var(--border);}
   <div class="sheet" id="moreSheet" hidden role="dialog" aria-label="More sections">
     <div class="sheet-card">
       <h2>More</h2>
+      <div class="sheet-grp">Today</div>
+      <button class="sheet-btn" data-view="today">Daily brief</button>
+      <button class="sheet-btn" data-view="time" id="sheetTime" hidden>Time</button>
+      <button class="sheet-btn" data-view="routine" id="sheetRoutine" hidden>Routine</button>
+      <button class="sheet-btn" data-view="scorecard">Scorecard</button>
+      <div class="sheet-grp">Content</div>
+      <button class="sheet-btn" data-view="analytics">Analytics</button>
       <button class="sheet-btn" data-view="traffic">Traffic</button>
+      <div class="sheet-grp">Leads</div>
       <button class="sheet-btn" data-view="leadflow">Leads</button>
       <button class="sheet-btn" data-view="people" id="sheetPeople" hidden>Lead list</button>
-      <button class="sheet-btn" data-view="sales" id="sheetSales" hidden>Sales</button>
-      <button class="sheet-btn" data-view="delivery">Delivery</button>
-      <button class="sheet-btn" data-view="scorecard">Scorecard</button>
-      <button class="sheet-btn" data-view="today">Daily brief</button>
       <button class="sheet-btn" data-view="dms">DMs</button>
       <button class="sheet-btn" data-view="follow">Follow-ups</button>
-      <button class="sheet-btn" data-view="links">Funnel links</button>
-      <button class="sheet-btn" data-view="funnel">Funnel (old)</button>
-      <button class="sheet-btn" data-view="analytics">Analytics</button>
       <button class="sheet-btn" data-view="leads">Warm Leads</button>
       <button class="sheet-btn" data-view="magnets">Magnets <span class="tab-badge" id="magBadgeBb" hidden></span></button>
       <button class="sheet-btn" data-view="ads">Ads</button>
       <button class="sheet-btn" data-view="email" id="sheetEmail" hidden>Email</button>
-      <button class="sheet-btn" data-view="stripe" id="sheetStripe" hidden>Revenue</button>
-      <button class="sheet-btn" data-view="subs" id="sheetSubs" hidden>Subscriptions</button>
-      <button class="sheet-btn" data-view="challenge" id="sheetChallenge" hidden>Challenge <span class="tab-badge" id="chBadgeBb" hidden></span></button>
-      <button class="sheet-btn" data-view="routine" id="sheetRoutine" hidden>Routine</button>
+      <button class="sheet-btn" data-view="links">Funnel links</button>
+      <button class="sheet-btn" data-view="funnel">Funnel (old)</button>
+      <div class="sheet-grp">Sales</div>
+      <button class="sheet-btn" data-view="sales" id="sheetSales" hidden>Sales</button>
+      <div class="sheet-grp">Clients</div>
       <button class="sheet-btn" data-view="clients" id="sheetClients" hidden>Clients</button>
       <button class="sheet-btn" data-view="checkins" id="sheetCheckins" hidden>Check-in replies</button>
-      <button class="sheet-btn" data-view="time" id="sheetTime" hidden>Time</button>
+      <button class="sheet-btn" data-view="delivery">Delivery</button>
+      <button class="sheet-btn" data-view="challenge" id="sheetChallenge" hidden>Challenge <span class="tab-badge" id="chBadgeBb" hidden></span></button>
+      <div class="sheet-grp">Money</div>
+      <button class="sheet-btn" data-view="stripe" id="sheetStripe" hidden>Revenue</button>
+      <button class="sheet-btn" data-view="subs" id="sheetSubs" hidden>Subscriptions</button>
       <button class="sheet-btn" id="sheetTheme">Theme: system</button>
       <button class="sheet-btn" id="sheetSignOut">Sign out</button>
       <button class="btn" id="sheetClose" style="margin-top:4px">Close</button>
@@ -2629,6 +2638,9 @@ table.scores td{border-color:var(--border);}
     setView(g.getAttribute('data-go')); window.scrollTo(0,0);
   });
   // keyboard: arrow keys move between tabs (WAI-ARIA tabs pattern)
+  /* Hide a sidebar / More-sheet group label when every section under it is hidden (non-admin). */
+  function hqHideEmptyGroups(){ [['#tabRow','sb-group','tab'],['#moreSheet .sheet-card','sheet-grp','sheet-btn']].forEach(function(c){ var box=document.querySelector(c[0]); if(!box) return; var kids=box.children, g=null, any=false; function close(){ if(g) g.hidden=!any; } for(var i=0;i<kids.length;i++){ var k=kids[i]; if(k.classList.contains(c[1])){ close(); g=k; any=false; } else if(k.classList.contains(c[2]) && k.hasAttribute('data-view') && !k.hidden) any=true; } close(); }); }
+  window.hqHideEmptyGroups=hqHideEmptyGroups;
   var tabRow=$('tabRow');
   if(tabRow) tabRow.addEventListener('keydown', function(ev){
     var tabs=Array.prototype.filter.call(tabRow.querySelectorAll('.tab'), function(t){ return !t.hidden; });
@@ -2656,7 +2668,7 @@ table.scores td{border-color:var(--border);}
 
   /* ---------- sidebar collapse, status bar, keyboard shortcuts, command palette ---------- */
   var VIEW_LABEL={home:'Home', traffic:'Traffic', leadflow:'Leads', sales:'Sales', delivery:'Delivery', scorecard:'Scorecard', people:'Lead list', today:'Daily brief', funnel:'Funnel', leads:'Warm Leads', dms:'DM Pipeline', follow:'Follow-ups', magnets:'Magnets', apps:'Applications', ads:'Meta Ads', content:'Content Engine', analytics:'Analytics', email:'Email', stripe:'Revenue', subs:'Subscriptions', challenge:'Challenge', routine:'Routine', time:'Time', links:'Funnel links', checkins:'Check-in replies', clients:'Clients'};
-  var VIEW_KEYS={'1':'home','2':'traffic','3':'leadflow','4':'sales','5':'delivery','6':'apps','7':'content','8':'today'};
+  var VIEW_KEYS={'1':'home','2':'today','3':'content','4':'leadflow','5':'apps','6':'sales','7':'clients','8':'delivery'};
   var appEl=$('appRoot');
   function setCollapsed(c){ appEl.classList.toggle('collapsed', !!c); store('hqSidebar', c?'1':'0'); var b=$('sbCollapse'); if(b){ b.title=c?'Expand sidebar':'Collapse sidebar'; b.setAttribute('aria-label', b.title); } }
   if(read('hqSidebar')==='1') setCollapsed(true);
@@ -5803,7 +5815,7 @@ table.scores td{border-color:var(--border);}
     currentUser = user ? { email:user.email, firstName: (profile && profile.display_name) ? String(profile.display_name).split(/\s+/)[0] : (user.email && /^jordan/i.test(user.email) ? 'Jordan' : null) } : null;
     $('tabSales').hidden = !isAdmin; var shs=$('sheetSales'); if(shs) shs.hidden=!isAdmin;
     /* Lead list parked 13 Nov 2026: leads live in GHL until Jordan asks for it */ var LEADLIST_ON=false; $('tabPeople').hidden = !(isAdmin&&LEADLIST_ON); var shp=$('sheetPeople'); if(shp) shp.hidden=!(isAdmin&&LEADLIST_ON);
-    $('tabStripe').hidden = !isAdmin; var ss=$('sheetStripe'); if(ss) ss.hidden=!isAdmin; var gb=$('sbGroupBusiness'); if(gb) gb.hidden=!isAdmin;
+    $('tabStripe').hidden = !isAdmin; var ss=$('sheetStripe'); if(ss) ss.hidden=!isAdmin; var gb=$('sbGroupBusiness'); if(gb) gb.hidden=!isAdmin; if(window.hqHideEmptyGroups) window.hqHideEmptyGroups();
     ['tabEmail','sheetEmail'].forEach(function(id){ var el=$(id); if(el) el.hidden=!isAdmin; });
     supaClient = client;
     try{ db = makeSupabaseDb(client); }catch(e){ db=null; }

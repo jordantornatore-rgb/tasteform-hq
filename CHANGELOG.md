@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.23.0 — 26 Nov 2026 (Sidebar reorder)
+
+- Sidebar and phone More sheet regrouped in the order you work: **Today** (Home, Daily brief, Time, Routine, Scorecard), **Content** (Content Engine, Analytics, Traffic), **Leads** (Leads, Applications, Lead list, DMs, Follow-ups, Warm Leads, Magnets, Ads, Email, Funnel links, Funnel old), **Sales**, **Clients** (Clients, Check-in replies, Delivery, Challenge), **Money** (Revenue, Subscriptions). Group labels hide when everything under them is admin-only. Number keys: 1 Home, 2 Daily brief, 3 Content, 4 Leads, 5 Applications, 6 Sales, 7 Clients, 8 Delivery.
+
 ## 3.22.0 — 26 Nov 2026 (Clients: weekly report)
 
 - **Weekly ↗** on every client (Monthly ↗ is the month report): last full Mon–Sun week as a client-facing scorecard: x/y ticks (sessions, weigh-ins, food logged, check-in, steps), session streak, weight 7-day average vs last week with 4-week chart, wins, this week's targets, your closing line. Save as PDF or screenshot for WhatsApp.
