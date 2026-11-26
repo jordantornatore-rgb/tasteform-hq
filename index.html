@@ -6999,6 +6999,8 @@ table.scores td{border-color:var(--border);}
         t.forEach(function(x){ sxy+=(x.n-mx)*(x.v-my); sxx+=(x.n-mx)*(x.n-mx); });
         o.trend=sxx?sxy/sxx*7:null;
       }
+      var t2=w.filter(function(x){ return x.n>L-14; });
+      if(t2.length>=4 && t2[t2.length-1].n-t2[0].n>=9){ var mx2=t2.reduce(function(s,x){ return s+x.n; },0)/t2.length, my2=t2.reduce(function(s,x){ return s+x.v; },0)/t2.length, a2=0, b2=0; t2.forEach(function(x){ a2+=(x.n-mx2)*(x.v-my2); b2+=(x.n-mx2)*(x.n-mx2); }); o.trend14=b2?a2/b2*7:null; }
       if(o.goalW!=null && o.trend && Math.abs(o.trend)>=0.05 && (o.goalW-o.avg7)*o.trend>0){ o.eta=Math.round(L+(o.goalW-o.avg7)/o.trend*7); }
       var wk={}; w.forEach(function(x){ var k=monday(x.n); (wk[k]=wk[k]||[]).push(x.v); });
       o.weekly=Object.keys(wk).map(Number).sort(function(a,b){ return a-b; }).slice(-8).map(function(k){ return wk[k].reduce(function(s,v){ return s+v; },0)/wk[k].length; });
@@ -7024,9 +7026,13 @@ table.scores td{border-color:var(--border);}
     rp.forEach(function(r){ if(r.wants_support===true && !r.booked_click_at) o.att.push('wants a 1:1'); if(r.question) o.att.push('asked a question on a Loom'); });
     if(o.lastCheckin!=null && T-o.lastCheckin>=10) o.att.push('no check-in for '+(T-o.lastCheckin)+' days');
     if(o.gymPct!=null && o.gymPct<50) o.att.push('gym '+o.gymPct+'%');
+    o.dir=o.pace?(o.pace<0?-1:1):(/cut/i.test(o.phase)?-1:/bulk/i.test(o.phase)?1:(o.goalW!=null&&o.avg7!=null&&Math.abs(o.goalW-o.avg7)>=0.5?(o.goalW<o.avg7?-1:1):0));
+    if(o.dir && o.trend14!=null && o.lastW!=null && T-o.lastW<=5){ var tw=o.trend14*o.dir; if(tw<=-0.1){ o.stall='wrong'; o.att.push('weight going the wrong way 2 wks'); } else if(tw<0.1){ o.stall='flat'; o.att.push('scale stalled 2 wks'); } }
+    var ms2=p.macroSuggestion, md=p.macroDecision||{};
+    o.macroOpen=!!(ms2 && ms2.at && md.for!==ms2.at); if(o.macroOpen) o.att.push('macro check');
     o.att=o.att.filter(function(x,i,a){ return a.indexOf(x)===i; });
     var s=p.status;
-    if(!s){ if(!w.length && !o.hasSess && o.lastCheckin==null) s='unknown'; else if((o.gymPct!=null&&o.gymPct<50)||(o.lastCheckin!=null&&T-o.lastCheckin>=14)) s='off_track'; else if((o.gymPct!=null&&o.gymPct<75)||(o.lastCheckin!=null&&T-o.lastCheckin>=10)||(o.pace!=null&&o.trend!=null&&o.pace*o.trend<0)) s='watch'; else s='on_track'; }
+    if(!s){ if(!w.length && !o.hasSess && o.lastCheckin==null) s='unknown'; else if((o.gymPct!=null&&o.gymPct<50)||(o.lastCheckin!=null&&T-o.lastCheckin>=14)) s='off_track'; else if(o.stall==='wrong') s='off_track'; else if(o.stall==='flat'||(o.gymPct!=null&&o.gymPct<75)||(o.lastCheckin!=null&&T-o.lastCheckin>=10)||(o.pace!=null&&o.trend!=null&&o.pace*o.trend<0)) s='watch'; else s='on_track'; }
     o.status=s; o.statusWhy=p.statusWhy||'';
     var all=[];
     (timeline[id]||[]).forEach(function(e){ all.push({at:e.at, n:dn(e.at), source:e.source||'note', title:e.title||'', body:e.body||'', private:e.private!==false, unans:!!e.unanswered}); });
@@ -7067,7 +7073,7 @@ table.scores td{border-color:var(--border);}
   }
   function kpi(label, value, note, cls){ return '<div class="kpi'+(cls?' '+cls:'')+'"><div class="label">'+esc(label)+'</div><div class="value">'+value+'</div><div class="note">'+(note?esc(note):'&nbsp;')+'</div></div>'; }
   function kg2(v){ if(v==null||!isFinite(v)) return '–'; return (v>0?'+':'')+(Math.round(v*100)/100).toFixed(2); }
-  function trendNote(o){ if(o.trend==null) return 'needs 4+ weigh-ins over 10+ days'; return (o.pace!=null?'goal pace '+kg(o.pace,true)+' kg/wk':'no goal pace set')+(o.eta!=null?' · goal by '+fmtD(o.eta):''); }
+  function trendNote(o){ if(o.trend==null) return 'needs 4+ weigh-ins over 10+ days'; return (o.trend14!=null?'last 2 wks '+kg2(o.trend14)+' · ':'')+(o.pace!=null?'goal pace '+kg(o.pace,true)+' kg/wk':'no goal pace set')+(o.eta!=null?' · goal by '+fmtD(o.eta):''); }
   function trendCls(o){ if(o.trend==null || o.pace==null) return ''; return o.pace*o.trend<0?'alert':(Math.abs(o.trend)>=Math.abs(o.pace)*0.7?'good':''); }
 
   function renderRoster(){
@@ -7089,11 +7095,11 @@ table.scores td{border-color:var(--border);}
       return '<button type="button" class="cl-row" data-clopen="'+esc(o.id)+'">'+
         '<span class="cl-name"><span class="cl-dot '+o.status+'"></span>'+esc(o.name)+'<span class="cl-sub">'+(o.week?'Week '+o.week:'')+(o.phase?' · '+esc(o.phase):'')+'</span>'+(o.att.length?'<span class="cl-att">'+esc(o.att.join(' · '))+'</span>':'')+'</span>'+
         '<span class="cl-cell"><span class="cl-st '+o.status+'">'+SLABEL[o.status]+'</span></span>'+
-        '<span class="cl-cell hide-m">'+(o.avg7!=null?kg(o.avg7)+' kg ':'– ')+spark(o.weekly)+'<span class="cl-sub">'+(o.change!=null?kg(o.change,true)+' kg since start':'&nbsp;')+'</span></span>'+
+        '<span class="cl-cell hide-m">'+(o.avg7!=null?kg(o.avg7)+' kg ':'– ')+spark(o.weekly)+'<span class="cl-sub">'+(o.change!=null?kg(o.change,true)+' kg since start':'&nbsp;')+(o.eta!=null?' · goal ~'+fmtD(o.eta):'')+'</span></span>'+
         '<span class="cl-cell hide-m">'+gym+'<span class="cl-sub">'+(o.gymPct!=null?o.gymPct+'% last 4 wks':'&nbsp;')+'</span></span>'+
         '<span class="cl-cell hide-m">'+ago(o.lastCheckin)+'</span>'+
         '<span class="cl-cell hide-m">'+ago(o.lastContact)+'</span>'+
-        '<span class="cl-mline">'+[o.avg7!=null?kg(o.avg7)+' kg ('+kg(o.change,true)+')':null, o.spw?gym:null, 'check-in '+ago(o.lastCheckin)].filter(Boolean).join(' · ')+'</span>'+
+        '<span class="cl-mline">'+[o.avg7!=null?kg(o.avg7)+' kg ('+kg(o.change,true)+')':null, o.eta!=null?'goal ~'+fmtD(o.eta):null, o.spw?gym:null, 'check-in '+ago(o.lastCheckin)].filter(Boolean).join(' · ')+'</span>'+
       '</button>';
     }).join('');
   }
@@ -7137,9 +7143,9 @@ table.scores td{border-color:var(--border);}
     var row=function(label, a, b, d, unit, lowerGood){
       var av=a&&a.v!=null?a.v:(typeof a==='number'?a:null), bv=b&&b.v!=null?b.v:(typeof b==='number'?b:null);
       var diff=(av!=null&&bv!=null)?av-bv:null, cls='';
-      if(diff!=null && lowerGood!=null && Math.abs(diff)>1e-9) cls=((diff<0)===lowerGood)?'good':'bad';
+      if(diff!=null && Math.abs(diff)<0.5*Math.pow(10,-d)) diff=0; if(diff!=null && lowerGood!=null && diff!==0) cls=((diff<0)===lowerGood)?'good':'bad';
       var n=function(x){ return x&&x.n!=null?'<span class="cl-sub">'+x.n+' day'+(x.n===1?'':'s')+'</span>':''; };
-      return '<tr><th scope="row">'+label+'</th><td>'+f1(av,d)+(av!=null?unit:'')+n(a)+'</td><td>'+f1(bv,d)+(bv!=null?unit:'')+n(b)+'</td><td class="cl-d '+cls+'">'+(diff==null?'–':(diff>0?'+':'')+f1(diff,d)+unit)+'</td></tr>';
+      return '<tr><th scope="row">'+label+'</th><td>'+f1(av,d)+(av!=null?unit:'')+n(a)+'</td><td>'+f1(bv,d)+(bv!=null?unit:'')+n(b)+'</td><td class="cl-d '+cls+'">'+(diff==null?'–':diff===0?'no change':(diff>0?'+':'')+f1(diff,d)+unit)+'</td></tr>';
     };
     var lose=/cut/i.test(o.phase||'')||(o.pace!=null&&o.pace<0)?true:(/bulk/i.test(o.phase||'')||(o.pace!=null&&o.pace>0)?false:null);
     var pr=function(k){ var p=cmpPreset(k); return '<button type="button" class="btn small" data-clcmp="'+k+'" aria-pressed="'+(p.a1===cmp.a1&&p.a2===cmp.a2&&p.b1===cmp.b1&&p.b2===cmp.b2)+'">'+k+' vs '+k+' days</button>'; };
@@ -7166,10 +7172,26 @@ table.scores td{border-color:var(--border);}
         '<div class="panel"><h3 class="cl-h">Weight</h3>'+chart(o,false)+'<p class="cl-sub" style="margin:0">Dots = daily weigh-ins, line = 7-day average'+(o.goalW!=null?', dashed = goal':'')+'.</p></div>'+
         '<div class="panel"><h3 class="cl-h">Gym insights</h3>'+(g.length?list(g):'<p class="cl-empty">'+(o.hasSess?'No PRs or stalls flagged this week.':'No 1FIT workouts synced yet.')+'</p>')+'</div>'+
       '</div>'+
+      (o.eta!=null||o.stall?'<div class="panel"><h3 class="cl-h">Prediction</h3><p style="margin:0;font-size:15px">'+(o.eta!=null?'On the 4-week trend ('+kg2(o.trend)+' kg/wk) '+esc(first(o.name))+' reaches '+kg(o.goalW)+' kg around <b>'+fmtD(o.eta)+'</b>.':'')+(o.stall==='flat'?' <b style="color:var(--crit)">Scale has stalled for 2 weeks</b> ('+kg2(o.trend14)+' kg/wk).':o.stall==='wrong'?' <b style="color:var(--crit)">Weight has moved the wrong way for 2 weeks</b> ('+kg2(o.trend14)+' kg/wk).':'')+'</p></div>':'')+
+      macroPanel(o)+
       (p.brief||flags.length||o.statusWhy?'<div class="panel">'+(p.brief?'<h3 class="cl-h">Brief for your next call or Loom</h3><div class="cl-brief">'+esc(p.brief)+'</div>':'')+(o.statusWhy?'<p style="margin:0"><b>Why '+SLABEL[o.status].toLowerCase()+':</b> '+esc(o.statusWhy)+'</p>':'')+(flags.length?'<h3 class="cl-h">Key flags</h3>'+list(flags):'')+'</div>':'')+
       (o.unans.length?'<div class="panel"><h3 class="cl-h">Unanswered on WhatsApp</h3><div class="cl-tl">'+o.unans.map(function(u){ return '<div class="cl-ev unans"><div class="ic">💬</div><div><div class="when">'+esc(fmtD(dn(u.at)))+'</div><div class="body">'+esc(txt(u))+'</div></div></div>'; }).join('')+'</div></div>':'')+
       '<div class="panel"><h3 class="cl-h">Timeline</h3>'+(tl.length?'<div class="cl-tl">'+tl.map(function(e){ return '<div class="cl-ev'+(e.unans?' unans':'')+'"><div class="ic">'+(ICON[e.source]||'•')+'</div><div style="min-width:0"><div class="when">'+esc(fmtD(e.n))+' · '+esc(e.title||e.source)+'</div><div class="body">'+esc(e.body)+'</div></div></div>'; }).join('')+'</div>':'<p class="cl-empty">Nothing yet. WhatsApp, check-ins, Looms and calls land here every night.</p>')+'</div>'+
       editForm(o);
+  }
+  function macroPanel(o){
+    var p=o.p, cur=p.macros||{}, sg=p.macroSuggestion, md=p.macroDecision||{};
+    if(!sg && !cur.calories) return '';
+    var m=function(x){ return x?[x.calories!=null?x.calories+' kcal':null, x.protein!=null?'P '+x.protein+'g':null, x.carbs!=null?'C '+x.carbs+'g':null, x.fat!=null?'F '+x.fat+'g':null].filter(Boolean).join(' · '):''; };
+    var body='<h3 class="cl-h">Macro check <span class="cl-sub" style="display:inline;text-transform:none;letter-spacing:0">(only you)</span></h3>'+(cur.calories?'<p style="margin:0">Current: <b>'+esc(m(cur))+'</b>'+(cur.setAt?' <span class="cl-sub" style="display:inline">since '+esc(fmtD(dn(cur.setAt)))+'</span>':'')+'</p>':'');
+    if(sg && o.macroOpen) body+='<div class="cl-brief"><b>Suggested: '+esc(m(sg)||'no change')+'</b>'+(sg.change?' ('+esc(sg.change)+')':'')+'\n'+esc(sg.reason||'')+'</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn primary" data-clmacro="used">Done, I changed it in 1FIT</button><button type="button" class="btn" data-clmacro="dismissed">Dismiss</button></div>';
+    else if(sg && md.for===sg.at) body+='<p class="cl-sub" style="margin:0">Last suggestion ('+esc(fmtD(dn(sg.at)))+'): '+(md.choice==='used'?'you changed it':'dismissed')+' on '+esc(fmtD(dn(md.at)))+'.</p>';
+    return '<div class="panel">'+body+'</div>';
+  }
+  function macroDecide(choice){
+    var row=profiles.find(function(r){ return r.id===openId; }); if(!row||!(row.data||{}).macroSuggestion) return;
+    var data=Object.assign({}, row.data, {macroDecision:{choice:choice, at:new Date().toISOString(), for:row.data.macroSuggestion.at}});
+    client.from('client_profiles').update({data:data}).eq('id',row.id).then(function(r){ if(r.error){ alert("Didn't save: "+r.error.message); return; } row.data=data; renderProfile(); });
   }
   function editForm(o){
     var m=o.man, p=o.p;
@@ -7262,6 +7284,7 @@ table.scores td{border-color:var(--border);}
     if(t.closest('[data-clshareexit]')){ closeShare(); return; }
     if(t.closest('[data-clsave]')){ save(); return; }
     var cp=t.closest('[data-clcmp]'); if(cp){ cmp=cmpPreset(+cp.getAttribute('data-clcmp')); var row0=profiles.find(function(r){ return r.id===openId; }); if(row0) $('clCmp').innerHTML=renderCompare(model(row0)); return; }
+    var mc=t.closest('[data-clmacro]'); if(mc){ macroDecide(mc.getAttribute('data-clmacro')); return; }
     if(t.closest('[data-clgock]')){ var b=$('tabCheckins'); if(b) b.click(); return; }
   });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeShare(); });

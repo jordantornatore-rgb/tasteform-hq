@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.18.0 — 26 Nov 2026 (Clients: predictions + macro check)
+
+- **Prediction** panel on the client page: goal date from the 4-week trend, plus a red flag when the 2-week trend has stalled (moving < 0.1 kg/wk toward the goal) or gone the wrong way. Stalled → Watch, wrong way → Off track, and it shows in Needs attention. Roster shows "goal ~<date>".
+- **Macro check** (only Jordan): current 1FIT targets, the nightly sync's suggested change with the evidence, and "Done, I changed it in 1FIT" / "Dismiss" (saved as `macroDecision`, never overwritten). Never shown on Screenshare.
+- Compare periods: changes that round to zero show "no change".
+
 ## 3.17.1 — 26 Nov 2026 (Clients: compare periods)
 
 - Client page **Compare periods**: last 7 vs previous 7 days by default, one-tap 14 vs 14 and 28 vs 28, or pick any two date ranges. Shows weight, steps, calories and protein averages (over days with a log, with the day count), gym sessions, sessions per week (periods of 7+ days) and check-ins, with the change coloured for their phase.

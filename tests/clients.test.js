@@ -20,13 +20,15 @@ metrics.push({ id: 'jk|s|now', data: { member_id: 'jack-keys', date: nd(mon + 1)
 // Harris: perfect 4/4 sessions, no weights
 for (let w = 1; w <= 4; w++) [0, 1, 4, 5].forEach(d => metrics.push({ id: 'hk|s|' + w + d, data: { member_id: 'harris-katsianos', date: nd(mon - 7 * w + d), kind: 'session', value: 1 } }));
 [3, 10, 17, 24].forEach(d => metrics.push({ id: 'hk|c|' + d, data: { member_id: 'harris-katsianos', date: nd(T - d), kind: 'checkin', value: 1 } }));
+for (let i = 13; i >= 0; i--) metrics.push({ id: 'se|' + i, data: { member_id: 'sami-ellaz', date: nd(T - i), kind: 'weight', value: i % 2 ? 80.1 : 80.0 } });
 const FX = {
   client_profiles: [
     { id: 'jack-keys', data: { name: 'Jack Keys', startDate: '2026-09-22', sessionsPerWeek: 4, goalWeight: 85, goalPace: -0.5, phase: 'Cut', brief: 'SECRET BRIEF scale slowing', flags: ['Knee niggle'], syncedAt: '2026-11-25T13:00:00Z',
       loom: { weekOf: '2026-11-23', likes: ['Weighed in every day'], dislikes: ['PRIVATE DISLIKE two missed Thursdays'], focus: ['Train Thursday before work drinks'], questions: ['Creatine?'] },
       gym: { prs: [{ lift: 'Bench', from: 80, to: 90 }], stalls: [{ lift: 'Squat', weight: 110, weeks: 3 }] },
       whatsapp: { unanswered: [{ at: '2026-11-24', text: 'Should I take creatine?' }] } } },
-    { id: 'harris-katsianos', data: { name: 'Harris Katsianos', startDate: '2026-10-27', sessionsPerWeek: 4 } }
+    { id: 'harris-katsianos', data: { name: 'Harris Katsianos', startDate: '2026-10-27', sessionsPerWeek: 4 } },
+    { id: 'sami-ellaz', data: { name: 'Sami Ellaz', startDate: '2026-11-03', phase: 'Cut', macros: { calories: 2300, protein: 180, carbs: 230, fat: 70, setAt: '2026-11-03' }, macroSuggestion: { calories: 2150, protein: 180, carbs: 200, fat: 67, change: '-150 kcal from carbs/fat', reason: 'Scale flat 2 wks with 4/4 sessions and food logged 6/7.', at: '2026-11-25' } } }
   ],
   client_metrics: metrics,
   client_timeline: [{ id: 'jk|f|1', data: { member_id: 'jack-keys', at: '2026-11-17', source: 'fathom', title: '1:1 call', body: 'Agreed: 4 drinks max', private: true } }],
@@ -83,6 +85,17 @@ async function hq(browser, url, { width, dark, role }) {
       check(`${label}: eta exists`, () => assert.ok(m.eta > 0));
       check(`${label}: jack watch`, () => assert.strictEqual(m.status, 'watch'));
       check(`${label}: harris 100% on track, no weight`, () => assert.ok(m.h === 100 && m.hs === 'on_track' && m.hw === undefined, JSON.stringify(m)));
+      const se = await page.evaluate(() => { const o = window.__clients.model('sami-ellaz'); return { stall: o.stall, att: o.att.join('|'), macro: o.macroOpen }; });
+      check(`${label}: sami stalled + macro check`, () => assert.ok(se.stall === 'flat' && /scale stalled 2 wks/.test(se.att) && /macro check/.test(se.att) && se.macro, JSON.stringify(se)));
+      check(`${label}: roster shows goal date`, () => assert.ok(/goal ~9 Apr/.test(r.list), r.list));
+      await page.click('[data-clopen="sami-ellaz"]'); await page.waitForTimeout(150);
+      const sp = await page.evaluate(() => document.getElementById('clProfile').innerText);
+      check(`${label}: macro panel`, () => assert.ok(/Current: 2300 kcal · P 180g · C 230g · F 70g/.test(sp) && /Suggested: 2150 kcal/.test(sp) && /Scale has stalled for 2 weeks/.test(sp), sp.slice(0, 900)));
+      if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `macro-${tag}.png`), fullPage: true });
+      await page.$eval('[data-clmacro="used"]', b => b.click()); await page.waitForTimeout(150);
+      const md = await page.evaluate(() => ({ d: window.__mock.__tables.client_profiles.find(x => x.id === 'sami-ellaz').data.macroDecision, t: document.getElementById('clProfile').innerText }));
+      check(`${label}: macro decision saved`, () => assert.ok(md.d.choice === 'used' && md.d.for === '2026-11-25' && /you changed it/.test(md.t), JSON.stringify(md.d)));
+      await page.$eval('[data-clback]', b => b.click()); await page.waitForTimeout(100);
       // open profile
       await page.click('[data-clopen="jack-keys"]'); await page.waitForTimeout(200);
       const p = await page.evaluate(() => document.getElementById('clProfile').innerText);
