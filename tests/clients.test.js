@@ -21,6 +21,8 @@ metrics.push({ id: 'jk|s|now', data: { member_id: 'jack-keys', date: nd(mon + 1)
 for (let w = 1; w <= 4; w++) [0, 1, 4, 5].forEach(d => metrics.push({ id: 'hk|s|' + w + d, data: { member_id: 'harris-katsianos', date: nd(mon - 7 * w + d), kind: 'session', value: 1 } }));
 [3, 10, 17, 24].forEach(d => metrics.push({ id: 'hk|c|' + d, data: { member_id: 'harris-katsianos', date: nd(T - d), kind: 'checkin', value: 1 } }));
 for (let i = 13; i >= 0; i--) metrics.push({ id: 'se|' + i, data: { member_id: 'sami-ellaz', date: nd(T - i), kind: 'weight', value: i % 2 ? 80.1 : 80.0 } });
+const svg = (c, label) => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800"><rect width="600" height="800" fill="${c}"/><circle cx="300" cy="160" r="80" fill="#fff"/><text x="40" y="700" font-size="60" fill="#fff">${label}</text></svg>`);
+const STORAGE = { 'jack-keys/2026-09-25-1.jpg': svg('#335', 'W1 FRONT'), 'jack-keys/2026-09-25-2.jpg': svg('#533', 'W1 BACK'), 'jack-keys/2026-11-20-1.jpg': svg('#353', 'W9 FRONT'), 'jack-keys/2026-11-20-2.jpg': svg('#553', 'W9 BACK') };
 const FX = {
   client_profiles: [
     { id: 'jack-keys', data: { name: 'Jack Keys', startDate: '2026-09-22', sessionsPerWeek: 4, goalWeight: 85, goalPace: -0.5, phase: 'Cut', brief: 'SECRET BRIEF scale slowing', flags: ['Knee niggle'], syncedAt: '2026-11-25T13:00:00Z',
@@ -31,6 +33,12 @@ const FX = {
     { id: 'sami-ellaz', data: { name: 'Sami Ellaz', startDate: '2026-11-03', phase: 'Cut', macros: { calories: 2300, protein: 180, carbs: 230, fat: 70, setAt: '2026-11-03' }, macroSuggestion: { calories: 2150, protein: 180, carbs: 200, fat: 67, change: '-150 kcal from carbs/fat', reason: 'Scale flat 2 wks with 4/4 sessions and food logged 6/7.', at: '2026-11-25' } } }
   ],
   client_metrics: metrics,
+  client_photos: [
+    { id: 'jack-keys|2026-09-25|1', data: { member_id: 'jack-keys', date: '2026-09-25', pos: 1, angle: 'front', path: 'jack-keys/2026-09-25-1.jpg', weight: 93.4 } },
+    { id: 'jack-keys|2026-09-25|2', data: { member_id: 'jack-keys', date: '2026-09-25', pos: 2, angle: 'back', path: 'jack-keys/2026-09-25-2.jpg', weight: 93.4 } },
+    { id: 'jack-keys|2026-11-20|1', data: { member_id: 'jack-keys', date: '2026-11-20', pos: 1, angle: 'front', path: 'jack-keys/2026-11-20-1.jpg', weight: 91.8 } },
+    { id: 'jack-keys|2026-11-20|2', data: { member_id: 'jack-keys', date: '2026-11-20', pos: 2, angle: 'back', path: 'jack-keys/2026-11-20-2.jpg', weight: 91.8 } }
+  ],
   client_timeline: [{ id: 'jk|f|1', data: { member_id: 'jack-keys', at: '2026-11-17', source: 'fathom', title: '1:1 call', body: 'Agreed: 4 drinks max', private: true } }],
   checkin_replies: [
     { id: 'd1', member_id: 'jack-keys', client_name: 'Jack Keys', status: 'draft', loom_url: null, created_at: '2026-11-23T05:00:00Z', points: 'WIN: weighed daily', checkin: { submittedLabel: 'Sun 8am', answers: { 'Biggest win': 'Bench PR' } } },
@@ -49,7 +57,7 @@ async function hq(browser, url, { width, dark, role }) {
   const page = await context.newPage(); const errors = [];
   page.on('console', m => { if (m.type() === 'error' && !benign(m.text())) errors.push(m.text()); });
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
-  await page.addInitScript({ content: mockSrc + `(function(){ window.__CL_TODAY='${TODAY}'; try{ localStorage.setItem('hqTheme','${dark ? 'dark' : 'light'}'); }catch(e){} var c=makeMockClient(${JSON.stringify(FX)}); window.__mock=c; window.__HQ_TEST={ client:c, user:{id:'u1', email:'t@e.com'}, profile:{role:'${role}', display_name:'X'} }; })();` });
+  await page.addInitScript({ content: mockSrc + `(function(){ window.__CL_TODAY='${TODAY}'; try{ localStorage.setItem('hqTheme','${dark ? 'dark' : 'light'}'); }catch(e){} var c=makeMockClient(${JSON.stringify(FX)}, {storageUrls:${JSON.stringify(STORAGE)}}); window.__mock=c; window.__HQ_TEST={ client:c, user:{id:'u1', email:'t@e.com'}, profile:{role:'${role}', display_name:'X'} }; })();` });
   await page.goto(url + '/index.html#clients', { waitUntil: 'load' });
   await page.waitForFunction(() => window.__clients, null, { timeout: 10000 });
   await page.waitForTimeout(700);
@@ -130,6 +138,41 @@ async function hq(browser, url, { width, dark, role }) {
       await page.keyboard.press('Escape');
       check(`${label}: Esc closes`, async () => {});
       const closed = await page.evaluate(() => document.getElementById('clShare').hidden); check(`${label}: share closed`, () => assert.ok(closed));
+      // photos: compare + post
+      await page.click('[data-clmode="photos"]'); await page.waitForTimeout(500);
+      const ph = await page.evaluate(() => { const imgs = [...document.querySelectorAll('#clProfile .ph-view img')]; return { n: imgs.length, loaded: imgs.every(i => i.naturalWidth > 0), w: imgs.map(i => i.style.width), tags: [...document.querySelectorAll('.ph-tag')].map(x => x.innerText), alts: imgs.map(i => i.alt) }; });
+      check(`${label}: photos two panes loaded`, () => assert.ok(ph.n === 2 && ph.loaded && ph.w.every(Boolean), JSON.stringify(ph)));
+      check(`${label}: default first vs latest front`, () => assert.ok(/25 Sept · Week 1 · 93\.4 kg/.test(ph.tags[0]) && /20 Nov · Week 9 · 91\.8 kg/.test(ph.tags[1]) && /front/.test(ph.alts[0]) && /front/.test(ph.alts[1]), JSON.stringify(ph)));
+      await page.$eval('[data-phkey="R|back:2"]', b => b.click()); await page.waitForTimeout(300);
+      const ph2 = await page.evaluate(() => document.querySelectorAll('#clProfile .ph-view img')[1].alt);
+      check(`${label}: angle switch`, () => assert.ok(/back/.test(ph2), ph2));
+      const w0 = await page.evaluate(() => parseFloat(document.querySelectorAll('#clProfile .ph-view img')[0].style.width));
+      await page.$eval('[data-phz="L"]', el => { el.value = '2'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+      const zz = await page.evaluate(() => [...document.querySelectorAll('#clProfile .ph-view img')].map(i => parseFloat(i.style.width)));
+      check(`${label}: zoom linked doubles both`, () => assert.ok(Math.abs(zz[0] / w0 - 2) < 0.01 && zz[1] > 0, JSON.stringify([w0, zz])));
+      const lk = await page.evaluate(() => { const S = window.__clients.ph().sides; return [S.L.z, S.R.z]; });
+      check(`${label}: both sides zoom 2`, () => assert.deepStrictEqual(lk, [2, 2]));
+      await page.$eval('[data-phb="R"]', el => { el.value = '130'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+      const fb = await page.evaluate(() => [...document.querySelectorAll('#clProfile .ph-view img')].map(i => i.style.filter));
+      check(`${label}: brightness right only`, () => assert.ok(/brightness\(100%\)/.test(fb[0]) && /brightness\(130%\)/.test(fb[1]), JSON.stringify(fb)));
+      if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `photos-${tag}.png`), fullPage: true });
+      await page.$eval('[data-phpost]', b => b.click()); await page.waitForTimeout(800);
+      const pp = await page.evaluate(() => ({ open: !document.getElementById('clShare').hidden, head: document.getElementById('phHead').value, stat: document.getElementById('phStat').value, dl: document.querySelector('[data-phdl]').disabled, px: (() => { const c = document.getElementById('phCanvas'); const d = c.getContext('2d').getImageData(200, 900, 1, 1).data; return [c.width, c.height, d[0], d[1], d[2]]; })() }));
+      check(`${label}: post builder defaults`, () => assert.ok(pp.open && pp.head === '8 WEEKS' && pp.stat === '-1.6 kg in 8 weeks' && pp.dl, JSON.stringify(pp)));
+      check(`${label}: story canvas drew photo`, () => assert.ok(pp.px[0] === 1080 && pp.px[1] === 1920 && !(pp.px[2] === 15 && pp.px[3] === 13 && pp.px[4] === 11), JSON.stringify(pp.px)));
+      await page.$eval('[data-phfmt="feed"]', b => b.click()); await page.waitForTimeout(150);
+      const fh = await page.evaluate(() => document.getElementById('phCanvas').height);
+      check(`${label}: feed 4:5`, () => assert.strictEqual(fh, 1350));
+      if (SHOTS) { await page.$eval('[data-phfmt="story"]', b => b.click()); await page.fill('#phQuote', 'Never thought I would actually enjoy training before work.'); await page.waitForTimeout(150); const data = await page.evaluate(() => document.getElementById('phCanvas').toDataURL('image/png')); fs.writeFileSync(path.join(SHOTS, `post-${tag}.png`), Buffer.from(data.split(',')[1], 'base64')); await page.screenshot({ path: path.join(SHOTS, `builder-${tag}.png`) }); }
+      await page.check('#phOk');
+      const dl2 = await page.evaluate(() => document.querySelector('[data-phdl]').disabled);
+      check(`${label}: consent enables download`, () => assert.ok(!dl2));
+      const [download] = await Promise.all([page.waitForEvent('download', { timeout: 5000 }).catch(() => null), page.$eval('[data-phdl]', b => b.click())]);
+      check(`${label}: download fires`, () => assert.ok(download && /jack-keys-2026-09-25-vs-2026-11-20-(story|feed)\.png/.test(download.suggestedFilename()), download && download.suggestedFilename()));
+      await page.waitForTimeout(200);
+      const logged = await page.evaluate(() => (window.__mock.__tables.client_profiles.find(x => x.id === 'jack-keys').data.posts || []).length);
+      check(`${label}: post logged with consent`, () => assert.strictEqual(logged, 1));
+      await page.keyboard.press('Escape');
       // edit
       await page.click('[data-clmode="overview"]'); await page.waitForTimeout(100);
       await page.evaluate(() => { document.querySelector('#clProfile details:last-of-type').open = true; });

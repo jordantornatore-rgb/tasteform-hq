@@ -272,6 +272,28 @@ button.kpi:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .cl-edit label{font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:4px;}
 .cl-edit .wide{grid-column:1 / -1;}
 .cl-empty{font-size:14px;color:var(--muted);}
+.ph-wrap{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3);}
+.ph-pane{display:flex;flex-direction:column;gap:8px;min-width:0;}
+.ph-ctl{display:flex;flex-direction:column;gap:6px;}
+.ph-ctl select{width:100%;}
+.ph-angles{display:flex;gap:4px;flex-wrap:wrap;}
+.ph-angles .btn[aria-pressed="true"],[data-phlink][aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
+.ph-view{position:relative;aspect-ratio:3/4;overflow:hidden;border-radius:var(--r-m);background:#1E1913;touch-action:none;cursor:grab;user-select:none;}
+.ph-view:active{cursor:grabbing;}
+.ph-view img{position:absolute;max-width:none;pointer-events:none;}
+.ph-tag{position:absolute;left:0;right:0;bottom:0;padding:8px 10px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff;font-size:12px;font-weight:700;}
+.ph-sl{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;}
+.ph-sl label{font-size:11px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;gap:2px;min-width:0;}
+.ph-sl input{width:100%;}
+@media (max-width:820px){ .ph-wrap{gap:8px;} .ph-sl{grid-template-columns:1fr;} .ph-angles .btn{padding:4px 8px;font-size:12px;} }
+.ph-post{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,380px);gap:var(--s4);align-items:start;}
+@media (max-width:900px){ .ph-post{grid-template-columns:1fr;} }
+.ph-prev canvas{width:100%;max-height:78vh;object-fit:contain;display:block;border-radius:var(--r-m);background:#000;}
+.ph-form{display:flex;flex-direction:column;gap:10px;}
+.ph-form label{font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:4px;}
+.ph-form label.ph-chk{flex-direction:row;align-items:center;gap:8px;color:var(--text);}
+.ph-form .cl-seg{margin-left:0;align-self:flex-start;}
+
 .cl-cmp-pre{display:flex;gap:6px;flex-wrap:wrap;}
 .cl-cmp-pre .btn[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
 .cl-cmp-dates{display:flex;gap:var(--s3);flex-wrap:wrap;}
@@ -6962,7 +6984,7 @@ table.scores td{border-color:var(--border);}
 (function(){
   'use strict';
   var esc=HQ.esc, client=null, admin=false, loaded=false, poller=null;
-  var profiles=[], metrics={}, timeline={}, replies=[], openId=null, mode='overview', cmp=null;
+  var profiles=[], metrics={}, timeline={}, replies=[], photos={}, openId=null, mode='overview', cmp=null;
   function $(id){ return document.getElementById(id); }
   var DAY=864e5;
   function today(){ if(window.__CL_TODAY) return window.__CL_TODAY; try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Sydney',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()); }catch(e){ return new Date().toISOString().slice(0,10); } }
@@ -7117,7 +7139,7 @@ table.scores td{border-color:var(--border);}
     var ini=o.name.split(' ').map(function(s){ return s[0]||''; }).join('').slice(0,2).toUpperCase();
     return '<div class="cl-top"><button type="button" class="btn small" data-clback>← Clients</button><div class="cl-ava">'+esc(ini)+'</div><div><h1 style="margin:0">'+esc(o.name)+'</h1><div class="sub">'+[o.week?'Week '+o.week:null, o.phase||null, o.goal||null, o.start!=null?'started '+fmtD(o.start):null].filter(Boolean).map(esc).join(' · ')+'</div></div>'+
       '<span class="cl-st '+o.status+'">'+SLABEL[o.status]+'</span>'+
-      '<div class="cl-seg" role="group" aria-label="View"><button type="button" data-clmode="overview" aria-pressed="'+(mode==='overview')+'">Overview</button><button type="button" data-clmode="loom" aria-pressed="'+(mode==='loom')+'">Loom prep</button><button type="button" data-clshare>Screenshare ↗</button></div></div>';
+      '<div class="cl-seg" role="group" aria-label="View"><button type="button" data-clmode="overview" aria-pressed="'+(mode==='overview')+'">Overview</button><button type="button" data-clmode="loom" aria-pressed="'+(mode==='loom')+'">Loom prep</button><button type="button" data-clmode="photos" aria-pressed="'+(mode==='photos')+'">Photos</button><button type="button" data-clshare>Screenshare ↗</button></div></div>';
   }
   function kpiRow(o){
     return '<div class="kpis">'+
@@ -7221,12 +7243,167 @@ table.scores td{border-color:var(--border);}
         '<div class="panel"><p class="cl-empty" style="margin:0">No check-in waiting for a Loom. New ones are drafted Saturday arvo and Sunday.</p></div>')+
       kpiRow(o);
   }
+
+  /* ---------- Progress photos: compare side by side (pick date + angle, zoom, pan, brightness, contrast) + branded post builder ----------
+     client_photos data: {member_id, date, pos (1..n in the 1FIT gallery), angle: front|back|side|other, path (storage key in bucket progress-photos), weight, w, h}.
+     Images are private: HQ asks Storage for 1-hour signed links. Nothing here is public until Jordan downloads a post. */
+  var PH={urls:{}, sides:null, linked:true, imgs:{}};
+  var ANG=['front','side','back','other'];
+  function phList(id){ return (photos[id]||[]).slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)) || (a.pos||0)-(b.pos||0); }); }
+  function phDates(id){ var seen={}, out=[]; phList(id).forEach(function(p){ if(!seen[p.date]){ seen[p.date]=1; out.push(p.date); } }); return out; }
+  function phPick(id, date, key){ var l=phList(id).filter(function(p){ return p.date===date; }); if(!l.length) return null; return l.find(function(p){ return phKey(p)===key; }) || l.find(function(p){ return (p.angle||'other')===String(key).split(':')[0]; }) || l[0]; }
+  function phKey(p){ return (p.angle||'other')+':'+(p.pos||1); }
+  function phKeyLabel(p){ var a=p.angle||'other'; return a.charAt(0).toUpperCase()+a.slice(1)+(phList(p.member_id).filter(function(x){ return x.date===p.date && (x.angle||'other')===a; }).length>1?' '+(p.pos||''):''); }
+  function phSide(){ return {z:1, x:0, y:0, b:100, c:100}; }
+  function phInit(o){
+    var ds=phDates(o.id); if(!ds.length){ PH.sides=null; return; }
+    if(PH.sides && PH.sides.id===o.id) return;
+    var first=phPick(o.id, ds[0], 'front:1'), key=first?phKey(first):'front:1';
+    PH.sides={id:o.id, L:Object.assign(phSide(),{date:ds[0], key:key}), R:Object.assign(phSide(),{date:ds[ds.length-1], key:key})};
+  }
+  function phUrls(id){
+    var need=phList(id).map(function(p){ return p.path; }).filter(function(p){ return p && !PH.urls[p]; });
+    if(!need.length || !client.storage) return Promise.resolve();
+    return client.storage.from('progress-photos').createSignedUrls(need, 3600).then(function(r){ (r.data||[]).forEach(function(x){ if(x.signedUrl) PH.urls[x.path]=x.signedUrl; }); });
+  }
+  function weekOf(o, date){ return o.start!=null&&dn(date)!=null?Math.floor((dn(date)-o.start)/7)+1:null; }
+  function phLabel(o, p){ return [fmtD(dn(p.date)), weekOf(o,p.date)?'Week '+weekOf(o,p.date):null, p.weight!=null?kg(num(p.weight))+' kg':null].filter(Boolean).join(' · '); }
+  function phPane(o, k){
+    var s=PH.sides[k], p=phPick(o.id, s.date, s.key), ds=phDates(o.id);
+    var keys=phList(o.id).filter(function(x){ return x.date===s.date; });
+    var url=p&&PH.urls[p.path];
+    return '<div class="ph-pane" data-phside="'+k+'">'+
+      '<div class="ph-ctl"><select class="input" data-phdate="'+k+'" aria-label="'+(k==='L'?'Left':'Right')+' photo date">'+ds.slice().reverse().map(function(d){ var w=phList(o.id).find(function(x){ return x.date===d && x.weight!=null; }); return '<option value="'+esc(d)+'"'+(d===s.date?' selected':'')+'>'+esc(fmtD(dn(d)))+(weekOf(o,d)?' · Wk '+weekOf(o,d):'')+(w?' · '+kg(num(w.weight))+' kg':'')+'</option>'; }).join('')+'</select>'+
+      '<div class="ph-angles">'+keys.map(function(x){ return '<button type="button" class="btn small" data-phkey="'+k+'|'+esc(phKey(x))+'" aria-pressed="'+(p&&phKey(p)===phKey(x))+'">'+esc(phKeyLabel(x))+'</button>'; }).join('')+'</div></div>'+
+      '<div class="ph-view" data-phview="'+k+'">'+(url?'<img alt="'+esc(o.name+' '+(p.angle||'')+' '+p.date)+'" src="'+esc(url)+'" crossorigin="anonymous" draggable="false">':'<div class="cl-empty" style="padding:20px">Loading…</div>')+'<div class="ph-tag">'+esc(p?phLabel(o,p):'')+'</div></div>'+
+      '<div class="ph-sl"><label>Zoom<input type="range" min="1" max="4" step="0.05" value="'+s.z+'" data-phz="'+k+'"></label><label>Brightness<input type="range" min="50" max="150" value="'+s.b+'" data-phb="'+k+'"></label><label>Contrast<input type="range" min="50" max="150" value="'+s.c+'" data-phc="'+k+'"></label><button type="button" class="btn small" data-phreset="'+k+'">Reset</button></div>'+
+    '</div>';
+  }
+  function renderPhotos(o){
+    phInit(o);
+    if(!PH.sides) return '<div class="panel"><h3 class="cl-h">Progress photos</h3><p class="cl-empty">No photos yet. The nightly sync copies every 1FIT gallery here (newest first, then the history a couple of clients a night).</p></div>';
+    var n=phDates(o.id).length, c=phList(o.id).length;
+    var html='<div class="panel"><div class="cl-top"><div><h3 class="cl-h">Compare photos</h3><p class="cl-sub" style="margin:4px 0 0">'+c+' photos from '+n+' check-ins. Drag to move, scroll or pinch to zoom.</p></div><div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn small" data-phlink aria-pressed="'+PH.linked+'">'+(PH.linked?'🔗 Zoom linked':'Zoom separate')+'</button><button type="button" class="btn small" data-phswap>⇄ Swap</button><button type="button" class="btn primary small" data-phpost>Create post</button></div></div>'+
+      '<div class="ph-wrap">'+phPane(o,'L')+phPane(o,'R')+'</div></div>';
+    phUrls(o.id).then(function(){ var need=['L','R'].some(function(k){ var p=phPick(o.id, PH.sides[k].date, PH.sides[k].key); return p && PH.urls[p.path] && !document.querySelector('[data-phview="'+k+'"] img'); }); if(need && mode==='photos' && openId===o.id) renderProfile(); });
+    return html;
+  }
+  function phGeom(img, W, H, s){ var iw=img.naturalWidth||1, ih=img.naturalHeight||1, base=Math.max(W/iw, H/ih), sc=base*s.z, dw=iw*sc, dh=ih*sc; return {w:dw, h:dh, x:(W-dw)/2+s.x*W, y:(H-dh)/2+s.y*H}; }
+  function phApply(k){
+    var v=document.querySelector('[data-phview="'+k+'"]'); if(!v||!PH.sides) return; var img=v.querySelector('img'), s=PH.sides[k]; if(!img) return;
+    var go=function(){ var g=phGeom(img, v.clientWidth, v.clientHeight, s); img.style.width=g.w+'px'; img.style.height=g.h+'px'; img.style.left=g.x+'px'; img.style.top=g.y+'px'; img.style.filter='brightness('+s.b+'%) contrast('+s.c+'%)'; };
+    if(img.complete && img.naturalWidth) go(); else img.onload=go;
+    var z=document.querySelector('[data-phz="'+k+'"]'); if(z) z.value=s.z;
+  }
+  function phClamp(s){ s.z=Math.max(1, Math.min(4, s.z)); var lim=(s.z-1)/2+0.25; s.x=Math.max(-lim, Math.min(lim, s.x)); s.y=Math.max(-lim, Math.min(lim, s.y)); }
+  function phSet(k, patch, geo){
+    var ks=geo && PH.linked ? ['L','R'] : [k];
+    ks.forEach(function(x){ Object.assign(PH.sides[x], patch); phClamp(PH.sides[x]); phApply(x); });
+  }
+  // pointer drag / pinch / wheel on the photo views
+  var drag=null;
+  document.addEventListener('pointerdown', function(e){ var v=e.target.closest && e.target.closest('[data-phview]'); if(!v||!PH.sides) return; var k=v.getAttribute('data-phview'); drag=drag&&drag.k===k?drag:{k:k, pts:{}, s0:null}; drag.pts[e.pointerId]={x:e.clientX, y:e.clientY}; drag.s0=Object.assign({}, PH.sides[k]); drag.w=v.clientWidth; drag.h=v.clientHeight; drag.d0=null; try{ v.setPointerCapture(e.pointerId); }catch(x){} e.preventDefault(); });
+  document.addEventListener('pointermove', function(e){ if(!drag||!drag.pts[e.pointerId]) return; var first=drag.pts[e.pointerId]; var ids=Object.keys(drag.pts);
+    if(ids.length===1){ var dx=(e.clientX-first.x)/drag.w, dy=(e.clientY-first.y)/drag.h; phSet(drag.k, {x:drag.s0.x+dx, y:drag.s0.y+dy}, true); }
+    else { drag.cur=drag.cur||{}; drag.cur[e.pointerId]={x:e.clientX,y:e.clientY}; var a=drag.cur[ids[0]]||drag.pts[ids[0]], b=drag.cur[ids[1]]||drag.pts[ids[1]], d=Math.hypot(a.x-b.x,a.y-b.y); var p0=drag.pts[ids[0]], p1=drag.pts[ids[1]], d0=Math.hypot(p0.x-p1.x,p0.y-p1.y)||1; phSet(drag.k, {z:drag.s0.z*d/d0}, true); } });
+  document.addEventListener('pointerup', function(e){ if(drag){ delete drag.pts[e.pointerId]; if(drag.cur) delete drag.cur[e.pointerId]; if(!Object.keys(drag.pts).length) drag=null; else { drag.s0=Object.assign({}, PH.sides[drag.k]); var r=Object.keys(drag.pts)[0]; drag.pts[r]=(drag.cur&&drag.cur[r])||drag.pts[r]; drag.cur=null; } } });
+  document.addEventListener('pointercancel', function(){ drag=null; });
+  document.addEventListener('wheel', function(e){ var v=e.target.closest && e.target.closest('[data-phview]'); if(!v||!PH.sides) return; e.preventDefault(); var k=v.getAttribute('data-phview'); phSet(k, {z:PH.sides[k].z*(e.deltaY<0?1.1:1/1.1)}, true); }, {passive:false});
+  document.addEventListener('input', function(e){ var t=e.target; if(!t||!t.getAttribute||!PH.sides) return; var k;
+    if((k=t.getAttribute('data-phz'))) phSet(k, {z:+t.value}, true);
+    else if((k=t.getAttribute('data-phb'))) phSet(k, {b:+t.value});
+    else if((k=t.getAttribute('data-phc'))) phSet(k, {c:+t.value});
+    else if(t.closest && t.closest('#phPost')) phDraw(); });
+  document.addEventListener('change', function(e){ var t=e.target; if(!t||!t.getAttribute) return; var k=t.getAttribute('data-phdate'); if(k && PH.sides){ PH.sides[k].date=t.value; renderProfile(); return; } if(t.closest && t.closest('#phPost')) phDraw(); });
+  document.addEventListener('click', function(e){ var t=e.target.closest ? e.target : null; if(!t||!PH.sides) return; var b;
+    if((b=t.closest('[data-phkey]'))){ var kv=b.getAttribute('data-phkey').split('|'); PH.sides[kv[0]].key=kv[1]; renderProfile(); return; }
+    if((b=t.closest('[data-phreset]'))){ var k2=b.getAttribute('data-phreset'); Object.assign(PH.sides[k2], phSide()); phApply(k2); var pb=document.querySelector('[data-phb="'+k2+'"]'), pc=document.querySelector('[data-phc="'+k2+'"]'); if(pb) pb.value=100; if(pc) pc.value=100; return; }
+    if(t.closest('[data-phlink]')){ PH.linked=!PH.linked; renderProfile(); return; }
+    if(t.closest('[data-phswap]')){ var L=PH.sides.L; PH.sides.L=PH.sides.R; PH.sides.R=L; renderProfile(); return; }
+    if(t.closest('[data-phpost]')){ phOpenPost(); return; }
+    if(t.closest('[data-phpostclose]')){ phClosePost(); return; }
+    if(t.closest('[data-phdl]')){ phExport(false); return; }
+    if(t.closest('[data-phshare]')){ phExport(true); return; }
+  });
+
+  /* ---------- Post builder (branded, 9:16 story or 4:5 feed) ---------- */
+  var POST={fmt:'story'};
+  function phOpenPost(){
+    var row=profiles.find(function(r){ return r.id===openId; }); if(!row) return; var o=model(row);
+    var pL=phPick(o.id, PH.sides.L.date, PH.sides.L.key), pR=phPick(o.id, PH.sides.R.date, PH.sides.R.key);
+    var wk=(weekOf(o,pR.date)||0)-(weekOf(o,pL.date)||0), dw=(pL.weight!=null&&pR.weight!=null)?num(pR.weight)-num(pL.weight):null;
+    var el=$('clShare');
+    el.innerHTML='<div class="sh-top"><div><h1 style="font-size:clamp(28px,4vw,44px)">Create post</h1><div class="sh-sub">'+esc(o.name)+' · uses the two photos exactly as you framed them</div></div><button type="button" class="btn sh-exit" data-phpostclose>Close (Esc)</button></div>'+
+      '<div class="ph-post" id="phPost"><div class="ph-prev"><canvas id="phCanvas" width="1080" height="1920" aria-label="Post preview"></canvas></div><div class="ph-form">'+
+      '<div class="cl-seg" role="group" aria-label="Format"><button type="button" data-phfmt="story" aria-pressed="true">Story 9:16</button><button type="button" data-phfmt="feed" aria-pressed="false">Post 4:5</button></div>'+
+      '<label>Headline<input class="input" id="phHead" maxlength="40" value="'+esc(wk>0?wk+' WEEKS':'THE PROCESS')+'"></label>'+
+      '<label>Result line<input class="input" id="phStat" maxlength="60" value="'+esc(dw!=null?(dw>0?'+':'')+kg(dw)+' kg'+(wk>0?' in '+wk+' weeks':''):'')+'"></label>'+
+      '<label>Left label<input class="input" id="phLabL" maxlength="40" value="'+esc(phLabel(o,pL))+'"></label>'+
+      '<label>Right label<input class="input" id="phLabR" maxlength="40" value="'+esc(phLabel(o,pR))+'"></label>'+
+      '<label>Their words (optional)<textarea class="input" id="phQuote" rows="3" maxlength="220" placeholder="Paste what they said in their check-in or on WhatsApp"></textarea></label>'+
+      '<label>Footer<input class="input" id="phFoot" maxlength="60" value="COACHED BY @JORDANTORNATORE"></label>'+
+      '<label class="ph-chk"><input type="checkbox" id="phFace"> Blur faces</label>'+
+      '<label class="ph-chk"><input type="checkbox" id="phOk"> '+esc(first(o.name))+' said yes to this exact post, in writing</label>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn primary" data-phdl disabled>Download PNG</button><button type="button" class="btn" data-phshare disabled>Share…</button></div>'+
+      '<p class="cl-sub" id="phMsg" style="margin:0">Send them the image first and get a yes before posting.</p>'+
+      '</div></div>';
+    el.hidden=false; document.body.style.overflow='hidden';
+    POST.o=o; POST.pL=pL; POST.pR=pR;
+    var ld=function(p){ return new Promise(function(res){ var i=new Image(); i.crossOrigin='anonymous'; i.onload=function(){ res(i); }; i.onerror=function(){ res(null); }; i.src=PH.urls[p.path]; }); };
+    Promise.all([ld(pL), ld(pR), document.fonts && document.fonts.load ? document.fonts.load('80px Anton').catch(function(){}) : null]).then(function(r){ POST.iL=r[0]; POST.iR=r[1]; phDraw(); });
+  }
+  function phClosePost(){ closeShare(); }
+  document.addEventListener('click', function(e){ var b=e.target.closest && e.target.closest('[data-phfmt]'); if(!b) return; POST.fmt=b.getAttribute('data-phfmt'); document.querySelectorAll('[data-phfmt]').forEach(function(x){ x.setAttribute('aria-pressed', x===b?'true':'false'); }); phDraw(); });
+  document.addEventListener('change', function(e){ if(e.target && e.target.id==='phOk'){ var on=e.target.checked; document.querySelectorAll('[data-phdl],[data-phshare]').forEach(function(x){ x.disabled=!on; }); } });
+  function wrap(ctx, text, maxW){ var words=String(text).split(/\s+/), lines=[], cur=''; words.forEach(function(w){ var t=cur?cur+' '+w:w; if(ctx.measureText(t).width>maxW && cur){ lines.push(cur); cur=w; } else cur=t; }); if(cur) lines.push(cur); return lines; }
+  function phDraw(){
+    var c=$('phCanvas'); if(!c||!POST.o) return; var story=POST.fmt==='story', W=1080, H=story?1920:1350; c.width=W; c.height=H;
+    var ctx=c.getContext('2d'), val=function(id){ var x=$(id); return x?x.value:''; };
+    var BG='#0F0D0B', CREAM='#F2F1E8', ACC='#B8895A', MUTE='#8F8272';
+    ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+    // brand bar
+    ctx.fillStyle=ACC; ctx.fillRect(60, story?120:70, 90, 8);
+    ctx.fillStyle=MUTE; ctx.font='700 30px "Open Sans", sans-serif'; ctx.textBaseline='alphabetic';
+    ctx.fillText('T A S T E F O R M', 60, story?185:130);
+    ctx.fillStyle=CREAM; ctx.font=(story?'150px':'120px')+' Anton, Impact, sans-serif';
+    ctx.fillText(val('phHead').toUpperCase(), 54, story?340:265);
+    // photos
+    var gap=20, pw=(W-120-gap)/2, ph=story?pw*1.5:pw*4/3, py=story?400:310;
+    [['L',POST.iL,val('phLabL')],['R',POST.iR,val('phLabR')]].forEach(function(a, i){
+      var x=60+i*(pw+gap), s=PH.sides[a[0]], img=a[1];
+      ctx.save(); ctx.beginPath(); ctx.rect(x,py,pw,ph); ctx.clip(); ctx.fillStyle='#1E1913'; ctx.fillRect(x,py,pw,ph);
+      if(img){ var g=phGeom(img, pw, ph, s); ctx.filter='brightness('+s.b+'%) contrast('+s.c+'%)'; ctx.drawImage(img, x+g.x, py+g.y, g.w, g.h); ctx.filter='none';
+        if($('phFace') && $('phFace').checked){ ctx.save(); ctx.beginPath(); ctx.rect(x,py,pw,ph*0.24); ctx.clip(); ctx.filter='blur(28px) brightness('+s.b+'%)'; ctx.drawImage(img, x+g.x, py+g.y, g.w, g.h); ctx.restore(); } }
+      ctx.restore();
+      ctx.fillStyle=i?ACC:'rgba(15,13,11,.78)'; ctx.fillRect(x, py+ph-64, pw, 64);
+      ctx.fillStyle=i?BG:CREAM; ctx.font='700 26px "Open Sans", sans-serif'; ctx.fillText(String(a[2]).toUpperCase().slice(0,34), x+20, py+ph-23);
+    });
+    var y=py+ph+(story?120:95);
+    if(val('phStat')){ ctx.fillStyle=ACC; ctx.font=(story?'110px':'84px')+' Anton, Impact, sans-serif'; ctx.fillText(val('phStat').toUpperCase(), 54, y); y+=story?50:30; }
+    if(val('phQuote')){ ctx.fillStyle=CREAM; ctx.font='italic 500 '+(story?40:32)+'px "Open Sans", sans-serif'; var ls=wrap(ctx, '“'+val('phQuote').trim()+'”', W-140).slice(0, story?6:3); ls.forEach(function(l){ y+=story?58:46; ctx.fillText(l, 60, y); }); }
+    ctx.fillStyle=ACC; ctx.fillRect(60, H-(story?150:105), W-120, 3);
+    ctx.fillStyle=MUTE; ctx.font='700 28px "Open Sans", sans-serif'; ctx.fillText(val('phFoot').toUpperCase(), 60, H-(story?90:52));
+  }
+  function phExport(share){
+    var c=$('phCanvas'), ok=$('phOk'); if(!c||!ok||!ok.checked) return;
+    var o=POST.o, name=(o.name||'client').toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+POST.pL.date+'-vs-'+POST.pR.date+'-'+POST.fmt+'.png';
+    var log=function(){ var row=profiles.find(function(r){ return r.id===o.id; }); if(!row) return; var posts=(row.data.posts||[]).concat([{at:new Date().toISOString(), from:POST.pL.date, to:POST.pR.date, format:POST.fmt, consent:true}]).slice(-50); var data=Object.assign({}, row.data, {posts:posts}); client.from('client_profiles').update({data:data}).eq('id', row.id).then(function(r){ if(!r.error) row.data=data; }); };
+    c.toBlob(function(blob){
+      if(!blob){ $('phMsg').textContent="Couldn't make the image (a photo didn't load)."; return; }
+      var file=window.File?new File([blob], name, {type:'image/png'}):blob;
+      if(share && navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file]}).then(log, function(){}); return; }
+      var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      log(); $('phMsg').textContent='Saved '+name;
+    }, 'image/png');
+  }
+
   function renderProfile(){
     var el=$('clProfile'), row=profiles.find(function(r){ return r.id===openId; });
     if(!row){ openId=null; $('clRoster').hidden=false; el.hidden=true; renderRoster(); return; }
     var o=model(row);
     $('clRoster').hidden=true; el.hidden=false;
-    el.innerHTML=profileHead(o)+(mode==='loom'?renderLoom(o):renderOverview(o));
+    el.innerHTML=profileHead(o)+(mode==='loom'?renderLoom(o):mode==='photos'?renderPhotos(o):renderOverview(o));
+    if(mode==='photos'){ phApply('L'); phApply('R'); }
   }
   function renderShare(){
     var row=profiles.find(function(r){ return r.id===openId; }), el=$('clShare'); if(!row||!el) return;
@@ -7264,14 +7441,15 @@ table.scores td{border-color:var(--border);}
   function load(){
     if(!client || !admin) return Promise.resolve();
     var q=function(t, lim){ return client.from(t).select('id,data').limit(lim); };
-    return Promise.all([q('client_profiles',500), q('client_metrics',20000), q('client_timeline',5000),
+    return Promise.all([q('client_profiles',500), q('client_metrics',20000), q('client_timeline',5000), q('client_photos',20000),
       client.from('checkin_replies').select('id,member_id,client_name,created_at,sent_at,loom_url,status,views,rating,question,wants_support,booked_click_at,points,checkin').order('created_at',{ascending:false}).limit(500)
     ]).then(function(rs){
       var err=rs.find(function(r){ return r.error; }); if(err && rs[0].error){ $('clSub').textContent="Couldn't load clients: "+rs[0].error.message; return; }
       profiles=(rs[0].data||[]).filter(function(r){ return r.data && r.data.active!==false; });
       metrics={}; (rs[1].data||[]).forEach(function(r){ var d=r.data||{}; if(!d.member_id) return; (metrics[d.member_id]=metrics[d.member_id]||[]).push(d); });
       timeline={}; (rs[2].data||[]).forEach(function(r){ var d=r.data||{}; if(!d.member_id) return; (timeline[d.member_id]=timeline[d.member_id]||[]).push(d); });
-      replies=(rs[3]&&rs[3].data)||[];
+      photos={}; (rs[3].data||[]).forEach(function(r){ var d=r.data||{}; if(!d.member_id||!d.path||d.hidden) return; (photos[d.member_id]=photos[d.member_id]||[]).push(d); });
+      replies=(rs[4]&&rs[4].data)||[];
       loaded=true; var v=$('viewClients'); if(v && !v.hidden) render(); else renderRoster();
     });
   }
@@ -7288,6 +7466,7 @@ table.scores td{border-color:var(--border);}
     if(t.closest('[data-clgock]')){ var b=$('tabCheckins'); if(b) b.click(); return; }
   });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeShare(); });
+  window.addEventListener('resize', function(){ if(mode==='photos' && openId){ phApply('L'); phApply('R'); } });
   document.addEventListener('change', function(e){ var k=e.target && e.target.getAttribute && e.target.getAttribute('data-clcd'); if(!k || !cmp || !e.target.value) return; cmp[k]=e.target.value; var row0=profiles.find(function(r){ return r.id===openId; }); if(row0) $('clCmp').innerHTML=renderCompare(model(row0)); });
   document.addEventListener('hq-view', function(ev){ if(ev.detail && ev.detail.view==='clients'){ render(); load(); } else closeShare(); });
   document.addEventListener('tf-auth-ready', function(ev){
@@ -7297,7 +7476,7 @@ table.scores td{border-color:var(--border);}
     load(); if(poller) clearInterval(poller); poller=setInterval(function(){ var v=$('viewClients'); if(v && !v.hidden && !openId) load(); }, 120000);
   });
   document.addEventListener('tf-auth-signed-out', function(){ client=null; admin=false; profiles=[]; loaded=false; openId=null; closeShare(); if(poller) clearInterval(poller); var t=$('tabClients'); if(t) t.hidden=true; var s=$('sheetClients'); if(s) s.hidden=true; });
-  window.__clients={cmp:function(id,a1,a2,b1,b2){ return cmpStats(id,a1,a2) && {a:cmpStats(id,a1,a2), b:cmpStats(id,b1,b2)}; }, model:function(id){ var r=profiles.find(function(x){ return x.id===id; }); return r?model(r):null; }, open:function(id,m){ openId=id; mode=m||'overview'; render(); }, share:renderShare, close:closeShare, load:load};
+  window.__clients={ph:function(){ return PH; }, post:function(){ return POST; }, cmp:function(id,a1,a2,b1,b2){ return cmpStats(id,a1,a2) && {a:cmpStats(id,a1,a2), b:cmpStats(id,b1,b2)}; }, model:function(id){ var r=profiles.find(function(x){ return x.id===id; }); return r?model(r):null; }, open:function(id,m){ openId=id; mode=m||'overview'; render(); }, share:renderShare, close:closeShare, load:load};
 })();
 </script>
 <script>

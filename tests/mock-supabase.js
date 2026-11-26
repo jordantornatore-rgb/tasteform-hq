@@ -62,7 +62,9 @@
       return Promise.resolve({ data: { ok: true, saved: body.fields || {} }, error: null }); } };
     // rpc: answers come from opts.rpc[name] (a value or a function of the args); unknown functions return an error like Supabase does
     function rpc(name, args) { calls.push({ rpc: name, args: args }); var r = opts && opts.rpc && opts.rpc[name]; if (r === undefined) return Promise.resolve({ data: null, error: { message: 'function ' + name + ' does not exist' } }); return Promise.resolve({ data: typeof r === 'function' ? r(args) : r, error: null }); }
-    return { from: from, rpc: rpc, functions: functions, __calls: calls, __tables: tables, __stats: stats, auth: { signOut: function () { return Promise.resolve({}); } } };
+    // storage: createSignedUrls answers from opts.storageUrls[path] (tests pass data: URLs)
+    var storage = { from: function (b) { return { createSignedUrls: function (paths) { calls.push({ storage: b, paths: paths }); return Promise.resolve({ data: paths.map(function (p) { return { path: p, signedUrl: (opts.storageUrls || {})[p] || null }; }), error: null }); } }; } };
+    return { storage: storage, from: from, rpc: rpc, functions: functions, __calls: calls, __tables: tables, __stats: stats, auth: { signOut: function () { return Promise.resolve({}); } } };
   }
   if (typeof module !== 'undefined' && module.exports) module.exports = { makeMockClient: makeMockClient };
   root.makeMockClient = makeMockClient;

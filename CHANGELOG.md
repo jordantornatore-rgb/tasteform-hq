@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.19.0 — 26 Nov 2026 (Clients: progress photos + post builder)
+
+- Client page **Photos**: two panes side by side, each with its own date (with week and weigh-in) and angle (front / side / back). Drag to move, scroll or pinch to zoom, zoom linked or separate, brightness and contrast per side, reset, swap.
+- **Create post**: branded TasteForm 9:16 story or 4:5 post from the two photos exactly as framed: headline, result line, labels, the client's words, footer, optional face blur. Download or Share is locked until you tick that the client said yes in writing; each export is logged on the profile.
+- Photos live in the private Storage bucket `progress-photos` (signed 1-hour links, admin only) with rows in `client_photos`. The nightly sync copies new 1FIT gallery photos every night and backfills history 2 clients a night through the `photo-ingest` edge function. Migration `20261126_client_photos.sql`.
+
 ## 3.18.0 — 26 Nov 2026 (Clients: predictions + macro check)
 
 - **Prediction** panel on the client page: goal date from the 4-week trend, plus a red flag when the 2-week trend has stalled (moving < 0.1 kg/wk toward the goal) or gone the wrong way. Stalled → Watch, wrong way → Off track, and it shows in Needs attention. Roster shows "goal ~<date>".
